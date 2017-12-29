@@ -12,6 +12,25 @@ int       out_start       = 0;
 /*===----                              main                            ----===*/
 /*============================--------------------============================*/
 
+char      verstring    [500];
+
+char*        /*-> return library versio --------------[ leaf   [gs.420.012.00]*/ /*-[00.0000.012.!]-*/ /*-[--.---.---.--]-*/
+PROG_version         (void)
+{
+   char    t [20] = "";
+#if    __TINYC__ > 0
+   strncpy (t, "[tcc built  ]", 15);
+#elif  __GNUC__  > 0
+   strncpy (t, "[gnu gcc    ]", 15);
+#elif  __CBANG__  > 0
+   strncpy (t, "[cbang      ]", 15);
+#else
+   strncpy (t, "[unknown    ]", 15);
+#endif
+   snprintf (verstring, 100, "%s   %s : %s", t, VER_NUM, VER_TXT);
+   return verstring;
+}
+
 char       /*----: display command line help/usage ---------------------------*/
 PROG_usage         (void)
 {
@@ -39,6 +58,15 @@ PROG_usage         (void)
 char       /*----: one-time initialization of program environment ------------*/
 PROG_init          (void)
 {
+   /*---(log header)---------------------*/
+   DEBUG_TOPS   yLOG_info     ("purpose" , "light, clean, vim-ish, technical, and wicked spreadsheet");
+   DEBUG_TOPS   yLOG_info     ("namesake", "ugly, impossibly powerful, one-hundred handed, fifty headed, primeval giant");
+   DEBUG_TOPS   yLOG_info     ("gregg"   , PROG_version    ());
+   DEBUG_TOPS   yLOG_info     ("yURG"    , yURG_version    ());
+   DEBUG_TOPS   yLOG_info     ("ySTR"    , ySTR_version    ());
+   DEBUG_TOPS   yLOG_info     ("yLOG"    , yLOG_version    ());
+   /*---(header)-------------------------*/
+   DEBUG_TOPS   yLOG_enter    (__FUNCTION__);
    /*---(formatting)------------------*/
    format_input();
    /*---(fonts)-----------------------*/
@@ -73,6 +101,7 @@ PROG_init          (void)
    /*> debug.summ     = 'n';                                                          <* 
     *> debug.lock     = 'n';                                                          <*/
    /*---(complete)--------------------*/
+   DEBUG_TOPS   yLOG_exit     (__FUNCTION__);
    return 0;
 }
 
@@ -81,13 +110,17 @@ PROG_args          (int argc, char *argv[])
 {
    char *a = NULL;
    int   i = 0;
+   /*---(header)-------------------------*/
+   DEBUG_TOPS   yLOG_enter    (__FUNCTION__);
    for (i = 1; i < argc; ++i) {
       a = argv[i];
-      DEBUG_C   printf("   processing [%s]\n", a);
-      if      (strncmp(a, "@c", 5) == 0) {
-         /*> debug_old.top = debug.cli         = 'y';                                 <*/
-         printf("command line debugging mode [%s]\n", a);
-      }
+      if (a[0] == '@')  continue;
+      DEBUG_ARGS  yLOG_info    ("cli arg", a);
+      /*> DEBUG_C   printf("   processing [%s]\n", a);                                <*/
+      /*> if      (strncmp(a, "@c", 5) == 0) {                                                  <* 
+       *>    /+> debug_old.top = debug.cli         = 'y';                                 <+/   <* 
+       *>    printf("command line debugging mode [%s]\n", a);                                   <* 
+       *> }                                                                                     <*/
       /*> else if (strncmp(a, "@x", 5) == 0)  debug.top = debug.prep        = 'y';    <* 
        *> else if (strncmp(a, "@i", 5) == 0)  debug.top = debug.input       = 'y';    <* 
        *> else if (strncmp(a, "@o", 5) == 0)  debug.top = debug.output      = 'y';    <* 
@@ -113,12 +146,12 @@ PROG_args          (int argc, char *argv[])
        *> else if (strncmp(a, "-h"            , 20) == 0) PROG_usage();               <* 
        *> else if (strncmp(a, "--help"        , 20) == 0) PROG_usage();               <* 
        *> else if (a[0] >= '0' && a[0] <= '9')            out_start  = atoi(a);       <*/
-      else {
-         printf("\noption [%s] not understood\n", a);
-         exit (-1);
-      }
+      /*> else {                                                                      <* 
+       *>    printf("\noption [%s] not understood\n", a);                             <* 
+       *> }                                                                           <*/
    }
-   DEBUG_C   printf("   done.\n\n");
+   /*---(complete)-----------------------*/
+   DEBUG_TOPS   yLOG_exit     (__FUNCTION__);
    return 0;
 }
 
@@ -126,13 +159,20 @@ PROG_args          (int argc, char *argv[])
 char
 PROG_begin(void)
 {
+   /*---(header)-------------------------*/
+   DEBUG_TOPS   yLOG_enter    (__FUNCTION__);
    dict_read();
+   /*---(complete)-----------------------*/
+   DEBUG_TOPS   yLOG_exit     (__FUNCTION__);
+   return 0;
 }
 
 /* PURPOSE : drive the program startup activities                             */
 char
 PROG_final (void)
 {
+   /*---(header)-------------------------*/
+   DEBUG_TOPS   yLOG_enter    (__FUNCTION__);
    yXINIT_start(win.title, win.width, win.height, YX_FOCUSABLE, YX_FIXED, debug_old.prep);
    yGOD_start();
    font_load();
@@ -140,6 +180,9 @@ PROG_final (void)
    if (out_start > 0) o.curr = out_start;
    dlist_init();
    draw_init();
+   TOUCH_init ();
+   /*---(complete)-----------------------*/
+   DEBUG_TOPS   yLOG_exit     (__FUNCTION__);
    return 0;
 }
 
@@ -156,168 +199,179 @@ PROG_event()
    out_read  (o.curr);
    int    i = o.curr;
    int       j         = 0;
+   tTSPEC      x_dur;
    /*---(for keypresses)-------------------*/
    XKeyEvent *key_event;
    char       the_key[5];
    int        the_bytes;
    char       rc;
+   int        x_loop  = 0;
    /*---(for timer)------------------------*/
    /*> struct     timespec timer, remain;                                             <*/
+   x_dur.tv_sec    = 0;
+   x_dur.tv_nsec   = 1.0 * 1000000;
    /*---(main loop)------------------------*/
    DEBUG_T printf("EVENT LOOP :: begin -------------\n\n");
    while (1) {
-      XNextEvent(DISP, &EVNT);
-      ++j;
-      switch(EVNT.type) {
+      ++x_loop;
+      while (XPending(DISP)) {
+         XNextEvent(DISP, &EVNT);
+         ++j;
+         switch(EVNT.type) {
 
-      case Expose:
-         DEBUG_E printf("event (%5d) exposure\n", j);
-         draw_main();
-         break;
-
-      case ConfigureNotify:
-         DEBUG_E printf("event (%5d) configure\n", j);
-         if (EVNT.xconfigure.width != X || EVNT.xconfigure.height != Y) {
-            DEBUG_E printf("   - moved    x=%4d, y=%4d", X, Y);
-            X = EVNT.xconfigure.width;
-            Y = EVNT.xconfigure.height;
-            DEBUG_E printf("  TO  x=%4d, y=%4d\n", X, Y);
-         }
-         if (EVNT.xconfigure.width != (int) WIDTH || EVNT.xconfigure.height != (int) HEIGHT) {
-            DEBUG_E printf("   - resized  w=%3d, h=%3d\n", EVNT.xconfigure.width, EVNT.xconfigure.height);
-            draw_resize(win.width, win.height);
-         }
-         draw_main();
-         break;
-
-      case KeyPress:
-         DEBUG_E printf("event (%5d) keypress\n", j);
-         i = o.curr;
-         /*---(get the key)---------------------*/
-         key_event  = (XKeyEvent *) &EVNT;
-         the_bytes = XLookupString((XKeyEvent *) &EVNT, the_key, 5, NULL, NULL);
-         if (the_bytes < 1) break;
-         switch (the_key[0]) {
-         case 'h': case 'l': case 'H': case 'L': 
-         case 'j': case 'k': case 'J': case 'K':
-         case 'd': case 't': case 'D': case 'T':
-         case 'p': case 'P': case 16 : case 'v': case 'V': case 22 :
-         case 'o': case 'O': case 15 : case 'y': case 'Y': case 25 :
-         case 'r': case 'R': case 18 : case 's': case 'S': case 19 :
-         case '0': case '1': case '2': case '3':
-         case '4': case '5': case '6':
-            yGOD_key(the_key[0]);
+         case Expose:
+            DEBUG_E printf("event (%5d) exposure\n", j);
+            draw_main();
             break;
-         case  ']':
-            ++o.curr;
-            DEBUG_T  printf("\n\n=== outline %3d ================================\n\n", o.curr);
-            break;
-         case  '[':
-            --o.curr;
-            DEBUG_T  printf("\n\n=== outline %3d ================================\n\n", o.curr);
-            break;
-         case  'Q':              exit(0);
-         case  '<': --o.cavg;  break;
-         case  '>': ++o.cavg;  break;
-         case  'i':
-         case  'w':
-         case  'x':
-                    if (o.saved != 'y') {
-                       rc = out_append  ();
-                       if (rc == 0) out_read (o.curr);
-                    }
-                    dict_read();
-                    return the_key[0];
-                    break;
-         }
-         /*---(enforce limits)-----------*/
-         if (o.cavg < 1      ) o.cavg = 1;
-         if (o.cavg > o.navg ) o.cavg = o.navg;
-         if (o.curr < 1      ) o.curr = 1;
-         if (o.curr > o.total) o.curr = o.total;
-         /*---(redraw)------------------*/
-         if (i != o.curr)      out_read (o.curr);
-         draw_main();
-         break;
 
-      case KeyRelease:
-         DEBUG_E printf("event (%5d) keyrelease\n", j);
-         break;
-
-      case ButtonPress:
-         DEBUG_E printf("event (%5d) buttonpress\n", j);
-         /*---(get basic info)------------------*/
-         x   = EVNT.xbutton.x - win.left + 20;
-         y   = win.top - EVNT.xbutton.y  - 6;
-         r   = sqrt((x * x) + (y * y));
-         /*> printf("touch down at %3dx, %3dy, %3d\n", x, y, r);                      <*/
-         input_type = '-';
-         if        (r < SIZE_R1) {
-            input_type = 'o';
-            raw_beg  (x, y);
-         } else if (x < 0 && y > 0) {
-            input_type = 'p';
-            raw_pre  (x, y);
-         } else if (x < -50 && y <  -50) {
-            input_type = '-';
-            if (o.saved != 'y') {
-               rc = out_append  ();
-               if (rc == 0) out_read (o.curr);
-               draw_main();
+         case ConfigureNotify:
+            DEBUG_E printf("event (%5d) configure\n", j);
+            if (EVNT.xconfigure.width != X || EVNT.xconfigure.height != Y) {
+               DEBUG_E printf("   - moved    x=%4d, y=%4d", X, Y);
+               X = EVNT.xconfigure.width;
+               Y = EVNT.xconfigure.height;
+               DEBUG_E printf("  TO  x=%4d, y=%4d\n", X, Y);
             }
-         } else {
-            input_type = 'c';
-            raw_cont (x, y);
+            if (EVNT.xconfigure.width != (int) WIDTH || EVNT.xconfigure.height != (int) HEIGHT) {
+               DEBUG_E printf("   - resized  w=%3d, h=%3d\n", EVNT.xconfigure.width, EVNT.xconfigure.height);
+               draw_resize(win.width, win.height);
+            }
+            draw_main();
+            break;
+
+         case KeyPress:
+            DEBUG_E printf("event (%5d) keypress\n", j);
+            i = o.curr;
+            /*---(get the key)---------------------*/
+            key_event  = (XKeyEvent *) &EVNT;
+            the_bytes = XLookupString((XKeyEvent *) &EVNT, the_key, 5, NULL, NULL);
+            if (the_bytes < 1) break;
+            switch (the_key[0]) {
+            case 'h': case 'l': case 'H': case 'L': 
+            case 'j': case 'k': case 'J': case 'K':
+            case 'd': case 't': case 'D': case 'T':
+            case 'p': case 'P': case 16 : case 'v': case 'V': case 22 :
+            case 'o': case 'O': case 15 : case 'y': case 'Y': case 25 :
+            case 'r': case 'R': case 18 : case 's': case 'S': case 19 :
+            case '0': case '1': case '2': case '3':
+            case '4': case '5': case '6':
+               yGOD_key(the_key[0]);
+               break;
+            case  ']':
+               ++o.curr;
+               DEBUG_T  printf("\n\n=== outline %3d ================================\n\n", o.curr);
+               break;
+            case  '[':
+               --o.curr;
+               DEBUG_T  printf("\n\n=== outline %3d ================================\n\n", o.curr);
+               break;
+            case  'Q':              exit(0);
+            case  '<': --o.cavg;  break;
+            case  '>': ++o.cavg;  break;
+            case  'i':
+            case  'w':
+            case  'x':
+                       if (o.saved != 'y') {
+                          rc = out_append  ();
+                          if (rc == 0) out_read (o.curr);
+                       }
+                       dict_read();
+                       return the_key[0];
+                       break;
+            }
+            /*---(enforce limits)-----------*/
+            if (o.cavg < 1      ) o.cavg = 1;
+            if (o.cavg > o.navg ) o.cavg = o.navg;
+            if (o.curr < 1      ) o.curr = 1;
+            if (o.curr > o.total) o.curr = o.total;
+            /*---(redraw)------------------*/
+            if (i != o.curr)      out_read (o.curr);
+            draw_main();
+            break;
+
+         case KeyRelease:
+            DEBUG_E printf("event (%5d) keyrelease\n", j);
+            break;
+
+         case ButtonPress:
+            DEBUG_E printf("event (%5d) buttonpress\n", j);
+            /*---(get basic info)------------------*/
+            x   = EVNT.xbutton.x - win.left + 20;
+            y   = win.top - EVNT.xbutton.y  - 6;
+            r   = sqrt((x * x) + (y * y));
+            /*> printf("touch down at %3dx, %3dy, %3d\n", x, y, r);                      <*/
+            input_type = '-';
+            if        (r < SIZE_R1) {
+               input_type = 'o';
+               raw_beg  (x, y);
+            } else if (x < 0 && y > 0) {
+               input_type = 'p';
+               raw_pre  (x, y);
+            } else if (x < -50 && y <  -50) {
+               input_type = '-';
+               if (o.saved != 'y') {
+                  rc = out_append  ();
+                  if (rc == 0) out_read (o.curr);
+                  draw_main();
+               }
+            } else {
+               input_type = 'c';
+               raw_cont (x, y);
+            }
+            /*> printf("input type = %c\n", input_type);                                 <*/
+            break;
+
+         case MotionNotify:
+            DEBUG_E printf("event (%5d) motion\n", j);
+            /*---(get basic info)------------------*/
+            x   = EVNT.xbutton.x - win.left + 20;
+            y   = win.top - EVNT.xbutton.y  - 6;
+            r   = sqrt((x * x) + (y * y));
+            /*> printf("moved    to %4dx, %4dy, %dr\n", x, y, r);                     <*/
+            if (input_type == '-') break;
+            raw_add  (x, y);
+            break;
+
+         case ButtonRelease:
+            DEBUG_E printf("event (%5d) buttonrelease\n", j);
+            /*---(get basic info)------------------*/
+            x   = EVNT.xbutton.x - win.left + 20;
+            y   = win.top - EVNT.xbutton.y  - 6;
+            r   = sqrt((x * x) + (y * y));
+            if (input_type == '-') break;
+            /*> printf("released at %4dx, %4dy\n", x, y);                             <*/
+            raw_end          (x, y);
+            /*> rc = out_append  ();                                                     <* 
+             *> if (rc == 0) out_read (o.curr);                                          <*/
+            DEBUG_E printf("   - bas_filter\n"); fflush(stdout);
+            bas_filter    ();
+            DEBUG_E printf("   - key_filter\n"); fflush(stdout);
+            key_filter    ();
+            DEBUG_E printf("   - match_flatter\n"); fflush(stdout);
+            match_flatten ();
+            DEBUG_E printf("   - match_squeeze\n"); fflush(stdout);
+            match_squeeze ();
+            DEBUG_E printf("   - circle_driver\n"); fflush(stdout);
+            circle_driver ();
+            DEBUG_E printf("   - match_sharps\n"); fflush(stdout);
+            match_sharps  ();
+            DEBUG_E printf("   - match_driver\n"); fflush(stdout);
+            match_driver  ();
+            DEBUG_E printf("   - draw_main\n"); fflush(stdout);
+            draw_main     ();
+            DEBUG_E printf("   - done\n"); fflush(stdout);
+            break;
+
+         default          :
+            DEBUG_E printf("event (%5d) unknown (%d)\n", j, EVNT.type);
+            draw_main();
+            break;
          }
-         /*> printf("input type = %c\n", input_type);                                 <*/
-         break;
-
-      case MotionNotify:
-         DEBUG_E printf("event (%5d) motion\n", j);
-         /*---(get basic info)------------------*/
-         x   = EVNT.xbutton.x - win.left + 20;
-         y   = win.top - EVNT.xbutton.y  - 6;
-         r   = sqrt((x * x) + (y * y));
-         /*> printf("moved    to %4dx, %4dy, %dr\n", x, y, r);                     <*/
-         if (input_type == '-') break;
-         raw_add  (x, y);
-         break;
-
-      case ButtonRelease:
-         DEBUG_E printf("event (%5d) buttonrelease\n", j);
-         /*---(get basic info)------------------*/
-         x   = EVNT.xbutton.x - win.left + 20;
-         y   = win.top - EVNT.xbutton.y  - 6;
-         r   = sqrt((x * x) + (y * y));
-         if (input_type == '-') break;
-         /*> printf("released at %4dx, %4dy\n", x, y);                             <*/
-         raw_end          (x, y);
-         /*> rc = out_append  ();                                                     <* 
-          *> if (rc == 0) out_read (o.curr);                                          <*/
-         DEBUG_E printf("   - bas_filter\n"); fflush(stdout);
-         bas_filter    ();
-         DEBUG_E printf("   - key_filter\n"); fflush(stdout);
-         key_filter    ();
-         DEBUG_E printf("   - match_flatter\n"); fflush(stdout);
-         match_flatten ();
-         DEBUG_E printf("   - match_squeeze\n"); fflush(stdout);
-         match_squeeze ();
-         DEBUG_E printf("   - circle_driver\n"); fflush(stdout);
-         circle_driver ();
-         DEBUG_E printf("   - match_sharps\n"); fflush(stdout);
-         match_sharps  ();
-         DEBUG_E printf("   - match_driver\n"); fflush(stdout);
-         match_driver  ();
-         DEBUG_E printf("   - draw_main\n"); fflush(stdout);
-         draw_main     ();
-         DEBUG_E printf("   - done\n"); fflush(stdout);
-         break;
-
-      default          :
-         DEBUG_E printf("event (%5d) unknown (%d)\n", j, EVNT.type);
-         draw_main();
-         break;
       }
+      TOUCH_read ();
+      printf ("loop %3d\n", x_loop);
+      /*---(sleeping)--------------------*/
+      nanosleep    (&x_dur, NULL);
    }
    DEBUG_T printf("EVENT LOOP :: end ---------------\n\n");
    /*---(complete)------------------------------*/
@@ -328,6 +382,7 @@ PROG_event()
 char
 PROG_end(void)
 {
+   TOUCH_wrap ();
    font_free();
    yXINIT_end();
    DEBUG_T printf("\npetal writing v03 ----------------------------------end---\n\n");

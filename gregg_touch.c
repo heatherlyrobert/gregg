@@ -15,13 +15,20 @@ static int   s_flags     = 0;
 static int   s_line      = 0;
 
 
-#define   DEBUG_TOUCH    if (0) 
 
 
 char
 TOUCH_init           (void)
 {
-   snprintf (s_event  , LEN_STR, "%s%s", "/dev/", "event16");
+   snprintf (s_event  , LEN_STR, "%s%s", "/dev/input/", "event16");
+   TOUCH__open ();
+   return 0;
+}
+
+char
+TOUCH_wrap           (void)
+{
+   TOUCH__close ();
    return 0;
 }
 
@@ -122,10 +129,10 @@ TOUCH_read           (void)
    }
    /*---(headers and line breaks)--------*/
    if ((s_line % 15) == 0) {
-      DEBUG_TOUCH  printf ("\n-- -- -- -- -- -- -- --   -- -- -- -- -- -- -- --   -- -- typ   -- -- code-   -- -- -- -- value-----\n");
+      printf ("\n-- -- -- -- -- -- -- --   -- -- -- -- -- -- -- --   -- -- typ   -- -- code-   -- -- -- -- value-----\n");
    }
    if ((s_line %  3) == 0) {
-      DEBUG_TOUCH  printf ("\n");
+      printf ("\n");
    }
    ++s_line;
    /*---(prepare)------------------------*/
@@ -183,7 +190,7 @@ TOUCH_read           (void)
          sprintf (next, "%10d", ev_value);
          /*---(print final line)---------*/
          strcat  (output, next);
-         DEBUG_TOUCH  printf ("%s\n", output);
+         printf ("%s\n", output);
          /*---(reset values)-------------*/
          strcpy (output, "");
          x_count = 0;

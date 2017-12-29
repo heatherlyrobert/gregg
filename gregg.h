@@ -204,8 +204,8 @@
 
 
 /* rapidly evolving version number to aid with visual change confirmation     */
-#define VER_NUM   "5.0c"
-#define VER_TXT   "can compile again.  messy, but compiles"
+#define VER_NUM   "5.0d"
+#define VER_TXT   "uses petal touch interface and spits out data (but segfault)"
 
 
 #define    PUBL      /*--*/
@@ -424,6 +424,7 @@ extern int   g_transy;
 #define   SIZE_R3         62
 #define   SIZE_M3         78
 
+typedef struct timespec  tTSPEC;
 
 
 typedef struct cPOINT tPOINT;
@@ -494,13 +495,14 @@ struct cOUTLINE
 int        main              (int argc, char *argv[]);
 
 /*---(prog)-----------------*/
-char       PROG_usage        (void);
-char       PROG_init         ();
-char       PROG_args         (int argc, char *argv[]);
-char       PROG_begin        (void);
-char       PROG_final        (void);
-char       PROG_event        (void);
-char       PROG_end          (void);
+char*      PROG_version         (void);
+char       PROG_usage           (void);
+char       PROG_init            ();
+char       PROG_args            (int argc, char *argv[]);
+char       PROG_begin           (void);
+char       PROG_final           (void);
+char       PROG_event           (void);
+char       PROG_end             (void);
 
 char       draw_main         (void);
 char       draw_init         (void);
@@ -597,11 +599,12 @@ char*      unit_accessor     (char *a_question, int a_num);
 
 
 char        TOUCH_init           (void);
-char        TOUCH_open           (void);
-char        TOUCH_normal         (void);
-char        TOUCH_check          (void);
+char        TOUCH_wrap           (void);
+char        TOUCH__open          (void);
+char        TOUCH__close         (void);
+char        TOUCH__normal        (void);
+char        TOUCH__check         (void);
 char        TOUCH_read           (void);
-char        TOUCH_close          (void);
 
 
 
