@@ -37,7 +37,7 @@ PROG_usage         (void)
 }
 
 char       /*----: one-time initialization of program environment ------------*/
-prog_init          (void)
+PROG_init          (void)
 {
    /*---(formatting)------------------*/
    format_input();
@@ -45,39 +45,39 @@ prog_init          (void)
    strcpy(win.face_bg, "verdana");
    strcpy(win.face_sm, "courier");
    /*---(debugger : standard)---------*/
-   debug.prep   = 'n';     /* x) program setup and tear-down           */
-   debug.cli    = 'n';     /* c) command line interface                */
-   debug.input  = 'n';     /* i) text input   (files, stdin, keys)     */
-   debug.proc   = 'n';     /* p) main analytics and processing         */
-   debug.data   = 'n';     /* d) data structure use and mgmt           */
-   debug.output = 'n';     /* o) text output  (files, stdout, keys)    */
-   debug.graph  = 'n';     /* g) graphics, drawing, and rendering      */
-   debug.event  = 'n';     /* e) event loop                            */
-   debug.api    = 'n';     /* x) programming api                       */
+   /*> debug.prep   = 'n';     /+ x) program setup and tear-down           +/         <* 
+    *> debug.cli    = 'n';     /+ c) command line interface                +/         <* 
+    *> debug.input  = 'n';     /+ i) text input   (files, stdin, keys)     +/         <* 
+    *> debug.proc   = 'n';     /+ p) main analytics and processing         +/         <* 
+    *> debug.data   = 'n';     /+ d) data structure use and mgmt           +/         <* 
+    *> debug.output = 'n';     /+ o) text output  (files, stdout, keys)    +/         <* 
+    *> debug.graph  = 'n';     /+ g) graphics, drawing, and rendering      +/         <* 
+    *> debug.event  = 'n';     /+ e) event loop                            +/         <* 
+    *> debug.api    = 'n';     /+ x) programming api                       +/         <*/
    /*---(debugger : specific)---------*/
-   debug.raw    = 'n';     /* raw points                               */
-   debug.bas    = 'n';     /* bas points                               */
-   debug.key    = 'n';     /* key points                               */
+   /*> debug.raw    = 'n';     /+ raw points                               +/         <* 
+    *> debug.bas    = 'n';     /+ bas points                               +/         <* 
+    *> debug.key    = 'n';     /+ key points                               +/         <*/
    /*---(debugger : specific)---------*/
-   debug.sharps   = 'n';   /* finding sharp corners                    */
-   debug.circles  = 'n';   /* finding circles                          */
-   debug.matches  = 'n';   /* matching logic                           */
-   debug.shapes   = 'n';   /* shape formation in display lists         */
-   debug.averages = 'n';   /* shape formation in display lists         */
-   debug.curves   = 'n';   /* identifying curviness of lines           */
-   debug.writing  = 'n';   /* process of creating outlines             */
-   debug.dict     = 'n';   /* reading and loading of the dictionary    */
-   debug.dicte    = 'n';   /* output of english word index             */
-   debug.dictg    = 'n';   /* output of gregg word index               */
+   /*> debug.sharps   = 'n';   /+ finding sharp corners                    +/         <* 
+    *> debug.circles  = 'n';   /+ finding circles                          +/         <* 
+    *> debug.matches  = 'n';   /+ matching logic                           +/         <* 
+    *> debug.shapes   = 'n';   /+ shape formation in display lists         +/         <* 
+    *> debug.averages = 'n';   /+ shape formation in display lists         +/         <* 
+    *> debug.curves   = 'n';   /+ identifying curviness of lines           +/         <* 
+    *> debug.writing  = 'n';   /+ process of creating outlines             +/         <* 
+    *> debug.dict     = 'n';   /+ reading and loading of the dictionary    +/         <* 
+    *> debug.dicte    = 'n';   /+ output of english word index             +/         <* 
+    *> debug.dictg    = 'n';   /+ output of gregg word index               +/         <*/
    /*---(summary----------------------*/
-   debug.summ     = 'n';
-   debug.lock     = 'n';
+   /*> debug.summ     = 'n';                                                          <* 
+    *> debug.lock     = 'n';                                                          <*/
    /*---(complete)--------------------*/
    return 0;
 }
 
 char       /*----: process command line arguments ----------------------------*/
-prog_args          (int argc, char *argv[])
+PROG_args          (int argc, char *argv[])
 {
    char *a = NULL;
    int   i = 0;
@@ -85,34 +85,34 @@ prog_args          (int argc, char *argv[])
       a = argv[i];
       DEBUG_C   printf("   processing [%s]\n", a);
       if      (strncmp(a, "@c", 5) == 0) {
-         debug.top = debug.cli         = 'y';
+         /*> debug_old.top = debug.cli         = 'y';                                 <*/
          printf("command line debugging mode [%s]\n", a);
       }
-      else if (strncmp(a, "@x", 5) == 0)  debug.top = debug.prep        = 'y';
-      else if (strncmp(a, "@i", 5) == 0)  debug.top = debug.input       = 'y';
-      else if (strncmp(a, "@o", 5) == 0)  debug.top = debug.output      = 'y';
-      else if (strncmp(a, "@p", 5) == 0)  debug.top = debug.proc        = 'y';
-      else if (strncmp(a, "@e", 5) == 0)  debug.top = debug.event       = 'y';
-      else if (strncmp(a, "@g", 5) == 0)  debug.top = debug.graph       = 'y';
-      else if (strncmp(a, "@@raw"         , 20) == 0) debug.raw         = 'y';
-      else if (strncmp(a, "@@bas"         , 20) == 0) debug.bas         = 'y';
-      else if (strncmp(a, "@@avg"         , 20) == 0) debug.averages    = 'y';
-      else if (strncmp(a, "@@key"         , 20) == 0) debug.key         = 'y';
-      else if (strncmp(a, "@@sharp"       , 20) == 0) debug.sharps      = 'y';
-      else if (strncmp(a, "@@circle"      , 20) == 0) debug.circles     = 'y';
-      else if (strncmp(a, "@@line"        , 20) == 0) debug.lines       = 'y';
-      else if (strncmp(a, "@@match"       , 20) == 0) debug.matches     = 'y';
-      else if (strncmp(a, "@@shape"       , 20) == 0) debug.shapes      = 'y';
-      else if (strncmp(a, "@@curve"       , 20) == 0) debug.curves      = 'y';
-      else if (strncmp(a, "@@writing"     , 20) == 0) debug.writing     = 'y';
-      else if (strncmp(a, "@@dict"        , 20) == 0) debug.dict        = 'y';
-      else if (strncmp(a, "@@dictg"       , 20) == 0) debug.dictg       = 'y';
-      else if (strncmp(a, "@@dicte"       , 20) == 0) debug.dicte       = 'y';
-      else if (strncmp(a, "@@sum"         , 20) == 0) debug.summ        = 'y';
-      else if (strncmp(a, "@@lock"        , 20) == 0) debug.lock        = 'y';
-      else if (strncmp(a, "-h"            , 20) == 0) PROG_usage();
-      else if (strncmp(a, "--help"        , 20) == 0) PROG_usage();
-      else if (a[0] >= '0' && a[0] <= '9')            out_start  = atoi(a);
+      /*> else if (strncmp(a, "@x", 5) == 0)  debug.top = debug.prep        = 'y';    <* 
+       *> else if (strncmp(a, "@i", 5) == 0)  debug.top = debug.input       = 'y';    <* 
+       *> else if (strncmp(a, "@o", 5) == 0)  debug.top = debug.output      = 'y';    <* 
+       *> else if (strncmp(a, "@p", 5) == 0)  debug.top = debug.proc        = 'y';    <* 
+       *> else if (strncmp(a, "@e", 5) == 0)  debug.top = debug.event       = 'y';    <* 
+       *> else if (strncmp(a, "@g", 5) == 0)  debug.top = debug.graph       = 'y';    <* 
+       *> else if (strncmp(a, "@@raw"         , 20) == 0) debug.raw         = 'y';    <* 
+       *> else if (strncmp(a, "@@bas"         , 20) == 0) debug.bas         = 'y';    <* 
+       *> else if (strncmp(a, "@@avg"         , 20) == 0) debug.averages    = 'y';    <* 
+       *> else if (strncmp(a, "@@key"         , 20) == 0) debug.key         = 'y';    <* 
+       *> else if (strncmp(a, "@@sharp"       , 20) == 0) debug.sharps      = 'y';    <* 
+       *> else if (strncmp(a, "@@circle"      , 20) == 0) debug.circles     = 'y';    <* 
+       *> else if (strncmp(a, "@@line"        , 20) == 0) debug.lines       = 'y';    <* 
+       *> else if (strncmp(a, "@@match"       , 20) == 0) debug.matches     = 'y';    <* 
+       *> else if (strncmp(a, "@@shape"       , 20) == 0) debug.shapes      = 'y';    <* 
+       *> else if (strncmp(a, "@@curve"       , 20) == 0) debug.curves      = 'y';    <* 
+       *> else if (strncmp(a, "@@writing"     , 20) == 0) debug.writing     = 'y';    <* 
+       *> else if (strncmp(a, "@@dict"        , 20) == 0) debug.dict        = 'y';    <* 
+       *> else if (strncmp(a, "@@dictg"       , 20) == 0) debug.dictg       = 'y';    <* 
+       *> else if (strncmp(a, "@@dicte"       , 20) == 0) debug.dicte       = 'y';    <* 
+       *> else if (strncmp(a, "@@sum"         , 20) == 0) debug.summ        = 'y';    <* 
+       *> else if (strncmp(a, "@@lock"        , 20) == 0) debug.lock        = 'y';    <* 
+       *> else if (strncmp(a, "-h"            , 20) == 0) PROG_usage();               <* 
+       *> else if (strncmp(a, "--help"        , 20) == 0) PROG_usage();               <* 
+       *> else if (a[0] >= '0' && a[0] <= '9')            out_start  = atoi(a);       <*/
       else {
          printf("\noption [%s] not understood\n", a);
          exit (-1);
@@ -124,23 +124,29 @@ prog_args          (int argc, char *argv[])
 
 /* PURPOSE : drive the program startup activities                             */
 char
-prog_begin(void)
+PROG_begin(void)
 {
-   yXINIT_start(win.title, win.width, win.height, YX_FOCUSABLE, YX_FIXED, debug.prep);
+   dict_read();
+}
+
+/* PURPOSE : drive the program startup activities                             */
+char
+PROG_final (void)
+{
+   yXINIT_start(win.title, win.width, win.height, YX_FOCUSABLE, YX_FIXED, debug_old.prep);
    yGOD_start();
    font_load();
    out_init();
    if (out_start > 0) o.curr = out_start;
    dlist_init();
    draw_init();
-   dict_read();
    return 0;
 }
 
 
 /* PURPOSE : process the xwindows event stream                                */
 char
-prog_event()
+PROG_event()
 {
    /*---(local variables)------------------*/
    int   x, y;         /* x,y coordinate of pointer        */
@@ -178,8 +184,7 @@ prog_event()
             DEBUG_E printf("  TO  x=%4d, y=%4d\n", X, Y);
          }
          if (EVNT.xconfigure.width != (int) WIDTH || EVNT.xconfigure.height != (int) HEIGHT) {
-            DEBUG_E printf("   - resized  w=%3d, h=%3d\n",
-                  EVNT.xconfigure.width, EVNT.xconfigure.height);
+            DEBUG_E printf("   - resized  w=%3d, h=%3d\n", EVNT.xconfigure.width, EVNT.xconfigure.height);
             draw_resize(win.width, win.height);
          }
          draw_main();
@@ -321,7 +326,7 @@ prog_event()
 
 /* PURPOSE : drive the program closure activities                             */
 char
-prog_end(void)
+PROG_end(void)
 {
    font_free();
    yXINIT_end();

@@ -201,6 +201,7 @@ draw_aslider()
 char
 draw_kslider()
 {
+   float       i           = 0.0;
    float   x_lef =  -win.left  + (win.bar * 3.00);
    float   x_rig =  win.right  - (win.bar * 1.20);
    float   x_top =  win.top    - (win.bar * 0.85);
@@ -226,7 +227,7 @@ draw_kslider()
    if (o.nkey == 0) return 0;
    glColor4f(0.7f, 0.7f, 0.7f, 1.0f);
    float x_inc = (x_rig - x_lef - 10) / o.nkey;
-   for (float i = x_lef +  5; i <= x_rig -  5; i += x_inc) {
+   for (i = x_lef +  5; i <= x_rig -  5; i += x_inc) {
       glBegin(GL_LINES);
       glVertex3f( i, x_top, z + 1);
       glVertex3f( i, x_bot, z + 1);
@@ -256,6 +257,7 @@ draw_kslider()
 char
 draw_oslider()
 {
+   float       i           = 0.0;
    float   x_lef =  win.right  - (win.bar * 1.0);
    float   x_rig =  win.right  - (win.bar * 0.2);
    float   x_top =  win.top    - (win.bar * 0.2);
@@ -284,7 +286,7 @@ draw_oslider()
    if (o.total == 0) return 0;
    glColor4f(0.2f, 0.4f, 0.2f, 1.0f);
    float x_inc = (x_top - x_bot) / o.total;
-   for (float i = x_bot; i <= x_top; i += x_inc) {
+   for (i = x_bot; i <= x_top; i += x_inc) {
       glBegin(GL_LINES);
       glVertex3f( x_lef, i, z + 0.2);
       glVertex3f( x_rig, i, z + 0.2);
@@ -982,6 +984,7 @@ sample_init        (void)
 char       /*----: draw the writing samples to the texture -------------------*/
 sample_etch        (void)
 {
+   int         i           = 0;
    /*---(setup)--------------------------*/
    glViewport            (0.0,  0.0, sample_w, sample_h);
    glMatrixMode          (GL_PROJECTION);
@@ -1002,7 +1005,7 @@ sample_etch        (void)
    /*---(cycle samples)------------------*/
    glPushMatrix(); {
       glScalef(2.0, 2.0, 2.0);
-      for (int i = 0; i < MAX_LETTERS && strncmp(loc[i].n, "eof", 5) != 0; ++i) {
+      for (i = 0; i < MAX_LETTERS && strncmp(loc[i].n, "eof", 5) != 0; ++i) {
          glPushMatrix();
          glTranslatef(loc[i].tx, loc[i].ty,  0.0);
          yFONT_print(win.txf_sm,  5, YF_BOTRIG, loc[i].n);

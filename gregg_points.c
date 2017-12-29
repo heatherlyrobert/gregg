@@ -10,170 +10,6 @@ char fname[] = "/home/dotsuu/p_gvskav/gregg.gregg_shorthand_system/strokes_new.d
 char oname[] = "/home/dotsuu/p_gvskav/gregg.gregg_shorthand_system/strokes_new.dat";
 
 
-
-/*============================--------------------============================*/
-/*===----                          raw points                          ----===*/
-/*============================--------------------============================*/
-void o___RAW_POINTS_____________o (void) {;}
-PRIV int     ntries    = 0;            /* number of raw points attempted      */
-PRIV char    stype     = '-';          /* p=prefix, o=outline, c=continue     */
-PRIV int     xadj      = 0;
-PRIV int     yadj      = 0;
-
-PRIV char     /*----: add a new raw point to outline -------------------------*/
-raw_point          (int a_x, int a_y, char a_type)
-{
-   /*---(begin)--------------------------*/
-   ++ntries;
-   DEBUG_I     printf("   %4d : %4dx, %4dy,    %c\n", o.nraw, a_x, a_y, a_type);
-   DEBUG__RAW  printf("   %4d : %4d : %4dx, %4dy : ", ntries, o.nraw, a_x, a_y);
-   /*---(defenses)-----------------------*/
-   if (o.nraw >= MAX_POINTS) {
-      DEBUG__RAW  printf("REJECTED, too many points (%d >= %d\n", o.nraw, MAX_POINTS);
-      return -2;
-   }
-   if (o.nraw > 0 && a_type == o.raw[o.nraw - 1].t && a_x == o.raw[o.nraw - 1].x && a_y == o.raw[o.nraw - 1].y) {
-      DEBUG__RAW  printf("REJECTED, same as last point\n");
-      return -3;
-   }
-   /*---(save point)---------------------*/
-   o.raw[o.nraw].o   = o.nraw;
-   o.raw[o.nraw].x   = a_x;
-   o.raw[o.nraw].y   = a_y;
-   o.raw[o.nraw].t   = a_type;
-   if (o.raw[o.nraw].t != 'S') gen_calc(o.raw + o.nraw, 'n');
-   /*---(garbage catching)---------------*/
-   if (o.nraw > 0 && o.raw[o.nraw].t != 'F' && o.raw[o.nraw].l > 5) {
-      DEBUG__RAW  printf("NEW STROKE, point too far away (%d > 1)\n", o.raw[o.nraw].l);
-      raw_point (o.raw[o.nraw - 1].x, o.raw[o.nraw - 1].y, 'F');
-      o.raw[o.nraw - 1].a = 'y';
-      raw_point (a_x, a_y, 'S');
-      o.raw[o.nraw - 1].a = 'y';
-      raw_point (a_x, a_y, '-');
-      o.raw[o.nraw - 1].t = '>';
-   } else {
-      DEBUG__RAW {
-         if      (a_type == 'S') printf("beg (fake) point, adding\n");
-         else if (a_type == 'F') printf("end (fake) point, adding\n");
-         else                    printf("unique, adding\n");
-      }
-      ++o.nraw;
-   }
-   /*---(complete)-----------------------*/
-   return 0;
-}
-
-char          /*----: add a new raw point to outline -------------------------*/
-raw_add            (int a_x, int a_y)
-{
-   raw_point (a_x, a_y, '-');
-   return 0;
-}
-
-char          /*----: start a new outline with a prefix ----------------------*/
-raw_pre            (int a_x, int a_y)
-{
-   /*---(initialize)---------------------*/
-   DEBUG__RAW  printf("RAW POINTS (prefix)\n");
-   out_clear ();
-   stype   = 'p';
-   ntries  =  0;
-   /*---(save points)--------------------*/
-   raw_point (a_x, a_y, 'S');
-   o.raw[o.nraw - 1].a = 'y';
-   raw_point (a_x, a_y, '-');
-   o.raw[o.nraw - 1].t = '>';
-   /*---(save adjustment)----------------*/
-   xadj = 0;
-   yadj = 0;
-   /*---(complete)-----------------------*/
-   return 0;
-}
-
-char          /*----: start a new outline ------------------------------------*/
-raw_beg            (int a_x, int a_y)
-{
-   /*---(check for prefix)---------------*/
-   DEBUG__RAW  printf("RAW POINTS (begin)\n");
-   if (stype != 'p') {
-      out_clear ();
-      ntries  =  0;
-   }
-   /*---(save points)--------------------*/
-   stype   = 'o';
-   raw_point (a_x, a_y, 'S');
-   o.raw[o.nraw - 1].a = 'y';
-   raw_point (a_x, a_y, '-');
-   o.raw[o.nraw - 1].t = '>';
-   /*---(save adjustment)----------------*/
-   xadj = a_x;
-   yadj = a_y;
-   /*---(complete)-----------------------*/
-   return 0;
-}
-
-char          /*----: start a new outline ------------------------------------*/
-raw_read           (int a_x, int a_y)
-{
-   /*---(check for prefix)---------------*/
-   DEBUG__RAW  printf("RAW POINTS (begin)\n");
-   /*---(save points)--------------------*/
-   out_clear ();
-   ntries  =  0;
-   raw_point (a_x, a_y, 'S');
-   o.raw[o.nraw - 1].a = 'y';
-   raw_point (a_x, a_y, '-');
-   o.raw[o.nraw - 1].t = '>';
-   /*---(save adjustment)----------------*/
-   xadj = 0;
-   yadj = 0;
-   /*---(complete)-----------------------*/
-   return 0;
-}
-
-char          /*----: continue an outline with another stroke ----------------*/
-raw_cont           (int a_x, int a_y)
-{
-   /*---(check for prefix)---------------*/
-   DEBUG__RAW  printf("RAW POINTS (continue)\n");
-   /*---(save points)--------------------*/
-   stype   = 'c';
-   raw_point (a_x, a_y, 'S');
-   o.raw[o.nraw - 1].a = 'y';
-   raw_point (a_x, a_y, '-');
-   o.raw[o.nraw - 1].t = '>';
-   /*---(save adjustment)----------------*/
-   xadj = 0;
-   yadj = 0;
-   /*---(complete)-----------------------*/
-   return 0;
-}
-
-char          /*----: finish off a set of outline raw points -----------------*/
-raw_end            (int a_x, int a_y)
-{
-   raw_point (a_x, a_y, '-');
-   raw_point (a_x, a_y, 'F');
-   o.raw[o.nraw - 1].a = 'y';
-   raw_equalize();
-   DEBUG__RAW       gen_list(o.raw, o.nraw);
-   DEBUG__RAW  printf("RAW POINTS (end)\n\n");
-   return 0;
-}
-
-char          /*----: make raw xy relative to neutral origin -----------------*/
-raw_equalize       (void)
-{
-   DEBUG__RAW  printf("   adjust all by %dx, %dy\n", xadj, yadj);
-   for (int i = 0; i < o.nraw; ++i) {
-      o.raw[i].x   -= xadj;
-      o.raw[i].y   -= yadj;
-   }
-   return 0;
-}
-
-
-
 /*============================--------------------============================*/
 /*===----                          basic points                        ----===*/
 /*============================--------------------============================*/
@@ -182,7 +18,8 @@ void o___BAS_POINTS_____________o (void) {;}
 PRIV int      /*----: locate a basic point based on its raw point ------------*/
 bas_find           (int a_raw)
 {
-   for (int i = 0; i < o.nbas; ++i) {
+   int i = 0;
+   for (i = 0; i < o.nbas; ++i) {
       if (o.bas[i].p == a_raw) return i;
    }
    return -1;
@@ -383,7 +220,8 @@ avg_pick           (int a_y)
 int           /*----: locate a avg point based on raw id ---------------------*/
 avg_find           (int a_pt)
 {
-   for (int i = 0; i < o.navg; ++i) {
+   int i;
+   for (i = 0; i < o.navg; ++i) {
       if (o.avg[i].o == a_pt - 1) return i;
    }
    return -1;
@@ -428,8 +266,10 @@ key_swap           (int a_i, int a_j)
 PRIV char     /*----: reorder key points by bas id ---------------------------*/
 key_sort           (void)
 {
-   for (int i = 0; i < o.nkey - 1; ++i) {
-      for (int j = i + 1; j < o.nkey; ++j) {
+   int i;
+   int j;
+   for (i = 0; i < o.nkey - 1; ++i) {
+      for (j = i + 1; j < o.nkey; ++j) {
          if (o.key[i].p > o.key[j].p) key_swap(i, j);
       }
    }
@@ -439,6 +279,7 @@ key_sort           (void)
 char          /*----: calculate curvature between two consecutive key points -*/
 key_curve          (int a_pt)
 {
+   int i;
    int deg   = o.key[a_pt].d;
    int range = -1;
    range = match_range(deg);
@@ -458,13 +299,11 @@ key_curve          (int a_pt)
    float liney    = 0.0;
    float diffx    = 0.0;
    float diffy    = 0.0;
-   /*> DEBUG__CURVES {                                                                          <* 
-    *>    printf("RUNNING CURVE CALCS\n");                                                      <* 
-    *>    printf("key 1 = %2d at bas = %2d x=%4d, y=%4d\n", a_start, p1, xx1, yy1);             <* 
-    *>    printf("key 2 = %2d at bas = %2d x=%4d, y=%4d\n", a_start + a_count, p4, xx4, yy4);   <* 
-    *>    printf("so  slope = %8.3f and intercept = %4d\n", slope, b);                          <* 
-    *> }                                                                                        <*/
-   for (int i = p1 + 1; i < p4; ++i) {
+      /*> printf("RUNNING CURVE CALCS\n");                                                      <* 
+       *> printf("key 1 = %2d at bas = %2d x=%4d, y=%4d\n", a_start, p1, xx1, yy1);             <* 
+       *> printf("key 2 = %2d at bas = %2d x=%4d, y=%4d\n", a_start + a_count, p4, xx4, yy4);   <* 
+       *> printf("so  slope = %8.3f and intercept = %4d\n", slope, b);                          <*/
+   for (i = p1 + 1; i < p4; ++i) {
       liney   = (slope * o.bas[i].x) + b;
       linex   = (o.bas[i].y - b) / slope;
       diffx   = (o.bas[i].x    - linex);
@@ -527,7 +366,8 @@ key_calc           (char a_mode)
 int           /*----: locate a key point based on bas id ---------------------*/
 key_find           (int a_pt)
 {
-   for (int i = 0; i < o.nkey; ++i) {
+   int i;
+   for (i = 0; i < o.nkey; ++i) {
       if (o.key[i].p == a_pt) return i;
    }
    return -1;
@@ -569,7 +409,8 @@ char          /*----: remove a key point -------------------------------------*/
 key_del            (int a_pt)
 {
    DEBUG__KEY  printf("   key delete  for %4d\n", a_pt);
-   for (int i = a_pt + 1 ; i < o.nkey; ++i) {
+   int i;
+   for (i = a_pt + 1 ; i < o.nkey; ++i) {
       o.key[i - 1].o = o.key[i].o;
       o.key[i - 1].p = o.key[i].p;
       o.key[i - 1].x = o.key[i].x;
@@ -586,9 +427,10 @@ key_del            (int a_pt)
 char          /*---: prepare key points for matching -------------------------*/
 key_prep           (void)
 {
+   int i;
    int     nclean  = 0;
    DEBUG__KEY  printf("   preparing for matching\n");
-   for (int i = 0 ; i < o.nkey; ++i) {
+   for (i = 0 ; i < o.nkey; ++i) {
       if (o.key[i].t == '>') {
          strncpy(o.key[i].u, ">", 5);
       }
@@ -599,9 +441,10 @@ key_prep           (void)
 PRIV char     /*---: remove similar key points -------------------------------*/
 key_clean          (void)
 {
+   int i;
    int     nclean  = 0;
    DEBUG__KEY  printf("   cleaning for similar points\n");
-   for (int i = 1 ; i < o.nkey; ++i) {
+   for (i = 1 ; i < o.nkey; ++i) {
       if (o.key[i].t == '>')            continue;
       if (o.key[i].q == o.key[i - 1].q) {
          DEBUG__KEY  printf("   cleaned out %d\n", i);
@@ -778,13 +621,14 @@ key_sharpen        (void)
 char          /*----: identify key points from bas/avg ones ------------------*/
 key_filter         (void)
 {
+   int i;
    DEBUG__KEY  printf("KEY POINTS (begin)\n");
    /*---(identify criticals)-------------*/
    o.nkey = 0;
    /*> key_beg ();                                                                    <*/
    /*> key_end ();                                                                    <*/
    /*---(process)------------------------*/
-   for (int i = 1; i < o.navg - 1; ++i) {
+   for (i = 1; i < o.navg - 1; ++i) {
       /*---(filter)----------------------*/
       if      (o.avg[i].t == 'S')  continue;
       if      (o.avg[i].t == 'F')  continue;
@@ -812,7 +656,8 @@ key_filter         (void)
 char          /*---: label a range of key points with a use ------------------*/
 key_label          (int a_pt, int a_count, char *a_use)
 {
-   for (int i = a_pt; i < a_pt + a_count; ++i) {
+   int i;
+   for (i = a_pt; i < a_pt + a_count; ++i) {
       /*> printf("labeling %d with %c\n", i, a_letter);                               <*/
       if      (i == a_pt)                strncpy(o.key[i].u, a_use, 5);
       else if (strcmp(a_use, "-") == 0)  strncpy(o.key[i].u, a_use, 5);
@@ -831,6 +676,8 @@ void o___OUTLINES_______________o (void) {;}
 char          /*----: clear all point data -----------------------------------*/
 out_clear          (void)
 {
+   int i;
+   int j;
    /*---(clear header)-------------------*/
    o.when   [0]  = '\0';
    o.expect [0]  = '\0';
@@ -847,14 +694,14 @@ out_clear          (void)
    /*---(clear structures)---------------*/
    tPOINT  *p = NULL;
    DEBUG_I printf("   clearing ");
-   for (int i = 0; i < 4; ++i) {
+   for (i = 0; i < 4; ++i) {
       switch (i) {
       case 0: p = o.raw; DEBUG_I printf("raw, "); break;
       case 1: p = o.bas; DEBUG_I printf("bas, "); break;
       case 2: p = o.avg; DEBUG_I printf("avg, "); break;
       case 3: p = o.key; DEBUG_I printf("key\n"); break;
       }
-      for (int j = 0; j < MAX_POINTS; ++j) {
+      for (j = 0; j < MAX_POINTS; ++j) {
          p[j].o  = p[j].p  = 0;
          p[j].x  = p[j].y  = p[j].xd = p[j].yd = 0;
          p[j].l  = p[j].b  = p[j].d  = p[j].q  = p[j].cc = 0;
@@ -863,7 +710,7 @@ out_clear          (void)
          strncpy(p[j].u, "-", 5);
       }
    }
-   ntries  = 0;
+   /*> ntries  = 0;                                                                   <*/
    //---(complete)-------------------------------#
    return 0;
 }
@@ -931,6 +778,7 @@ out_read (int a_num)
    char      s[MAX_LINE] = "";         // current record
    int       n = 0;                    // current record number in file
    int       len       = 0;
+   int i;
    /*---(open file)------------------------*/
    f = fopen(fname, "r");
    if (f == NULL) return -1;
@@ -975,7 +823,7 @@ out_read (int a_num)
       DEBUG_I  printf("   expecting %4d points\n", x_count);
       /*> printf("out_read(%d) has %d points\n", a_num, x_count);                  <*/
       p = strtok(NULL, q2);
-      for (int i = 0; i < x_count; ++i) {
+      for (i = 0; i < x_count; ++i) {
          p = strtok(NULL, q2);
          if (p == NULL)  {
             DEBUG_I  printf("(%04d) x=null\n", i);
@@ -1022,6 +870,7 @@ out_append         (void)
    /*---(locals)---------------------------*/
    FILE     *f;
    char      d[500]     = "";
+   int i;
    /*---(open file)------------------------*/
    f = fopen(oname, "a");
    if (f == NULL) {
@@ -1046,7 +895,7 @@ out_append         (void)
    /*---(write count)----------------------*/
    fprintf(f, "%03d | ", o.nraw);
    /*---(process)--------------------------*/
-   for (int i = 0; i < o.nraw; ++i) {
+   for (i = 0; i < o.nraw; ++i) {
       fprintf(f, "(%+04d,%+04d)", o.raw[i].x, o.raw[i].y);
    }
    /*---(finish off record)----------------*/
@@ -1109,11 +958,12 @@ gen_calc           (tPOINT *a_curr,  char a_span)
 char          /*----: list all points of a particular type -------------------*/
 gen_list           (tPOINT *a_curr, int a_count)
 {
+   int i;
    //---(display list)---------------------------#
    printf("\n");
    printf("point inventory----------------------------------------------------------------------\n");
    printf("### bas raw a | -xx- -yy- xd- yd- | len -slope-- icept -rad- deg | q r curve cc c t u\n");
-   for (int i = 0; i < a_count; ++i) {
+   for (i = 0; i < a_count; ++i) {
       gen_show(a_curr + i, i);
    }
    printf("### bas raw a | -xx- -yy- xd- yd- | len -slope-- icept -rad- deg | q r curve cc c t u\n");

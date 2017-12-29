@@ -163,7 +163,7 @@ gregg_find         (char *a_gregg)
    while (1) {
       p = strtok(NULL, q);
       if (p == NULL || strncmp(p, "", MAX_LEN) == 0) break;
-      for (int i = 0; i < MAX_LETTERS; ++i) {
+      for (i = 0; i < MAX_LETTERS; ++i) {
          if (strncmp(p, loc[i].n, 5) != 0) continue;
          switch (count) {
          case 0: a = i; break;
@@ -301,6 +301,7 @@ dict_read          (void)            /* read the translation dictionary         
    int       prev;
    int       curr;
    int       dups      = 0;
+   int i;
    /*---(begin)----------s-----------------*/
    DEBUG__DICT  printf("READ DICTIONARY WORDS\n");
    dict_init   ();
@@ -354,7 +355,7 @@ dict_read          (void)            /* read the translation dictionary         
    ++n;
    char      t[MAX_LEN];
    char      u[MAX_LEN];
-   for (int i = 0; i < n; ++i) {
+   for (i = 0; i < n; ++i) {
       snprintf(t, MAX_LEN, "%s", words[i].english);
       snprintf(u, MAX_LEN, "%s", words[i].gregg);
       DEBUG__DICT  printf("%03d) %-25s = %-25s :: %2s / %3d   %c\n", i, t, u, words[i].source, words[i].page, words[i].type);
@@ -367,10 +368,11 @@ dict_read          (void)            /* read the translation dictionary         
 static char
 words_heads (void)           /* list the head of each index                   */
 {
-   DEBUG__DICTG {
-      for (int i = 0; i < MAX_LETTERS; i++) {
-         for (int j = 0; j < MAX_LETTERS; j++) {
-            for (int k = 0; k < MAX_LETTERS; k++) {
+   int i, j, k;
+   /*> DEBUG__DICTG {                                                                 <*/
+      for (i = 0; i < MAX_LETTERS; i++) {
+         for (j = 0; j < MAX_LETTERS; j++) {
+            for (k = 0; k < MAX_LETTERS; k++) {
                if (out_index[i][j][k] != NULL) {
                   printf("%3d %3d %3d\n", i, j, k);
                   words_listg(out_index[i][j][k]);
@@ -378,11 +380,11 @@ words_heads (void)           /* list the head of each index                   */
             }
          }
       }
-   }
-   DEBUG__DICTE {
-      for (int i = 0; i < 27; i++) {
-         for (int j = 0; j < 27; j++) {
-            for (int k = 0; k < 27; k++) {
+   /*> }                                                                              <*/
+   /*> DEBUG__DICTE {                                                                 <*/
+      for (i = 0; i < 27; i++) {
+         for (j = 0; j < 27; j++) {
+            for (k = 0; k < 27; k++) {
                if (eng_index[i][j][k] != NULL) {
                   printf("%3d %3d %3d\n", i, j, k);
                   words_liste(eng_index[i][j][k]);
@@ -390,7 +392,7 @@ words_heads (void)           /* list the head of each index                   */
             }
          }
       }
-   }
+   /*> }                                                                              <*/
    return 0;
 }
 
@@ -423,7 +425,8 @@ int
 words_find (                 /* locate a word in the translation dictionary   */
       char     *a_word)                /* english word                        */
 {
-   for (int i = 0; i < MAX_WORDS; ++i) {
+   int i;
+   for (i = 0; i < MAX_WORDS; ++i) {
       if (strncmp(words[i].english, "eof",  MAX_LEN) == 0)  return -1;
       if (strncmp(words[i].english, a_word, MAX_LEN) != 0)  continue;
       DEBUG__WRITING  printf("%3d) <<%s>>\n", i, words[i].english);
@@ -436,13 +439,14 @@ int
 words_outstring (            /* locate outline in the translation dictionary  */
       char     *a_outstring)           /* outline letters                     */
 {
+   int i;
    if (strcmp(o.grade, "BAD") == 0) {
       strncpy(o.word, "(malformed)", MAX_LEN);
       return 0;
    }
    strncpy(o.word, "(unknown)", MAX_LEN);
    int count = 0;
-   for (int i = 0; i < MAX_WORDS; ++i) {
+   for (i = 0; i < MAX_WORDS; ++i) {
       if (strncmp(words[i].english, "eof",  MAX_LEN) == 0)  return -1;
       /*> DEBUG__MATCHES  printf("look <<%s>>\n", words[i].gregg);                    <*/
       if (strncmp(words[i].gregg, a_outstring, MAX_LEN) != 0)  continue;
@@ -461,6 +465,7 @@ char*
 str_trim (                   /* trim spaces from front and back on string     */
       char     *a_string)
 {
+   int i;
    /*---(locals)--------------------------------*/
    char *head = a_string;
    int  l = strlen(a_string);
@@ -469,12 +474,12 @@ str_trim (                   /* trim spaces from front and back on string     */
       --l;
    }
    /*---(deal with leading spaces)--------------*/
-   for (int i = 0; i < l; ++i) {
+   for (i = 0; i < l; ++i) {
       if (a_string[i] != ' ') break;
       ++head;
    }
    /*---(deal with trailing spaces)-------------*/
-   for (int i = l - 1; i > 0; --i) {
+   for (i = l - 1; i > 0; --i) {
       if (a_string[i] != ' ') break;
       a_string[i] = '\0';
    }
@@ -561,13 +566,14 @@ words_outline (              /* draw a gregg outline to the screen            */
    int    right  = 0;        /* rightmost position                            */
    int    temp   = 0;        /* calc variable                                 */
    int    ltr    = 0;        /* current letter index                          */
+   int i;
    /*---(set up letters)------------------------*/
    int    count  = words_translate(a_index);
    DEBUG__WRITING  printf("CREATING OUTLINE...\n");
    /*---(test for width too large)--------------*/
    DEBUG__WRITING  printf("   test width...\n");
    posx = posy = 0;
-   for (int i = 0; i < count; ++i) {
+   for (i = 0; i < count; ++i) {
       ltr   = letters[i];
       posy += loc[ltr].ey;
       if (posy < 50 && posy > -50) {
@@ -577,11 +583,9 @@ words_outline (              /* draw a gregg outline to the screen            */
          if (temp > right) right = temp;
       }
       posx += loc[ltr].ex;
-      DEBUG__WRITING {
          printf("      %02d (%03d) %-5.5s :: ", i, ltr, loc[ltr].n);
          printf("tx = %4.0f, px  = %4d, py  = %4d, le  = %4d, ri = %4d\n",
                loc[ltr].ex, posx, posy, left, right);
-      }
    }
    if (outx - left + right > 280) { /* 260 small, 360 pad */
       outx  = BASX;     /* reset to left margin      */
@@ -602,7 +606,7 @@ words_outline (              /* draw a gregg outline to the screen            */
    DEBUG__WRITING  printf("   drawing...\n");
    DEBUG__WRITING  printf("      starting at %4dx, %4dy\n", outx - left, outy);
    glLineWidth(1.5);
-   for (int i = 0; i < count; ++i) {
+   for (i = 0; i < count; ++i) {
       /*---(establish values)-------------------*/
       letter = letters[i];
       offset = 0;
@@ -650,7 +654,7 @@ words_translate    (int a_word)
    /*---(init)---------------------------*/
    strncpy(a_outstring, words[a_word].gregg, MAX_LEN);
    /*---(clear letters)------------------*/
-   for (int i = 0; i < 30; ++i) {
+   for (i = 0; i < 30; ++i) {
       letters[i] = 0;
    }
    /*---(get the first letter, always ">")------*/
@@ -714,11 +718,12 @@ words_consonant (            /* adjust for combination consontants            */
    int two;
    int adjx = 0;
    int adjy = 0;
+   int i;
    if (a_index == 0)            return -1;
    /*---(previous letter)----------------*/
    letter = letters[a_index - 1];
    one    = 0;
-   for (int i = 0; i < MAX_GROUPS; ++i) {
+   for (i = 0; i < MAX_GROUPS; ++i) {
       if (i > 0 && strncmp(groups[i].gr, groups[i - 1].gr, 5) == 0) continue;
       /*> printf("%s ", groups[i].gr);                                             <*/
       if (strncmp(groups[i].gr, "eof",  5) == 0)                    break;
@@ -729,7 +734,7 @@ words_consonant (            /* adjust for combination consontants            */
    /*---(current letter)-----------------*/
    letter = letters[a_index];
    two    = 0;
-   for (int i = 0; i < MAX_GROUPS; ++i) {
+   for (i = 0; i < MAX_GROUPS; ++i) {
       if (i > 0 && strncmp(groups[i].gr, groups[i - 1].gr, 5) == 0) continue;
       /*> printf("%s ", groups[i].gr);                                             <*/
       if (strncmp(groups[i].gr, "eof",  5) == 0)                    break;
@@ -768,6 +773,7 @@ words_vowel (                /* adjust vowel shape for layout                 */
    int one;
    int two;
    int offset;
+   int i;
    /*---(prev letter)---------------------------*/
    if (a_index == 0) {
       one = 0;
@@ -776,7 +782,7 @@ words_vowel (                /* adjust vowel shape for layout                 */
       letter = letters[a_index - 1];
       /*> printf("   letter one = %2d, %2s, %2s ( ", letter, loc[letter].n, loc[letter].gr);   <*/
       one    = 0;
-      for (int i = 0; i < MAX_GROUPS; ++i) {
+      for (i = 0; i < MAX_GROUPS; ++i) {
          if (i > 0 && strncmp(groups[i].gr, groups[i - 1].gr, 5) == 0) continue;
          /*> printf("%s ", groups[i].gr);                                             <*/
          if (strncmp(groups[i].gr, "eof",  5) == 0)                    break;
@@ -794,7 +800,7 @@ words_vowel (                /* adjust vowel shape for layout                 */
       letter = letters[a_index + 1];
       /*> printf("   letter two = %2d, %2s, %2s ( ", letter, loc[letter].n, loc[letter].gr);   <*/
       two    = 0;
-      for (int i = 0; i < MAX_GROUPS; ++i) {
+      for (i = 0; i < MAX_GROUPS; ++i) {
          if (i > 0 && strncmp(groups[i].gr, groups[i - 1].gr, 5) == 0) continue;
          /*> printf("%s ", groups[i].gr);                                             <*/
          if (strncmp(groups[i].gr, "eof",  5) == 0)                    break;

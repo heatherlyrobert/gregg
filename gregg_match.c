@@ -46,6 +46,7 @@ char
 match_calc (int a_start, int a_count)
 {
    /*---(get points)----------------------------*/
+   int         i           = 0;
    int p1         = o.key[a_start              ].p;
    int p2         = o.key[a_start + 1          ].p;
    int p3         = o.key[a_start + a_count - 1].p;
@@ -96,7 +97,7 @@ match_calc (int a_start, int a_count)
    DEBUG__CURVES  printf("key 2 = %2d at bas = %2d x=%4d, y=%4d\n", a_start + a_count, p4, xx4, yy4);
    DEBUG__CURVES  printf("so  slope = %8.3f and intercept = %4d\n", opens.s, opens.b);
    DEBUG__CURVES  printf("   pt# -xx- -yy- --lx-- --ly-- --dx-- --dy-- theta degs curve\n");
-   for (int i = p1 + 1; i < p4; ++i) {
+   for (i = p1 + 1; i < p4; ++i) {
       /*---(start with calc'd point)------------*/
       if (opens.s == 0.0) opens.s = 0.001;
       liney   = (opens.s * o.bas[i].x) + opens.b;
@@ -127,8 +128,8 @@ match_calc (int a_start, int a_count)
       case 7:  if (diffx < 0.0) opens.c *= -1;  break;
       case 8:  if (diffx < 0.0) opens.c *= -1;  break;
       }
-      DEBUG__CURVES  printf("   %3d %4d %4d %6.1f %6.1f %6.1f %6.1f %5.2f %4d %5.1f\n",
-            i, o.bas[i].x, o.bas[i].y, linex, liney, diffx, diffy, theta, thetad, opens.c);
+      /*> printf("   %3d %4d %4d %6.1f %6.1f %6.1f %6.1f %5.2f %4d %5.1f\n",                      <* 
+       *>       i, o.bas[i].x, o.bas[i].y, linex, liney, diffx, diffy, theta, thetad, opens.c);   <*/
       if (opens.c > lcurve) lcurve = opens.c;
       if (opens.c < rcurve) rcurve = opens.c;
       if (fabs(opens.c) > fabs(opens.cm)) opens.cm = opens.c;
@@ -155,8 +156,8 @@ match_calc (int a_start, int a_count)
    else                                                         opens.cc =  0;
    o.tmp[1].c   = opens.c;
    o.tmp[1].cc  = opens.cc;
-   DEBUG__CURVES  printf("between key points %d/%d (bas %02d/%02d) lcurve=%5.1f, rcurve=%5.1f, maxcurve=%5.1f, curve=%5.1f, curvec=%2d\n",
-         a_start, a_start + a_count, p1, p4, lcurve, rcurve, opens.cm, opens.c, opens.cc);
+   /*> printf("between key points %d/%d (bas %02d/%02d) lcurve=%5.1f, rcurve=%5.1f, maxcurve=%5.1f, curve=%5.1f, curvec=%2d\n",   <* 
+    *>       a_start, a_start + a_count, p1, p4, lcurve, rcurve, opens.cm, opens.c, opens.cc);                                    <*/
    /*---(other)---------------------------------*/
    o.tmp[1].ra  = opens.r;
    o.tmp[0].ca  = o.tmp[1].ca  = '-';
@@ -188,12 +189,13 @@ match_size (int a_len)
 int
 match_range (int a_deg)
 {
+   int i = 0;
    /*---(range)---------------------------------*/
    if (a_deg >  180) a_deg -= 360;
    if (a_deg < -180) a_deg += 360;
    int  x_range      = -1;
    opens.r2  = -1;
-   for (int i = 0; i < MAX_RANGES; ++i) {
+   for (i = 0; i < MAX_RANGES; ++i) {
       if (strncmp(ranges[i].nam, "eof", 5) == 0) break;
       if (a_deg <= ranges[i].min) continue;
       if (a_deg >  ranges[i].max) continue;
@@ -206,13 +208,14 @@ match_range (int a_deg)
 char
 match_sharps (void)
 {
+   int i = 0;
    int  avg_pt;
    int  d1, d2, dd;
    int  sharp = 70;
    /*> int  sharp = 60;                                                               <*/
    /*> o.key[o.nkey - 1].ca = 'x';                                                    <*/
    DEBUG__SHARPS  printf("RUNNING SHARPS (beg) :: tolerance at >= %d\n", sharp);
-   for (int i = 1; i < o.nkey - 1; ++i) {
+   for (i = 1; i < o.nkey - 1; ++i) {
       DEBUG__SHARPS  printf("  %02d) ", i);
       if (o.key[i    ].ca != '-' || o.key[i + 1].ca != '-') {
          DEBUG__SHARPS  printf("skipping as its marked (%c) or the next is (%c)\n", o.key[i].ca, o.key[i + 1].ca);
@@ -229,8 +232,8 @@ match_sharps (void)
       if (abs(dd) >= sharp) {
          o.key[i].ca = 'x';
          DEBUG__SHARPS  printf("SHARP\n");
-      } else
-         DEBUG__SHARPS  printf("no\n");
+      }
+      /*> } else DEBUG__SHARPS  printf("no\n");                                       <*/
    }
    DEBUG__SHARPS  printf("RUNNING SHARPS (end)\n");
    return 0;
@@ -477,12 +480,10 @@ match_opens        (int a_beg)
    }
    --end;
    /*---(report out)---------------------*/
-   DEBUG__MATCHES {
-      if (opens.sharps > 0) {
-         printf("\n   OPEN : beg=%2d, end=%2d, opens=%2d, nines=%2d extra   [%-5.5s] [%-5.5s]\n",
-               a_beg, end, opens.norm, opens.sharps - opens.norm, opens.oshape, opens.oflow);
-      }
-   }
+   /*> if (opens.sharps > 0) {                                                                       <* 
+    *>    printf("\n   OPEN : beg=%2d, end=%2d, opens=%2d, nines=%2d extra   [%-5.5s] [%-5.5s]\n",   <* 
+    *>          a_beg, end, opens.norm, opens.sharps - opens.norm, opens.oshape, opens.oflow);       <* 
+    *> }                                                                                             <*/
    /*---(complete)-----------------------*/
    return 0;
 }
@@ -502,10 +503,8 @@ match_prep         (void)
       }
    }
    /*---(report out)---------------------*/
-   DEBUG__MATCHES {
-      if (nclean > 0) printf("   cleansed jogs, jitters, and tails\n");
-      else            printf("   no prep up needed on little segments\n");
-   }
+   /*> if (nclean > 0) printf("   cleansed jogs, jitters, and tails\n");           <* 
+    *> else            printf("   no prep up needed on little segments\n");        <*/
    /*---(complete)-----------------------*/
    return 0;
 }
@@ -528,12 +527,10 @@ match_cleanup      (void)
       }
    }
    /*---(report out)---------------------*/
-   DEBUG__MATCHES {
-      if (nclean > 0) printf("   cleaned up little leftover segment(s)\n");
-      else            printf("   no clean up needed on little leftover segments\n");
-      if (missed > 0) printf("   NOT DONE (missing some segments)\n");
-      else            printf("   all segments accounted for\n");
-   }
+   /*> if (nclean > 0) printf("   cleaned up little leftover segment(s)\n");            <* 
+    *> else            printf("   no clean up needed on little leftover segments\n");   <* 
+    *> if (missed > 0) printf("   NOT DONE (missing some segments)\n");                 <* 
+    *> else            printf("   all segments accounted for\n");                       <*/
    /*---(complete)-----------------------*/
    return 0;
 }
@@ -613,11 +610,9 @@ match_location     (int a_rule, int a_beg, int a_opens, int a_size)
       DEBUG__MATCHES  printf("[ no fits   ]");
    }
    /*---(finish locations)----------------*/
-   DEBUG__MATCHES {
-      /*> if (trys_ltr == 0) printf("no LOCATION entry\n");                           <* 
-       *> else               printf("\n");                                            <*/
-      printf("\n");
-   }
+   /*> if (trys_ltr == 0) printf("no LOCATION entry\n");                           <* 
+    *> else               printf("\n");                                            <*/
+   printf("\n");
    /*---(complete)-----------------------*/
    return rc;
 }
@@ -652,8 +647,8 @@ match_group        (int a_beg, int a_opens, char *a_group)
          if (strncmp(groups[i].gr, a_group, 5) != 0) continue;
       }
       /*---(start report out)----------------*/
-      DEBUG__MATCHES  printf("      #%02d [%-3.3s] f=%2d o=%1d, r=%1d, c=%2d : ",
-            i, groups[i].gr, a_beg, groups[i].op, groups[i].ra, opens.cc);
+      /*> printf("      #%02d [%-3.3s] f=%2d o=%1d, r=%1d, c=%2d : ",                 <* 
+       *>       i, groups[i].gr, a_beg, groups[i].op, groups[i].ra, opens.cc);        <*/
       ++trys_grp;
       /*---(secondary filtering)-------------*/
       if (match_shape (i, a_beg) != 1)   continue;
@@ -664,17 +659,13 @@ match_group        (int a_beg, int a_opens, char *a_group)
    }
    /*---(finish rules)-----------------------*/
    if (strncmp(a_group, "", 5) == 0) {
-      DEBUG__MATCHES {
-         if (trys_grp == 0) printf("      no group rules found (in GROUP table)\n");
-         else               printf("      end of group rules (%d tries)\n", trys_grp);
-      }
+         /*> if (trys_grp == 0) printf("      no group rules found (in GROUP table)\n");     <* 
+          *> else               printf("      end of group rules (%d tries)\n", trys_grp);   <*/
    } else {
-      DEBUG__MATCHES {
-         if (trys_grp == 0) {
-            printf("      #-- [%-3.3s] f=%2d o=%1d, r=%1d, c=%2d :", a_group, a_beg, a_opens, opens.r, opens.cc);
-            printf(" --- --- --- : --- --- --- --- : ---- ---- ---- [ no joy    ]\n");
-         }
-      }
+         /*> if (trys_grp == 0) {                                                                                       <* 
+          *>    printf("      #-- [%-3.3s] f=%2d o=%1d, r=%1d, c=%2d :", a_group, a_beg, a_opens, opens.r, opens.cc);   <* 
+          *>    printf(" --- --- --- : --- --- --- --- : ---- ---- ---- [ no joy    ]\n");                              <* 
+          *> }                                                                                                          <*/
    }
    /*---(complete)-----------------------*/
    return rc;
@@ -702,10 +693,10 @@ match_driver       (void)
          rc = 0;
          if (count > opens.sharps)               continue;
          match_calc (beg, count);
-         DEBUG__MATCHES  printf("\n   %02d-%02d%c =========  o=%1d, r=%1d, c=%2d : ",
-               beg, beg + count, count > (opens.norm) ? '*' : ' ', count, opens.r, opens.cc);
-         DEBUG__MATCHES  printf("le=%4d, sz=%1d, de=%4d, mc=%5.1f  ==========================\n",
-               opens.l, opens.la, opens.d, opens.cm);
+         /*> printf("\n   %02d-%02d%c =========  o=%1d, r=%1d, c=%2d : ",                           <* 
+          *>       beg, beg + count, count > (opens.norm) ? '*' : ' ', count, opens.r, opens.cc);   <*/
+         /*> printf("le=%4d, sz=%1d, de=%4d, mc=%5.1f  ==========================\n",   <* 
+          *>       opens.l, opens.la, opens.d, opens.cm);                               <*/
          if (count >= 3 && opens.sharps >= 3)  rc = combo_driver (beg, count);
          if (rc == 1) break;
          trys_grp = 0;
@@ -723,10 +714,8 @@ match_driver       (void)
    DEBUG__MATCHES  printf("\n");
    DEBUG__MATCHES  gen_list(o.key, o.nkey);
    DEBUG__MATCHES  printf("\nMATCHING LETTERS (end)--------------------\n");
-   DEBUG__SUMM {
-      printf("r=%3d, a=%3d, k=%3d, ltr=%s, act=%s, wrd=%s\n",
-            o.nraw, o.navg, o.nkey, o.actual, o.letters, o.word);
-   }
+      /*> printf("r=%3d, a=%3d, k=%3d, ltr=%s, act=%s, wrd=%s\n",                     <* 
+       *>       o.nraw, o.navg, o.nkey, o.actual, o.letters, o.word);                 <*/
    return 0;
 }
 

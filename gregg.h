@@ -192,16 +192,20 @@
 #include   <GL/gl.h>              /* opengl standard primary header           */
 #include   <GL/glx.h>             /* opengl standard X11 integration          */
 
-/*---(heatherly made)--------------------*/
-#include   <yX11.h>               /* heatherly xlib/glx setup/teardown        */
-#include   <yGOD.h>               /* heatherly opengl godview                 */
-#include   <yFONT.h>              /* heatherly texture-mapped fonts           */
+/*===[[ CUSTOM LIBRARIES ]]===================================================*/
+#include    <yLOG.h>         /* CUSTOM : heatherly program logging            */
+#include    <yURG.h>         /* CUSTOM : heatherly urgent processing          */
+#include    <yVAR.h>         /* CUSTOM : heatherly variable testing           */
+#include    <ySTR.h>         /* CUSTOM : heatherly string handling            */
+#include    <yX11.h>         /* CUSTOM : heatherly xlib/glx setup/teardown        */
+#include    <yGOD.h>         /* CUSTOM : heatherly opengl godview                 */
+#include    <yFONT.h>        /* CUSTOM : heatherly texture-mapped fonts           */
 
 
 
 /* rapidly evolving version number to aid with visual change confirmation     */
-#define VER_NUM   "5.0a"
-#define VER_TXT   "start to update, modernize, and put into github"
+#define VER_NUM   "5.0c"
+#define VER_TXT   "can compile again.  messy, but compiles"
 
 
 #define    PUBL      /*--*/
@@ -263,33 +267,33 @@ struct cDEBUG {
    /*---(summary)------------------------*/
    char      summ;     /* just summary statistics                  */
    char      lock;     /* finding my lockup                        */
-} debug;
-#define   DEBUG_T           if (debug.top       == 'y')
-#define   DEBUG_X           if (debug.prep      == 'y')
-#define   DEBUG_C           if (debug.cli       == 'y')
-#define   DEBUG_I           if (debug.input     == 'y')
-#define   DEBUG_P           if (debug.proc      == 'y')
-#define   DEBUG_O           if (debug.output    == 'y')
-#define   DEBUG_G           if (debug.graph     == 'y')
-#define   DEBUG_A           if (debug.api       == 'y')
-#define   DEBUG_E           if (debug.event     == 'y')
+} debug_old;
+#define   DEBUG_T           if (debug_old.top       == 'y')
+#define   DEBUG_X           if (debug_old.prep      == 'y')
+#define   DEBUG_C           if (debug_old.cli       == 'y')
+#define   DEBUG_I           if (debug_old.input     == 'y')
+#define   DEBUG_P           if (debug_old.proc      == 'y')
+#define   DEBUG_O           if (debug_old.output    == 'y')
+#define   DEBUG_G           if (debug_old.graph     == 'y')
+#define   DEBUG_A           if (debug_old.api       == 'y')
+#define   DEBUG_E           if (debug_old.event     == 'y')
 
-#define   DEBUG__RAW        if (debug.raw      == 'y')
-#define   DEBUG__BAS        if (debug.bas      == 'y')
-#define   DEBUG__KEY        if (debug.key      == 'y')
-#define   DEBUG__SHARPS     if (debug.sharps   == 'y')
-#define   DEBUG__CIRCLES    if (debug.circles  == 'y')
-#define   DEBUG__LINES      if (debug.lines    == 'y')
-#define   DEBUG__MATCHES    if (debug.matches  == 'y')
-#define   DEBUG__SHAPES     if (debug.shapes   == 'y')
-#define   DEBUG__AVERAGES   if (debug.averages == 'y')
-#define   DEBUG__CURVES     if (debug.curves   == 'y')
-#define   DEBUG__WRITING    if (debug.writing  == 'y')
-#define   DEBUG__DICT       if (debug.dict     == 'y')
-#define   DEBUG__DICTE      if (debug.dicte    == 'y')
-#define   DEBUG__DICTG      if (debug.dictg    == 'y')
+#define   DEBUG__RAW        if (debug_old.raw      == 'y')
+#define   DEBUG__BAS        if (debug_old.bas      == 'y')
+#define   DEBUG__KEY        if (debug_old.key      == 'y')
+#define   DEBUG__SHARPS     if (debug_old.sharps   == 'y')
+#define   DEBUG__CIRCLES    if (debug_old.circles  == 'y')
+#define   DEBUG__LINES      if (debug_old.lines    == 'y')
+#define   DEBUG__MATCHES    if (debug_old.matches  == 'y')
+#define   DEBUG__SHAPES     if (debug_old.shapes   == 'y')
+#define   DEBUG__AVERAGES   if (debug_old.averages == 'y')
+#define   DEBUG__CURVES     if (debug_old.curves   == 'y')
+#define   DEBUG__WRITING    if (debug_old.writing  == 'y')
+#define   DEBUG__DICT       if (debug_old.dict     == 'y')
+#define   DEBUG__DICTE      if (debug_old.dicte    == 'y')
+#define   DEBUG__DICTG      if (debug_old.dictg    == 'y')
 
-#define   DEBUG__SUMM       if (debug.summ     == 'y')
+#define   DEBUG__SUMM       if (debug_old.summ     == 'y')
 
 
 
@@ -420,6 +424,8 @@ extern int   g_transy;
 #define   SIZE_R3         62
 #define   SIZE_M3         78
 
+
+
 typedef struct cPOINT tPOINT;
 struct cPOINT
 {
@@ -443,6 +449,8 @@ struct cPOINT
    char      u[5];       // use of this point in outline
    char      a;          // artificial or not (y/n)               
 };
+
+
 
 typedef struct cOUTLINE tOUTLINE;
 struct cOUTLINE
@@ -476,17 +484,23 @@ struct cOUTLINE
    tPOINT    key[MAX_POINTS];          /* key points                          */
 } o;
 
+
+
 /*============================--------------------============================*/
 /*===----                           prototypes                         ----===*/
 /*============================--------------------============================*/
 
+/*---(main)-----------------*/
 int        main              (int argc, char *argv[]);
-char       prog_usage        (void);
-char       prog_init         (void);
-char       prog_args         (int argc, char *argv[]);
-char       prog_begin        (void);
-char       prog_event        (void);
-char       prog_end          (void);
+
+/*---(prog)-----------------*/
+char       PROG_usage        (void);
+char       PROG_init         ();
+char       PROG_args         (int argc, char *argv[]);
+char       PROG_begin        (void);
+char       PROG_final        (void);
+char       PROG_event        (void);
+char       PROG_end          (void);
 
 char       draw_main         (void);
 char       draw_init         (void);
@@ -580,6 +594,16 @@ char       words_result      (void);
 char      *str_trim          (char *);
 
 char*      unit_accessor     (char *a_question, int a_num);
+
+
+char        TOUCH_init           (void);
+char        TOUCH_open           (void);
+char        TOUCH_normal         (void);
+char        TOUCH_check          (void);
+char        TOUCH_read           (void);
+char        TOUCH_close          (void);
+
+
 
 #endif
 /*============================----(source-end)----============================*/

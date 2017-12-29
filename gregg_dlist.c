@@ -176,10 +176,10 @@ draw_line (int a_who, char a_dotted)
    loc[a_who].ri = right;
    loc[a_who].le = left;
    /*---(report out)----------------------------*/
-   DEBUG__SHAPES  if (a_dotted == 'n') {
-      printf("   %-5s  %5.1f  %5.1f    %3d  %3d    %3d  %3d     %-3s\n",
-            loc[a_who].n, x, y, o.tmp[1].l, o.tmp[1].d, left, right, loc[a_who].gr);
-   }
+   /*> if (a_dotted == 'n') {                                                              <* 
+    *>    printf("   %-5s  %5.1f  %5.1f    %3d  %3d    %3d  %3d     %-3s\n",               <* 
+    *>          loc[a_who].n, x, y, o.tmp[1].l, o.tmp[1].d, left, right, loc[a_who].gr);   <* 
+    *> }                                                                                   <*/
    /*---(complete)------------------------------*/
    return 0;
 }
@@ -268,10 +268,10 @@ draw_ellipse (int a_who, char a_dotted)
    o.tmp[1].y   = y;
    gen_calc(o.tmp + 1, 'n');
    /*---(report out)----------------------------*/
-   DEBUG__SHAPES  if (a_dotted == 'n') {
-      printf("   %-5s  %5.1f  %5.1f    %3d  %3d    %3d  %3d     %-3s\n",
-            loc[a_who].n, x, y, o.tmp[1].l, o.tmp[1].d, left, right, loc[a_who].gr);
-   }
+   /*> if (a_dotted == 'n') {                                                              <* 
+    *>    printf("   %-5s  %5.1f  %5.1f    %3d  %3d    %3d  %3d     %-3s\n",               <* 
+    *>          loc[a_who].n, x, y, o.tmp[1].l, o.tmp[1].d, left, right, loc[a_who].gr);   <* 
+    *> }                                                                                   <*/
    /*---(set size values)-----------------------*/
    loc[a_who].ex = x;
    loc[a_who].ey = y;
