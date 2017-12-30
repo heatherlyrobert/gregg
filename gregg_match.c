@@ -47,27 +47,27 @@ match_calc (int a_start, int a_count)
 {
    /*---(get points)----------------------------*/
    int         i           = 0;
-   int p1         = o.key[a_start              ].p;
-   int p2         = o.key[a_start + 1          ].p;
-   int p3         = o.key[a_start + a_count - 1].p;
-   int p4         = o.key[a_start + a_count    ].p;
+   int p1         = o.key[a_start              ].p_bas;
+   int p2         = o.key[a_start + 1          ].p_bas;
+   int p3         = o.key[a_start + a_count - 1].p_bas;
+   int p4         = o.key[a_start + a_count    ].p_bas;
    /*---(get coordinates)-----------------------*/
-   int yy1        = o.avg[p1].y;
-   int yy2        = o.avg[p2].y;
-   int yy3        = o.avg[p3].y;
-   int yy4        = o.avg[p4].y;
-   int xx1        = o.avg[p1].x;
-   int xx2        = o.avg[p2].x;
-   int xx3        = o.avg[p3].x;
-   int xx4        = o.avg[p4].x;
+   int yy1        = o.avg[p1].ypos;
+   int yy2        = o.avg[p2].ypos;
+   int yy3        = o.avg[p3].ypos;
+   int yy4        = o.avg[p4].ypos;
+   int xx1        = o.avg[p1].xpos;
+   int xx2        = o.avg[p2].xpos;
+   int xx3        = o.avg[p3].xpos;
+   int xx4        = o.avg[p4].xpos;
    /*---(get overall calcs)---------------------*/
-   o.tmp[0].p   = a_start;
-   o.tmp[0].x   = xx1;
-   o.tmp[0].y   = yy1;
-   o.tmp[1].p   = a_start + a_count;
-   o.tmp[1].x   = xx4;
-   o.tmp[1].y   = yy4;
-   gen_calc(o.tmp + 1, 'n');
+   o.tmp[0].p_bas   = a_start;
+   o.tmp[0].xpos   = xx1;
+   o.tmp[0].ypos   = yy1;
+   o.tmp[1].p_bas   = a_start + a_count;
+   o.tmp[1].xpos   = xx4;
+   o.tmp[1].ypos   = yy4;
+   POINT_calc (o.tmp + 1, 'n');
    /*---(more variables)------------------------*/
    opens.xd   = o.tmp[1].xd;
    opens.yd   = o.tmp[1].yd;
@@ -100,15 +100,15 @@ match_calc (int a_start, int a_count)
    for (i = p1 + 1; i < p4; ++i) {
       /*---(start with calc'd point)------------*/
       if (opens.s == 0.0) opens.s = 0.001;
-      liney   = (opens.s * o.bas[i].x) + opens.b;
-      linex   = (o.bas[i].y - opens.b) / opens.s;
+      liney   = (opens.s * o.bas[i].xpos) + opens.b;
+      linex   = (o.bas[i].ypos - opens.b) / opens.s;
       if (linex >  999) linex =  999;
       if (linex < -999) linex = -999;
       if (liney >  999) liney =  999;
       if (liney < -999) liney = -999;
       /*---(calc differences)-------------------*/
-      diffx   = (o.bas[i].x    - linex);
-      diffy   = (o.bas[i].y    - liney);
+      diffx   = (o.bas[i].xpos    - linex);
+      diffy   = (o.bas[i].ypos    - liney);
       if (diffx >  999) diffx =  999;
       if (diffx < -999) diffx = -999;
       if (diffy >  999) diffy =  999;
@@ -129,7 +129,7 @@ match_calc (int a_start, int a_count)
       case 8:  if (diffx < 0.0) opens.c *= -1;  break;
       }
       /*> printf("   %3d %4d %4d %6.1f %6.1f %6.1f %6.1f %5.2f %4d %5.1f\n",                      <* 
-       *>       i, o.bas[i].x, o.bas[i].y, linex, liney, diffx, diffy, theta, thetad, opens.c);   <*/
+       *>       i, o.bas[i].xpos, o.bas[i].ypos, linex, liney, diffx, diffy, theta, thetad, opens.c);   <*/
       if (opens.c > lcurve) lcurve = opens.c;
       if (opens.c < rcurve) rcurve = opens.c;
       if (fabs(opens.c) > fabs(opens.cm)) opens.cm = opens.c;
@@ -162,8 +162,8 @@ match_calc (int a_start, int a_count)
    o.tmp[1].ra  = opens.r;
    o.tmp[0].ca  = o.tmp[1].ca  = '-';
    o.tmp[0].t   = o.tmp[1].t   = '-';
-   strncpy(o.tmp[0].u, "-", 3);
-   strncpy(o.tmp[1].u, "-", 3);
+   strncpy(o.tmp[0].use, "-", 3);
+   strncpy(o.tmp[1].use, "-", 3);
    /*---(complete)------------------------------*/
    /*> printf("deg = %4d, range = %2d; and len = %4d, size = %d; and curve = %6.2f, curvea = %2d\n",   <* 
     *>       opens.d, opens.r, opens.l, size, opens.c, opens.cc);                                                 <*/
@@ -221,7 +221,7 @@ match_sharps (void)
          DEBUG__SHARPS  printf("skipping as its marked (%c) or the next is (%c)\n", o.key[i].ca, o.key[i + 1].ca);
          continue;
       }
-      avg_pt = o.key[i].p;
+      avg_pt = o.key[i].p_bas;
       d1     = o.avg[avg_pt - 1].d;
       d2     = o.avg[avg_pt + 1].d;
       dd     = d1 - d2;
@@ -247,7 +247,7 @@ match_flatten    (void)
    int       dd        = 0;
    /*---(report out)---------------------*/
    DEBUG__LINES  printf("STRAIGHTENING LINES (begin)\n");
-   DEBUG__LINES  gen_list(o.key, o.nkey);
+   DEBUG__LINES  POINT_list (o.key, o.nkey);
    /*---(process)------------------------*/
    DEBUG__LINES  printf("   start...\n");
    while (i < o.nkey - 1) {
@@ -301,7 +301,7 @@ match_flatten    (void)
    }
    DEBUG__LINES  printf("   done\n\n");
    /*---(report out)---------------------*/
-   DEBUG__LINES  gen_list(o.key, o.nkey);
+   DEBUG__LINES  POINT_list (o.key, o.nkey);
    /*---(complete)-------------------------------*/
    DEBUG__LINES  printf("STRAIGHTENING LINES (end)\n\n");
    return 0;
@@ -315,7 +315,7 @@ match_squeeze    (void)
    int       dd        = 0;
    /*---(report out)---------------------*/
    DEBUG__LINES  printf("SQUEEZING LINES (begin)\n");
-   DEBUG__LINES  gen_list(o.key, o.nkey);
+   DEBUG__LINES  POINT_list (o.key, o.nkey);
    /*---(process)------------------------*/
    DEBUG__LINES  printf("   start...\n");
    while (i < o.nkey - 1) {
@@ -360,7 +360,7 @@ match_squeeze    (void)
    }
    DEBUG__LINES  printf("   done\n\n");
    /*---(report out)---------------------*/
-   DEBUG__LINES  gen_list(o.key, o.nkey);
+   DEBUG__LINES  POINT_list (o.key, o.nkey);
    /*---(complete)-------------------------------*/
    DEBUG__LINES  printf("SQUEEZING LINES (end)\n\n");
    return 0;
@@ -466,7 +466,7 @@ match_opens        (int a_beg)
    strncpy(opens.oshape, "     ", 10);
    strncpy(opens.oflow , "     ", 10);
    for (end = a_beg + 1; end < o.nkey; ++end) {
-      if (strncmp(o.key[end].u, "-", 5) != 0)  break;
+      if (strncmp(o.key[end].use, "-", 5) != 0)  break;
       /*---(count)-----------------------*/
       ++opens.sharps;
       if (cutoff == 0) ++opens.norm;
@@ -496,7 +496,7 @@ match_prep         (void)
    int       nclean    = 0;                 /* number of cleaned segments     */
    /*---(clean out little leftovers)-----*/
    for (i = 1; i < o.nkey; ++i) {
-      if (strncmp(o.key[i].u, "-", 5) != 0) continue;
+      if (strncmp(o.key[i].use, "-", 5) != 0) continue;
       if (o.key[i].l <= 5) {
          key_label(i, 1, "*");
          ++nclean;
@@ -518,7 +518,7 @@ match_cleanup      (void)
    int       missed    = 0;                 /* number of missed segments      */
    /*---(clean out little leftovers)-----*/
    for (i = 1; i < o.nkey; ++i) {
-      if (strncmp(o.key[i].u, "-", 5) != 0) continue;
+      if (strncmp(o.key[i].use, "-", 5) != 0) continue;
       if (o.key[i].l < SIZE_M0) {
          key_label(i, 1, "*");
          ++nclean;
@@ -547,14 +547,14 @@ match_result       (void)
    strncpy(o.letters, ">", 50);
    for (i = 1; i < o.nkey; ++i) {
       strncat(o.letters, "."     , 50);
-      strncat(o.letters, o.key[i].u, 50);
-      if (  strncmp(o.key[i].u, "*", 5) != 0 &&
-            strncmp(o.key[i].u, "+", 5) != 0) {
-         DEBUG__MATCHES  printf(".%s", o.key[i].u);
+      strncat(o.letters, o.key[i].use, 50);
+      if (  strncmp(o.key[i].use, "*", 5) != 0 &&
+            strncmp(o.key[i].use, "+", 5) != 0) {
+         DEBUG__MATCHES  printf(".%s", o.key[i].use);
          strncat(o.actual, "."       , 50);
-         strncat(o.actual, o.key[i].u, 50);
+         strncat(o.actual, o.key[i].use, 50);
       }
-      if (strncmp(o.key[i].u, "-", 5) == 0) bad = 1;
+      if (strncmp(o.key[i].use, "-", 5) == 0) bad = 1;
    }
    DEBUG__MATCHES  printf("\"\n");
    /*---(expect)-------------------------*/
@@ -683,7 +683,7 @@ match_driver       (void)
    /*---(process)------------------------*/
    DEBUG__MATCHES  printf("\nMATCHING LETTERS (beg)--------------------\n");
    match_prep      ();
-   DEBUG__MATCHES  gen_list(o.key, o.nkey);
+   DEBUG__MATCHES  POINT_list (o.key, o.nkey);
    for (beg = 0; beg < o.nkey - 1; ++beg) {
       /*---(get open point count)------------------*/
       match_opens(beg);
@@ -712,7 +712,7 @@ match_driver       (void)
    words_outstring (o.actual);
    /*---(complete)-----------------------*/
    DEBUG__MATCHES  printf("\n");
-   DEBUG__MATCHES  gen_list(o.key, o.nkey);
+   DEBUG__MATCHES  POINT_list (o.key, o.nkey);
    DEBUG__MATCHES  printf("\nMATCHING LETTERS (end)--------------------\n");
       /*> printf("r=%3d, a=%3d, k=%3d, ltr=%s, act=%s, wrd=%s\n",                     <* 
        *>       o.nraw, o.navg, o.nkey, o.actual, o.letters, o.word);                 <*/
@@ -766,24 +766,24 @@ combo_flaty        (int a_beg, int a_count, int a_offset)
    int       mid;
    int       new;
    /*---(initialize points)--------------*/
-   p1        = o.key[a_beg    ].p;
-   p2        = o.key[a_beg + 1].p;
-   p3        = o.key[a_beg + 2].p;
-   p4        = o.key[a_beg + 3].p;
+   p1        = o.key[a_beg    ].p_bas;
+   p2        = o.key[a_beg + 1].p_bas;
+   p3        = o.key[a_beg + 2].p_bas;
+   p4        = o.key[a_beg + 3].p_bas;
    /*---(get target y)-------------------*/
    if (a_offset == 0) {
-      y1        = o.avg[p1].y;
-      y2        = o.avg[p4].y;
+      y1        = o.avg[p1].ypos;
+      y2        = o.avg[p4].ypos;
    } else {
-      y1        = o.avg[p2].y;
-      y2        = o.avg[p3].y;
+      y1        = o.avg[p2].ypos;
+      y2        = o.avg[p3].ypos;
    }
    yt        = y1;
    DEBUG__MATCHES  printf("y1=%4d, y2=%4d, yt=%5.1f, ", y1, y2, yt);
    /*---(find midpoint)------------------*/
    for (i = p2 + 1; i < p3; ++i) {
-      dist = fabs(o.avg[i].y - yt);
-      /*> DEBUG__MATCHES  printf("%2d at %3d is %6.2f\n", i, o.avg[i].y, dist);       <*/
+      dist = fabs(o.avg[i].ypos - yt);
+      /*> DEBUG__MATCHES  printf("%2d at %3d is %6.2f\n", i, o.avg[i].ypos, dist);       <*/
       if (dist <= min) {
          min = dist;
          mid = i;
@@ -813,24 +813,24 @@ combo_midy         (int a_beg, int a_count, int a_offset)
    int       mid;
    int       new;
    /*---(initialize points)--------------*/
-   p1        = o.key[a_beg    ].p;
-   p2        = o.key[a_beg + 1].p;
-   p3        = o.key[a_beg + 2].p;
-   p4        = o.key[a_beg + 3].p;
+   p1        = o.key[a_beg    ].p_bas;
+   p2        = o.key[a_beg + 1].p_bas;
+   p3        = o.key[a_beg + 2].p_bas;
+   p4        = o.key[a_beg + 3].p_bas;
    /*---(get target y)-------------------*/
    if (a_offset == 0) {
-      y1        = o.avg[p1].y;
-      y2        = o.avg[p4].y;
+      y1        = o.avg[p1].ypos;
+      y2        = o.avg[p4].ypos;
    } else {
-      y1        = o.avg[p2].y;
-      y2        = o.avg[p3].y;
+      y1        = o.avg[p2].ypos;
+      y2        = o.avg[p3].ypos;
    }
    yt        = y1 + ((y2 - y1) / 2.0);
    DEBUG__MATCHES  printf("y1=%4d, y2=%4d, yt=%5.1f, ", y1, y2, yt);
    /*---(find midpoint)------------------*/
    for (i = p2 + 1; i < p3; ++i) {
-      dist = fabs(o.avg[i].y - yt);
-      /*> DEBUG__MATCHES  printf("%2d at %3d is %6.2f\n", i, o.avg[i].y, dist);       <*/
+      dist = fabs(o.avg[i].ypos - yt);
+      /*> DEBUG__MATCHES  printf("%2d at %3d is %6.2f\n", i, o.avg[i].ypos, dist);       <*/
       if (dist <= min) {
          min = dist;
          mid = i;
@@ -856,24 +856,24 @@ combo_flatx        (int a_beg, int a_count, int a_offset)
    int       mid;
    int       new;
    /*---(initialize points)--------------*/
-   p1        = o.key[a_beg    ].p;
-   p2        = o.key[a_beg + 1].p;
-   p3        = o.key[a_beg + 2].p;
-   p4        = o.key[a_beg + 3].p;
+   p1        = o.key[a_beg    ].p_bas;
+   p2        = o.key[a_beg + 1].p_bas;
+   p3        = o.key[a_beg + 2].p_bas;
+   p4        = o.key[a_beg + 3].p_bas;
    /*---(get target y)-------------------*/
    if (a_offset == 0) {
-      x1        = o.avg[p1].x;
-      x2        = o.avg[p4].x;
+      x1        = o.avg[p1].xpos;
+      x2        = o.avg[p4].xpos;
    } else {
-      x1        = o.avg[p2].x;
-      x2        = o.avg[p3].x;
+      x1        = o.avg[p2].xpos;
+      x2        = o.avg[p3].xpos;
    }
    xt        = x1;
    DEBUG__MATCHES  printf("x1=%4d, x2=%4d, xt=%5.1f, ", x1, x2, xt);
    /*---(find midpoint)------------------*/
    for (i = p2 + 1; i < p3; ++i) {
-      dist = fabs(o.avg[i].x - xt);
-      /*> DEBUG__MATCHES  printf("%2d at %3d is %6.2f\n", i, o.avg[i].x, dist);       <*/
+      dist = fabs(o.avg[i].xpos - xt);
+      /*> DEBUG__MATCHES  printf("%2d at %3d is %6.2f\n", i, o.avg[i].xpos, dist);       <*/
       if (dist <= min) {
          min = dist;
          mid = i;
@@ -899,24 +899,24 @@ combo_midx         (int a_beg, int a_count, int a_offset)
    int       mid;
    int       new;
    /*---(initialize points)--------------*/
-   p1        = o.key[a_beg    ].p;
-   p2        = o.key[a_beg + 1].p;
-   p3        = o.key[a_beg + 2].p;
-   p4        = o.key[a_beg + 3].p;
+   p1        = o.key[a_beg    ].p_bas;
+   p2        = o.key[a_beg + 1].p_bas;
+   p3        = o.key[a_beg + 2].p_bas;
+   p4        = o.key[a_beg + 3].p_bas;
    /*---(get target y)-------------------*/
    if (a_offset == 0) {
-      x1        = o.avg[p1].x;
-      x2        = o.avg[p4].x;
+      x1        = o.avg[p1].xpos;
+      x2        = o.avg[p4].xpos;
    } else {
-      x1        = o.avg[p2].x;
-      x2        = o.avg[p3].x;
+      x1        = o.avg[p2].xpos;
+      x2        = o.avg[p3].xpos;
    }
    xt        = x1 + ((x2 - x1) / 2.0);
    DEBUG__MATCHES  printf("x1=%4d, x2=%4d, xt=%5.1f, ", x1, x2, xt);
    /*---(find midpoint)------------------*/
    for (i = p2 + 1; i < p3; ++i) {
-      dist = fabs(o.avg[i].x - xt);
-      /*> DEBUG__MATCHES  printf("%2d at %3d is %6.2f\n", i, o.avg[i].x, dist);       <*/
+      dist = fabs(o.avg[i].xpos - xt);
+      /*> DEBUG__MATCHES  printf("%2d at %3d is %6.2f\n", i, o.avg[i].xpos, dist);       <*/
       if (dist <= min) {
          min = dist;
          mid = i;
@@ -1079,15 +1079,15 @@ circle_intersect    (int a_p1, int a_p3)
    int       _max    = 0;              /* axis minimum point                  */
    int       _min    = 0;              /* axis maximum point                  */
    /*---(solve segment one)--------------*/
-   A1 = o.key[p2].y - o.key[p1].y;
-   B1 = o.key[p1].x - o.key[p2].x;
-   C1 = (A1 * o.key[p1].x) + (B1 * o.key[p1].y);
-   DEBUG__CIRCLES  printf("   1st seg :: %4d,%4d to %4d,%4d :: s=%8.3f, b=%4d :: A=%4.0f, B=%4.0f, C=%4.0f\n", o.key[p1].x, o.key[p1].y, o.key[p2].x, o.key[p2].y, o.key[p2].s, o.key[p2].b, A1, B1, C1);
+   A1 = o.key[p2].ypos - o.key[p1].ypos;
+   B1 = o.key[p1].xpos - o.key[p2].xpos;
+   C1 = (A1 * o.key[p1].xpos) + (B1 * o.key[p1].ypos);
+   DEBUG__CIRCLES  printf("   1st seg :: %4d,%4d to %4d,%4d :: s=%8.3f, b=%4d :: A=%4.0f, B=%4.0f, C=%4.0f\n", o.key[p1].xpos, o.key[p1].ypos, o.key[p2].xpos, o.key[p2].ypos, o.key[p2].s, o.key[p2].b, A1, B1, C1);
    /*---(solve segment two)--------------*/
-   A2 = o.key[p4].y - o.key[p3].y;
-   B2 = o.key[p3].x - o.key[p4].x;
-   C2 = (A2 * o.key[p3].x) + (B2 * o.key[p3].y);
-   DEBUG__CIRCLES  printf("   2nd seg :: %4d,%4d to %4d,%4d :: s=%8.3f, b=%4d :: A=%4.0f, B=%4.0f, C=%4.0f\n", o.key[p3].x, o.key[p3].y, o.key[p4].x, o.key[p4].y, o.key[p4].s, o.key[p4].b, A2, B2, C2);
+   A2 = o.key[p4].ypos - o.key[p3].ypos;
+   B2 = o.key[p3].xpos - o.key[p4].xpos;
+   C2 = (A2 * o.key[p3].xpos) + (B2 * o.key[p3].ypos);
+   DEBUG__CIRCLES  printf("   2nd seg :: %4d,%4d to %4d,%4d :: s=%8.3f, b=%4d :: A=%4.0f, B=%4.0f, C=%4.0f\n", o.key[p3].xpos, o.key[p3].ypos, o.key[p4].xpos, o.key[p4].ypos, o.key[p4].s, o.key[p4].b, A2, B2, C2);
    /*---(hypothetical intersection)------*/
    det = (A1 * B2) - (A2 * B1);
    if (det == 0) {
@@ -1098,16 +1098,16 @@ circle_intersect    (int a_p1, int a_p3)
    y  = (int) ((A1 * C2) - (A2 * C1)) / det;
    DEBUG__CIRCLES  printf("   hypothetical intersection at %4d, %4d\n", x, y);
    /*---(check 1st segment)--------------*/
-   _min   = (int) fmin(o.key[p1].x, o.key[p2].x);
-   _max   = (int) fmax(o.key[p1].x, o.key[p2].x);
+   _min   = (int) fmin(o.key[p1].xpos, o.key[p2].xpos);
+   _max   = (int) fmax(o.key[p1].xpos, o.key[p2].xpos);
    DEBUG__CIRCLES  printf("   test x on 1st :: %4d < %4d < %4d : ", _min, x, _max);
    if (_min > x || _max < x)  {
       DEBUG__CIRCLES  printf("FAILED, failing out\n");
       return -1;
    }
    DEBUG__CIRCLES  printf("accepted\n");
-   _min   = (int) fmin(o.key[p1].y, o.key[p2].y);
-   _max   = (int) fmax(o.key[p1].y, o.key[p2].y);
+   _min   = (int) fmin(o.key[p1].ypos, o.key[p2].ypos);
+   _max   = (int) fmax(o.key[p1].ypos, o.key[p2].ypos);
    DEBUG__CIRCLES  printf("   test y on 1st :: %4d < %4d < %4d : ", _min, y, _max);
    if (_min > y || _max < y) {
       DEBUG__CIRCLES  printf("FAILED, failing out\n");
@@ -1115,16 +1115,16 @@ circle_intersect    (int a_p1, int a_p3)
    }
    DEBUG__CIRCLES  printf("accepted\n");
    /*---(check 2nd segment)--------------*/
-   _min   = (int) fmin(o.key[p3].x, o.key[p4].x);
-   _max   = (int) fmax(o.key[p3].x, o.key[p4].x);
+   _min   = (int) fmin(o.key[p3].xpos, o.key[p4].xpos);
+   _max   = (int) fmax(o.key[p3].xpos, o.key[p4].xpos);
    DEBUG__CIRCLES  printf("   test x on 2nd :: %4d < %4d < %4d : ", _min, x, _max);
    if (_min > x || _max < x) {
       DEBUG__CIRCLES  printf("FAILED, failing out\n");
       return -1;
    }
    DEBUG__CIRCLES  printf("accepted\n");
-   _min   = (int) fmin(o.key[p3].y, o.key[p4].y);
-   _max   = (int) fmax(o.key[p3].y, o.key[p4].y);
+   _min   = (int) fmin(o.key[p3].ypos, o.key[p4].ypos);
+   _max   = (int) fmax(o.key[p3].ypos, o.key[p4].ypos);
    DEBUG__CIRCLES  printf("   test y on 2nd :: %4d < %4d < %4d : ", _min, y, _max);
    if (_min > y || _max < y) {
       DEBUG__CIRCLES  printf("FAILED, failing out\n");
@@ -1153,21 +1153,21 @@ circle_minpoint     (int a_p1, int a_p3)
    int  ci_y = 0;
    float my_dist = 0.0;
    float my_min  = 1000.0;
-   for (i = o.key[p1].p; i <= o.key[p2].p; ++i) {
+   for (i = o.key[p1].p_bas; i <= o.key[p2].p_bas; ++i) {
       if (i == 0)  {
          /*> DEBUG__CIRCLES  printf("   %03d (fake/beg) can not be used in connection distance calcs\n", i);   <*/
          continue;
       }
       /*> DEBUG__CIRCLES  printf("   %03d\n", i);                                     <*/
-      my_x = o.bas[i].x;
-      my_y = o.bas[i].y;
-      for (j = o.key[p3].p; j <= o.key[p4].p; ++j) {
+      my_x = o.bas[i].xpos;
+      my_y = o.bas[i].ypos;
+      for (j = o.key[p3].p_bas; j <= o.key[p4].p_bas; ++j) {
          if (j == o.nbas - 1) {
             /*> DEBUG__CIRCLES  printf("   %03d (fake/end) can not be used in connection distance calcs\n", i);   <*/
             continue;
          }
-         ci_x = abs(o.bas[j].x - my_x);
-         ci_y = abs(o.bas[j].y - my_y);
+         ci_x = abs(o.bas[j].xpos - my_x);
+         ci_y = abs(o.bas[j].ypos - my_y);
          my_dist = sqrt((ci_x * ci_x) + (ci_y * ci_y));
          if (my_dist < my_min) {
             my_min = my_dist;
@@ -1210,15 +1210,15 @@ circle_size        (int a_one, int a_two)
    mid2     = half + space;
    DEBUG__CIRCLES  printf("   _min1 =%3d, _min2 =%3d, space=%3d, half =%3d, mid1 =%3d, mid2 =%3d\n", a_one, a_two, space, half, mid1, mid2);
    /*---(calc midsection)----------------*/
-   _distx   = abs(o.bas[mid2].x - o.bas[mid1].x);
-   _disty   = abs(o.bas[mid2].y - o.bas[mid1].y);
+   _distx   = abs(o.bas[mid2].xpos - o.bas[mid1].xpos);
+   _disty   = abs(o.bas[mid2].ypos - o.bas[mid1].ypos);
    _dist1   = (int) sqrt((_distx * _distx) + (_disty * _disty));
    DEBUG__CIRCLES  printf("   midpoints  : _distx=%3d, _disty=%3d, _dist1=%3d\n", _distx, _disty, _dist1);
    o.avg[mid1].t = 'm';
    o.avg[mid2].t = 'm';
    /*---(get half mark)------------------*/
-   _distx   = abs(o.bas[half].x - o.bas[a_one].x);
-   _disty   = abs(o.bas[half].y - o.bas[a_one].y);
+   _distx   = abs(o.bas[half].xpos - o.bas[a_one].xpos);
+   _disty   = abs(o.bas[half].ypos - o.bas[a_one].ypos);
    _dist2   = (int) sqrt((_distx * _distx) + (_disty * _disty));
    DEBUG__CIRCLES  printf("   halfpoints : _distx=%3d, _disty=%3d, _dist2=%3d\n", _distx, _disty, _dist2);
    o.avg[half].t = 'm';
@@ -1241,17 +1241,17 @@ circle_backward    (void)
    int       old_nkey  = o.nkey;
    DEBUG__CIRCLES  printf("\n");
    DEBUG__CIRCLES  printf("   extend circle intersection backwards from start...\n");
-   DEBUG__CIRCLES  printf("      circle beg is    key = %3d, bas = %3d\n", one, o.key[one].p);
-   DEBUG__CIRCLES  printf("      circle end is    key = %3d, bas = %3d\n", two, o.key[two].p);
-   DEBUG__CIRCLES  printf("      circle midpoint  key = %3d, bas = %3d\n", one + 2, o.key[one + 2].p);
+   DEBUG__CIRCLES  printf("      circle beg is    key = %3d, bas = %3d\n", one, o.key[one].p_bas);
+   DEBUG__CIRCLES  printf("      circle end is    key = %3d, bas = %3d\n", two, o.key[two].p_bas);
+   DEBUG__CIRCLES  printf("      circle midpoint  key = %3d, bas = %3d\n", one + 2, o.key[one + 2].p_bas);
    DEBUG__CIRCLES  printf("      total circle point are key = %3d, bas = %3d\n", o.nkey, o.nbas);
-   DEBUG__CIRCLES  printf("      so, checking forward from bas   0 to %3d...\n", o.key[one].p);
-   DEBUG__CIRCLES  printf("      against, forward  from    bas %3d to %3d...\n", o.key[one + 2].p, o.key[two].p);
+   DEBUG__CIRCLES  printf("      so, checking forward from bas   0 to %3d...\n", o.key[one].p_bas);
+   DEBUG__CIRCLES  printf("      against, forward  from    bas %3d to %3d...\n", o.key[one + 2].p_bas, o.key[two].p_bas);
    if (one == 0) return 0;
-   for (i = o.key[one - 1].p; i < o.key[one].p; ++i) {
-      for (j = o.key[one + 2].p; j <= o.key[two].p; ++j) {
-         xd   = abs(o.bas[j].x - o.bas[i].x);
-         yd   = abs(o.bas[j].y - o.bas[i].y);
+   for (i = o.key[one - 1].p_bas; i < o.key[one].p_bas; ++i) {
+      for (j = o.key[one + 2].p_bas; j <= o.key[two].p_bas; ++j) {
+         xd   = abs(o.bas[j].xpos - o.bas[i].xpos);
+         yd   = abs(o.bas[j].ypos - o.bas[i].ypos);
          dist = (int) sqrt((xd * xd) + (yd * yd));
          /*> DEBUG__CIRCLES  printf("      checking i=%3d, j=%3d, dist=%6.2f\n", i, j, dist);   <*/
          if (dist <= 3.0) {
@@ -1263,7 +1263,7 @@ circle_backward    (void)
       if (pt  != 0) break;
    }
    /*---(mark)---------------------------*/
-   if (pt  != 0 && pt  != o.key[one].p) {
+   if (pt  != 0 && pt  != o.key[one].p_bas) {
       new = key_add   (pt , 'y', '-');
       if (old_nkey != o.nkey) {
          DEBUG__CIRCLES  printf("      ADDED KEY\n");
@@ -1293,17 +1293,17 @@ circle_forward     (void)
    int       old_nkey  = o.nkey;
    DEBUG__CIRCLES  printf("\n");
    DEBUG__CIRCLES  printf("   extend circle intersection forwards from end...\n");
-   DEBUG__CIRCLES  printf("      circle beg is    key = %3d, bas = %3d\n", one, o.key[one].p);
-   DEBUG__CIRCLES  printf("      circle end is    key = %3d, bas = %3d\n", two, o.key[two].p);
-   DEBUG__CIRCLES  printf("      circle midpoint  key = %3d, bas = %3d\n", two - 2, o.key[two - 2].p);
+   DEBUG__CIRCLES  printf("      circle beg is    key = %3d, bas = %3d\n", one, o.key[one].p_bas);
+   DEBUG__CIRCLES  printf("      circle end is    key = %3d, bas = %3d\n", two, o.key[two].p_bas);
+   DEBUG__CIRCLES  printf("      circle midpoint  key = %3d, bas = %3d\n", two - 2, o.key[two - 2].p_bas);
    DEBUG__CIRCLES  printf("      total circle point are key = %3d, bas = %3d\n", o.nkey, o.nbas);
-   DEBUG__CIRCLES  printf("      so, checking backward from bas %3d to %3d...\n", o.nkey - 1, o.key[two].p);
-   DEBUG__CIRCLES  printf("      against, forward from      bas %3d to %3d...\n", o.key[two - 1].p, o.key[one].p);
+   DEBUG__CIRCLES  printf("      so, checking backward from bas %3d to %3d...\n", o.nkey - 1, o.key[two].p_bas);
+   DEBUG__CIRCLES  printf("      against, forward from      bas %3d to %3d...\n", o.key[two - 1].p_bas, o.key[one].p_bas);
    if (two == o.nkey - 1) return 0;
-   for (j = o.key[two + 1].p; j > o.key[two].p; --j) {
-      for (i = o.key[two - 2].p; i > o.key[one].p; --i) {
-         xd   = abs(o.bas[j].x - o.bas[i].x);
-         yd   = abs(o.bas[j].y - o.bas[i].y);
+   for (j = o.key[two + 1].p_bas; j > o.key[two].p_bas; --j) {
+      for (i = o.key[two - 2].p_bas; i > o.key[one].p_bas; --i) {
+         xd   = abs(o.bas[j].xpos - o.bas[i].xpos);
+         yd   = abs(o.bas[j].ypos - o.bas[i].ypos);
          dist = (int) sqrt((xd * xd) + (yd * yd));
          /*> DEBUG__CIRCLES  printf("      checking i=%3d, j=%3d, dist=%6.2f\n", i, j, dist);   <*/
          if (dist <= 3.0) {
@@ -1315,7 +1315,7 @@ circle_forward     (void)
       if (pt  != 0) break;
    }
    /*---(mark)---------------------------*/
-   if (pt  != 0 && pt  != o.key[two].p) {
+   if (pt  != 0 && pt  != o.key[two].p_bas) {
       new = key_add   (pt , 'y', '-');
       if (old_nkey != o.nkey) {
          DEBUG__CIRCLES  printf("      ADDED KEY\n");
@@ -1369,9 +1369,9 @@ circle_update      (int a_one, int a_two, int a_size)
    }
    /*---(label)--------------------------*/
    for (i = one + 1; i <= two; ++i) {
-      strncpy(o.key[i].u, "+", 5);
+      strncpy(o.key[i].use, "+", 5);
    }
-   strncpy(o.key[one + 1].u, use, 5);
+   strncpy(o.key[one + 1].use, use, 5);
    /*---(complete)-----------------------*/
    return 0;
 }
@@ -1397,8 +1397,8 @@ circle_identify    (int a_p1, int a_p3)
          DEBUG__CIRCLES  printf("   REJECTED, crosses a stroke start at %2d\n", i);
          return -1;
       }
-      if (strncmp(o.key[i].u, "-", 5) != 0) {
-         DEBUG__CIRCLES  printf("   REJECTED, point %2d taken by a <<%s>>\n", i, o.key[i].u);
+      if (strncmp(o.key[i].use, "-", 5) != 0) {
+         DEBUG__CIRCLES  printf("   REJECTED, point %2d taken by a <<%s>>\n", i, o.key[i].use);
          return -1;
       }
    }
@@ -1417,7 +1417,7 @@ circle_identify    (int a_p1, int a_p3)
    circle_backward             ();
    circle_forward              ();
    /*---(complete)-----------------------*/
-   DEBUG__CIRCLES  gen_list(o.key, o.nkey);
+   DEBUG__CIRCLES  POINT_list (o.key, o.nkey);
    DEBUG__CIRCLES  printf("\n\n");
    return 1;
 }
@@ -1437,13 +1437,13 @@ circle_driver      (void)
    }
    key_calc ('c');
    /*---(report out)---------------------*/
-   DEBUG__CIRCLES  gen_list(o.key, o.nkey);
+   DEBUG__CIRCLES  POINT_list (o.key, o.nkey);
    while (_found == 1) {
       _found = 0;
       for (i = 0; i < o.nkey - 3; ++i) {
-         if (strcmp(o.key[i + 1].u, "-") != 0) continue;
+         if (strcmp(o.key[i + 1].use, "-") != 0) continue;
          for (j = i + 2; j < i + 6; ++j) {
-            if (strcmp(o.key[j + 1].u, "-") != 0) break;
+            if (strcmp(o.key[j + 1].use, "-") != 0) break;
             DEBUG__CIRCLES  printf("\n   TEST %d/%d to %d/%d\n", i, i + 1, j, j + 1);
             _found = circle_identify (i, j);
             if (_found == 1) break;
@@ -1462,7 +1462,7 @@ circle_driver      (void)
    key_prep ();
    key_calc ('n');
    /*---(report out)---------------------*/
-   DEBUG__CIRCLES  gen_list(o.key, o.nkey);
+   DEBUG__CIRCLES  POINT_list (o.key, o.nkey);
    /*---(complete)-----------------------*/
    DEBUG__CIRCLES  printf("CIRCLE DETECTION (end)\n\n");
    return 0;

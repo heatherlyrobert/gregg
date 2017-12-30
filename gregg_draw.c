@@ -396,29 +396,29 @@ draw_bands         (void)
    int       miny, maxy;
    float     z  =   4.00;
    /*---(run the list)-------------------*/
-   out_minx = o.key[0].x;
-   out_maxx = o.key[0].x;
-   out_miny = o.key[0].y;
-   out_maxy = o.key[0].y;
+   out_minx = o.key[0].xpos;
+   out_maxx = o.key[0].xpos;
+   out_miny = o.key[0].ypos;
+   out_maxy = o.key[0].ypos;
    for (i = 0; i < o.nkey; ++i) {
       /*---(update outline bounds)-------*/
-      if (o.key[i].x < out_minx)  out_minx = o.key[i].x;
-      if (o.key[i].x > out_maxx)  out_maxx = o.key[i].x;
-      if (o.key[i].y < out_miny)  out_miny = o.key[i].y;
-      if (o.key[i].y > out_maxy)  out_maxy = o.key[i].y;
-      if (o.key[i].u[0] == 'a' || o.key[i].u[0] == 'A' ||
-            o.key[i].u[0] == 'e' || o.key[i].u[0] == 'E') {
+      if (o.key[i].xpos < out_minx)  out_minx = o.key[i].xpos;
+      if (o.key[i].xpos > out_maxx)  out_maxx = o.key[i].xpos;
+      if (o.key[i].ypos < out_miny)  out_miny = o.key[i].ypos;
+      if (o.key[i].ypos > out_maxy)  out_maxy = o.key[i].ypos;
+      if (o.key[i].use[0] == 'a' || o.key[i].use[0] == 'A' ||
+            o.key[i].use[0] == 'e' || o.key[i].use[0] == 'E') {
          /*---(update circle bounds)-----*/
-         minx = o.key[i].x;
-         maxx = o.key[i].x;
-         maxy = o.key[i].y;
-         miny = o.key[i].y;
+         minx = o.key[i].xpos;
+         maxx = o.key[i].xpos;
+         maxy = o.key[i].ypos;
+         miny = o.key[i].ypos;
          for (j = i + 1; j < o.nkey; ++j) {
-            if (o.key[j].u[0] != '+') break;
-            if (o.key[j].x < minx)  minx = o.key[j].x;
-            if (o.key[j].x > maxx)  maxx = o.key[j].x;
-            if (o.key[j].y < miny)  miny = o.key[j].y;
-            if (o.key[j].y > maxy)  maxy = o.key[j].y;
+            if (o.key[j].use[0] != '+') break;
+            if (o.key[j].xpos < minx)  minx = o.key[j].xpos;
+            if (o.key[j].xpos > maxx)  maxx = o.key[j].xpos;
+            if (o.key[j].ypos < miny)  miny = o.key[j].ypos;
+            if (o.key[j].ypos > maxy)  maxy = o.key[j].ypos;
          }
          /*---(circle adjustment band)---*/
          glColor4f(0.0f, 0.0f, 1.0f, 0.3f);
@@ -445,8 +445,8 @@ draw_curr          (void)
    float   z  =   5.25;
    /*---(draw current point)-------------*/
    glPushMatrix();
-   /*> glTranslatef( o.avg[o.cavg - 1].x, o.avg[o.cavg - 1].y,    0.0);               <*/
-   glTranslatef( o.avg[o.cavg - 1].x, o.avg[o.cavg - 1].y,    0.0);
+   /*> glTranslatef( o.avg[o.cavg - 1].xpos, o.avg[o.cavg - 1].ypos,    0.0);               <*/
+   glTranslatef( o.avg[o.cavg - 1].xpos, o.avg[o.cavg - 1].ypos,    0.0);
    glBegin(GL_POLYGON);
    glColor4f(0.0f, 0.0f, 0.0f, 1.0f);       /* nice medium grey            */
    for (d = 0; d <= 360; d += 10) {
@@ -457,7 +457,7 @@ draw_curr          (void)
    }
    glEnd();
    /*---(draw tangent line)--------------*/
-   if (o.cavg > 2 && o.bas[o.cavg - 1].a != 'y' && o.bas[o.cavg - 2].a != 'y') {
+   if (o.cavg > 2 && o.bas[o.cavg - 1].fake != 'y' && o.bas[o.cavg - 2].fake != 'y') {
       int xa  = (int) (cos(o.avg[o.cavg - 1].r) * 20);
       int ya  = (int) (sin(o.avg[o.cavg - 1].r) * 20);
       glBegin(GL_LINES);
@@ -501,12 +501,12 @@ draw_raws          (void)
    /*> glBegin(GL_LINE_STRIP);                                                        <*/
    glBegin(GL_POINTS);
    for (i = 0; i < o.nraw; ++i) {
-      if (o.raw[i].x == 999 && o.raw[i].y == 999) {
+      if (o.raw[i].xpos == 999 && o.raw[i].ypos == 999) {
          glEnd();
          glBegin(GL_POINTS);
          continue;
       }
-      glVertex3f( o.raw[i].x, o.raw[i].y, z);
+      glVertex3f( o.raw[i].xpos, o.raw[i].ypos, z);
    }
    glEnd();
    glLineWidth(0.8);
@@ -523,11 +523,11 @@ draw_avgs          (void)
    glColor4f(0.7f, 0.7f, 0.0f, 1.0f);
    glBegin(GL_POINTS);
    for (i = 0; i < o.navg; ++i) {
-      if      (o.avg[i].ca == 'x') glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
-      else if (o.avg[i].t  == 'm') glColor4f(1.0f, 0.0f, 1.0f, 1.0f);
-      else if (o.bas[i].a  == 'y') glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
-      else                         glColor4f(0.7f, 0.7f, 0.0f, 1.0f);
-      glVertex3f( o.avg[i].x, o.avg[i].y, z);
+      if      (o.avg[i].ca    == 'x') glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
+      else if (o.avg[i].t     == 'm') glColor4f(1.0f, 0.0f, 1.0f, 1.0f);
+      else if (o.bas[i].fake  == 'y') glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
+      else                            glColor4f(0.7f, 0.7f, 0.0f, 1.0f);
+      glVertex3f( o.avg[i].xpos, o.avg[i].ypos, z);
    }
    glEnd();
    glLineWidth(0.8);
@@ -549,10 +549,10 @@ draw_keys          (void)
    for (i = 0; i < o.nkey; ++i) {
       /*---(draw the point)--------------*/
       glPushMatrix();
-      glTranslatef( o.key[i].x, o.key[i].y,    0.0);
+      glTranslatef( o.key[i].xpos, o.key[i].ypos,    0.0);
       glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
-      if (o.key[i].ca == 'x') glColor4f(1.0f, 0.0f, 0.0f, 0.5f);
-      if (o.key[i].a  == 'y') glColor4f(0.0f, 1.0f, 1.0f, 0.5f);
+      if (o.key[i].ca    == 'x') glColor4f(1.0f, 0.0f, 0.0f, 0.5f);
+      if (o.key[i].fake  == 'y') glColor4f(0.0f, 1.0f, 1.0f, 0.5f);
       glBegin(GL_POLYGON);
       for (d = 0; d <= 360; d += 10) {
          rad = d * DEG2RAD;
@@ -567,8 +567,8 @@ draw_keys          (void)
          glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
          glLineWidth(2.0);
          glBegin(GL_LINES);
-         glVertex3f(o.key[i - 1].x, o.key[i - 1].y, z + 0.25);
-         glVertex3f(o.key[i].x,     o.key[i].y,     z + 0.25);
+         glVertex3f(o.key[i - 1].xpos, o.key[i - 1].ypos, z + 0.25);
+         glVertex3f(o.key[i].xpos,     o.key[i].ypos,     z + 0.25);
          glEnd();
       }
       /*---(draw the hidden lines)-------*/
@@ -576,33 +576,33 @@ draw_keys          (void)
          glColor4f(0.5f, 0.5f, 0.5f, 1.0f);
          glLineWidth(2.0);
          glBegin(GL_LINES);
-         glVertex3f(o.key[i - 1].x, o.key[i - 1].y, z - 1.00);
-         glVertex3f(o.key[i].x,     o.key[i].y,     z - 1.00);
+         glVertex3f(o.key[i - 1].xpos, o.key[i - 1].ypos, z - 1.00);
+         glVertex3f(o.key[i].xpos,     o.key[i].ypos,     z - 1.00);
          glEnd();
       }
       /*---(draw the S extension)--------*/
       if (o.key[i].t == '>') {
-         pt = o.key[i].p - 1;
+         pt = o.key[i].p_bas - 1;
          glEnable(GL_LINE_STIPPLE);
          glLineStipple(1, 0x3333);
          glColor4f(0.2f, 0.2f, 0.2f, 1.0f);
          glLineWidth(2.0);
          glBegin(GL_LINES);
-         glVertex3f(o.bas[pt].x    , o.bas[pt].y  , z - 1.50);
-         glVertex3f(o.key[i].x     , o.key[i].y   , z - 1.50);
+         glVertex3f(o.bas[pt].xpos    , o.bas[pt].ypos  , z - 1.50);
+         glVertex3f(o.key[i].xpos     , o.key[i].ypos   , z - 1.50);
          glEnd();
          glDisable(GL_LINE_STIPPLE);
       }
       /*---(draw the F extension)--------*/
       if (o.key[i + 1].t == '>' || i + 1 == o.nkey) {
-         pt = o.key[i].p + 1;
+         pt = o.key[i].p_bas + 1;
          glEnable(GL_LINE_STIPPLE);
          glLineStipple(1, 0x3333);
          glColor4f(0.2f, 0.2f, 0.2f, 1.0f);
          glLineWidth(2.0);
          glBegin(GL_LINES);
-         glVertex3f(o.bas[pt].x    , o.bas[pt].y  , z - 1.50);
-         glVertex3f(o.key[i].x     , o.key[i].y   , z - 1.50);
+         glVertex3f(o.bas[pt].xpos    , o.bas[pt].ypos  , z - 1.50);
+         glVertex3f(o.key[i].xpos     , o.key[i].ypos   , z - 1.50);
          glEnd();
          glDisable(GL_LINE_STIPPLE);
       }
@@ -649,13 +649,13 @@ draw_info (void)
    font_label ("key#", msg);
    /*---(average point)---------------------*/
    glTranslatef(   0, -win.bar * 0.5, 0.0);
-   snprintf(msg, 100, "%4d", o.avg[o.cavg - 1].p);
+   snprintf(msg, 100, "%4d", o.avg[o.cavg - 1].p_bas);
    font_label ("num", msg);
-   snprintf(msg, 100, "%4d", o.avg[o.cavg - 1].o);
+   snprintf(msg, 100, "%4d", o.avg[o.cavg - 1].p_raw);
    font_label ("raw", msg);
-   snprintf(msg, 100, "%4d", o.avg[o.cavg - 1].x);
+   snprintf(msg, 100, "%4d", o.avg[o.cavg - 1].xpos);
    font_label ("x"  , msg);
-   snprintf(msg, 100, "%4d", o.avg[o.cavg - 1].y);
+   snprintf(msg, 100, "%4d", o.avg[o.cavg - 1].ypos);
    font_label ("y"  , msg);
    snprintf(msg, 100, "%4d", o.avg[o.cavg - 1].xd);
    font_label ("xd" , msg);
@@ -730,9 +730,9 @@ draw_info (void)
       font_label ("cc"  , msg);
       snprintf(msg, 100, "   %c", o.key[xkey].ca);
       font_label ("ca"  , msg);
-      snprintf(msg, 100, "   %c", o.key[xkey].a);
+      snprintf(msg, 100, "   %c", o.key[xkey].fake);
       font_label ("a"   , msg);
-      snprintf(msg, 100, "%4.4s", o.key[xkey].u);
+      snprintf(msg, 100, "%4.4s", o.key[xkey].use);
       font_label ("u"   , msg);
    }
    glPopMatrix();

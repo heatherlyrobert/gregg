@@ -217,12 +217,12 @@ TOUCH_read           (void)
       /*---(touch)-----------------------*/
       if      (s_touch == '-' && x_event.value >= 25) {
          s_touch = 'y';
-         RAW_begin (s_xpos, s_ypos);
+         RAW_touch (s_xpos, s_ypos);
       }
       /*---(release)---------------------*/
       else if (s_touch == 'y' && x_event.value <  25) {
          s_touch = '-';
-         RAW_end   (s_xpos, s_ypos);
+         RAW_lift  (s_xpos, s_ypos);
       }
       ++s_line;
       return 0;
@@ -249,6 +249,7 @@ TOUCH_read           (void)
       return 0;
       break;
    }
+   if (s_touch == 'y')  RAW_normal (s_xpos, s_ypos);
    ++s_line;
    /*---(headers and line breaks)--------*/
    RPTG_TOUCH {

@@ -174,7 +174,7 @@ PROG_final (void)
    yXINIT_start(win.title, win.width, win.height, YX_FOCUSABLE, YX_FIXED, debug_old.prep);
    yGOD_start ();
    font_load  ();
-   /*> OUT_init   ();                                                                 <*/
+   OUT_init   ();
    if (out_start > 0) o.curr = out_start;
    dlist_init ();
    draw_init  ();
@@ -301,10 +301,10 @@ PROG_event()
             input_type = '-';
             if        (r < SIZE_R1) {
                input_type = 'o';
-               RAW_begin  (x, y);
+               /*> RAW_touch  (x, y);                                                 <*/
             } else if (x < 0 && y > 0) {
                input_type = 'p';
-               RAW_prefix  (x, y);
+               /*> RAW_touch   (x, y);                                                <*/
             } else if (x < -50 && y <  -50) {
                input_type = '-';
                if (o.saved != 'y') {
@@ -314,7 +314,7 @@ PROG_event()
                }
             } else {
                input_type = 'c';
-               RAW_continue (x, y);
+               /*> RAW_touch (x, y);                                                  <*/
             }
             /*> printf("input type = %c\n", input_type);                                 <*/
             break;
@@ -327,7 +327,7 @@ PROG_event()
             r   = sqrt((x * x) + (y * y));
             /*> printf("moved    to %4dx, %4dy, %dr\n", x, y, r);                     <*/
             if (input_type == '-') break;
-            RAW_add  (x, y);
+            /*> RAW_add  (x, y);                                                      <*/
             break;
 
          case ButtonRelease:
@@ -338,7 +338,7 @@ PROG_event()
             r   = sqrt((x * x) + (y * y));
             if (input_type == '-') break;
             /*> printf("released at %4dx, %4dy\n", x, y);                             <*/
-            RAW_end          (x, y);
+            /*> RAW_end          (x, y);                                              <*/
             /*> rc = out_append  ();                                                     <* 
              *> if (rc == 0) out_read (o.curr);                                          <*/
             DEBUG_E printf("   - bas_filter\n"); fflush(stdout);
@@ -406,7 +406,7 @@ unit_accessor(char *a_question, int a_num)
       } else if (a_num >= o.nraw) {
          snprintf(unit_answer, LEN_TEXT, "Raw Point (%4d) : out of range %3d to %3d", a_num, 0, o.nraw - 1);
       } else
-         snprintf(unit_answer, LEN_TEXT, "Raw Point (%4d) : %4dx, %4dy, %4dc", a_num, o.raw[a_num].x, o.raw[a_num].y, o.nraw);
+         snprintf(unit_answer, LEN_TEXT, "Raw Point (%4d) : %4dx, %4dy, %4dc", a_num, o.raw[a_num].xpos, o.raw[a_num].ypos, o.nraw);
    } else if        (strcmp(a_question, "bas")         == 0) {
       if (o.nbas == 0) {
          snprintf(unit_answer, LEN_TEXT, "Bas Point (%4d) : there are no dots", a_num);
@@ -415,7 +415,7 @@ unit_accessor(char *a_question, int a_num)
       } else if (a_num >= o.nbas) {
          snprintf(unit_answer, LEN_TEXT, "Bas Point (%4d) : out of range %3d to %3d", a_num, 0, o.nraw - 1);
       } else
-         snprintf(unit_answer, LEN_TEXT, "Bas Point (%4d) : %4dx, %4dy, %4dc", a_num, o.raw[a_num].x, o.raw[a_num].y, o.nraw);
+         snprintf(unit_answer, LEN_TEXT, "Bas Point (%4d) : %4dx, %4dy, %4dc", a_num, o.raw[a_num].xpos, o.raw[a_num].ypos, o.nraw);
    } else if        (strcmp(a_question, "num_raw")     == 0) {
       snprintf(unit_answer, LEN_TEXT, "Raw Count        : %4dc", o.nraw);
    } else if        (strcmp(a_question, "num_bas")     == 0) {

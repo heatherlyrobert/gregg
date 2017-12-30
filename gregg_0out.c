@@ -5,29 +5,30 @@
 const float FULL_CIRCLE  = 2 * 3.14159;   // circle in radians
 
 
-/*> char                                                                                        <* 
- *> OUT_init             (void)                                                                 <* 
- *> {                                                                                           <* 
- *>    /+---(locals)---------------------------+/                                               <* 
- *>    FILE     *f;                                                                             <* 
- *>    char      s[MAX_LINE]   = "";                                                            <* 
- *>    int       i             = 0;                                                             <* 
- *>    int       len           = 0;                                                             <* 
- *>    /+---(open file)------------------------+/                                               <* 
- *>    f = fopen(fname, "r");                                                                   <* 
- *>    if (f == NULL) return -1;                                                                <* 
- *>    /+---(count records)--------------------+/                                               <* 
- *>    for (i = 0; fgets(s, MAX_LINE, f) ; ++i) {                                               <* 
- *>       len = strlen(s);                                                                      <* 
- *>       if (len > 1 && s[0] != '#' && s[0] != ' ') ++o.total;                                 <* 
- *>    }                                                                                        <* 
- *>    /+> printf("out_init() - found %d saved outlines\n", o.total);                     <+/   <* 
- *>    o.craw     = 1;                                                                          <* 
- *>    o.cavg     = 1;                                                                          <* 
- *>    o.ckey     = 1;                                                                          <* 
- *>    o.curr     = 1;                                                                          <* 
- *>    return 0;                                                                                <* 
- *> }                                                                                           <*/
+char
+OUT_init             (void)
+{
+   OUT_clear ();
+   /*---(locals)---------------------------*/
+   FILE     *f;
+   char      s[MAX_LINE]   = "";
+   int       i             = 0;
+   int       len           = 0;
+   /*---(open file)------------------------*/
+   /*> f = fopen(fname, "r");                                                         <* 
+    *> if (f == NULL) return -1;                                                      <*/
+   /*---(count records)--------------------*/
+   /*> for (i = 0; fgets(s, MAX_LINE, f) ; ++i) {                                     <* 
+    *>    len = strlen(s);                                                            <* 
+    *>    if (len > 1 && s[0] != '#' && s[0] != ' ') ++o.total;                       <* 
+    *> }                                                                              <*/
+   /*> printf("out_init() - found %d saved outlines\n", o.total);                     <*/
+   /*> o.craw     = 1;                                                                <* 
+    *> o.cavg     = 1;                                                                <* 
+    *> o.ckey     = 1;                                                                <* 
+    *> o.curr     = 1;                                                                <*/
+   return 0;
+}
 
 char          /*----: clear all point data -----------------------------------*/
 OUT_clear          (void)
@@ -77,12 +78,12 @@ OUT_clear          (void)
       }
       /*---(clear points)----------------*/
       for (x_pt = 0; x_pt < MAX_POINTS; ++x_pt) {
-         p [x_pt].o  = p [x_pt].p  = 0;
-         p [x_pt].x  = p [x_pt].y  = p [x_pt].xd = p [x_pt].yd = 0;
+         p [x_pt].p_raw  = p [x_pt].p_bas  = 0;
+         p [x_pt].xpos  = p [x_pt].ypos  = p [x_pt].xd = p [x_pt].yd = 0;
          p [x_pt].l  = p [x_pt].b  = p [x_pt].d  = p [x_pt].q  = p [x_pt].cc = 0;
          p [x_pt].s  = p [x_pt].r  = p [x_pt].ra = p [x_pt].c  = 0.0;
-         p [x_pt].ca = p [x_pt].t  = p [x_pt].a  = '-';
-         strlcpy (p [x_pt].u, "-", 5);
+         p [x_pt].ca = p [x_pt].t  = p [x_pt].fake  = '-';
+         strlcpy (p [x_pt].use, "-", 5);
       }
       /*---(done)------------------------*/
    }
@@ -114,7 +115,7 @@ OUT_clear          (void)
  *>     *>       x_pos, x_num);                                                                 <+/   <* 
  *>    if (x_num != o.curr) {                                                                         <* 
  *>       out_read(x_num);                                                                            <* 
- *>       /+> gen_list(key, o.nkey);                                                     <+/          <* 
+ *>       /+> POINT_list (key, o.nkey);                                                     <+/          <* 
  *>    }                                                                                              <* 
  *>    return 0;                                                                                      <* 
  *> }                                                                                                 <*/
@@ -197,7 +198,7 @@ OUT_clear          (void)
  *>    }                                                                                        <* 
  *>    DEBUG_I  printf("   took in %4d points\n", o.nraw);                                      <* 
  *>    DEBUG_I  printf("OUTLINE READ (end)\n\n");                                               <* 
- *>    DEBUG__RAW  gen_list(o.raw, o.nraw);                                                     <* 
+ *>    DEBUG__RAW  POINT_list (o.raw, o.nraw);                                                     <* 
  *>    DEBUG__RAW  printf("RAW POINTS (end)\n\n");                                              <* 
  *>    o.craw     = 1;                                                                          <* 
  *>    o.cavg     = 1;                                                                          <* 
@@ -211,7 +212,7 @@ OUT_clear          (void)
  *>    circle_driver ();                                                                        <* 
  *>    match_sharps  ();                                                                        <* 
  *>    match_driver  ();                                                                        <* 
- *>    /+> DEBUG__KEY  gen_list(o.key, o.nkey);                                           <+/   <* 
+ *>    /+> DEBUG__KEY  POINT_list (o.key, o.nkey);                                           <+/   <* 
  *>    return 0;                                                                                <* 
  *> }                                                                                           <*/
 
@@ -248,7 +249,7 @@ OUT_clear          (void)
  *>    fprintf(f, "%03d | ", o.nraw);                                                 <* 
  *>    /+---(process)--------------------------+/                                     <* 
  *>    for (i = 0; i < o.nraw; ++i) {                                                 <* 
- *>       fprintf(f, "(%+04d,%+04d)", o.raw[i].x, o.raw[i].y);                        <* 
+ *>       fprintf(f, "(%+04d,%+04d)", o.raw[i].xpos, o.raw[i].ypos);                        <* 
  *>    }                                                                              <* 
  *>    /+---(finish off record)----------------+/                                     <* 
  *>    fprintf(f, " |\n");                                                            <* 
@@ -270,23 +271,23 @@ OUT_clear          (void)
 /*============================--------------------============================*/
 void o___GENERIC________________o (void) {;}
 
-char          /*----: perform standard interpoint calculations ---------------*/
-gen_calc           (tPOINT *a_curr,  char a_span)
+char
+POINT_calc         (tPOINT *a_curr,  int a_span)
 {
    /*---(set the ends)---------------------*/
    tPOINT  *one  = a_curr - 1;
    tPOINT  *two  = a_curr;
    if (a_span == 'a')  two = a_curr + 1;
    /*---(x and y diff)---------------------*/
-   a_curr->xd  = two->x - one->x;
-   a_curr->yd  = two->y - one->y;
+   a_curr->xd  = two->xpos - one->xpos;
+   a_curr->yd  = two->ypos - one->ypos;
    /*---(length)---------------------------*/
    a_curr->l   = (int) sqrt((a_curr->xd * a_curr->xd) + (a_curr->yd * a_curr->yd));
    /*---(slope and intercept)--------------*/
    if      (a_curr->xd != 0) a_curr->s = (float) a_curr->yd / a_curr->xd;
    else if (a_curr->yd >  0) a_curr->s = +100000;
    else                      a_curr->s = -100000;
-   a_curr->b   = (int) (a_curr->y - (a_curr->s * a_curr->x));
+   a_curr->b   = (int) (a_curr->ypos - (a_curr->s * a_curr->xpos));
    /*---(radians/degrees)------------------*/
    a_curr->r   = atan2(a_curr->yd, a_curr->xd);
    if (a_curr->r > FULL_CIRCLE) a_curr->r -= FULL_CIRCLE;
@@ -308,7 +309,7 @@ gen_calc           (tPOINT *a_curr,  char a_span)
 }
 
 char          /*----: list all points of a particular type -------------------*/
-gen_list           (tPOINT *a_curr, int a_count)
+POINT_list         (tPOINT *a_curr, int a_count)
 {
    int i;
    //---(display list)---------------------------#
@@ -316,7 +317,7 @@ gen_list           (tPOINT *a_curr, int a_count)
    printf("point inventory----------------------------------------------------------------------\n");
    printf("### bas raw a | -xx- -yy- xd- yd- | len -slope-- icept -rad- deg | q r curve cc c t u\n");
    for (i = 0; i < a_count; ++i) {
-      gen_show(a_curr + i, i);
+      POINT_show (a_curr + i, i);
    }
    printf("### bas raw a | -xx- -yy- xd- yd- | len -slope-- icept -rad- deg | q r curve cc c t u\n");
    printf("-------------------------------------------------------------------------------------\n");
@@ -326,7 +327,7 @@ gen_list           (tPOINT *a_curr, int a_count)
 }
 
 char          /*----: display all information on an individual point ---------*/
-gen_show           (tPOINT *a_curr, int a_num)
+POINT_show         (tPOINT *a_curr, int a_num)
 {
    float s  = a_curr->s;
    int   b  = a_curr->b;
@@ -338,10 +339,10 @@ gen_show           (tPOINT *a_curr, int a_num)
       s = -999.99;
       b = -999;
    }
-   printf("%3d %3d %3d %c", a_num, a_curr->p, a_curr->o, a_curr->a);
-   printf(" | %4d %4d %3d %3d", a_curr->x, a_curr->y, a_curr->xd, a_curr->yd);
+   printf("%3d %3d %3d %c", a_num, a_curr->p_bas, a_curr->p_raw, a_curr->fake);
+   printf(" | %4d %4d %3d %3d", a_curr->xpos, a_curr->ypos, a_curr->xd, a_curr->yd);
    printf(" | %3d %8.2f %5d %5.2f %3d", a_curr->l, s, b, a_curr->r, a_curr->d);
-   printf(" | %1d %1d %5.1f %2d %c %c %s\n", a_curr->q, a_curr->ra, a_curr->c, a_curr->cc, a_curr->ca, a_curr->t, a_curr->u);
+   printf(" | %1d %1d %5.1f %2d %c %c %s\n", a_curr->q, a_curr->ra, a_curr->c, a_curr->cc, a_curr->ca, a_curr->t, a_curr->use);
    return 0;
 }
 

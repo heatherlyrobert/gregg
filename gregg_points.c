@@ -19,7 +19,7 @@ bas_find           (int a_raw)
 {
    int i = 0;
    for (i = 0; i < o.nbas; ++i) {
-      if (o.bas[i].p == a_raw) return i;
+      if (o.bas[i].p_bas == a_raw) return i;
    }
    return -1;
 }
@@ -33,14 +33,14 @@ bas_add            (int a_raw)
       DEBUG__BAS  printf("REJECTED, already exists as %4d\n", rc);
       return -1;
    }
-   DEBUG__BAS  printf("added as %4d at %4dx, %4dy\n", o.nbas, o.raw[a_raw].x, o.raw[a_raw].y);
-   o.bas[o.nbas].o    = o.avg[o.navg].o   = a_raw;
-   o.bas[o.nbas].p    = o.avg[o.navg].p   = o.nbas;
-   o.bas[o.nbas].x    = o.avg[o.navg].x   = o.raw[a_raw].x;
-   o.bas[o.nbas].y    = o.avg[o.navg].y   = o.raw[a_raw].y;
-   o.bas[o.nbas].t    = o.avg[o.navg].t   = o.raw[a_raw].t;
-   strncpy(o.bas[o.nbas].u, "-", 5);
-   strncpy(o.avg[o.nbas].u, "-", 5);
+   DEBUG__BAS  printf("added as %4d at %4dx, %4dy\n", o.nbas, o.raw[a_raw].xpos, o.raw[a_raw].ypos);
+   o.bas[o.nbas].p_raw = o.avg[o.navg].p_raw = a_raw;
+   o.bas[o.nbas].p_bas    = o.avg[o.navg].p_bas    = o.nbas;
+   o.bas[o.nbas].xpos    = o.avg[o.navg].xpos    = o.raw[a_raw].xpos;
+   o.bas[o.nbas].ypos    = o.avg[o.navg].ypos    = o.raw[a_raw].ypos;
+   o.bas[o.nbas].t    = o.avg[o.navg].t    = o.raw[a_raw].t;
+   strncpy(o.bas[o.nbas].use, "-", 5);
+   strncpy(o.avg[o.nbas].use, "-", 5);
    ++o.nbas;
    ++o.navg;
    return 0;
@@ -54,8 +54,8 @@ bas_calc           (void)
       if (o.bas[i].t     == 'S') continue;
       if (o.bas[i - 1].t == 'S') continue;
       if (o.bas[i].t     == 'F') continue;
-      gen_calc(o.bas + i, 'n');
-      gen_calc(o.avg + i, 'a');
+      POINT_calc (o.bas + i, 'n');
+      POINT_calc (o.avg + i, 'a');
    }
    return 0;
 }
@@ -70,16 +70,16 @@ bas_extend         (void)
    for (i = 0; i < o.nbas; ++i) {
       if (o.avg[i].t == 'S') {
          rad = o.avg[i + 2].r;
-         o.bas[i].x  = o.avg[i].x  = o.bas[i + 1].x - (20 * cos(rad)) ;
-         o.bas[i].y  = o.avg[i].y  = o.bas[i + 1].x - (20 * sin(rad)) ;
-         DEBUG__BAS  printf("   extended beg %4d to %4dx, %4dy for circle detection\n", 0, o.bas[i].x, o.bas[i].y);
+         o.bas[i].xpos  = o.avg[i].xpos  = o.bas[i + 1].xpos - (20 * cos(rad)) ;
+         o.bas[i].ypos  = o.avg[i].ypos  = o.bas[i + 1].xpos - (20 * sin(rad)) ;
+         DEBUG__BAS  printf("   extended beg %4d to %4dx, %4dy for circle detection\n", 0, o.bas[i].xpos, o.bas[i].ypos);
       }
       /*---(ending)-------------------------*/
       if (o.avg[i].t == 'F') {
          rad = o.bas[i - 1].r;
-         o.bas[i].x  = o.avg[i].x  = o.bas[i - 1].x + (20 * cos(rad)) ;
-         o.bas[i].y  = o.avg[i].y  = o.bas[i - 1].y + (20 * sin(rad)) ;
-         DEBUG__BAS  printf("   extended end %4d to %4dx, %4dy for circle detection\n", o.nbas - 1, o.bas[i].x, o.bas[i].y);
+         o.bas[i].xpos  = o.avg[i].xpos  = o.bas[i - 1].xpos + (20 * cos(rad)) ;
+         o.bas[i].ypos  = o.avg[i].ypos  = o.bas[i - 1].ypos + (20 * sin(rad)) ;
+         DEBUG__BAS  printf("   extended end %4d to %4dx, %4dy for circle detection\n", o.nbas - 1, o.bas[i].xpos, o.bas[i].ypos);
       }
    }
    /*---(complete)-----------------------*/
@@ -136,7 +136,7 @@ bas_filter         (void)
       if (o.raw[i].t == 'S') {
          DEBUG__BAS  printf("S/>                    ACCEPT\n");
          bas_add (i);
-         o.bas[o.nbas - 1].a = 'y';
+         o.bas[o.nbas - 1].fake = 'y';
          bas_add (i + 1);
          o.bas[o.nbas - 1].t = '>';
          o.avg[o.nbas - 1].t = '>';
@@ -148,8 +148,8 @@ bas_filter         (void)
       /*---(handle finsishes)------------*/
       if (o.raw[i].t == 'F') {
          DEBUG__BAS  printf("F                      ACCEPT\n");
-         xd   = fabs(o.raw[i].x - o.bas[o.nbas - 1].x);
-         yd   = fabs(o.raw[i].y - o.bas[o.nbas - 1].y);
+         xd   = fabs(o.raw[i].xpos - o.bas[o.nbas - 1].xpos);
+         yd   = fabs(o.raw[i].ypos - o.bas[o.nbas - 1].ypos);
          dist = sqrt((xd * xd) + (yd * yd));
          if (dist <=  3.0 && o.bas[o.nbas - 1].t!= '>') {
             DEBUG__BAS  printf("too close to F         reject, i=%c, i-1=%c\n", o.raw[i].t, o.raw[i - 1].t);
@@ -158,12 +158,12 @@ bas_filter         (void)
          }
          bas_add (i - 1);
          bas_add (i);
-         o.bas[o.nbas - 1].a = 'y';
+         o.bas[o.nbas - 1].fake = 'y';
          continue;
       }
       /*---(handle normal)---------------*/
-      xd   = abs(o.raw[i].x - o.bas[o.nbas - 1].x);
-      yd   = abs(o.raw[i].y - o.bas[o.nbas - 1].y);
+      xd   = abs(o.raw[i].xpos - o.bas[o.nbas - 1].xpos);
+      yd   = abs(o.raw[i].ypos - o.bas[o.nbas - 1].ypos);
       dist = sqrt((xd * xd) + (yd * yd));
       if (dist >  3.0) {
          DEBUG__BAS  printf("good distance  %6.2f  ACCEPT\n", dist);
@@ -180,8 +180,8 @@ bas_filter         (void)
    bas_sharpen ();
    bas_calc    ();
    /*---(output)-------------------------*/
-   DEBUG__BAS       gen_list(o.bas, o.nbas);
-   DEBUG__AVERAGES  gen_list(o.avg, o.navg);
+   DEBUG__BAS       POINT_list (o.bas, o.nbas);
+   DEBUG__AVERAGES  POINT_list (o.avg, o.navg);
    /*---(complete)-----------------------*/
    DEBUG__BAS  printf("BAS POINTS (end)\n\n");
    return 0;
@@ -221,7 +221,7 @@ avg_find           (int a_pt)
 {
    int i;
    for (i = 0; i < o.navg; ++i) {
-      if (o.avg[i].o == a_pt - 1) return i;
+      if (o.avg[i].p_raw == a_pt - 1) return i;
    }
    return -1;
 }
@@ -238,27 +238,27 @@ key_swap           (int a_i, int a_j)
 {
    int or, p, x, y, a, t;
    char  u[5];
-   or = o.key[a_i].o;
-   p  = o.key[a_i].p;
-   x  = o.key[a_i].x;
-   y  = o.key[a_i].y;
-   a  = o.key[a_i].a;
+   or = o.key[a_i].p_raw;
+   p  = o.key[a_i].p_bas;
+   x  = o.key[a_i].xpos;
+   y  = o.key[a_i].ypos;
+   a  = o.key[a_i].fake;
    t  = o.key[a_i].t;
-   strncpy(u, o.key[a_i].u, 5);
-   o.key[a_i].o = o.key[a_j].o;
-   o.key[a_i].p = o.key[a_j].p;
-   o.key[a_i].x = o.key[a_j].x;
-   o.key[a_i].y = o.key[a_j].y;
-   o.key[a_i].a = o.key[a_j].a;
+   strncpy(u, o.key[a_i].use, 5);
+   o.key[a_i].p_raw = o.key[a_j].p_raw;
+   o.key[a_i].p_bas = o.key[a_j].p_bas;
+   o.key[a_i].xpos = o.key[a_j].xpos;
+   o.key[a_i].ypos = o.key[a_j].ypos;
+   o.key[a_i].fake = o.key[a_j].fake;
    o.key[a_i].t = o.key[a_j].t;
-   strncpy(o.key[a_i].u, o.key[a_j].u, 5);
-   o.key[a_j].o = or;
-   o.key[a_j].p = p;
-   o.key[a_j].x = x;
-   o.key[a_j].y = y;
-   o.key[a_j].a = a;
+   strncpy(o.key[a_i].use, o.key[a_j].use, 5);
+   o.key[a_j].p_raw = or;
+   o.key[a_j].p_bas = p;
+   o.key[a_j].xpos = x;
+   o.key[a_j].ypos = y;
+   o.key[a_j].fake = a;
    o.key[a_j].t = t;
-   strncpy(o.key[a_j].u, u, 5);
+   strncpy(o.key[a_j].use, u, 5);
    return 0;
 }
 
@@ -269,7 +269,7 @@ key_sort           (void)
    int j;
    for (i = 0; i < o.nkey - 1; ++i) {
       for (j = i + 1; j < o.nkey; ++j) {
-         if (o.key[i].p > o.key[j].p) key_swap(i, j);
+         if (o.key[i].p_bas > o.key[j].p_bas) key_swap(i, j);
       }
    }
    return 0;
@@ -284,8 +284,8 @@ key_curve          (int a_pt)
    range = match_range(deg);
    o.key[a_pt].ra = range;
    /*---(calc the arch)-------------------------*/
-   int   p1       = o.key[a_pt - 1].p;
-   int   p4       = o.key[a_pt].p;
+   int   p1       = o.key[a_pt - 1].p_bas;
+   int   p4       = o.key[a_pt].p_bas;
    float slope    = o.key[a_pt].s;
    int   b        = o.key[a_pt].b;
    float curve    = 0.0;
@@ -303,10 +303,10 @@ key_curve          (int a_pt)
        *> printf("key 2 = %2d at bas = %2d x=%4d, y=%4d\n", a_start + a_count, p4, xx4, yy4);   <* 
        *> printf("so  slope = %8.3f and intercept = %4d\n", slope, b);                          <*/
    for (i = p1 + 1; i < p4; ++i) {
-      liney   = (slope * o.bas[i].x) + b;
-      linex   = (o.bas[i].y - b) / slope;
-      diffx   = (o.bas[i].x    - linex);
-      diffy   = (o.bas[i].y    - liney);
+      liney   = (slope * o.bas[i].xpos) + b;
+      linex   = (o.bas[i].ypos - b) / slope;
+      diffx   = (o.bas[i].xpos    - linex);
+      diffy   = (o.bas[i].ypos    - liney);
       theta   = atan(diffy/diffx);
       thetad  = theta * RAD2DEG;
       curve   = fabs(diffx * sin(theta));
@@ -355,7 +355,7 @@ key_calc           (char a_mode)
       if (a_mode == 'n' && o.key[i].t == '>') continue;
       if (a_mode == 'c' && o.key[i].t == 'S') continue;
       /*---(calculate)-------------------*/
-      gen_calc  (o.key + i, 'n');
+      POINT_calc (o.key + i, 'n');
       key_curve (i);
    }
    /*---(complete)-----------------------*/
@@ -367,7 +367,7 @@ key_find           (int a_pt)
 {
    int i;
    for (i = 0; i < o.nkey; ++i) {
-      if (o.key[i].p == a_pt) return i;
+      if (o.key[i].p_bas == a_pt) return i;
    }
    return -1;
 }
@@ -385,13 +385,13 @@ key_add            (int a_pt, char a_fake, char a_type)
       return pt;
    }
    /*---(add new key)--------------------*/
-   o.key[o.nkey].o = o.avg[a_pt].o;
-   o.key[o.nkey].p = o.avg[a_pt].p;
-   o.key[o.nkey].x = o.avg[a_pt].x;
-   o.key[o.nkey].y = o.avg[a_pt].y;
-   strncpy(o.key[o.nkey].u, "-", 5);
+   o.key[o.nkey].p_raw = o.avg[a_pt].p_raw;
+   o.key[o.nkey].p_bas = o.avg[a_pt].p_bas;
+   o.key[o.nkey].xpos = o.avg[a_pt].xpos;
+   o.key[o.nkey].ypos = o.avg[a_pt].ypos;
+   strncpy(o.key[o.nkey].use, "-", 5);
    /*---(add params)---------------------*/
-   o.key[o.nkey].a = a_fake;
+   o.key[o.nkey].fake = a_fake;
    o.key[o.nkey].t = a_type;
    /*---(update the keys)----------------*/
    ++o.nkey;
@@ -410,13 +410,13 @@ key_del            (int a_pt)
    DEBUG__KEY  printf("   key delete  for %4d\n", a_pt);
    int i;
    for (i = a_pt + 1 ; i < o.nkey; ++i) {
-      o.key[i - 1].o = o.key[i].o;
-      o.key[i - 1].p = o.key[i].p;
-      o.key[i - 1].x = o.key[i].x;
-      o.key[i - 1].y = o.key[i].y;
-      o.key[i - 1].a = o.key[i].a;
+      o.key[i - 1].p_raw = o.key[i].p_raw;
+      o.key[i - 1].p_bas = o.key[i].p_bas;
+      o.key[i - 1].xpos = o.key[i].xpos;
+      o.key[i - 1].ypos = o.key[i].ypos;
+      o.key[i - 1].fake = o.key[i].fake;
       o.key[i - 1].t = o.key[i].t;
-      strncpy(o.key[i - 1].u, o.key[i].u, 5);
+      strncpy(o.key[i - 1].use, o.key[i].use, 5);
    }
    --o.nkey;
    key_calc('n');
@@ -431,7 +431,7 @@ key_prep           (void)
    DEBUG__KEY  printf("   preparing for matching\n");
    for (i = 0 ; i < o.nkey; ++i) {
       if (o.key[i].t == '>') {
-         strncpy(o.key[i].u, ">", 5);
+         strncpy(o.key[i].use, ">", 5);
       }
    }
    return 0;
@@ -467,19 +467,19 @@ key_extend         (void)
    /*---(beginning)----------------------*/
    for (i = 0; i < o.nkey; ++i) {
       if (o.key[i    ].t == '>') {
-         pt  = o.key[i    ].p - 1;
+         pt  = o.key[i    ].p_bas - 1;
          rad = o.key[i + 1].r;
-         o.bas[pt].x  = o.avg[pt].x  = o.key[i].x - (20 * cos(rad)) ;
-         o.bas[pt].y  = o.avg[pt].y  = o.key[i].y - (20 * sin(rad)) ;
-         DEBUG__KEY  printf("   extended beg %4d to %4dx, %4dy for circle detection\n", pt, o.bas[pt].x, o.bas[pt].y);
+         o.bas[pt].xpos  = o.avg[pt].xpos  = o.key[i].xpos - (20 * cos(rad)) ;
+         o.bas[pt].ypos  = o.avg[pt].ypos  = o.key[i].ypos - (20 * sin(rad)) ;
+         DEBUG__KEY  printf("   extended beg %4d to %4dx, %4dy for circle detection\n", pt, o.bas[pt].xpos, o.bas[pt].ypos);
       }
       /*---(ending)-------------------------*/
       if (o.key[i + 1].t == '>' || i + 1 == o.nkey) {
-         pt  = o.key[i    ].p + 1;
+         pt  = o.key[i    ].p_bas + 1;
          rad = o.key[i    ].r;
-         o.bas[pt].x  = o.avg[pt].x  = o.key[i].x + (20 * cos(rad)) ;
-         o.bas[pt].y  = o.avg[pt].y  = o.key[i].y + (20 * sin(rad)) ;
-         DEBUG__BAS  printf("   extended end %4d to %4dx, %4dy for circle detection\n", pt, o.bas[pt].x, o.bas[pt].y);
+         o.bas[pt].xpos  = o.avg[pt].xpos  = o.key[i].xpos + (20 * cos(rad)) ;
+         o.bas[pt].ypos  = o.avg[pt].ypos  = o.key[i].ypos + (20 * sin(rad)) ;
+         DEBUG__BAS  printf("   extended end %4d to %4dx, %4dy for circle detection\n", pt, o.bas[pt].xpos, o.bas[pt].ypos);
       }
    }
    /*---(complete)-----------------------*/
@@ -510,25 +510,25 @@ key_sharpen        (void)
       }
       q1   = o.key[i    ].q;
       q2   = o.key[i + 1].q;
-      new  = o.key[i].p;
+      new  = o.key[i].p_bas;
       /*---(bigger y)--------------------*/
       if ((q1 == 1 && q2 == 4) || (q1 == 2 && q2 == 3)) {
-         base = max  = o.key[i].y;
-         DEBUG__KEY  printf("      #01 [BIGGER Y] (%3d) %3d is %1d and %1d : base = %3d --------------------\n", i, o.key[i].p, q1, q2, base);
-         for (j = o.key[i - 1].p; j < o.key[i + 1].p; ++j) {
-            DEBUG__KEY  printf("         %3d is %3d : ", j, o.avg[j].y);
-            if        (o.avg[j].p == o.key[i].p) {
+         base = max  = o.key[i].ypos;
+         DEBUG__KEY  printf("      #01 [BIGGER Y] (%3d) %3d is %1d and %1d : base = %3d --------------------\n", i, o.key[i].p_bas, q1, q2, base);
+         for (j = o.key[i - 1].p_bas; j < o.key[i + 1].p_bas; ++j) {
+            DEBUG__KEY  printf("         %3d is %3d : ", j, o.avg[j].ypos);
+            if        (o.avg[j].p_bas == o.key[i].p_bas) {
                DEBUG__KEY  printf("existing\n");
-            } else if (o.avg[j].y >  base) {
+            } else if (o.avg[j].ypos >  base) {
                DEBUG__KEY  printf("NEW MAX\n");
-               max = o.avg[j].y;
-               new = o.avg[j].p;
+               max = o.avg[j].ypos;
+               new = o.avg[j].p_bas;
             } else {
                DEBUG__KEY  printf("-\n");
             }
          }
-         if (new != o.key[i].p) {
-            DEBUG__KEY  printf("         new max, %3d moves from %3d to %3d\n", i, o.key[i].p, new);
+         if (new != o.key[i].p_bas) {
+            DEBUG__KEY  printf("         new max, %3d moves from %3d to %3d\n", i, o.key[i].p_bas, new);
             key_del (i);
             key_add (new, '-', '-');
          } else {
@@ -537,22 +537,22 @@ key_sharpen        (void)
       }
       /*---(lesser y)--------------------*/
       else if ((q1 == 4 && q2 == 1) || (q1 == 3 && q2 == 2)) {
-         base = max  = o.key[i].y;
-         DEBUG__KEY  printf("      #02 [LESSER Y] (%3d) %3d is %1d and %1d : base = %3d --------------------\n", i, o.key[i].p, q1, q2, base);
-         for (j = o.key[i - 1].p; j < o.key[i + 1].p; ++j) {
-            DEBUG__KEY  printf("         %3d is %3d : ", j, o.avg[j].y);
-            if        (o.avg[j].p == o.key[i].p) {
+         base = max  = o.key[i].ypos;
+         DEBUG__KEY  printf("      #02 [LESSER Y] (%3d) %3d is %1d and %1d : base = %3d --------------------\n", i, o.key[i].p_bas, q1, q2, base);
+         for (j = o.key[i - 1].p_bas; j < o.key[i + 1].p_bas; ++j) {
+            DEBUG__KEY  printf("         %3d is %3d : ", j, o.avg[j].ypos);
+            if        (o.avg[j].p_bas == o.key[i].p_bas) {
                DEBUG__KEY  printf("existing\n");
-            } else if (o.avg[j].y <  base) {
+            } else if (o.avg[j].ypos <  base) {
                DEBUG__KEY  printf("NEW MAX\n");
-               max = o.avg[j].y;
-               new = o.avg[j].p;
+               max = o.avg[j].ypos;
+               new = o.avg[j].p_bas;
             } else {
                DEBUG__KEY  printf("-\n");
             }
          }
-         if (new != o.key[i].p) {
-            DEBUG__KEY  printf("         new max, %3d moves from %3d to %3d\n", i, o.key[i].p, new);
+         if (new != o.key[i].p_bas) {
+            DEBUG__KEY  printf("         new max, %3d moves from %3d to %3d\n", i, o.key[i].p_bas, new);
             key_del (i);
             key_add (new, '-', '-');
          } else {
@@ -561,22 +561,22 @@ key_sharpen        (void)
       }
       /*---(bigger x)--------------------*/
       else if ((q1 == 1 && q2 == 2) || (q1 == 4 && q2 == 3)) {
-         base = max  = o.key[i].x;
-         DEBUG__KEY  printf("      #03 [BIGGER X] (%3d) %3d is %1d and %1d : base = %3d --------------------\n", i, o.key[i].p, q1, q2, base);
-         for (j = o.key[i - 1].p; j < o.key[i + 1].p; ++j) {
-            DEBUG__KEY  printf("         %3d is %3d : ", j, o.avg[j].x);
-            if        (o.avg[j].p == o.key[i].p) {
+         base = max  = o.key[i].xpos;
+         DEBUG__KEY  printf("      #03 [BIGGER X] (%3d) %3d is %1d and %1d : base = %3d --------------------\n", i, o.key[i].p_bas, q1, q2, base);
+         for (j = o.key[i - 1].p_bas; j < o.key[i + 1].p_bas; ++j) {
+            DEBUG__KEY  printf("         %3d is %3d : ", j, o.avg[j].xpos);
+            if        (o.avg[j].p_bas == o.key[i].p_bas) {
                DEBUG__KEY  printf("existing\n");
-            } else if (o.avg[j].x >  base) {
+            } else if (o.avg[j].xpos >  base) {
                DEBUG__KEY  printf("NEW MAX\n");
-               max = o.avg[j].x;
-               new = o.avg[j].p;
+               max = o.avg[j].xpos;
+               new = o.avg[j].p_bas;
             } else {
                DEBUG__KEY  printf("-\n");
             }
          }
-         if (new != o.key[i].p) {
-            DEBUG__KEY  printf("         new max, %3d moves from %3d to %3d\n", i, o.key[i].p, new);
+         if (new != o.key[i].p_bas) {
+            DEBUG__KEY  printf("         new max, %3d moves from %3d to %3d\n", i, o.key[i].p_bas, new);
             key_del (i);
             key_add (new, '-', '-');
          } else {
@@ -585,22 +585,22 @@ key_sharpen        (void)
       }
       /*---(lesser x)--------------------*/
       else if ((q1 == 2 && q2 == 1) || (q1 == 3 && q2 == 4)) {
-         base = max  = o.key[i].x;
-         DEBUG__KEY  printf("      #04 [LESSER X] (%3d) %3d is %1d and %1d : base = %3d --------------------\n", i, o.key[i].p, q1, q2, base);
-         for (j = o.key[i - 1].p; j < o.key[i + 1].p; ++j) {
-            DEBUG__KEY  printf("         %3d is %3d : ", j, o.avg[j].x);
-            if        (o.avg[j].p == o.key[i].p) {
+         base = max  = o.key[i].xpos;
+         DEBUG__KEY  printf("      #04 [LESSER X] (%3d) %3d is %1d and %1d : base = %3d --------------------\n", i, o.key[i].p_bas, q1, q2, base);
+         for (j = o.key[i - 1].p_bas; j < o.key[i + 1].p_bas; ++j) {
+            DEBUG__KEY  printf("         %3d is %3d : ", j, o.avg[j].xpos);
+            if        (o.avg[j].p_bas == o.key[i].p_bas) {
                DEBUG__KEY  printf("existing\n");
-            } else if (o.avg[j].x <  base) {
+            } else if (o.avg[j].xpos <  base) {
                DEBUG__KEY  printf("NEW MAX\n");
-               max = o.avg[j].x;
-               new = o.avg[j].p;
+               max = o.avg[j].xpos;
+               new = o.avg[j].p_bas;
             } else {
                DEBUG__KEY  printf("-\n");
             }
          }
-         if (new != o.key[i].p) {
-            DEBUG__KEY  printf("         new max, %3d moves from %3d to %3d\n", i, o.key[i].p, new);
+         if (new != o.key[i].p_bas) {
+            DEBUG__KEY  printf("         new max, %3d moves from %3d to %3d\n", i, o.key[i].p_bas, new);
             key_del (i);
             key_add (new, '-', '-');
          } else {
@@ -609,7 +609,7 @@ key_sharpen        (void)
       }
       /*---(quad 1 to 2)-----------------*/
       else {
-         DEBUG__KEY  printf("      #?? (%3d) %3d is %1d and %1d\n", i, o.key[i].p, q1, q2);
+         DEBUG__KEY  printf("      #?? (%3d) %3d is %1d and %1d\n", i, o.key[i].p_bas, q1, q2);
       }
    }
    key_calc ('n');
@@ -646,7 +646,7 @@ key_filter         (void)
    key_extend  ();
    key_sharpen ();
    DEBUG__KEY  printf("   done with %d points\n", o.nkey);
-   DEBUG__KEY  gen_list(o.key, o.nkey);
+   DEBUG__KEY  POINT_list (o.key, o.nkey);
    /*---(completion)---------------------*/
    DEBUG__KEY  printf("KEY POINTS (end)\n\n");
    return 0;
@@ -658,9 +658,9 @@ key_label          (int a_pt, int a_count, char *a_use)
    int i;
    for (i = a_pt; i < a_pt + a_count; ++i) {
       /*> printf("labeling %d with %c\n", i, a_letter);                               <*/
-      if      (i == a_pt)                strncpy(o.key[i].u, a_use, 5);
-      else if (strcmp(a_use, "-") == 0)  strncpy(o.key[i].u, a_use, 5);
-      else                               strncpy(o.key[i].u, "+", 5);
+      if      (i == a_pt)                strncpy(o.key[i].use, a_use, 5);
+      else if (strcmp(a_use, "-") == 0)  strncpy(o.key[i].use, a_use, 5);
+      else                               strncpy(o.key[i].use, "+", 5);
    }
    return 0;
 }

@@ -204,8 +204,8 @@
 
 
 /* rapidly evolving version number to aid with visual change confirmation     */
-#define VER_NUM   "5.0g"
-#define VER_TXT   "cleaned up outline functions and clearing outline data"
+#define VER_NUM   "5.0h"
+#define VER_TXT   "touch generates raw data points, not unit tested yet"
 
 
 #define     LEN_RECD      2000
@@ -444,28 +444,37 @@ extern int   g_transy;
 typedef struct timespec  tTSPEC;
 
 
+#define     PART_PREFIX    'p'
+#define     PART_MAIN      'o'
+#define     PART_CONTINUE  'c'
+
+#define     POINT_START    'S'
+#define     POINT_HEAD     '>'
+#define     POINT_NORMAL   '-'
+#define     POINT_FINISH   'F'
+
 typedef struct cPOINT tPOINT;
 struct cPOINT
 {
-   int       o;          // tie to raw point
-   int       p;          // tie to basic point
-   int       x;          // xpos
-   int       y;          // ypos
-   int       xd;         // x-dist from last xpos
-   int       yd;         // y-dist from last ypos
-   int       l;          // length between points
-   float     s;          // slope from last point
-   int       b;          // y-intercept of line from last point
-   float     r;          // radians of line from last point
-   int       d;          // degrees of line from last point
-   int       q;          // quadrent of line from last point
-   int       ra;         // range of point
-   float     c;          // pixels of curvature at mid point
-   char      ca;         // curve anomolies '-' = normal, 'x' = jittery
-   char      cc;         // curve category : +1, 0, -1                    
-   char      t;          // type of key point (sharp or rounded)
-   char      u[5];       // use of this point in outline
-   char      a;          // artificial or not (y/n)               
+   int         p_raw;                  // tie to raw point
+   int         p_bas;                  // tie to basic point
+   int         xpos;                   // xpos
+   int         ypos;                   // ypos
+   int         xd;                     // x-dist from last xpos
+   int         yd;                     // y-dist from last ypos
+   int         l;                      // length between points
+   float       s;                      // slope from last point
+   int         b;                      // y-intercept of line from last point
+   float       r;                      // radians of line from last point
+   int         d;                      // degrees of line from last point
+   int         q;                      // quadrent of line from last point
+   int         ra;                     // range of point
+   float       c;                      // pixels of curvature at mid point
+   char        ca;                     // curve anomolies '-' = normal, 'x' = jittery
+   char        cc;                     // curve category : +1, 0, -1                    
+   char        t;                      // type of key point (sharp or rounded)
+   char        use         [5];        /* use of this point in outline        */
+   char        fake;                   /* artificial point or not (y/n)       */
 };
 
 
@@ -569,14 +578,15 @@ char       OUT_clear            (void);
 char       out_pick             (int);
 char       out_read             (int);
 char       out_append           (void);
+char       POINT_calc           (tPOINT*, int);
+char       POINT_list           (tPOINT*, int);
+char       POINT_show           (tPOINT*, int);
 
 /*---(raw)------------------*/
 char       POINT_wipe           (tPOINT *a_pt);
-char       RAW_begin            (int a_x, int a_y);
-char       RAW_end              (int a_x, int a_y);
-char       RAW_prefix           (int a_x, int a_y);
-char       RAW_continue         (int a_x, int a_y);
-char       RAW_add              (int, int);
+char       RAW_touch            (int a_x, int a_y);
+char       RAW_normal           (int a_x, int a_y);
+char       RAW_lift             (int a_x, int a_y);
 char       RAW_equalize         (void);
 
 
@@ -591,9 +601,6 @@ char       key_label         (int, int, char*);
 char       key_del           (int);
 int        key_find          (int);
 char       match_sharps      (void);
-char       gen_calc          (tPOINT*, char);
-char       gen_list          (tPOINT*, int);
-char       gen_show          (tPOINT*, int);
 
 char       match_driver      (void);
 char       match_calc        (int, int);

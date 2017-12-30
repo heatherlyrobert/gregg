@@ -161,13 +161,13 @@ draw_line (int a_who, char a_dotted)
    glEnd();
    glLineWidth(0.8);
    /*---(get overall calcs)---------------------*/
-   o.tmp[0].p   = 0;
-   o.tmp[0].x   = 0;
-   o.tmp[0].y   = 0;
-   o.tmp[1].p   = 1;
-   o.tmp[1].x   = x;
-   o.tmp[1].y   = y;
-   gen_calc(o.tmp + 1, 'n');
+   o.tmp[0].p_bas   = 0;
+   o.tmp[0].xpos   = 0;
+   o.tmp[0].ypos   = 0;
+   o.tmp[1].p_bas   = 1;
+   o.tmp[1].xpos   = x;
+   o.tmp[1].ypos   = y;
+   POINT_calc (o.tmp + 1, 'n');
    /*---(set size values)-----------------------*/
    loc[a_who].ex = x;
    loc[a_who].ey = y;
@@ -260,13 +260,13 @@ draw_ellipse (int a_who, char a_dotted)
    }
    glEnd();
    /*---(get overall calcs)---------------------*/
-   o.tmp[0].p   = 0;
-   o.tmp[0].x   = 0;
-   o.tmp[0].y   = 0;
-   o.tmp[1].p   = 1;
-   o.tmp[1].x   = x;
-   o.tmp[1].y   = y;
-   gen_calc(o.tmp + 1, 'n');
+   o.tmp[0].p_bas   = 0;
+   o.tmp[0].xpos   = 0;
+   o.tmp[0].ypos   = 0;
+   o.tmp[1].p_bas   = 1;
+   o.tmp[1].xpos   = x;
+   o.tmp[1].ypos   = y;
+   POINT_calc (o.tmp + 1, 'n');
    /*---(report out)----------------------------*/
    /*> if (a_dotted == 'n') {                                                              <* 
     *>    printf("   %-5s  %5.1f  %5.1f    %3d  %3d    %3d  %3d     %-3s\n",               <* 
