@@ -2,16 +2,27 @@
 #include    "gregg.h"
 
 
+#define      MAX_Y       19700.0
+#define      MAX_X       31500.0
 
 static char  s_event     [LEN_STR];
 static FILE *s_file      = NULL;
+
+static int   s_line     = 0;
+static char  s_touch    = '-';
+static int   s_pres     = 0;
+static int   s_xpad     = 0;
+static int   s_ypad     = 0;
+static float s_xrel     = 0;
+static float s_yrel     = 0;
+static int   s_xpos     = 0;
+static int   s_ypos     = 0;
 
 static int   s_new_x     = 0;
 static int   s_new_y     = 0;
 static int   s_new_r     = 0;
 static int   s_fileno    = 0;
 static int   s_flags     = 0;
-static int   s_line      = 0;
 
 
 #define      REL_MODE    2
@@ -55,11 +66,26 @@ tEVCODE     s_evcode   [MAX_EVCODE] = {
 };
 
 
+/*---(struct.re)--------+-----------+-*//*-+----------------------------------*/
+typedef     struct      cEVENT      tEVENT;
+struct      cEVENT {
+   int64_t     one;
+   int64_t     two;
+   int16_t     type;
+   int16_t     code;
+   int32_t     value;
+};
+
+
+
+/*====================------------------------------------====================*/
+/*===----                        program level                         ----===*/
+/*====================------------------------------------====================*/
+PRIV void  o___PROGRAM_________o () { return; }
 
 char
 TOUCH_init           (void)
 {
-   /*> snprintf (s_event  , LEN_STR, "%s%s", "/dev/input/", "event6");                <*/
    snprintf (s_event  , LEN_STR, "%s%s", "/dev/input/", "event6");
    TOUCH__open ();
    return 0;
@@ -72,6 +98,12 @@ TOUCH_wrap           (void)
    return 0;
 }
 
+
+
+/*====================------------------------------------====================*/
+/*===----                          device file                         ----===*/
+/*====================------------------------------------====================*/
+PRIV void  o___DEVICE__________o () { return; }
 
 char         /*--> open touch device event file ----------[ leaf   [ ------ ]-*/
 TOUCH__open          (void)
@@ -143,146 +175,6 @@ TOUCH__check         (void)
    return  0;
 }
 
-char             /* [------] read input event -------------------------------*/
-TOUCH_read           (void)
-{
-   /*---(locals)-----------+-----+-----+-*/
-   char        rce         =  -10;           /* return code for errors         */
-   int         rc          =    0;
-   static int  x_count     =    1;
-   uchar       x_ch        =    0;
-   int         x_field     =    0;
-   char        t           [LEN_STR];
-   char        x_msg       [LEN_STR];
-   char        ev_type     = 0;
-   char        ev_code     = 0;
-   int         ev_value    = 0;
-   float       x           = 0.0;
-   float       y           = 0.0;
-   /*---(header)-------------------------*/
-   DEBUG_TOUCH  yLOG_enter   (__FUNCTION__);
-   /*---(check)--------------------------*/
-   rc = TOUCH__check  ();
-   DEBUG_TOUCH  yLOG_value   ("rc"        , rc);
-   --rce;  if (rc < 0) {
-      DEBUG_TOUCH  yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   /*---(prepare)------------------------*/
-   while (1) {
-      /*---(start)-----------------------*/
-      if (x_field == 0)   sprintf (x_msg, "%-5d  ", x_count);
-      /*---(get and format character)----*/
-      ++x_field;
-      x_ch = fgetc (s_file);
-      sprintf (t  , "%02x ", x_ch);
-      strlcat  (x_msg, t, LEN_STR);
-      /*---(check for columns breaks)----*/
-      if (x_field ==  8)   { strlcat (x_msg, "  ", LEN_STR);        continue; }
-      if (x_field == 16)   { strlcat (x_msg, "  ", LEN_STR);        continue; }
-      /*---(filter certain columns)------*/
-      if (x_field <  17)                                   continue;
-      /*---(event types)-----------------*/
-      if (x_field == 17)   { ev_type   = x_ch;             continue; }
-      if (x_field == 18) {
-         ev_type += x_ch * 256;
-         switch (ev_type) {
-         case 0  : strlcat (x_msg, "SYN    ", LEN_STR);      break;
-         case 1  : strlcat (x_msg, "KEY    ", LEN_STR);      break;
-         case 2  : strlcat (x_msg, "REL    ", LEN_STR);      break;
-         case 3  : strlcat (x_msg, "ABS    ", LEN_STR);      break;
-         case 4  : strlcat (x_msg, "MISC   ", LEN_STR);      break;
-         default : strlcat (x_msg, "-?-    ", LEN_STR);      break;
-         }
-         continue;
-      }
-      /*---(event codes)-----------------*/
-      if (x_field == 19)   { ev_code   = x_ch;             continue; }
-      if (x_field == 20) {
-         ev_code += x_ch * 256;
-         if (ev_type == ABS_MODE) {
-            switch (ev_code) {
-            case 0x00 : strlcat (x_msg, "ABS_X   ", LEN_STR);  break;
-            case 0x01 : strlcat (x_msg, "ABS_Y   ", LEN_STR);  break;
-            case 0x18 : strlcat (x_msg, "PRES    ", LEN_STR);  break;
-            case 0x19 : strlcat (x_msg, "DIST    ", LEN_STR);  break;
-            case 0x1a : strlcat (x_msg, "TILT_X  ", LEN_STR);  break;
-            case 0x1b : strlcat (x_msg, "TILT_Y  ", LEN_STR);  break;
-            default   : strlcat (x_msg, "        ", LEN_STR);  break;
-            }
-         } else {
-            strlcat (x_msg, "        ", LEN_STR);
-         }
-         continue;
-      }
-      /*---(event value)-----------------*/
-      if (x_field == 21)   { ev_value  = x_ch;             continue; }
-      if (x_field == 22)   { ev_value += x_ch * 256;       continue; }
-      if (x_field == 23)   { ev_value += x_ch * (256 * 256);       continue; }
-      /*---(last value)------------------*/
-      if (x_field == 24) {
-         /*---(format value)-------------*/
-         ev_value += x_ch * (256 * 256 * 256);
-         sprintf (t, "%10d", ev_value);
-         strlcat  (x_msg, t, LEN_STR);
-      }
-      /*---(finger touch)----------------*/
-      if (ev_type == ABS_MODE && ev_code == 0x39 && ev_value >= 0)  {
-         strlcat (x_msg, "  TOUCH", LEN_STR);
-         /*> stroke.channel = ev_value;                                               <*/
-         /*> stroke.beg     = timestamp ();                                           <*/
-         /*> ndot = 0;                                                                <*/
-      }
-      /*---(finger lift)-----------------*/
-      if (ev_type == ABS_MODE && ev_code == 0x39 && ev_value <  0)  {
-         strlcat (x_msg, "  LIFT", LEN_STR);
-         /*> stroke.end   = timestamp ();                                             <*/
-         /*> stroke.diff  = stroke.end - stroke.beg;                                  <*/
-         /*> rc = STROKE_end (s_new_x, s_new_y, s_new_r);                             <*/
-      }
-      /*---(x-value)---------------------*/
-      if (ev_type == ABS_MODE && ev_code == 0x35)  {
-         x     = ((float) ev_value / 1800.0);
-         s_new_x = (1366.0 * (1 - x));
-         s_new_y = 0;
-         s_new_r = 0;
-         sprintf (t, "val = %8.4f, x = %4f, y = %4f, r = %4f", ev_value, s_new_x, s_new_y, s_new_r);
-      }
-      /*---(y-value)---------------------*/
-      if (ev_type == ABS_MODE && ev_code == 0x36)  {
-         y     = ((float) ev_value / 1800.0);
-         s_new_y = (768.0 * y);
-         s_new_r = sqrt((s_new_x * s_new_x) + (s_new_y * s_new_y));
-         /*> if (ndot == 0) rc = STROKE_begin (s_new_x, s_new_y, s_new_r);            <* 
-          *> else           rc = stroke_next  (s_new_x, s_new_y, s_new_r);            <*/
-         sprintf (t, "val = %8.4f, x = %4f, y = %4f, r = %4f", ev_value, s_new_x, s_new_y, s_new_r);
-      }
-      /*---(display)---------------------*/
-      if (ev_type == ABS_MODE) {
-         /*---(headers and line breaks)--------*/
-         if ((s_line % 15) == 0) {
-            printf ("\n");
-            printf ("-----  -----------------------junk----------------------   ev_type---   ev_code----   ev_value--------------\n");
-            printf ("count  -- -- -- -- -- -- -- --   -- -- -- -- -- -- -- --   lo hi type   lo hi code-   1s 2n 3r 4t value-----\n");
-         }
-         if ((s_line %  3) == 0) {
-            printf ("\n");
-         }
-         printf ("%s\n", x_msg);
-         ++s_line;
-      }
-      /*---(reset values)-------------*/
-      x_field = 0;
-      ++x_count;
-      /*---(done)------------------------*/
-      break;
-   }
-   TOUCH__normal ();
-   /*---(complete)-------------------------*/
-   DEBUG_TOUCH  yLOG_exit    (__FUNCTION__);
-   return rc;
-}
-
 char
 TOUCH__close         (void)
 {
@@ -296,5 +188,87 @@ TOUCH__close         (void)
    /*---(complete)-----------------------*/
    return  0;
 }
+
+
+
+/*====================------------------------------------====================*/
+/*===----                         data reading                         ----===*/
+/*====================------------------------------------====================*/
+PRIV void  o___READING_________o () { return; }
+
+char             /* [------] read input event -------------------------------*/
+TOUCH_read           (void)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;           /* return code for errors         */
+   int         rc          =    0;
+   tEVENT      x_event;
+   float       x_xrel      =  0.0;
+   float       x_yrel      =  0.0;
+   /*---(check)--------------------------*/
+   rc = TOUCH__check  ();
+   if (rc < 0)  return 0;
+   /*---(read)---------------------------*/
+   fread (&x_event, sizeof (x_event), 1, s_file);
+   if (x_event.type != ABS_MODE)  return 0;
+   /*---(touch and pressure)-------------*/
+   if (x_event.code == ABS_PRES) {
+      s_pres = x_event.value;
+      /*---(touch)-----------------------*/
+      if      (s_touch == '-' && x_event.value >= 25) {
+         s_touch = 'y';
+         RAW_begin (s_xpos, s_ypos);
+      }
+      /*---(release)---------------------*/
+      else if (s_touch == 'y' && x_event.value <  25) {
+         s_touch = '-';
+         RAW_end   (s_xpos, s_ypos);
+      }
+      ++s_line;
+      return 0;
+   }
+   /*---(position)-----------------------*/
+   switch (x_event.code) {
+   case  ABS_X :
+      s_xpad = x_event.value;
+      x_xrel = 1.0 - (x_event.value / MAX_X);
+      if (x_xrel >= 0.001 && x_xrel <= 0.999) {
+         s_xrel = x_xrel;
+         s_xpos = s_xrel * win.width;
+      }
+      break;
+   case  ABS_Y :
+      s_ypad = x_event.value;
+      x_yrel = 1.0 - (x_event.value / MAX_Y);
+      if (x_yrel >= 0.001 && x_yrel <= 0.999) {
+         s_yrel = x_yrel;
+         s_ypos = s_yrel * win.height;
+      }
+      break;
+   default     :
+      return 0;
+      break;
+   }
+   ++s_line;
+   /*---(headers and line breaks)--------*/
+   RPTG_TOUCH {
+      if ((s_line % 15) == 0) {
+         printf ("\n");
+         printf ("count  type  -pad-  -rel-  -scr-\n");
+      }
+      if ((s_line %  3) == 0) {
+         printf ("\n");
+      }
+      printf ("%5d   X  %5d  %5.3f  %5d   Y  %5d  %5.3f  %5d\n",
+            s_line, s_xpad, s_xrel, s_xpos, s_ypad, s_yrel, s_ypos);
+   }
+   /*---(reset values)-------------*/
+   TOUCH__normal ();
+   /*---(complete)-------------------------*/
+   DEBUG_TOUCH  yLOG_exit    (__FUNCTION__);
+   return rc;
+}
+
+
 
 /*============================[[ end-of-code ]]===============================*/

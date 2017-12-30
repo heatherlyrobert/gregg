@@ -837,9 +837,9 @@ out_read (int a_num)
          }
          y = atoi(p);
          /*> printf("out_read %4dx, %4dy\n", x, y);                                <*/
-         if      (i == 0)               raw_read  (x, y);
-         else if (i == x_count - 1)     raw_end   (x, y);
-         else                           raw_add   (x, y);
+         if      (i == 0)               RAW_read  (x, y);
+         else if (i == x_count - 1)     RAW_end   (x, y);
+         else                           RAW_add   (x, y);
          sprintf(x_info, "(%04d) x=%03d, y=%03d", i, x, y);
       }
    }

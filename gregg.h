@@ -204,8 +204,8 @@
 
 
 /* rapidly evolving version number to aid with visual change confirmation     */
-#define VER_NUM   "5.0e"
-#define VER_TXT   "configured wacom in kernel/xorg, capturing correct events now"
+#define VER_NUM   "5.0f"
+#define VER_TXT   "cleaned up touch intake and created touch reporting cli arg"
 
 
 #define     LEN_RECD      2000
@@ -239,6 +239,17 @@ struct cWIN {
    int       txf_sm;
    int       psize;                    /* font point size to use              */
 } win;
+
+
+
+/*---(struct.re)--------+-----------+-*//*-+----------------------------------*/
+typedef     struct      cACCESSOR   tACCESSOR;
+struct cACCESSOR {
+   char        rptg_touch;
+} my;
+
+#define     RPTG_TOUCH  if (my.rptg_touch == 'y') 
+
 
 
 /*===[[ DEBUGGER : GENERIC ]]=================================================*/
@@ -557,12 +568,18 @@ char       out_clear         (void);
 char       out_pick          (int);
 char       out_read          (int);
 char       out_append        (void);
-char       raw_pre           (int, int);
-char       raw_beg           (int, int);
-char       raw_cont          (int, int);
-char       raw_add           (int, int);
-char       raw_end           (int, int);
-char       raw_equalize      (void);
+
+/*---(raw)------------------*/
+char       POINT_wipe           (tPOINT *a_pt);
+char       RAW__purge           (void);
+char       RAW_begin            (int a_x, int a_y);
+char       RAW_end              (int a_x, int a_y);
+char       RAW_prefix           (int a_x, int a_y);
+char       RAW_continue         (int a_x, int a_y);
+char       RAW_add              (int, int);
+char       RAW_equalize         (void);
+
+
 char       bas_filter        (void);
 char       avg_pick          (int);
 int        avg_find          (int);

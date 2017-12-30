@@ -72,6 +72,8 @@ PROG_init          (void)
    /*---(fonts)-----------------------*/
    strcpy(win.face_bg, "verdana");
    strcpy(win.face_sm, "courier");
+   /*---(reporting flags)-------------*/
+   my.rptg_touch = '-';
    /*---(debugger : standard)---------*/
    /*> debug.prep   = 'n';     /+ x) program setup and tear-down           +/         <* 
     *> debug.cli    = 'n';     /+ c) command line interface                +/         <* 
@@ -116,11 +118,7 @@ PROG_args          (int argc, char *argv[])
       a = argv[i];
       if (a[0] == '@')  continue;
       DEBUG_ARGS  yLOG_info    ("cli arg", a);
-      /*> DEBUG_C   printf("   processing [%s]\n", a);                                <*/
-      /*> if      (strncmp(a, "@c", 5) == 0) {                                                  <* 
-       *>    /+> debug_old.top = debug.cli         = 'y';                                 <+/   <* 
-       *>    printf("command line debugging mode [%s]\n", a);                                   <* 
-       *> }                                                                                     <*/
+      if      (strncmp(a, "--rptg-touch"        , 20) == 0)   my.rptg_touch = 'y';
       /*> else if (strncmp(a, "@x", 5) == 0)  debug.top = debug.prep        = 'y';    <* 
        *> else if (strncmp(a, "@i", 5) == 0)  debug.top = debug.input       = 'y';    <* 
        *> else if (strncmp(a, "@o", 5) == 0)  debug.top = debug.output      = 'y';    <* 
@@ -303,10 +301,10 @@ PROG_event()
             input_type = '-';
             if        (r < SIZE_R1) {
                input_type = 'o';
-               raw_beg  (x, y);
+               RAW_begin  (x, y);
             } else if (x < 0 && y > 0) {
                input_type = 'p';
-               raw_pre  (x, y);
+               RAW_prefix  (x, y);
             } else if (x < -50 && y <  -50) {
                input_type = '-';
                if (o.saved != 'y') {
@@ -316,7 +314,7 @@ PROG_event()
                }
             } else {
                input_type = 'c';
-               raw_cont (x, y);
+               RAW_continue (x, y);
             }
             /*> printf("input type = %c\n", input_type);                                 <*/
             break;
@@ -329,7 +327,7 @@ PROG_event()
             r   = sqrt((x * x) + (y * y));
             /*> printf("moved    to %4dx, %4dy, %dr\n", x, y, r);                     <*/
             if (input_type == '-') break;
-            raw_add  (x, y);
+            RAW_add  (x, y);
             break;
 
          case ButtonRelease:
@@ -340,7 +338,7 @@ PROG_event()
             r   = sqrt((x * x) + (y * y));
             if (input_type == '-') break;
             /*> printf("released at %4dx, %4dy\n", x, y);                             <*/
-            raw_end          (x, y);
+            RAW_end          (x, y);
             /*> rc = out_append  ();                                                     <* 
              *> if (rc == 0) out_read (o.curr);                                          <*/
             DEBUG_E printf("   - bas_filter\n"); fflush(stdout);
