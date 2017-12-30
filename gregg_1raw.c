@@ -19,55 +19,6 @@ PRIV int     yadj      = 0;
 
 
 /*============================--------------------============================*/
-/*===----                          program level                       ----===*/
-/*============================--------------------============================*/
-static void o___PROGRAM________________o (void) {;}
-
-char
-POINT_wipe           (tPOINT *a_pt)
-{
-   /*---(ties)--------------*/
-   a_pt->o     = 0;
-   a_pt->p     = 0;
-   /*---(coords)------------*/
-   a_pt->x     = 0;
-   a_pt->y     = 0;
-   /*---(stats)-------------*/
-   a_pt->xd    = 0;
-   a_pt->yd    = 0;
-   a_pt->l     = 0;
-   a_pt->s     = 0.0;
-   a_pt->b     = 0;
-   a_pt->r     = 0.0;
-   a_pt->d     = 0;
-   a_pt->q     = 0;
-   a_pt->ra    = 0;
-   a_pt->c     = 0.0;
-   /*---(flags)-------------*/
-   a_pt->ca    = '-';
-   a_pt->cc    = 0;
-   a_pt->t     = 0;
-   a_pt->u[0]  = 0;
-   a_pt->a     = '-';
-   /*---(complete)----------*/
-   return 0;
-}
-
-char
-RAW__purge           (void)
-{
-   /*---(locals)-----------+-----+-----+-*/
-   int         i           =    0;
-   /*---(clear)--------------------------*/
-   for (i = 0; i < MAX_POINTS; ++i)  POINT_wipe (&o.raw [i]);
-   o.nraw = 0;
-   o.craw = 0;
-   /*---(complete)-----------------------*/
-   return 0;
-}
-
-
-/*============================--------------------============================*/
 /*===----                          raw points                          ----===*/
 /*============================--------------------============================*/
 static void o___RAW_POINTS_____________o (void) {;}
@@ -113,6 +64,19 @@ RAW_point          (int a_x, int a_y, char a_type)
    return 0;
 }
 
+
+char          /*----: add a new raw point to outline -------------------------*/
+RAW_touch          (int a_x, int a_y)
+{
+   return 0;
+}
+
+char          /*----: add a new raw point to outline -------------------------*/
+RAW_lift           (int a_x, int a_y)
+{
+   return 0;
+}
+
 char          /*----: add a new raw point to outline -------------------------*/
 RAW_add            (int a_x, int a_y)
 {
@@ -120,12 +84,16 @@ RAW_add            (int a_x, int a_y)
    return 0;
 }
 
+
+
+
+
 char          /*----: start a new outline with a prefix ----------------------*/
 RAW_prefix         (int a_x, int a_y)
 {
    /*---(initialize)---------------------*/
    DEBUG__RAW  printf("RAW POINTS (prefix)\n");
-   out_clear ();
+   OUT_clear ();
    stype   = 'p';
    ntries  =  0;
    /*---(save points)--------------------*/
@@ -146,7 +114,7 @@ RAW_begin          (int a_x, int a_y)
    /*---(check for prefix)---------------*/
    DEBUG__RAW  printf("RAW POINTS (begin)\n");
    if (stype != 'p') {
-      out_clear ();
+      OUT_clear ();
       ntries  =  0;
    }
    /*---(save points)--------------------*/
@@ -211,7 +179,7 @@ RAW_read           (int a_x, int a_y)
    /*---(check for prefix)---------------*/
    DEBUG__RAW  printf("RAW POINTS (begin)\n");
    /*---(save points)--------------------*/
-   out_clear ();
+   OUT_clear ();
    ntries  =  0;
    RAW_point (a_x, a_y, 'S');
    o.raw[o.nraw - 1].a = 'y';

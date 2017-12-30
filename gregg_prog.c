@@ -172,12 +172,12 @@ PROG_final (void)
    /*---(header)-------------------------*/
    DEBUG_TOPS   yLOG_enter    (__FUNCTION__);
    yXINIT_start(win.title, win.width, win.height, YX_FOCUSABLE, YX_FIXED, debug_old.prep);
-   yGOD_start();
-   font_load();
-   out_init();
+   yGOD_start ();
+   font_load  ();
+   /*> OUT_init   ();                                                                 <*/
    if (out_start > 0) o.curr = out_start;
-   dlist_init();
-   draw_init();
+   dlist_init ();
+   draw_init  ();
    TOUCH_init ();
    /*---(complete)-----------------------*/
    DEBUG_TOPS   yLOG_exit     (__FUNCTION__);
@@ -194,7 +194,7 @@ PROG_event()
    int   x2, y2;       /* x,y coordinate adjusted for view */
    int   r;            /* radius of point from origin      */
    char  input_type = '-';
-   out_read  (o.curr);
+   /*> out_read  (o.curr);                                                            <*/
    int    i = o.curr;
    int       j         = 0;
    tTSPEC      x_dur;
@@ -270,8 +270,8 @@ PROG_event()
             case  'w':
             case  'x':
                        if (o.saved != 'y') {
-                          rc = out_append  ();
-                          if (rc == 0) out_read (o.curr);
+                          /*> rc = out_append  ();                                    <*/
+                          /*> if (rc == 0) out_read (o.curr);                         <*/
                        }
                        dict_read();
                        return the_key[0];
@@ -283,7 +283,7 @@ PROG_event()
             if (o.curr < 1      ) o.curr = 1;
             if (o.curr > o.total) o.curr = o.total;
             /*---(redraw)------------------*/
-            if (i != o.curr)      out_read (o.curr);
+            /*> if (i != o.curr)      out_read (o.curr);                              <*/
             draw_main();
             break;
 
@@ -308,8 +308,8 @@ PROG_event()
             } else if (x < -50 && y <  -50) {
                input_type = '-';
                if (o.saved != 'y') {
-                  rc = out_append  ();
-                  if (rc == 0) out_read (o.curr);
+                  /*> rc = out_append  ();                                            <*/
+                  /*> if (rc == 0) out_read (o.curr);                                 <*/
                   draw_main();
                }
             } else {

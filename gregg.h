@@ -204,8 +204,8 @@
 
 
 /* rapidly evolving version number to aid with visual change confirmation     */
-#define VER_NUM   "5.0f"
-#define VER_TXT   "cleaned up touch intake and created touch reporting cli arg"
+#define VER_NUM   "5.0g"
+#define VER_TXT   "cleaned up outline functions and clearing outline data"
 
 
 #define     LEN_RECD      2000
@@ -563,15 +563,15 @@ long       time_stamp        (void);
 
 char       dlist_init        (void);
 
-char       out_init          (void);
-char       out_clear         (void);
-char       out_pick          (int);
-char       out_read          (int);
-char       out_append        (void);
+/*---(outline)--------------*/
+char       OUT_init             (void);
+char       OUT_clear            (void);
+char       out_pick             (int);
+char       out_read             (int);
+char       out_append           (void);
 
 /*---(raw)------------------*/
 char       POINT_wipe           (tPOINT *a_pt);
-char       RAW__purge           (void);
 char       RAW_begin            (int a_x, int a_y);
 char       RAW_end              (int a_x, int a_y);
 char       RAW_prefix           (int a_x, int a_y);
