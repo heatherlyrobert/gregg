@@ -2,7 +2,6 @@
 #include    "gregg.h"
 
 
-#define     LEN_STR       200
 
 static char  s_event     [LEN_STR];
 static FILE *s_file      = NULL;
@@ -15,12 +14,53 @@ static int   s_flags     = 0;
 static int   s_line      = 0;
 
 
+#define      REL_MODE    2
+#define      ABS_MODE    3
+
+#define      EV_SYN      0
+#define      EV_KEY      1
+#define      EV_REL      2
+#define      EV_ABS      3
+#define      EV_MISC     4
+
+/*---(struct.re)--------+-----------+-*//*-+----------------------------------*/
+#define     ABS_X       0x00
+#define     ABS_Y       0x01
+#define     ABS_Z       0x02
+#define     ABS_PRES    0x18
+#define     ABS_DIST    0x19
+#define     ABS_TILTX   0x1a
+#define     ABS_TILTY   0x1b
+#define     ABS_MISC    0x28
+#define     ABS_SLOT    0x2f
+
+#define     MAX_EVCODE  100
+typedef     struct      cEVCODE     tEVCODE;
+struct cEVCODE {
+   int         code;
+   char        abbr        [LEN_LABEL];
+   char        desc        [LEN_DESC ];
+   int         count;
+};
+tEVCODE     s_evcode   [MAX_EVCODE] = {
+   { ABS_X      , "ABS_X"    , ""                                             , 0 },
+   { ABS_Y      , "ABS_Y"    , ""                                             , 0 },
+   { ABS_PRES   , "PRES"     , ""                                             , 0 },
+   { ABS_DIST   , "DIST"     , ""                                             , 0 },
+   { ABS_TILTX  , "TILT_X"   , ""                                             , 0 },
+   { ABS_TILTY  , "TILT_Y"   , ""                                             , 0 },
+   { ABS_MISC   , "MISC"     , ""                                             , 0 },
+   { ABS_SLOT   , "SLOT"     , ""                                             , 0 },
+   { -1         , "end"      , ""                                             , 0 },
+};
+
 
 
 char
 TOUCH_init           (void)
 {
-   snprintf (s_event  , LEN_STR, "%s%s", "/dev/input/", "event16");
+   /*> snprintf (s_event  , LEN_STR, "%s%s", "/dev/input/", "event6");                <*/
+   snprintf (s_event  , LEN_STR, "%s%s", "/dev/input/", "event6");
    TOUCH__open ();
    return 0;
 }
@@ -106,126 +146,140 @@ TOUCH__check         (void)
 char             /* [------] read input event -------------------------------*/
 TOUCH_read           (void)
 {
-   /*---(locals)-----------*-------------*/
-   char        rce         = -10;           /* return code for errors         */
-   int         rc          = 0;
-   int         ch          = 0;
-   uchar       x_ch        = 0;
-   int         x_count       = 0;
-   char   next   [100];
-   char   output [200];
-   char   ev_type  = 0;
-   char   ev_code  = 0;
-   int    ev_value = 0;
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;           /* return code for errors         */
+   int         rc          =    0;
+   static int  x_count     =    1;
+   uchar       x_ch        =    0;
+   int         x_field     =    0;
+   char        t           [LEN_STR];
+   char        x_msg       [LEN_STR];
+   char        ev_type     = 0;
+   char        ev_code     = 0;
+   int         ev_value    = 0;
    float       x           = 0.0;
    float       y           = 0.0;
    /*---(header)-------------------------*/
    DEBUG_TOUCH  yLOG_enter   (__FUNCTION__);
    /*---(check)--------------------------*/
    rc = TOUCH__check  ();
+   DEBUG_TOUCH  yLOG_value   ("rc"        , rc);
    --rce;  if (rc < 0) {
-      DEBUG_TOUCH  yLOG_exit    (__FUNCTION__);
+      DEBUG_TOUCH  yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   /*---(headers and line breaks)--------*/
-   if ((s_line % 15) == 0) {
-      printf ("\n-- -- -- -- -- -- -- --   -- -- -- -- -- -- -- --   -- -- typ   -- -- code-   -- -- -- -- value-----\n");
-   }
-   if ((s_line %  3) == 0) {
-      printf ("\n");
-   }
-   ++s_line;
    /*---(prepare)------------------------*/
-   x_count = 0;
-   strcpy  (output, "");
    while (1) {
+      /*---(start)-----------------------*/
+      if (x_field == 0)   sprintf (x_msg, "%-5d  ", x_count);
       /*---(get and format character)----*/
-      ++x_count;
-      ch = fgetc (s_file);
-      x_ch = ch;
-      sprintf (next  , "%02x ", x_ch);
-      strcat  (output, next);
+      ++x_field;
+      x_ch = fgetc (s_file);
+      sprintf (t  , "%02x ", x_ch);
+      strlcat  (x_msg, t, LEN_STR);
       /*---(check for columns breaks)----*/
-      if (x_count ==  8)   { strcat (output, "  ");        continue; }
-      if (x_count == 16)   { strcat (output, "  ");        continue; }
+      if (x_field ==  8)   { strlcat (x_msg, "  ", LEN_STR);        continue; }
+      if (x_field == 16)   { strlcat (x_msg, "  ", LEN_STR);        continue; }
       /*---(filter certain columns)------*/
-      if (x_count <  17)                                   continue;
+      if (x_field <  17)                                   continue;
       /*---(event types)-----------------*/
-      if (x_count == 17)   { ev_type   = x_ch;             continue; }
-      if (x_count == 18) {
+      if (x_field == 17)   { ev_type   = x_ch;             continue; }
+      if (x_field == 18) {
          ev_type += x_ch * 256;
          switch (ev_type) {
-         case 0  : strcat (output, "SYN   ");      break;
-         case 1  : strcat (output, "KEY   ");      break;
-         case 2  : strcat (output, "REL   ");      break;
-         case 3  : strcat (output, "ABS   ");      break;
-         default : strcat (output, "-?-   ");      break;
+         case 0  : strlcat (x_msg, "SYN    ", LEN_STR);      break;
+         case 1  : strlcat (x_msg, "KEY    ", LEN_STR);      break;
+         case 2  : strlcat (x_msg, "REL    ", LEN_STR);      break;
+         case 3  : strlcat (x_msg, "ABS    ", LEN_STR);      break;
+         case 4  : strlcat (x_msg, "MISC   ", LEN_STR);      break;
+         default : strlcat (x_msg, "-?-    ", LEN_STR);      break;
          }
          continue;
       }
       /*---(event codes)-----------------*/
-      if (x_count == 19)   { ev_code   = x_ch;             continue; }
-      if (x_count == 20) {
+      if (x_field == 19)   { ev_code   = x_ch;             continue; }
+      if (x_field == 20) {
          ev_code += x_ch * 256;
-         if (ev_type != 3) { strcat (output, "        ");  continue; }
-         switch (ev_code) {
-         case 0x00 : strcat (output, "ABS_X   ");  break;
-         case 0x01 : strcat (output, "ABS_Y   ");  break;
-         case 0x2f : strcat (output, "SLOT    ");  break;
-         case 0x35 : strcat (output, "EPS_X   ");  break;
-         case 0x36 : strcat (output, "EPS_Y   ");  break;
-         case 0x39 : strcat (output, "ID      ");  break;
-         default   : strcat (output, "--?--   ");  break;
+         if (ev_type == ABS_MODE) {
+            switch (ev_code) {
+            case 0x00 : strlcat (x_msg, "ABS_X   ", LEN_STR);  break;
+            case 0x01 : strlcat (x_msg, "ABS_Y   ", LEN_STR);  break;
+            case 0x18 : strlcat (x_msg, "PRES    ", LEN_STR);  break;
+            case 0x19 : strlcat (x_msg, "DIST    ", LEN_STR);  break;
+            case 0x1a : strlcat (x_msg, "TILT_X  ", LEN_STR);  break;
+            case 0x1b : strlcat (x_msg, "TILT_Y  ", LEN_STR);  break;
+            default   : strlcat (x_msg, "        ", LEN_STR);  break;
+            }
+         } else {
+            strlcat (x_msg, "        ", LEN_STR);
          }
          continue;
       }
       /*---(event value)-----------------*/
-      if (x_count == 21)   { ev_value  = x_ch;             continue; }
-      if (x_count == 22)   { ev_value += x_ch * 256;       continue; }
-      if (x_count == 23)   { ev_value += x_ch * (256 * 256);       continue; }
+      if (x_field == 21)   { ev_value  = x_ch;             continue; }
+      if (x_field == 22)   { ev_value += x_ch * 256;       continue; }
+      if (x_field == 23)   { ev_value += x_ch * (256 * 256);       continue; }
       /*---(last value)------------------*/
-      if (x_count == 24) {
+      if (x_field == 24) {
          /*---(format value)-------------*/
          ev_value += x_ch * (256 * 256 * 256);
-         sprintf (next, "%10d", ev_value);
-         /*---(print final line)---------*/
-         strcat  (output, next);
-         printf ("%s\n", output);
-         /*---(reset values)-------------*/
-         strcpy (output, "");
-         x_count = 0;
+         sprintf (t, "%10d", ev_value);
+         strlcat  (x_msg, t, LEN_STR);
       }
       /*---(finger touch)----------------*/
-      if (ev_type == 3 && ev_code == 0x39 && ev_value >= 0)  {
+      if (ev_type == ABS_MODE && ev_code == 0x39 && ev_value >= 0)  {
+         strlcat (x_msg, "  TOUCH", LEN_STR);
          /*> stroke.channel = ev_value;                                               <*/
          /*> stroke.beg     = timestamp ();                                           <*/
          /*> ndot = 0;                                                                <*/
       }
       /*---(finger lift)-----------------*/
-      if (ev_type == 3 && ev_code == 0x39 && ev_value <  0)  {
+      if (ev_type == ABS_MODE && ev_code == 0x39 && ev_value <  0)  {
+         strlcat (x_msg, "  LIFT", LEN_STR);
          /*> stroke.end   = timestamp ();                                             <*/
          /*> stroke.diff  = stroke.end - stroke.beg;                                  <*/
          /*> rc = STROKE_end (s_new_x, s_new_y, s_new_r);                             <*/
       }
       /*---(x-value)---------------------*/
-      if (ev_type == 3 && ev_code == 0x35)  {
+      if (ev_type == ABS_MODE && ev_code == 0x35)  {
          x     = ((float) ev_value / 1800.0);
          s_new_x = (1366.0 * (1 - x));
          s_new_y = 0;
+         s_new_r = 0;
+         sprintf (t, "val = %8.4f, x = %4f, y = %4f, r = %4f", ev_value, s_new_x, s_new_y, s_new_r);
       }
       /*---(y-value)---------------------*/
-      if (ev_type == 3 && ev_code == 0x36)  {
+      if (ev_type == ABS_MODE && ev_code == 0x36)  {
          y     = ((float) ev_value / 1800.0);
          s_new_y = (768.0 * y);
          s_new_r = sqrt((s_new_x * s_new_x) + (s_new_y * s_new_y));
          /*> if (ndot == 0) rc = STROKE_begin (s_new_x, s_new_y, s_new_r);            <* 
           *> else           rc = stroke_next  (s_new_x, s_new_y, s_new_r);            <*/
+         sprintf (t, "val = %8.4f, x = %4f, y = %4f, r = %4f", ev_value, s_new_x, s_new_y, s_new_r);
       }
+      /*---(display)---------------------*/
+      if (ev_type == ABS_MODE) {
+         /*---(headers and line breaks)--------*/
+         if ((s_line % 15) == 0) {
+            printf ("\n");
+            printf ("-----  -----------------------junk----------------------   ev_type---   ev_code----   ev_value--------------\n");
+            printf ("count  -- -- -- -- -- -- -- --   -- -- -- -- -- -- -- --   lo hi type   lo hi code-   1s 2n 3r 4t value-----\n");
+         }
+         if ((s_line %  3) == 0) {
+            printf ("\n");
+         }
+         printf ("%s\n", x_msg);
+         ++s_line;
+      }
+      /*---(reset values)-------------*/
+      x_field = 0;
+      ++x_count;
       /*---(done)------------------------*/
       break;
    }
    TOUCH__normal ();
    /*---(complete)-------------------------*/
+   DEBUG_TOUCH  yLOG_exit    (__FUNCTION__);
    return rc;
 }
 

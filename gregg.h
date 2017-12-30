@@ -204,8 +204,14 @@
 
 
 /* rapidly evolving version number to aid with visual change confirmation     */
-#define VER_NUM   "5.0d"
-#define VER_TXT   "uses petal touch interface and spits out data (but segfault)"
+#define VER_NUM   "5.0e"
+#define VER_TXT   "configured wacom in kernel/xorg, capturing correct events now"
+
+
+#define     LEN_RECD      2000
+#define     LEN_STR        200
+#define     LEN_DESC       100
+#define     LEN_LABEL       20
 
 
 #define    PUBL      /*--*/

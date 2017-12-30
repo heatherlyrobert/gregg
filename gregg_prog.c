@@ -369,7 +369,7 @@ PROG_event()
          }
       }
       TOUCH_read ();
-      printf ("loop %3d\n", x_loop);
+      /*> printf ("loop %3d\n", x_loop);                                              <*/
       /*---(sleeping)--------------------*/
       nanosleep    (&x_dur, NULL);
    }
