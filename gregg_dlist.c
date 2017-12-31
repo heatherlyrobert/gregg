@@ -24,7 +24,7 @@ dlist_init         (void)
    DEBUG_G  printf("dlist_init() -- drive loading\n");
    DEBUG_G  printf("   - clear letters\n\n");
    DEBUG_G  printf("   - create buttons\n\n");
-   radius_button = (win.bar / 2.5);
+   radius_button = (win.d_bar / 2.5);
    dlist_arrow();
    dlist_letters();
    dlist_arrowed();
@@ -632,7 +632,7 @@ dlist_backfan      (void)
          snprintf(msg, 100, "%d", ranges[i].num);
          glPushMatrix(); {
             glTranslatef(  x,     y,    z);
-            yFONT_print(win.txf_bg, 20, YF_MIDCEN, msg);
+            yFONT_print (win.font_bg, 20, YF_MIDCEN, msg);
          } glPopMatrix();
       }
       /*---(target line)-------------------*/
@@ -796,23 +796,23 @@ dlist_backguide    (void)
    z = -10.0;
    /*---(45's)-----*/
    glBegin(GL_LINES);
-   glVertex3f(  win.right,    win.right,  z);
-   glVertex3f( -win.right,   -win.right,  z);
-   glVertex3f( -win.right,    win.right,  z);
-   glVertex3f(  win.right,   -win.right,  z);
+   glVertex3f(  win.m_xmax,    win.m_xmax,  z);
+   glVertex3f( -win.m_xmax,   -win.m_xmax,  z);
+   glVertex3f( -win.m_xmax,    win.m_xmax,  z);
+   glVertex3f(  win.m_xmax,   -win.m_xmax,  z);
    glEnd();
    /*---(30's)-----*/
    glBegin(GL_LINES);
-   glVertex3f(  win.right,    win.right / 3.0,  z);
+   glVertex3f(  win.m_xmax,    win.m_xmax / 3.0,  z);
    glVertex3f(         0.0,           0.0 / 3.0,  z);
    glVertex3f(         0.0,           0.0 / 3.0,  z);
-   glVertex3f(  win.right,   -win.right / 3.0,  z);
+   glVertex3f(  win.m_xmax,   -win.m_xmax / 3.0,  z);
    glEnd();
    /*---(align)----*/
    z =  10.0;
    glBegin(GL_LINES);
    glVertex3f(       -50.0,           0.0,  1.0);
-   glVertex3f(  win.right,           0.0,  1.0);
+   glVertex3f(  win.m_xmax,           0.0,  1.0);
    glEnd();
    glLineWidth(0.8);
    /*---(complete)-----------------------*/

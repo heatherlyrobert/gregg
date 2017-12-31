@@ -197,15 +197,15 @@
 #include    <yURG.h>         /* CUSTOM : heatherly urgent processing          */
 #include    <yVAR.h>         /* CUSTOM : heatherly variable testing           */
 #include    <ySTR.h>         /* CUSTOM : heatherly string handling            */
-#include    <yX11.h>         /* CUSTOM : heatherly xlib/glx setup/teardown        */
-#include    <yGOD.h>         /* CUSTOM : heatherly opengl godview                 */
-#include    <yFONT.h>        /* CUSTOM : heatherly texture-mapped fonts           */
+#include    <yX11.h>         /* CUSTOM : heatherly xlib/glx setup/teardown    */
+#include    <yFONT.h>        /* CUSTOM : heatherly texture-mapped fonts       */
+#include    <yGLTEX.h>       /* CUSTOM : heatherly texture handling           */
 
 
 
 /* rapidly evolving version number to aid with visual change confirmation     */
-#define VER_NUM   "5.0h"
-#define VER_TXT   "touch generates raw data points, not unit tested yet"
+#define VER_NUM   "5.0i"
+#define VER_TXT   "drawing is back and onto texture now, faster"
 
 
 #define     LEN_RECD      2000
@@ -213,31 +213,59 @@
 #define     LEN_DESC       100
 #define     LEN_LABEL       20
 
+typedef     const char          cchar;
+typedef     const int           cint;
+
 
 #define    PUBL      /*--*/
 #define    PRIV      static
 
 /*---(window formatting)-------------------*/
 struct cWIN {
-   /*---(header)-------------------------*/
-   char      format;                   /* format identifier                   */
-   char      title [100];              /* window title                        */
-   /*---(sizes)--------------------------*/
-   int       height;                   /* full height                         */
-   int       top;                      /* distance from centery to top        */
-   int       bottom;                   /* distance from centery to bottom     */
-   int       width;                    /* full width                          */
-   int       left;                     /* distance from centerx to left       */
-   int       right;                    /* distance from centerx to right      */
-   int       bar;                      /* control bar height                  */
-   int       offx, offy, offz;         /* location of point information       */
-   int       ansx, ansy;               /* location of outline information     */
-   /*---(fonts)--------------------------*/
-   char      face_bg [50];
-   char      face_sm [50];
-   int       txf_bg;
-   int       txf_sm;
-   int       psize;                    /* font point size to use              */
+   /*---(header)------------*/
+   char        w_format;                    /* format identifier              */
+   /*---(window sizes)------*/
+   char        w_title     [LEN_DESC];      /* window title                   */
+   int         w_wide;                      /* window width                   */
+   int         w_tall;                      /* window heigth                  */
+   /*---(title sizes)-------*/
+   char        t_text      [LEN_DESC];      /* title text                     */
+   int         t_wide;                      /* width  of title line           */
+   int         t_left;                      /* left   of title line           */
+   int         t_tall;                      /* height of title line           */
+   int         t_bott;                      /* bottom of title line           */
+   /*---(command sizes)-----*/
+   char        c_text      [LEN_DESC];      /* current text in command mode   */
+   int         c_wide;                      /* width  of command line         */
+   int         c_left;                      /* left   of command line         */
+   int         c_tall;                      /* height of command line         */
+   int         c_bott;                      /* bottom of command line         */
+   /*---(main sizes)--------*/
+   int         m_wide;                      /* width  of main window          */
+   int         m_left;                      /* left   of main window          */
+   int         m_tall;                      /* height of main window          */
+   int         m_bott;                      /* bottom of main window          */
+   int         m_ymax;                      /* from center to top             */
+   int         m_ymin;                      /* from center to bottom          */
+   int         m_xmax;                      /* from center to right           */
+   int         m_xmin;                      /* from center to left            */
+   /*---(detail)------------*/
+   int         d_xoff;                      /* left offset of text details    */
+   int         d_yoff;                      /* top offset of text details     */
+   int         d_zoff;                      /* z offset of text details       */
+   int         d_point;                     /* font point                     */
+   int         d_bar;                       /* control bar height             */
+   int         d_ansx;                      /* answer x offset                */
+   int         d_ansy;                      /* answer y offset                */
+   /*---(fonts)-------------*/
+   char        face_bg     [50];
+   int         font_bg;
+   char        face_sm     [50];
+   int         font_sm;
+   /*---(texture)-----------*/
+   int         tex_h;                  /* texture height                      */
+   int         tex_w;                  /* texture width                       */
+   /*---(done)--------------*/
 } win;
 
 
@@ -246,9 +274,14 @@ struct cWIN {
 typedef     struct      cACCESSOR   tACCESSOR;
 struct cACCESSOR {
    char        rptg_touch;
+   char        rptg_raw;
+   char        touch;
+   int         xpos;
+   int         ypos;
 } my;
 
 #define     RPTG_TOUCH  if (my.rptg_touch == 'y') 
+#define     RPTG_RAW    if (my.rptg_raw   == 'y') 
 
 
 
@@ -522,7 +555,6 @@ int        main              (int argc, char *argv[]);
 
 /*---(prog)-----------------*/
 char*      PROG_version         (void);
-char       PROG_usage           (void);
 char       PROG_init            ();
 char       PROG_args            (int argc, char *argv[]);
 char       PROG_begin           (void);
@@ -530,20 +562,25 @@ char       PROG_final           (void);
 char       PROG_event           (void);
 char       PROG_end             (void);
 
-char       draw_main         (void);
-char       draw_init         (void);
-char       draw_resize       (uint, uint);
-char       draw_background   (void);
-char       draw_oslider      (void);
-char       draw_aslider      (void);
-char       draw_kslider      (void);
+char       DRAW_init            (void);
+char       DRAW__resize         (cchar a_format, cchar *a_title, cint a_wide, cint a_tall);
+char       DRAW_wrap            (void);
 
-char       draw_raws         (void);
-char       draw_avgs         (void);
-char       draw_keys         (void);
-char       draw_curr         (void);
-char       draw_saved        (void);
-char       draw_horz         (void);
+char       DRAW_main            (void);
+char       DRAW_back            (void);
+
+char       draw_background      (void);
+char       draw_oslider         (void);
+char       draw_aslider         (void);
+char       draw_kslider         (void);
+
+char       draw_raws            (void);
+char       draw_avgs            (void);
+char       draw_keys            (void);
+char       draw_curr            (void);
+char       draw_saved           (void);
+char       draw_horz            (void);
+char       DRAW_cursor          (void);
 
 char       draw_info         (void);
 char       draw_letters      (void);
@@ -553,19 +590,15 @@ char       draw_pie          (int);
 char       draw_dot          (int);
 char       draw_whitespace   (int);
 
-char       font_load         (void);
-char       font_label        (char*, char*);
-char       font_free         (void);
-
-char       format_change     (char);
-char       format_input      (void);
-char       format_wider      (void);
-char       format_detail     (void);
+char       FONT__load           (void);
+char       FONT__free           (void);
+char       FONT__label          (char *a_label, char *a_content);
 
 char       sample_init       (void);
 char       sample_etch       (void);
 char       sample_draw       (void);
 char       sample_free       (void);
+char       sample_show       (void);
 
 
 long       time_stamp        (void);

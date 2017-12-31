@@ -208,47 +208,67 @@ TOUCH_read           (void)
    /*---(check)--------------------------*/
    rc = TOUCH__check  ();
    if (rc < 0)  return 0;
+   /*---(header)-------------------------*/
+   DEBUG_TOUCH  yLOG_enter   (__FUNCTION__);
    /*---(read)---------------------------*/
+   DEBUG_TOUCH  yLOG_note    ("read event");
    fread (&x_event, sizeof (x_event), 1, s_file);
-   if (x_event.type != ABS_MODE)  return 0;
+   if (x_event.type != ABS_MODE) {
+      DEBUG_TOUCH  yLOG_note    ("not ABS mode, ignoring");
+      DEBUG_TOUCH  yLOG_exit    (__FUNCTION__);
+      return 0;
+   }
    /*---(touch and pressure)-------------*/
    if (x_event.code == ABS_PRES) {
+      DEBUG_TOUCH  yLOG_note    ("pressure event");
       s_pres = x_event.value;
+      DEBUG_TOUCH  yLOG_value   ("s_pres"    , s_pres);
       /*---(touch)-----------------------*/
       if      (s_touch == '-' && x_event.value >= 25) {
+         DEBUG_TOUCH  yLOG_note    ("new touch");
          s_touch = 'y';
          RAW_touch (s_xpos, s_ypos);
       }
       /*---(release)---------------------*/
       else if (s_touch == 'y' && x_event.value <  25) {
+         DEBUG_TOUCH  yLOG_note    ("lifted existing touch");
          s_touch = '-';
          RAW_lift  (s_xpos, s_ypos);
       }
       ++s_line;
+      DEBUG_TOUCH  yLOG_char    ("s_touch"   , s_touch);
+      DEBUG_TOUCH  yLOG_exit    (__FUNCTION__);
       return 0;
    }
    /*---(position)-----------------------*/
    switch (x_event.code) {
    case  ABS_X :
+      DEBUG_TOUCH  yLOG_note    ("X-movement event");
       s_xpad = x_event.value;
       x_xrel = 1.0 - (x_event.value / MAX_X);
       if (x_xrel >= 0.001 && x_xrel <= 0.999) {
          s_xrel = x_xrel;
-         s_xpos = s_xrel * win.width;
+         s_xpos = s_xrel * win.w_wide;
       }
       break;
    case  ABS_Y :
+      DEBUG_TOUCH  yLOG_note    ("Y-movement event");
       s_ypad = x_event.value;
       x_yrel = 1.0 - (x_event.value / MAX_Y);
       if (x_yrel >= 0.001 && x_yrel <= 0.999) {
          s_yrel = x_yrel;
-         s_ypos = s_yrel * win.height;
+         s_ypos = s_yrel * win.w_tall;
       }
       break;
    default     :
+      DEBUG_TOUCH  yLOG_note    ("event to be ignored");
+      DEBUG_TOUCH  yLOG_exit    (__FUNCTION__);
       return 0;
       break;
    }
+   my.touch = s_touch;
+   my.xpos  = s_xpos;
+   my.ypos  = s_ypos;
    if (s_touch == 'y')  RAW_normal (s_xpos, s_ypos);
    ++s_line;
    /*---(headers and line breaks)--------*/

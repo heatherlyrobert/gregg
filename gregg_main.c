@@ -27,14 +27,9 @@ main               (int argc, char *argv[])
       PROG_end ();
       return -1;
    }
-   /*---(startup)------------------------*/
-   rc = PROG_init();
-   if (rc == 0) rc = PROG_args(argc, argv);
-   if (rc == 0) rc = PROG_begin();
    /*---(main loop)----------------------*/
    while (rc != 1) {
       rc = PROG_event();
-      if (rc >  1) format_change(rc);
    }
    /*---(wrapup)-------------------------*/
    PROG_end();

@@ -198,19 +198,19 @@ char
 avg_pick           (int a_y)
 {
    /*---(extremes)-------------------------*/
-   float   x_min  =  win.top;
-   float   x_max  =  win.bottom;
+   float   x_min  =  win.m_ymax;
+   float   x_max  =  win.m_ymin;
    float   x_ran  =  x_min + x_max;
    float   x_inc  =  x_ran / o.navg;
    /*---(location)-------------------------*/
-   float   x_pos  =  x_ran -  (a_y + win.bottom);
+   float   x_pos  =  x_ran -  (a_y + win.m_ymin);
    if (x_pos <  0    ) return 0;
    if (x_pos >= x_ran) return 0;
    int     x_num  =  (x_pos / x_inc);
    /*---(make change)----------------------*/
    if (x_num + 1 != o.cavg) {
       o.cavg = x_num + 1;
-      draw_main();
+      /*> DRAW_main();                                                                <*/
    }
    /*---(complete)-------------------------*/
    return 0;

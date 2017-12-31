@@ -76,8 +76,8 @@ RAW_touch            (int a_x, int a_y)
    int         y           =  0.0;
    int         r           =  0.0;
    /*---(calculate)----------------------*/
-   x  = a_x - win.left;
-   y  = a_y - win.top;
+   x  = a_x - win.m_left;
+   y  = a_y - win.m_ymax;
    r  = sqrt((x * x) + (y * y));
    /*---(assign type)--------------------*/
    if (r < SIZE_R1) {
@@ -111,7 +111,7 @@ RAW_lift             (int a_x, int a_y)
    RAW_point (a_x, a_y, POINT_NORMAL);
    RAW_point (a_x, a_y, POINT_FINISH);
    RAW_equalize ();
-   POINT_list (o.raw, o.nraw);
+   RPTG_RAW  POINT_list (o.raw, o.nraw);
    return 0;
 }
 
