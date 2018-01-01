@@ -248,16 +248,17 @@ TOUCH_read           (void)
       x_xrel = 1.0 - (x_event.value / MAX_X);
       if (x_xrel >= 0.001 && x_xrel <= 0.999) {
          s_xrel = x_xrel;
-         s_xpos = s_xrel * win.w_wide;
+         s_xpos = win.m_xmin + (s_xrel * win.m_wide);
       }
       break;
    case  ABS_Y :
       DEBUG_TOUCH  yLOG_note    ("Y-movement event");
       s_ypad = x_event.value;
-      x_yrel = 1.0 - (x_event.value / MAX_Y);
+      /*> x_yrel = 1.0 - (x_event.value / MAX_Y);                                     <*/
+      x_yrel = (x_event.value / MAX_Y);
       if (x_yrel >= 0.001 && x_yrel <= 0.999) {
          s_yrel = x_yrel;
-         s_ypos = s_yrel * win.w_tall;
+         s_ypos = win.m_ymin + (s_yrel * win.m_tall);
       }
       break;
    default     :

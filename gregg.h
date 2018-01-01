@@ -204,8 +204,8 @@
 
 
 /* rapidly evolving version number to aid with visual change confirmation     */
-#define VER_NUM   "5.0j"
-#define VER_TXT   "background is sized well and showing beautifully"
+#define VER_NUM   "5.0k"
+#define VER_TXT   "cursor updates well, and raw points capture great"
 
 
 #define     LEN_RECD      2000

@@ -183,7 +183,6 @@ PROG_event()
    /*---(header)-------------------------*/
    DEBUG_TOPS   yLOG_enter    (__FUNCTION__);
    while (1) {
-      ++x_loop;
       while (XPending(DISP)) {
          XNextEvent(DISP, &EVNT);
          ++j;
@@ -324,9 +323,9 @@ PROG_event()
             break;
          }
       }
+      ++x_loop;
       TOUCH_read ();
-      DRAW_main();
-      /*> printf ("loop %3d\n", x_loop);                                              <*/
+      if ((x_loop % 25) == 0)  DRAW_main();
       /*---(sleeping)--------------------*/
       nanosleep    (&x_dur, NULL);
    }

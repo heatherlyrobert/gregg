@@ -285,6 +285,7 @@ DRAW_main (void)
    DRAW_title       ();
    DRAW_command     ();
    DRAW_primary     ();
+   DRAW_cursor ();
    /*> draw_oslider();                                                                <*/
    /*> draw_kslider();                                                                <*/
    /*> draw_raws   ();                                                                <*/
@@ -296,7 +297,6 @@ DRAW_main (void)
    /*> draw_horz   ();                                                                <*/
    /*> words_result ();                                                               <*/
    /*> sample_draw ();                                                                <*/
-   /*> DRAW_cursor ();                                                                <*/
    /*---(word)-----------------------------*/
    /*> glPushMatrix();                                                                <* 
     *> glColor4f(1.0f, 1.0f, 0.0f, 1.0f);                                             <* 
@@ -362,7 +362,7 @@ DRAW_slide_avg       (void)
 {
    float   x_lef = win.m_xmin;
    float   x_rig = win.m_xmax +  2;
-   float   x_top = win.m_ymin + 20;
+   float   x_top = win.m_ymin + 40;
    float   x_bot = win.m_ymin;
    float   x_cnt =  50;
    float   x_inc = (x_rig - x_lef) / x_cnt;
@@ -377,7 +377,7 @@ DRAW_slide_avg       (void)
     *>    glVertex3f( x_rig, x_bot, z);                                               <* 
     *>    glVertex3f( x_lef, x_bot, z);                                               <* 
     *>    glEnd();                                                                    <*/
-   glColor4f(0.3f, 0.3f, 0.0f, 1.0f);       /* nice medium grey            */
+   glColor4f(0.4f, 0.2f, 0.1f, 0.3f);       /* nice medium grey            */
    for (i = 0; i < x_cnt; i++) {
       x1 = x_lef + (x_inc * i);
       x2 = x1 + (x_inc * 0.70);
@@ -584,15 +584,11 @@ draw_horz          (void)
 char          /*----: draw the saved status ----------------------------------*/
 DRAW_cursor        (void)
 {
-   /*---(locals)-------------------------*/
-   float     d, rad;                   /* degrees and radians                 */
-   float     x, y, z;                  /* cartesian coordinates               */
-   char      msg[10];
-   z = 20.0;
+   if (my.touch == 'y')  return 0;
    glPointSize(5.0);
    glColor4f (1.0f, 0.0f, 0.0f, 1.0f);
    glBegin(GL_POINTS);
-   glVertex3f (my.xpos - win.m_xmin, win.m_ymax - my.ypos, z);
+   glVertex3f (my.xpos, my.ypos, 20.0);
    glEnd();
    return 0;
 }

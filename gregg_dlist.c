@@ -699,7 +699,7 @@ dlist_backring     (void)
    glEnd();
    glDisable(GL_LINE_STIPPLE);
    /*---(size one -- u,n,o)-----------------*/
-   glLineWidth(3.0);
+   glLineWidth(2.0);
    glBegin(GL_LINE_STRIP);
    glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
    for (d = 0; d <= 360; d +=  1) {
@@ -723,7 +723,7 @@ dlist_backring     (void)
    glEnd();
    glDisable(GL_LINE_STIPPLE);
    /*---(size two)--------------------------*/
-   glLineWidth(3.0);
+   glLineWidth (15.0);
    glBegin(GL_LINE_STRIP);
    glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
    for (d = 0; d <= 360; d +=  1) {

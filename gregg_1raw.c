@@ -72,18 +72,14 @@ char
 RAW_touch            (int a_x, int a_y)
 {
    /*---(locals)-----------+-----+-----+-*/
-   int         x           =  0.0;
-   int         y           =  0.0;
    int         r           =  0.0;
    /*---(calculate)----------------------*/
-   x  = a_x - win.m_left;
-   y  = a_y - win.m_ymax;
-   r  = sqrt((x * x) + (y * y));
+   r  = sqrt((a_x * a_x) + (a_y * a_y));
    /*---(assign type)--------------------*/
-   if (r < SIZE_R1) {
+   if (r < SIZE_R2) {
       if (stype != 'p')  OUT_clear ();
       stype   = PART_MAIN;
-   } else if (x < 0.0 && y < 0.0) {
+   } else if (a_x < 0.0 && a_y > 0.0) {
       OUT_clear ();
       stype   = PART_PREFIX;
       s_xadj  = a_x;
