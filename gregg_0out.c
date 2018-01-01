@@ -23,10 +23,10 @@ OUT_init             (void)
     *>    if (len > 1 && s[0] != '#' && s[0] != ' ') ++o.total;                       <* 
     *> }                                                                              <*/
    /*> printf("out_init() - found %d saved outlines\n", o.total);                     <*/
-   /*> o.craw     = 1;                                                                <* 
-    *> o.cavg     = 1;                                                                <* 
-    *> o.ckey     = 1;                                                                <* 
-    *> o.curr     = 1;                                                                <*/
+   o.craw     = 1;
+   o.cavg     = 1;
+   o.ckey     = 1;
+   o.curr     = 1;
    return 0;
 }
 
@@ -205,8 +205,8 @@ OUT_clear          (void)
  *>    o.ckey     = 1;                                                                          <* 
  *>    o.saved    = 'y';                                                                        <* 
  *>    fclose(f);                                                                               <* 
- *>    bas_filter    ();                                                                        <* 
- *>    key_filter    ();                                                                        <* 
+ *>    BASE_filter   ();                                                                        <* 
+ *>    KEY_filter    ();                                                                        <* 
  *>    match_flatten ();                                                                        <* 
  *>    match_squeeze ();                                                                        <* 
  *>    circle_driver ();                                                                        <* 

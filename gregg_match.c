@@ -267,7 +267,7 @@ match_flatten    (void)
          DEBUG__LINES  printf("#1 d1=%4d vs. d2=%4d : ", o.key[i].d, o.key[i + 1].d);
          if (dd <= 25 && o.key[i].d <= 20 && o.key[i + 1].d >= 340) {
             DEBUG__LINES  printf("can be removed");
-            key_del (i);
+            KEY_del (i);
             i = 0;
          } else {
             DEBUG__LINES  printf("no match");
@@ -278,7 +278,7 @@ match_flatten    (void)
          DEBUG__LINES  printf("#2 d1=%4d vs. d2=%4d : ", o.key[i].d, o.key[i + 1].d);
          if (dd <= 25 && o.key[i].d >= 340 && o.key[i + 1].d <= 20) {
             DEBUG__LINES  printf("can be removed");
-            key_del (i);
+            KEY_del (i);
             i = 0;
          } else {
             DEBUG__LINES  printf("no match");
@@ -287,7 +287,7 @@ match_flatten    (void)
       /*---(same quad)-------------------*/
       else if (o.key[i].q == o.key[i + 1].q) {
          DEBUG__LINES  printf("#3 same quadrant       : can be removed");
-         key_del (i);
+         KEY_del (i);
          i = 0;
       }
       /*---(otherwise)-------------------*/
@@ -333,7 +333,7 @@ match_squeeze    (void)
          DEBUG__LINES  printf("rule #1 d1=%4d vs. d2=%4d : ", o.key[i].d, o.key[i + 1].d);
          if (dd <= 20 && o.key[i].d <= 280 && o.key[i + 1].d >= 260) {
             DEBUG__LINES  printf("can be removed");
-            key_del (i);
+            KEY_del (i);
             i = 0;
          } else {
             DEBUG__LINES  printf("no match");
@@ -342,14 +342,14 @@ match_squeeze    (void)
          DEBUG__LINES  printf("rule #2 d1=%4d vs. d2=%4d : ", o.key[i].d, o.key[i + 1].d);
          if (dd <= 20 && o.key[i].d >= 260 && o.key[i + 1].d <= 280) {
             DEBUG__LINES  printf("can be removed");
-            key_del (i);
+            KEY_del (i);
             i = 0;
          } else {
             DEBUG__LINES  printf("no match");
          }
       } else if (o.key[i].q == o.key[i + 1].q) {
          DEBUG__LINES  printf("rule #3 same quadrant       : can be removed");
-         key_del (i);
+         KEY_del (i);
          i = 0;
       } else {
          DEBUG__LINES  printf("no rule");
@@ -498,7 +498,7 @@ match_prep         (void)
    for (i = 1; i < o.nkey; ++i) {
       if (strncmp(o.key[i].use, "-", 5) != 0) continue;
       if (o.key[i].l <= 5) {
-         key_label(i, 1, "*");
+         KEY_label(i, 1, "*");
          ++nclean;
       }
    }
@@ -520,7 +520,7 @@ match_cleanup      (void)
    for (i = 1; i < o.nkey; ++i) {
       if (strncmp(o.key[i].use, "-", 5) != 0) continue;
       if (o.key[i].l < SIZE_M0) {
-         key_label(i, 1, "*");
+         KEY_label(i, 1, "*");
          ++nclean;
       } else {
          ++missed;
@@ -605,7 +605,7 @@ match_location     (int a_rule, int a_beg, int a_opens, int a_size)
    }
    if (rc == 1) {
       DEBUG__MATCHES  printf("[ MATCH %-4.4s]", match);
-      key_label(a_beg + 1, a_opens, match);
+      KEY_label(a_beg + 1, a_opens, match);
    } else {
       DEBUG__MATCHES  printf("[ no fits   ]");
    }
@@ -745,8 +745,8 @@ combo_check        (int a_beg, int a_count, char a_method, int a_offset, int a_n
    rc2 = match_group (a_beg + a_offset, 2, a_2nd);
    /*---(check results)------------------*/
    if (rc1 == 0 || rc2 == 0) {
-      if (a_new > 0) key_del   (a_new);
-      key_label (a_beg + 1, a_count, "-");
+      if (a_new > 0) KEY_del   (a_new);
+      KEY_label (a_beg + 1, a_count, "-");
       return -1;
    }
    /*---(complete)-----------------------*/
@@ -794,7 +794,7 @@ combo_flaty        (int a_beg, int a_count, int a_offset)
       return -1;
    }
    /*---(add midpoint)-------------------*/
-   new = key_add (mid, 'y', '-');
+   new = KEY_add (mid, 'y', '-');
    DEBUG__MATCHES  printf("m=%3d, d=%5.1f, k=%2d\n", mid, min, new);
    /*---(complete)-----------------------*/
    return new;
@@ -837,7 +837,7 @@ combo_midy         (int a_beg, int a_count, int a_offset)
       }
    }
    /*---(add midpoint)-------------------*/
-   new = key_add (mid, 'y', '-');
+   new = KEY_add (mid, 'y', '-');
    DEBUG__MATCHES  printf("m=%3d, d=%5.1f, k=%2d\n", mid, min, new);
    /*---(complete)-----------------------*/
    return new;
@@ -880,7 +880,7 @@ combo_flatx        (int a_beg, int a_count, int a_offset)
       }
    }
    /*---(add midpoint)-------------------*/
-   new = key_add (mid, 'y', '-');
+   new = KEY_add (mid, 'y', '-');
    DEBUG__MATCHES  printf("m=%3d, d=%5.1f, k=%2d\n", mid, min, new);
    /*---(complete)-----------------------*/
    return new;
@@ -923,7 +923,7 @@ combo_midx         (int a_beg, int a_count, int a_offset)
       }
    }
    /*---(add midpoint)-------------------*/
-   new = key_add (mid, 'y', '-');
+   new = KEY_add (mid, 'y', '-');
    DEBUG__MATCHES  printf("m=%3d, d=%5.1f, k=%2d\n", mid, min, new);
    /*---(complete)-----------------------*/
    return new;
@@ -1264,12 +1264,12 @@ circle_backward    (void)
    }
    /*---(mark)---------------------------*/
    if (pt  != 0 && pt  != o.key[one].p_bas) {
-      new = key_add   (pt , 'y', '-');
+      new = KEY_add   (pt , 'y', '-');
       if (old_nkey != o.nkey) {
          DEBUG__CIRCLES  printf("      ADDED KEY\n");
          one = new;
          ++two;
-         key_label (one + 1, two - one, use);
+         KEY_label (one + 1, two - one, use);
       } else {
          DEBUG__CIRCLES  printf("      existing key\n");
       }
@@ -1316,10 +1316,10 @@ circle_forward     (void)
    }
    /*---(mark)---------------------------*/
    if (pt  != 0 && pt  != o.key[two].p_bas) {
-      new = key_add   (pt , 'y', '-');
+      new = KEY_add   (pt , 'y', '-');
       if (old_nkey != o.nkey) {
          DEBUG__CIRCLES  printf("      ADDED KEY\n");
-         key_label (new, 1, "+");
+         KEY_label (new, 1, "+");
          two = new;
       } else {
          DEBUG__CIRCLES  printf("      existing key\n");
@@ -1348,8 +1348,8 @@ circle_update      (int a_one, int a_two, int a_size)
    else                      strncpy(use, "e", 5);
    DEBUG__CIRCLES  printf("   calling it an <<%s>>\n", use);
    /*---(create new keys)----------------*/
-   one = key_add (a_one, 'y', '-');
-   two = key_add (a_two, 'y', '-');
+   one = KEY_add (a_one, 'y', '-');
+   two = KEY_add (a_two, 'y', '-');
    DEBUG__CIRCLES  printf("   added one=%4d and two=%4d\n", one, two);
    /*---(get direction)------------------*/
    /*> d1 = o.key[one + 2].d;                                                         <* 
@@ -1432,10 +1432,10 @@ circle_driver      (void)
    int       pt;
    /*---(add end points)-----------------*/
    for (i = 0; i < o.navg; ++i) {
-      if (o.avg[i].t == 'S') key_add (i, 'y', 'S');
-      if (o.avg[i].t == 'F') key_add (i, 'y', 'F');
+      if (o.avg[i].t == 'S') KEY_add (i, 'y', 'S');
+      if (o.avg[i].t == 'F') KEY_add (i, 'y', 'F');
    }
-   key_calc ('c');
+   KEY_calc  ('c');
    /*---(report out)---------------------*/
    DEBUG__CIRCLES  POINT_list (o.key, o.nkey);
    while (_found == 1) {
@@ -1454,13 +1454,13 @@ circle_driver      (void)
    /*---(put points back)----------------*/
    for (i = 0; i < o.nkey; ++i) {
       if (o.key[i].t == 'S' || o.key[i].t == 'F') {
-         key_del (i);
+         KEY_del (i);
          --i;
       }
    }
    /*---(prepare for matching)-----------*/
-   key_prep ();
-   key_calc ('n');
+   KEY_prep  ();
+   KEY_calc  ('n');
    /*---(report out)---------------------*/
    DEBUG__CIRCLES  POINT_list (o.key, o.nkey);
    /*---(complete)-----------------------*/

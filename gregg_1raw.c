@@ -79,11 +79,11 @@ RAW_touch            (int a_x, int a_y)
    if (r < SIZE_R2) {
       if (stype != 'p')  OUT_clear ();
       stype   = PART_MAIN;
+      s_xadj  = a_x;
+      s_yadj  = a_y;
    } else if (a_x < 0.0 && a_y > 0.0) {
       OUT_clear ();
       stype   = PART_PREFIX;
-      s_xadj  = a_x;
-      s_yadj  = a_y;
    } else {
       stype   = PART_CONTINUE;
    }
@@ -107,7 +107,16 @@ RAW_lift             (int a_x, int a_y)
    RAW_point (a_x, a_y, POINT_NORMAL);
    RAW_point (a_x, a_y, POINT_FINISH);
    RAW_equalize ();
-   RPTG_RAW  POINT_list (o.raw, o.nraw);
+   BASE_filter  ();
+   KEY_filter    ();
+   match_flatten ();
+   match_squeeze ();
+   circle_driver ();
+   match_sharps  ();
+   match_driver  ();
+   RPTG_RAW   POINT_list (o.raw, o.nraw);
+   RPTG_BASE  POINT_list (o.avg, o.navg);
+   RPTG_KEY   POINT_list (o.key, o.nkey);
    return 0;
 }
 

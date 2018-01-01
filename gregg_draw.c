@@ -93,8 +93,8 @@ DRAW__resize       (cchar a_format, cchar *a_title, cint a_wide, cint a_tall)
    win.d_zoff      =   100;
    win.d_point     =     8;
    win.d_bar       =    20;
-   win.d_ansx      =    40;
-   win.d_ansy      =   -65;
+   win.d_ansx      =   200;
+   win.d_ansy      =  -160;
    /*---(readout)------------------------*/
    DEBUG_GRAF   yLOG_complex ("window"    , "bott %3d, left %3d, wide %3d, tall %3d", 0         , 0         , win.w_wide, win.w_tall);
    DEBUG_GRAF   yLOG_complex ("title"     , "bott %3d, left %3d, wide %3d, tall %3d", win.t_bott, win.t_left, win.t_wide, win.t_tall);
@@ -172,6 +172,14 @@ DRAW_primary         (void)
     *> } glPopMatrix();                                                               <*/
    /*---(parts)--------------------------*/
    /*> DRAW_slide_avg ();                                                             <*/
+   if (my.touch != 'y') {
+      DRAW_base        ();
+      DRAW_keys        ();
+      DRAW_curr        ();
+      DRAW_info_counts ();
+      DRAW_info_base   ();
+      DRAW_info_answer ();
+   }
    /*---(complete)-----------------------*/
    return;
 }
@@ -278,7 +286,7 @@ DRAW_main (void)
    glClear         (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
    /*> glLoadIdentity();                                                              <*/
    /*---(draw)-----------------------------*/
-   /*> draw_info();                                                                   <*/
+   /*> DRAW_info();                                                                   <*/
    DEBUG_WIND   yLOG_note     ("post-godview");
    /*> glCallList (dl_back);                                                          <*/
    DEBUG_WIND   yLOG_note     ("post-displist");
@@ -288,10 +296,10 @@ DRAW_main (void)
    DRAW_cursor ();
    /*> draw_oslider();                                                                <*/
    /*> draw_kslider();                                                                <*/
-   /*> draw_raws   ();                                                                <*/
+   /*> DRAW_raws   ();                                                                <*/
    /*> draw_avgs   ();                                                                <*/
-   /*> draw_keys   ();                                                                <*/
-   /*> draw_curr   ();                                                                <*/
+   /*> DRAW_keys   ();                                                                <*/
+   /*> DRAW_curr   ();                                                                <*/
    /*> draw_bands  ();                                                                <*/
    /*> draw_saved  ();                                                                <*/
    /*> draw_horz   ();                                                                <*/
@@ -584,7 +592,7 @@ draw_horz          (void)
 char          /*----: draw the saved status ----------------------------------*/
 DRAW_cursor        (void)
 {
-   if (my.touch == 'y')  return 0;
+   /*> if (my.touch == 'y')  return 0;                                                <*/
    glPointSize(5.0);
    glColor4f (1.0f, 0.0f, 0.0f, 1.0f);
    glBegin(GL_POINTS);
@@ -668,7 +676,7 @@ draw_bands         (void)
 }
 
 char          /*----: draw the current point ---------------------------------*/
-draw_curr          (void)
+DRAW_curr          (void)
 {
    /*---(locals)-------------------------*/
    float   r1 =   2.0;
@@ -723,7 +731,7 @@ draw_curr          (void)
 static void      o___POINTS__________________o (void) {;}
 
 char          /*----: draw the raw points ------------------------------------*/
-draw_raws          (void)
+DRAW_raws          (void)
 {
    /*---(locals)-------------------------*/
    float   z     =    5.0;
@@ -747,14 +755,14 @@ draw_raws          (void)
 }
 
 char          /*----: draw the bas/avg points --------------------------------*/
-draw_avgs          (void)
+DRAW_base          (void)
 {
    /*---(locals)-------------------------*/
    float   z     =    5.25;
    int i;
-   glPointSize(5.0);
-   glColor4f(0.7f, 0.7f, 0.0f, 1.0f);
-   glBegin(GL_POINTS);
+   glPointSize (2.0);
+   glColor4f   (0.7f, 0.7f, 0.0f, 1.0f);
+   glBegin     (GL_POINTS);
    for (i = 0; i < o.navg; ++i) {
       if      (o.avg[i].ca    == 'x') glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
       else if (o.avg[i].t     == 'm') glColor4f(1.0f, 0.0f, 1.0f, 1.0f);
@@ -768,7 +776,7 @@ draw_avgs          (void)
 }
 
 char          /*----: draw the key points and lines --------------------------*/
-draw_keys          (void)
+DRAW_keys          (void)
 {
    /*---(locals)-------------------------*/
    float   r1 =   2.0;
@@ -852,7 +860,94 @@ draw_keys          (void)
 static void      o___INFO____________________o (void) {;}
 
 char
-draw_info (void)
+DRAW_info_counts     (void)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        t           [100];
+   /*---(point counts)-------------------*/
+   glColor4f     (0.0f, 0.0f, 0.0f, 1.0f);
+   glPushMatrix  (); {
+      glTranslatef  (win.d_xoff, win.d_yoff, win.d_zoff);
+      snprintf      (t, 100, "%4d", o.nraw);
+      FONT__label   ("raw#", t);
+      snprintf      (t, 100, "%4d", o.navg);
+      FONT__label   ("avg#", t);
+      snprintf      (t, 100, "%4d", o.nkey);
+      FONT__label   ("key#", t);
+   } glPopMatrix ();
+   /*---(complete)-----------------------*/
+   return 0;
+}
+
+char
+DRAW_info_base       (void)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        t           [100];
+   float       s           =  0.0;
+   int         b           =    0;
+   /*---(average point)------------------*/
+   glColor4f     (0.0f, 0.0f, 0.0f, 1.0f);
+   glPushMatrix  (); {
+      /*---(basics)----------------------*/
+      glTranslatef  (win.d_xoff, win.d_yoff - 50, win.d_zoff);
+      snprintf      (t, 100, "%4d", o.avg[o.cavg - 1].p_bas);
+      FONT__label   ("num", t);
+      snprintf      (t, 100, "%4d", o.avg[o.cavg - 1].p_raw);
+      FONT__label   ("raw", t);
+      snprintf      (t, 100, "%4d", o.avg[o.cavg - 1].xpos);
+      FONT__label   ("x"  , t);
+      snprintf      (t, 100, "%4d", o.avg[o.cavg - 1].ypos);
+      FONT__label   ("y"  , t);
+      snprintf      (t, 100, "%4d", o.avg[o.cavg - 1].xd);
+      FONT__label   ("xd" , t);
+      snprintf      (t, 100, "%4d", o.avg[o.cavg - 1].yd);
+      FONT__label   ("yd" , t);
+      snprintf      (t, 100, "%4d", o.avg[o.cavg - 1].l);
+      FONT__label   ("len" , t);
+      /*---(more complex)----------------*/
+      s = o.avg[o.cavg - 1].s;
+      b = o.avg[o.cavg - 1].b;
+      if (s >  999) { s = 999.99; b = 999; }
+      if (s < -999) { s = -999.99; b = -999; }
+      snprintf      (t, 100, "%7.2f", s);
+      FONT__label   ("s" , t);
+      snprintf      (t, 100, "%4d",   b);
+      FONT__label   ("b"   , t);
+      snprintf      (t, 100, "%7.2f", o.avg[o.cavg - 1].r);
+      FONT__label   ("r" , t);
+      snprintf      (t, 100, "%4d",   o.avg[o.cavg - 1].d);
+      FONT__label   ("d"   , t);
+      snprintf      (t, 100, "%4d",   o.avg[o.cavg - 1].q);
+      FONT__label   ("q"   , t);
+      snprintf      (t, 100, "   %c", o.avg[o.cavg - 1].t);
+      FONT__label   ("t"   , t);
+      /*---(done)------------------------*/
+   } glPopMatrix();
+   /*---(complete)-----------------------*/
+   return 0;
+}
+
+char
+DRAW_info_answer     (void)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        t           [100];
+   /*---(point counts)-------------------*/
+   glColor4f     (0.0f, 0.0f, 0.0f, 1.0f);
+   glPushMatrix  (); {
+      glTranslatef(  win.d_ansx, win.d_ansy, win.d_zoff);
+      snprintf      (t, 100, "%s",   o.actual);
+      FONT__label   ("actu"  , t);
+      snprintf      (t, 100, "%s",   o.word);
+      FONT__label   ("word"  , t);
+   } glPopMatrix ();
+   /*---(complete)-----------------------*/
+   return 0;
+}
+
+char
+DRAW_info (void)
 {
    DEBUG_G  printf("   - draw_info()\n");
    char msg[100];
@@ -920,7 +1015,7 @@ draw_info (void)
    snprintf(msg, 100, "   %c", o.avg[o.cavg - 1].t);
    FONT__label ("t"   , msg);
    /*---(calculated)------------------------*/
-   int  xkey = key_find(o.cavg - 1);
+   int  xkey = KEY_find(o.cavg - 1);
    if (xkey >= 0) {
       glTranslatef(   0, -win.d_bar * 0.5, 0.0);
       snprintf(msg, 100, "%4d",   xkey);

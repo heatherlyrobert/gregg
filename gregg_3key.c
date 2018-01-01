@@ -9,223 +9,6 @@ char fname[] = "/home/dotsuu/p_gvskav/gregg.gregg_shorthand_system/strokes_new.d
 char oname[] = "/home/dotsuu/p_gvskav/gregg.gregg_shorthand_system/strokes_new.dat";
 
 
-/*============================--------------------============================*/
-/*===----                          basic points                        ----===*/
-/*============================--------------------============================*/
-void o___BAS_POINTS_____________o (void) {;}
-
-PRIV int      /*----: locate a basic point based on its raw point ------------*/
-bas_find           (int a_raw)
-{
-   int i = 0;
-   for (i = 0; i < o.nbas; ++i) {
-      if (o.bas[i].p_bas == a_raw) return i;
-   }
-   return -1;
-}
-
-PRIV char     /*----: add an additional basic point from a raw point ---------*/
-bas_add            (int a_raw)
-{
-   int       rc        = 0;
-   DEBUG__BAS  printf("   %3d : ", a_raw);
-   if ((rc = bas_find(a_raw)) >= 0) {
-      DEBUG__BAS  printf("REJECTED, already exists as %4d\n", rc);
-      return -1;
-   }
-   DEBUG__BAS  printf("added as %4d at %4dx, %4dy\n", o.nbas, o.raw[a_raw].xpos, o.raw[a_raw].ypos);
-   o.bas[o.nbas].p_raw = o.avg[o.navg].p_raw = a_raw;
-   o.bas[o.nbas].p_bas    = o.avg[o.navg].p_bas    = o.nbas;
-   o.bas[o.nbas].xpos    = o.avg[o.navg].xpos    = o.raw[a_raw].xpos;
-   o.bas[o.nbas].ypos    = o.avg[o.navg].ypos    = o.raw[a_raw].ypos;
-   o.bas[o.nbas].t    = o.avg[o.navg].t    = o.raw[a_raw].t;
-   strncpy(o.bas[o.nbas].use, "-", 5);
-   strncpy(o.avg[o.nbas].use, "-", 5);
-   ++o.nbas;
-   ++o.navg;
-   return 0;
-}
-
-PRIV char     /*----: calculate additional information on basic points -------*/
-bas_calc           (void)
-{
-   int i;
-   for (i = 0; i < o.nbas; ++i) {
-      if (o.bas[i].t     == 'S') continue;
-      if (o.bas[i - 1].t == 'S') continue;
-      if (o.bas[i].t     == 'F') continue;
-      POINT_calc (o.bas + i, 'n');
-      POINT_calc (o.avg + i, 'a');
-   }
-   return 0;
-}
-
-PRIV char     /*----: move the beg/end points out to test circles ------------*/
-bas_extend         (void)
-{
-   /*---(locals)-------------------------*/
-   float     rad       = 0.0;          /* radians                             */
-   int       i         = 0;            /* loop iterator -- bas points         */
-   /*---(beginning)----------------------*/
-   for (i = 0; i < o.nbas; ++i) {
-      if (o.avg[i].t == 'S') {
-         rad = o.avg[i + 2].r;
-         o.bas[i].xpos  = o.avg[i].xpos  = o.bas[i + 1].xpos - (20 * cos(rad)) ;
-         o.bas[i].ypos  = o.avg[i].ypos  = o.bas[i + 1].xpos - (20 * sin(rad)) ;
-         DEBUG__BAS  printf("   extended beg %4d to %4dx, %4dy for circle detection\n", 0, o.bas[i].xpos, o.bas[i].ypos);
-      }
-      /*---(ending)-------------------------*/
-      if (o.avg[i].t == 'F') {
-         rad = o.bas[i - 1].r;
-         o.bas[i].xpos  = o.avg[i].xpos  = o.bas[i - 1].xpos + (20 * cos(rad)) ;
-         o.bas[i].ypos  = o.avg[i].ypos  = o.bas[i - 1].ypos + (20 * sin(rad)) ;
-         DEBUG__BAS  printf("   extended end %4d to %4dx, %4dy for circle detection\n", o.nbas - 1, o.bas[i].xpos, o.bas[i].ypos);
-      }
-   }
-   /*---(complete)-----------------------*/
-   return 0;
-}
-
-PRIV char     /*----: push bas points as far as possible into sharp corners --*/
-bas_sharpen        (void)
-{
-   /*---(locals)-------------------------*/
-   int       d1, d2, dd;                    /* calculated angles              */
-   int       sharp     = 70;                /* magnitude of sharp break       */
-   int       i         = 0;                 /* loop iterator -- basic points  */
-   /*---(process)------------------------*/
-   DEBUG__BAS  printf("   sharp tolerance set to >= %d\n", sharp);
-   for (i = 1; i < o.nbas - 1; ++i) {
-      if (o.avg[i].t == 'S' || o.avg[i - 1].t == 'S') continue;
-      if (o.avg[i].t == 'F' || o.avg[i + 1].t == 'F') continue;
-      if (o.avg[i - 1].q == 0)                        continue;
-      /*---(calculate)-------------------*/
-      d1     = o.avg[i - 1].d;
-      d2     = o.avg[i + 1].d;
-      dd     = d1 - d2;
-      if (dd >  180) dd -= 360;
-      if (dd < -180) dd += 360;
-      DEBUG__BAS  printf("   %3d : %5d vs. %5d, so %5d   ", i, d1, d2, abs(dd));
-      o.bas[i].ca = o.avg[i].ca = '-';
-      /*---(check)-----------------------*/
-      if (abs(dd) >= sharp) {
-         o.bas[i].ca = o.avg[i].ca = 'x';
-         DEBUG__BAS  printf("SHARP\n");
-      } else {
-         DEBUG__BAS  printf("no\n");
-      }
-   }
-   /*---(complete)-----------------------*/
-   return 0;
-}
-
-char          /*----: filter raw points into basic points --------------------*/
-bas_filter         (void)
-{
-   DEBUG__BAS  printf("BAS POINTS (begin)\n");
-   /*---(locals)-------------------------*/
-   float     xd, yd;
-   float     dist      = 0.0;
-   int       i;
-   /*---(beg points)---------------------*/
-   o.nbas = o.navg = 0;
-   /*---(find additional points)---------*/
-   for (i = 0; i < o.nraw; ++i) {
-      DEBUG__BAS  printf("%3d [%c] ", i, o.raw[i].t);
-      /*---(handle starts)---------------*/
-      if (o.raw[i].t == 'S') {
-         DEBUG__BAS  printf("S/>                    ACCEPT\n");
-         bas_add (i);
-         o.bas[o.nbas - 1].fake = 'y';
-         bas_add (i + 1);
-         o.bas[o.nbas - 1].t = '>';
-         o.avg[o.nbas - 1].t = '>';
-         /*> strcpy(o.bas[o.nbas - 1].t, ">");                                        <* 
-          *> strcpy(o.avg[o.nbas - 1].t, ">");                                        <*/
-         ++i;
-         continue;
-      }
-      /*---(handle finsishes)------------*/
-      if (o.raw[i].t == 'F') {
-         DEBUG__BAS  printf("F                      ACCEPT\n");
-         xd   = fabs(o.raw[i].xpos - o.bas[o.nbas - 1].xpos);
-         yd   = fabs(o.raw[i].ypos - o.bas[o.nbas - 1].ypos);
-         dist = sqrt((xd * xd) + (yd * yd));
-         if (dist <=  3.0 && o.bas[o.nbas - 1].t!= '>') {
-            DEBUG__BAS  printf("too close to F         reject, i=%c, i-1=%c\n", o.raw[i].t, o.raw[i - 1].t);
-            --o.nbas;
-            --o.navg;
-         }
-         bas_add (i - 1);
-         bas_add (i);
-         o.bas[o.nbas - 1].fake = 'y';
-         continue;
-      }
-      /*---(handle normal)---------------*/
-      xd   = abs(o.raw[i].xpos - o.bas[o.nbas - 1].xpos);
-      yd   = abs(o.raw[i].ypos - o.bas[o.nbas - 1].ypos);
-      dist = sqrt((xd * xd) + (yd * yd));
-      if (dist >  3.0) {
-         DEBUG__BAS  printf("good distance  %6.2f  ACCEPT\n", dist);
-         bas_add (i);
-      } else {
-         DEBUG__BAS  printf("too close with %6.2f\n", dist);
-      }
-   }
-   /*---(end points)---------------------*/
-   DEBUG__BAS  printf("   added %4d total bas points\n\n", o.nbas);
-   /*---(run calculations)---------------*/
-   bas_calc    ();
-   /*> bas_extend  ();                                                                <*/
-   bas_sharpen ();
-   bas_calc    ();
-   /*---(output)-------------------------*/
-   DEBUG__BAS       POINT_list (o.bas, o.nbas);
-   DEBUG__AVERAGES  POINT_list (o.avg, o.navg);
-   /*---(complete)-----------------------*/
-   DEBUG__BAS  printf("BAS POINTS (end)\n\n");
-   return 0;
-}
-
-
-
-/*============================--------------------============================*/
-/*===----                         average points                       ----===*/
-/*============================--------------------============================*/
-void o___AVG_POINTS_____________o (void) {;}
-
-char
-avg_pick           (int a_y)
-{
-   /*---(extremes)-------------------------*/
-   float   x_min  =  win.m_ymax;
-   float   x_max  =  win.m_ymin;
-   float   x_ran  =  x_min + x_max;
-   float   x_inc  =  x_ran / o.navg;
-   /*---(location)-------------------------*/
-   float   x_pos  =  x_ran -  (a_y + win.m_ymin);
-   if (x_pos <  0    ) return 0;
-   if (x_pos >= x_ran) return 0;
-   int     x_num  =  (x_pos / x_inc);
-   /*---(make change)----------------------*/
-   if (x_num + 1 != o.cavg) {
-      o.cavg = x_num + 1;
-      /*> DRAW_main();                                                                <*/
-   }
-   /*---(complete)-------------------------*/
-   return 0;
-}
-
-int           /*----: locate a avg point based on raw id ---------------------*/
-avg_find           (int a_pt)
-{
-   int i;
-   for (i = 0; i < o.navg; ++i) {
-      if (o.avg[i].p_raw == a_pt - 1) return i;
-   }
-   return -1;
-}
-
 
 
 /*============================--------------------============================*/
@@ -234,7 +17,7 @@ avg_find           (int a_pt)
 void o___KEY_POINTS_____________o (void) {;}
 
 PRIV char     /*----: swap two points during the sort ------------------------*/
-key_swap           (int a_i, int a_j)
+KEY__swap          (int a_i, int a_j)
 {
    int or, p, x, y, a, t;
    char  u[5];
@@ -263,13 +46,13 @@ key_swap           (int a_i, int a_j)
 }
 
 PRIV char     /*----: reorder key points by bas id ---------------------------*/
-key_sort           (void)
+KEY__sort          (void)
 {
    int i;
    int j;
    for (i = 0; i < o.nkey - 1; ++i) {
       for (j = i + 1; j < o.nkey; ++j) {
-         if (o.key[i].p_bas > o.key[j].p_bas) key_swap(i, j);
+         if (o.key[i].p_bas > o.key[j].p_bas) KEY__swap (i, j);
       }
    }
    return 0;
@@ -335,7 +118,7 @@ key_curve          (int a_pt)
 }
 
 char          /*----: calculate key point information ------------------------*/
-key_calc           (char a_mode)
+KEY_calc           (char a_mode)
 {
    /*---(usage notes)--------------------*/
    /*
@@ -363,7 +146,7 @@ key_calc           (char a_mode)
 }
 
 int           /*----: locate a key point based on bas id ---------------------*/
-key_find           (int a_pt)
+KEY_find           (int a_pt)
 {
    int i;
    for (i = 0; i < o.nkey; ++i) {
@@ -373,13 +156,13 @@ key_find           (int a_pt)
 }
 
 char          /*----: add a key point from a avg point -----------------------*/
-key_add            (int a_pt, char a_fake, char a_type)
+KEY_add            (int a_pt, char a_fake, char a_type)
 {
    DEBUG__KEY  printf("   key request for %4d as a=%c, t=%c : ", a_pt, a_fake, a_type);
    /*---(locals)-------------------------*/
    int pt  = -1;
    /*---(check for existing)-------------*/
-   pt  = key_find (a_pt);
+   pt  = KEY_find (a_pt);
    if (pt >= 0) {
       DEBUG__KEY  printf("already exists as %d\n", pt);
       return pt;
@@ -395,17 +178,17 @@ key_add            (int a_pt, char a_fake, char a_type)
    o.key[o.nkey].t = a_type;
    /*---(update the keys)----------------*/
    ++o.nkey;
-   key_sort();
-   key_calc('n');
+   KEY__sort ();
+   KEY_calc  ('n');
    /*---(locate after sort)--------------*/
-   pt = key_find (a_pt);
+   pt = KEY_find (a_pt);
    DEBUG__KEY  printf("added as %d\n", pt);
    /*---(complete)-----------------------*/
    return pt;
 }
 
 char          /*----: remove a key point -------------------------------------*/
-key_del            (int a_pt)
+KEY_del            (int a_pt)
 {
    DEBUG__KEY  printf("   key delete  for %4d\n", a_pt);
    int i;
@@ -419,12 +202,12 @@ key_del            (int a_pt)
       strncpy(o.key[i - 1].use, o.key[i].use, 5);
    }
    --o.nkey;
-   key_calc('n');
+   KEY_calc ('n');
    return 0;
 }
 
 char          /*---: prepare key points for matching -------------------------*/
-key_prep           (void)
+KEY_prep           (void)
 {
    int i;
    int     nclean  = 0;
@@ -438,7 +221,7 @@ key_prep           (void)
 }
 
 PRIV char     /*---: remove similar key points -------------------------------*/
-key_clean          (void)
+KEY__clean           (void)
 {
    int i;
    int     nclean  = 0;
@@ -447,7 +230,7 @@ key_clean          (void)
       if (o.key[i].t == '>')            continue;
       if (o.key[i].q == o.key[i - 1].q) {
          DEBUG__KEY  printf("   cleaned out %d\n", i);
-         key_del(i - 1);
+         KEY_del(i - 1);
          --i;
          ++nclean;
       }
@@ -457,7 +240,7 @@ key_clean          (void)
 }
 
 PRIV char     /*----: move the beg/end points out to test circles ------------*/
-key_extend         (void)
+KEY__extend        (void)
 {
 
    /*---(locals)-------------------------*/
@@ -487,7 +270,7 @@ key_extend         (void)
 }
 
 PRIV char     /*---: get key points into the corners/extremes ----------------*/
-key_sharpen        (void)
+KEY__sharpen       (void)
 {
    /*---(locals)-------------------------*/
    int       q1        = 0;
@@ -529,8 +312,8 @@ key_sharpen        (void)
          }
          if (new != o.key[i].p_bas) {
             DEBUG__KEY  printf("         new max, %3d moves from %3d to %3d\n", i, o.key[i].p_bas, new);
-            key_del (i);
-            key_add (new, '-', '-');
+            KEY_del (i);
+            KEY_add (new, '-', '-');
          } else {
             DEBUG__KEY  printf("         max remains\n");
          }
@@ -553,8 +336,8 @@ key_sharpen        (void)
          }
          if (new != o.key[i].p_bas) {
             DEBUG__KEY  printf("         new max, %3d moves from %3d to %3d\n", i, o.key[i].p_bas, new);
-            key_del (i);
-            key_add (new, '-', '-');
+            KEY_del (i);
+            KEY_add (new, '-', '-');
          } else {
             DEBUG__KEY  printf("         max remains\n");
          }
@@ -577,8 +360,8 @@ key_sharpen        (void)
          }
          if (new != o.key[i].p_bas) {
             DEBUG__KEY  printf("         new max, %3d moves from %3d to %3d\n", i, o.key[i].p_bas, new);
-            key_del (i);
-            key_add (new, '-', '-');
+            KEY_del (i);
+            KEY_add (new, '-', '-');
          } else {
             DEBUG__KEY  printf("         max remains\n");
          }
@@ -601,8 +384,8 @@ key_sharpen        (void)
          }
          if (new != o.key[i].p_bas) {
             DEBUG__KEY  printf("         new max, %3d moves from %3d to %3d\n", i, o.key[i].p_bas, new);
-            key_del (i);
-            key_add (new, '-', '-');
+            KEY_del (i);
+            KEY_add (new, '-', '-');
          } else {
             DEBUG__KEY  printf("         max remains\n");
          }
@@ -612,13 +395,13 @@ key_sharpen        (void)
          DEBUG__KEY  printf("      #?? (%3d) %3d is %1d and %1d\n", i, o.key[i].p_bas, q1, q2);
       }
    }
-   key_calc ('n');
+   KEY_calc  ('n');
    /*---(complete)-----------------------*/
    return 0;
 }
 
 char          /*----: identify key points from bas/avg ones ------------------*/
-key_filter         (void)
+KEY_filter         (void)
 {
    int i;
    DEBUG__KEY  printf("KEY POINTS (begin)\n");
@@ -633,27 +416,25 @@ key_filter         (void)
       if      (o.avg[i].t == 'F')  continue;
       /*---(mark)------------------------*/
       if        (o.avg[i + 1].t == 'F') {
-         key_add (i, '-', '-');
+         KEY_add (i, '-', '-');
       } else if (o.avg[i - 1].t == 'S') {
-         key_add (i, '-', '>');
+         KEY_add (i, '-', '>');
       } else if (o.avg[i - 1].q == 0) {
          continue;
       } else if (o.avg[i].q != o.avg[i - 1].q) {
-         key_add (i, '-', '-');
+         KEY_add (i, '-', '-');
       }
    }
-   key_clean   ();
-   key_extend  ();
-   key_sharpen ();
-   DEBUG__KEY  printf("   done with %d points\n", o.nkey);
-   DEBUG__KEY  POINT_list (o.key, o.nkey);
+   KEY__clean   ();
+   KEY__extend  ();
+   KEY__sharpen ();
    /*---(completion)---------------------*/
    DEBUG__KEY  printf("KEY POINTS (end)\n\n");
    return 0;
 }
 
 char          /*---: label a range of key points with a use ------------------*/
-key_label          (int a_pt, int a_count, char *a_use)
+KEY_label          (int a_pt, int a_count, char *a_use)
 {
    int i;
    for (i = a_pt; i < a_pt + a_count; ++i) {

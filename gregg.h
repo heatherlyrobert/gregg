@@ -204,8 +204,8 @@
 
 
 /* rapidly evolving version number to aid with visual change confirmation     */
-#define VER_NUM   "5.0k"
-#define VER_TXT   "cursor updates well, and raw points capture great"
+#define VER_NUM   "5.0l"
+#define VER_TXT   "goes all the way through dictionary matches"
 
 
 #define     LEN_RECD      2000
@@ -275,13 +275,19 @@ typedef     struct      cACCESSOR   tACCESSOR;
 struct cACCESSOR {
    char        rptg_touch;
    char        rptg_raw;
+   char        rptg_base;
+   char        rptg_key;
    char        touch;
    int         xpos;
    int         ypos;
+   int         xadj;
+   int         yadj;
 } my;
 
 #define     RPTG_TOUCH  if (my.rptg_touch == 'y') 
 #define     RPTG_RAW    if (my.rptg_raw   == 'y') 
+#define     RPTG_BASE   if (my.rptg_base  == 'y') 
+#define     RPTG_KEY    if (my.rptg_key   == 'y') 
 
 
 
@@ -574,15 +580,19 @@ char       draw_oslider         (void);
 char       DRAW_slide_avg       (void);
 char       draw_kslider         (void);
 
-char       draw_raws            (void);
-char       draw_avgs            (void);
-char       draw_keys            (void);
-char       draw_curr            (void);
+char       DRAW_raws            (void);
+char       DRAW_base            (void);
+char       DRAW_keys            (void);
+char       DRAW_curr            (void);
 char       draw_saved           (void);
 char       draw_horz            (void);
 char       DRAW_cursor          (void);
 
-char       draw_info         (void);
+char       DRAW_info            (void);
+char       DRAW_info_counts     (void);
+char       DRAW_info_base       (void);
+char       DRAW_info_answer     (void);
+
 char       draw_letters      (void);
 char       draw_ellipse      (int, char);
 char       draw_arc          (float, float, int, int);
@@ -622,17 +632,18 @@ char       RAW_normal           (int a_x, int a_y);
 char       RAW_lift             (int a_x, int a_y);
 char       RAW_equalize         (void);
 
+/*---(base)-----------------*/
+char       BASE_filter       (void);
 
-char       bas_filter        (void);
-char       avg_pick          (int);
-int        avg_find          (int);
-char       key_filter        (void);
-char       key_add           (int, char, char);
-char       key_calc          (char);
-char       key_prep          (void);
-char       key_label         (int, int, char*);
-char       key_del           (int);
-int        key_find          (int);
+char       KEY_filter        (void);
+
+char       KEY_add           (int, char, char);
+char       KEY_calc          (char);
+char       KEY_prep          (void);
+char       KEY_label         (int, int, char*);
+char       KEY_del           (int);
+int        KEY_find          (int);
+
 char       match_sharps      (void);
 
 char       match_driver      (void);

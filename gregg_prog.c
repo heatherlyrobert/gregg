@@ -49,6 +49,8 @@ PROG_init          (void)
    /*---(reporting flags)-------------*/
    my.rptg_touch = '-';
    my.rptg_raw   = '-';
+   my.rptg_base  = '-';
+   my.rptg_key   = '-';
    /*---(debugger : standard)---------*/
    /*> debug.prep   = 'n';     /+ x) program setup and tear-down           +/         <* 
     *> debug.cli    = 'n';     /+ c) command line interface                +/         <* 
@@ -95,6 +97,8 @@ PROG_args          (int argc, char *argv[])
       DEBUG_ARGS  yLOG_info    ("cli arg", a);
       if      (strncmp(a, "--rptg-touch"        , 20) == 0)   my.rptg_touch = 'y';
       else if (strncmp(a, "--rptg-raw"          , 20) == 0)   my.rptg_raw   = 'y';
+      else if (strncmp(a, "--rptg-base"         , 20) == 0)   my.rptg_base  = 'y';
+      else if (strncmp(a, "--rptg-key"          , 20) == 0)   my.rptg_key   = 'y';
       /*> else if (strncmp(a, "@x", 5) == 0)  debug.top = debug.prep        = 'y';    <* 
        *> else if (strncmp(a, "@i", 5) == 0)  debug.top = debug.input       = 'y';    <* 
        *> else if (strncmp(a, "@o", 5) == 0)  debug.top = debug.output      = 'y';    <* 
@@ -233,6 +237,10 @@ PROG_event()
                        dict_read();
                        return the_key[0];
                        break;
+            case '0' : o.cavg = 0; break;
+            case 'l' : ++o.cavg; break;
+            case 'h' : --o.cavg; break;
+            case '$' : o.cavg = o.navg - 1; break;
             }
             /*---(enforce limits)-----------*/
             if (o.cavg < 1      ) o.cavg = 1;
@@ -299,9 +307,9 @@ PROG_event()
             /*> rc = out_append  ();                                                     <* 
              *> if (rc == 0) out_read (o.curr);                                          <*/
             DEBUG_E printf("   - bas_filter\n"); fflush(stdout);
-            bas_filter    ();
+            BASE_filter   ();
             DEBUG_E printf("   - key_filter\n"); fflush(stdout);
-            key_filter    ();
+            KEY_filter    ();
             DEBUG_E printf("   - match_flatter\n"); fflush(stdout);
             match_flatten ();
             DEBUG_E printf("   - match_squeeze\n"); fflush(stdout);

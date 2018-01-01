@@ -3,7 +3,7 @@
 #include "gregg.h"
 
 
-const char dname[] = "/home/dotsuu/p_gvskav/gregg.gregg_shorthand_system/dictionary.dat";
+const char dname[] = "/var/lib/gregg/gregg.dict";
 
 
 
