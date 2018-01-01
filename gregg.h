@@ -204,8 +204,8 @@
 
 
 /* rapidly evolving version number to aid with visual change confirmation     */
-#define VER_NUM   "5.0l"
-#define VER_TXT   "goes all the way through dictionary matches"
+#define VER_NUM   "5.0m"
+#define VER_TXT   "average point slider is now working"
 
 
 #define     LEN_RECD      2000
@@ -491,6 +491,10 @@ typedef struct timespec  tTSPEC;
 #define     POINT_HEAD     '>'
 #define     POINT_NORMAL   '-'
 #define     POINT_FINISH   'F'
+
+#define     MODE_CURSOR    '-'
+#define     MODE_TOUCH     'y'
+#define     MODE_CONTROL   'c'
 
 typedef struct cPOINT tPOINT;
 struct cPOINT

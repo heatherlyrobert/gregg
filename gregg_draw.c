@@ -594,7 +594,7 @@ DRAW_cursor        (void)
 {
    /*> if (my.touch == 'y')  return 0;                                                <*/
    glPointSize(5.0);
-   glColor4f (1.0f, 0.0f, 0.0f, 1.0f);
+   glColor4f (0.15f, 0.30f, 0.15f, 1.0f);
    glBegin(GL_POINTS);
    glVertex3f (my.xpos, my.ypos, 20.0);
    glEnd();

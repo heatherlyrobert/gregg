@@ -9,7 +9,7 @@ static char  s_event     [LEN_STR];
 static FILE *s_file      = NULL;
 
 static int   s_line     = 0;
-static char  s_touch    = '-';
+static char  s_touch    = MODE_CURSOR;
 static int   s_pres     = 0;
 static int   s_xpad     = 0;
 static int   s_ypad     = 0;
@@ -189,6 +189,39 @@ TOUCH__close         (void)
    return  0;
 }
 
+char             /* [------] read input event -------------------------------*/
+TOUCH_control        (int a_x, int a_y)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   int         x_xpos      =    0;
+   int         x_xinc      =    0;
+   int         i           =    0;
+   int         x_total     =    0;
+   /*---(defense)------------------------*/
+   if (s_touch != MODE_CONTROL)   return 0;
+   if (o.navg  <=    0)           return 0;
+   /*---(process)------------------------*/
+   x_xpos = a_x - win.m_xmin;
+   /*> printf ("a_x    %4d, x_xpos %4d\n", a_x, x_xpos);                              <*/
+   x_xinc = win.m_wide / o.navg;
+   /*> printf ("navg   %4d, x_inc  %4d\n", o.navg, x_xinc);                           <*/
+   o.cavg = -1;
+   for (i = 0; i < o.navg; ++i) {
+      /*> printf ("%2d  x_xpos %4d, x_total  %4d\n", i, x_xpos, x_total);             <*/
+      if (x_xpos >  x_total) {
+         x_total += x_xinc;
+         /*> printf ("   next\n");                                                    <*/
+         continue;
+      }
+      /*> printf ("   CAUGHT\n");                                                     <*/
+      o.cavg = i;
+      break;
+   }
+   if (o.cavg < 0)  o.cavg = o.navg;
+   /*---(complete)-----------------------*/
+   return  0;
+}
+
 
 
 /*====================------------------------------------====================*/
@@ -224,16 +257,21 @@ TOUCH_read           (void)
       s_pres = x_event.value;
       DEBUG_TOUCH  yLOG_value   ("s_pres"    , s_pres);
       /*---(touch)-----------------------*/
-      if      (s_touch == '-' && x_event.value >= 25) {
+      if      (s_touch == MODE_CURSOR && x_event.value >= 25) {
          DEBUG_TOUCH  yLOG_note    ("new touch");
-         s_touch = 'y';
-         RAW_touch (s_xpos, s_ypos);
+         if (s_ypos <= -175) {
+            s_touch = MODE_CONTROL;
+            TOUCH_control (s_xpos, s_ypos);
+         } else {
+            s_touch = MODE_TOUCH;
+            RAW_touch (s_xpos, s_ypos);
+         }
       }
       /*---(release)---------------------*/
-      else if (s_touch == 'y' && x_event.value <  25) {
+      else if (s_touch != MODE_CURSOR && x_event.value <  25) {
          DEBUG_TOUCH  yLOG_note    ("lifted existing touch");
-         s_touch = '-';
-         RAW_lift  (s_xpos, s_ypos);
+         if (s_touch == MODE_TOUCH)  RAW_lift  (s_xpos, s_ypos);
+         s_touch = MODE_CURSOR;
       }
       ++s_line;
       DEBUG_TOUCH  yLOG_char    ("s_touch"   , s_touch);
@@ -245,6 +283,10 @@ TOUCH_read           (void)
    case  ABS_X :
       DEBUG_TOUCH  yLOG_note    ("X-movement event");
       s_xpad = x_event.value;
+      if (s_xpad <= 0) {
+         DEBUG_TOUCH  yLOG_note    ("lifted, i.e., coord went to zero");
+         s_touch = MODE_CURSOR;
+      }
       x_xrel = 1.0 - (x_event.value / MAX_X);
       if (x_xrel >= 0.001 && x_xrel <= 0.999) {
          s_xrel = x_xrel;
@@ -254,7 +296,10 @@ TOUCH_read           (void)
    case  ABS_Y :
       DEBUG_TOUCH  yLOG_note    ("Y-movement event");
       s_ypad = x_event.value;
-      /*> x_yrel = 1.0 - (x_event.value / MAX_Y);                                     <*/
+      if (s_ypad <= 0) {
+         DEBUG_TOUCH  yLOG_note    ("lifted, i.e., coord went to zero");
+         s_touch = MODE_CURSOR;
+      }
       x_yrel = (x_event.value / MAX_Y);
       if (x_yrel >= 0.001 && x_yrel <= 0.999) {
          s_yrel = x_yrel;
@@ -270,7 +315,8 @@ TOUCH_read           (void)
    my.touch = s_touch;
    my.xpos  = s_xpos;
    my.ypos  = s_ypos;
-   if (s_touch == 'y')  RAW_normal (s_xpos, s_ypos);
+   if (s_touch == MODE_TOUCH  )  RAW_normal    (s_xpos, s_ypos);
+   if (s_touch == MODE_CONTROL)  TOUCH_control (s_xpos, s_ypos);
    ++s_line;
    /*---(headers and line breaks)--------*/
    RPTG_TOUCH {
