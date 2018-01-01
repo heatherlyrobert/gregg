@@ -204,8 +204,8 @@
 
 
 /* rapidly evolving version number to aid with visual change confirmation     */
-#define VER_NUM   "5.0i"
-#define VER_TXT   "drawing is back and onto texture now, faster"
+#define VER_NUM   "5.0j"
+#define VER_TXT   "background is sized well and showing beautifully"
 
 
 #define     LEN_RECD      2000
@@ -571,7 +571,7 @@ char       DRAW_back            (void);
 
 char       draw_background      (void);
 char       draw_oslider         (void);
-char       draw_aslider         (void);
+char       DRAW_slide_avg       (void);
 char       draw_kslider         (void);
 
 char       draw_raws            (void);

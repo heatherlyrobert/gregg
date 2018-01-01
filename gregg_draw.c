@@ -39,14 +39,14 @@ DRAW_init            (void)
    /*---(header)-------------------------*/
    DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
    /*---(stuff)--------------------------*/
-   rc = DRAW__resize ('i', "gregg_input"    , 620, 420);
+   rc = DRAW__resize ('i', "gregg_input"    , 520, 370);
    rc = yXINIT_start (win.w_title, win.w_wide, win.w_tall, YX_FOCUSABLE, YX_FIXED, '-');
    rc = yGLTEX_init     ();
    glClearColor    (0.3f, 0.5f, 0.3f, 1.0f);       /* nice medium green          */
    rc = FONT__load      ();
    rc = dlist_init ();
-   win.tex_h        =  800;
-   win.tex_w        = 1200;
+   win.tex_h        =  700;
+   win.tex_w        = 1000;
    rc = yGLTEX_new (&s_tex, &s_fbo, &s_depth, win.tex_w, win.tex_h);
    rc = DRAW_back ();
    /*---(complete)-----------------------*/
@@ -170,6 +170,8 @@ DRAW_primary         (void)
     *>    } glEnd();                                                                  <* 
     *>    glBindTexture(GL_TEXTURE_2D, 0);                                            <* 
     *> } glPopMatrix();                                                               <*/
+   /*---(parts)--------------------------*/
+   /*> DRAW_slide_avg ();                                                             <*/
    /*---(complete)-----------------------*/
    return;
 }
@@ -248,7 +250,8 @@ DRAW_back            (void)
    /*---(draw)---------------------------*/
    glCallList (dl_back);
    draw_horz   ();
-   sample_show ();
+   DRAW_slide_avg ();
+   /*> sample_show ();                                                                <*/
    /*---(mipmaps)------------------------*/
    rc = yGLTEX_draw_end  (s_tex);
    /*---(complete)-----------------------*/
@@ -279,11 +282,10 @@ DRAW_main (void)
    DEBUG_WIND   yLOG_note     ("post-godview");
    /*> glCallList (dl_back);                                                          <*/
    DEBUG_WIND   yLOG_note     ("post-displist");
-   DRAW_title   ();
-   DRAW_command ();
-   DRAW_primary ();
+   DRAW_title       ();
+   DRAW_command     ();
+   DRAW_primary     ();
    /*> draw_oslider();                                                                <*/
-   /*> draw_aslider();                                                                <*/
    /*> draw_kslider();                                                                <*/
    /*> draw_raws   ();                                                                <*/
    /*> draw_avgs   ();                                                                <*/
@@ -356,21 +358,36 @@ time_stamp()                      /* PURPOSE : timestamp in microseconds      */
 static void      o___SLIDERS_________________o (void) {;}
 
 char
-draw_aslider()
+DRAW_slide_avg       (void)
 {
-   float   x_lef = -win.m_xmin + 5;
-   float   x_rig = -win.m_xmin + win.d_bar;
-   float   x_top =  win.m_ymax - 5;
-   float   x_bot = -win.m_ymin + 5;
-   float   z     =   10.0;
+   float   x_lef = win.m_xmin;
+   float   x_rig = win.m_xmax +  2;
+   float   x_top = win.m_ymin + 20;
+   float   x_bot = win.m_ymin;
+   float   x_cnt =  50;
+   float   x_inc = (x_rig - x_lef) / x_cnt;
+   float   z     =   20.0;
+   float   x1, x2;
+   int     i = 0;
    /*---(first)----------------------------*/
-   /*> glColor4f(0.3f, 0.6f, 0.3f, 1.0f);       /+ nice medium grey            +/     <* 
-    *> glBegin(GL_POLYGON);                                                           <* 
-    *> glVertex3f( x_lef, x_top, z);                                                  <* 
-    *> glVertex3f( x_rig, x_top, z);                                                  <* 
-    *> glVertex3f( x_rig, x_bot, z);                                                  <* 
-    *> glVertex3f( x_lef, x_bot, z);                                                  <* 
-    *> glEnd();                                                                       <*/
+   /*> glColor4f(0.3f, 0.3f, 0.0f, 1.0f);       /+ nice medium grey            +/     <* 
+    *>    glBegin(GL_POLYGON);                                                        <* 
+    *>    glVertex3f( x_lef, x_top, z);                                               <* 
+    *>    glVertex3f( x_rig, x_top, z);                                               <* 
+    *>    glVertex3f( x_rig, x_bot, z);                                               <* 
+    *>    glVertex3f( x_lef, x_bot, z);                                               <* 
+    *>    glEnd();                                                                    <*/
+   glColor4f(0.3f, 0.3f, 0.0f, 1.0f);       /* nice medium grey            */
+   for (i = 0; i < x_cnt; i++) {
+      x1 = x_lef + (x_inc * i);
+      x2 = x1 + (x_inc * 0.70);
+      glBegin(GL_POLYGON);
+      glVertex3f( x1, x_top, z);
+      glVertex3f( x2, x_top, z);
+      glVertex3f( x2, x_bot, z);
+      glVertex3f( x1, x_bot, z);
+      glEnd();
+   }
    /*---(second)---------------------------*/
    /*> glLineWidth(1.2);                                                              <* 
     *> glColor4f(0.7f, 0.7f, 0.7f, 1.0f);                                             <* 
@@ -382,22 +399,22 @@ draw_aslider()
     *> glVertex3f( x_lef, x_top, z + 0.1);                                            <* 
     *> glEnd();                                                                       <*/
    /*---(third)----------------------------*/
-   glLineWidth(0.8);
-   if (o.navg == 0) return 0;
-   glColor4f(0.7f, 0.7f, 0.7f, 1.0f);
-   float x_inc = (x_top - x_bot) / o.navg;
+   /*> glLineWidth(0.8);                                                              <* 
+    *> if (o.navg == 0) return 0;                                                     <* 
+    *> glColor4f(0.7f, 0.7f, 0.7f, 1.0f);                                             <* 
+    *> float x_inc = (x_top - x_bot) / o.navg;                                        <*/
    /*---(current point)-------------------------*/
-   glPushMatrix();
-   glTranslatef( x_lef, x_top - (x_inc * o.cavg) + x_inc,    0.0);
-   /*> printf("%d\n", o.cavg);                                                      <*/
-   glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
-   glBegin(GL_POLYGON);
-   glVertex3f(  0,      0, 20.0);
-   glVertex3f( 15,      0, 20.0);
-   glVertex3f( 15, -x_inc, 20.0);
-   glVertex3f(  0, -x_inc, 20.0);
-   glEnd();
-   glPopMatrix();
+   /*> glPushMatrix();                                                                        <* 
+    *> glTranslatef( x_lef, x_top - (x_inc * o.cavg) + x_inc,    0.0);                        <* 
+    *> /+> printf("%d\n", o.cavg);                                                      <+/   <* 
+    *> glColor4f(0.0f, 0.0f, 0.0f, 1.0f);                                                     <* 
+    *> glBegin(GL_POLYGON);                                                                   <* 
+    *> glVertex3f(  0,      0, 20.0);                                                         <* 
+    *> glVertex3f( 15,      0, 20.0);                                                         <* 
+    *> glVertex3f( 15, -x_inc, 20.0);                                                         <* 
+    *> glVertex3f(  0, -x_inc, 20.0);                                                         <* 
+    *> glEnd();                                                                               <* 
+    *> glPopMatrix();                                                                         <*/
    /*---(complete)------------------------------*/
    return 0;
 }
