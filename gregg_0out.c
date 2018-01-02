@@ -92,6 +92,96 @@ OUT_clear          (void)
    return 0;
 }
 
+
+
+/*============================--------------------============================*/
+/*===----                            overall                           ----===*/
+/*============================--------------------============================*/
+void o___GENERIC________________o (void) {;}
+
+char
+POINT_calc         (tPOINT *a_curr,  int a_span)
+{
+   /*---(set the ends)---------------------*/
+   tPOINT  *one  = a_curr - 1;
+   tPOINT  *two  = a_curr;
+   if (a_span == 'a')  two = a_curr + 1;
+   /*---(x and y diff)---------------------*/
+   a_curr->xd  = two->xpos - one->xpos;
+   a_curr->yd  = two->ypos - one->ypos;
+   /*---(length)---------------------------*/
+   a_curr->l   = (int) sqrt((a_curr->xd * a_curr->xd) + (a_curr->yd * a_curr->yd));
+   /*---(slope and intercept)--------------*/
+   if      (a_curr->xd != 0) a_curr->s = (float) a_curr->yd / a_curr->xd;
+   else if (a_curr->yd >  0) a_curr->s = +100000;
+   else                      a_curr->s = -100000;
+   a_curr->b   = (int) (a_curr->ypos - (a_curr->s * a_curr->xpos));
+   /*---(radians/degrees)------------------*/
+   a_curr->r   = atan2(a_curr->yd, a_curr->xd);
+   if (a_curr->r > FULL_CIRCLE) a_curr->r -= FULL_CIRCLE;
+   if (a_curr->r < 0)           a_curr->r += FULL_CIRCLE;
+   a_curr->d   = (int) (a_curr->r * 57.29577951308);
+   /*---(quadrant)-------------------------*/
+   if (a_curr->xd >= 0) {
+      if (a_curr->yd >= 0) a_curr->q = 1;
+      else                 a_curr->q = 4;
+   } else {
+      if (a_curr->yd >= 0) a_curr->q = 2;
+      else                 a_curr->q = 3;
+   }
+   /*---(correct the deg as required)------*/
+   /*> if (a_curr->q == 2) a_curr->d -= 180;                                          <* 
+    *> if (a_curr->q == 3) a_curr->d += 180;                                          <*/
+   /*---(complete)-------------------------*/
+   return 0;
+}
+
+char          /*----: list all points of a particular type -------------------*/
+POINT_list         (tPOINT *a_curr, int a_count)
+{
+   int i;
+   //---(display list)---------------------------#
+   printf("\n");
+   printf("point inventory----------------------------------------------------------------------\n");
+   printf("### bas raw a | -xx- -yy- xd- yd- | len -slope-- icept -rad- deg | q r curve cc c t u\n");
+   for (i = 0; i < a_count; ++i) {
+      POINT_show (a_curr + i, i);
+   }
+   printf("### bas raw a | -xx- -yy- xd- yd- | len -slope-- icept -rad- deg | q r curve cc c t u\n");
+   printf("-------------------------------------------------------------------------------------\n");
+   printf("\n");
+   //---(complete)-------------------------------#
+   return 0;
+}
+
+char          /*----: display all information on an individual point ---------*/
+POINT_show         (tPOINT *a_curr, int a_num)
+{
+   float s  = a_curr->s;
+   int   b  = a_curr->b;
+   if (s > 999) {
+      s = 999.99;
+      b = 999;
+   }
+   if (s < -999) {
+      s = -999.99;
+      b = -999;
+   }
+   printf("%3d %3d %3d %c", a_num, a_curr->p_bas, a_curr->p_raw, a_curr->fake);
+   printf(" | %4d %4d %3d %3d", a_curr->xpos, a_curr->ypos, a_curr->xd, a_curr->yd);
+   printf(" | %3d %8.2f %5d %5.2f %3d", a_curr->l, s, b, a_curr->r, a_curr->d);
+   printf(" | %1d %1d %5.1f %2d %c %c %s\n", a_curr->q, a_curr->ra, a_curr->c, a_curr->cc, a_curr->ca, a_curr->t, a_curr->use);
+   return 0;
+}
+
+
+
+/*============================--------------------============================*/
+/*===----                         saved outlines                       ----===*/
+/*============================--------------------============================*/
+void o___SAVED__________________o (void) {;}
+
+
 /*> char                                                                                              <* 
  *> out_pick (int a_y)                                                                                <* 
  *> {                                                                                                 <* 
@@ -263,88 +353,6 @@ OUT_clear          (void)
  *>    DEBUG_O  printf("OUT_APPEND (end)\n\n");                                       <* 
  *>    return 0;                                                                      <* 
  *> }                                                                                 <*/
-
-
-
-/*============================--------------------============================*/
-/*===----                            overall                           ----===*/
-/*============================--------------------============================*/
-void o___GENERIC________________o (void) {;}
-
-char
-POINT_calc         (tPOINT *a_curr,  int a_span)
-{
-   /*---(set the ends)---------------------*/
-   tPOINT  *one  = a_curr - 1;
-   tPOINT  *two  = a_curr;
-   if (a_span == 'a')  two = a_curr + 1;
-   /*---(x and y diff)---------------------*/
-   a_curr->xd  = two->xpos - one->xpos;
-   a_curr->yd  = two->ypos - one->ypos;
-   /*---(length)---------------------------*/
-   a_curr->l   = (int) sqrt((a_curr->xd * a_curr->xd) + (a_curr->yd * a_curr->yd));
-   /*---(slope and intercept)--------------*/
-   if      (a_curr->xd != 0) a_curr->s = (float) a_curr->yd / a_curr->xd;
-   else if (a_curr->yd >  0) a_curr->s = +100000;
-   else                      a_curr->s = -100000;
-   a_curr->b   = (int) (a_curr->ypos - (a_curr->s * a_curr->xpos));
-   /*---(radians/degrees)------------------*/
-   a_curr->r   = atan2(a_curr->yd, a_curr->xd);
-   if (a_curr->r > FULL_CIRCLE) a_curr->r -= FULL_CIRCLE;
-   if (a_curr->r < 0)           a_curr->r += FULL_CIRCLE;
-   a_curr->d   = (int) (a_curr->r * 57.29577951308);
-   /*---(quadrant)-------------------------*/
-   if (a_curr->xd >= 0) {
-      if (a_curr->yd >= 0) a_curr->q = 1;
-      else                 a_curr->q = 4;
-   } else {
-      if (a_curr->yd >= 0) a_curr->q = 2;
-      else                 a_curr->q = 3;
-   }
-   /*---(correct the deg as required)------*/
-   /*> if (a_curr->q == 2) a_curr->d -= 180;                                          <* 
-    *> if (a_curr->q == 3) a_curr->d += 180;                                          <*/
-   /*---(complete)-------------------------*/
-   return 0;
-}
-
-char          /*----: list all points of a particular type -------------------*/
-POINT_list         (tPOINT *a_curr, int a_count)
-{
-   int i;
-   //---(display list)---------------------------#
-   printf("\n");
-   printf("point inventory----------------------------------------------------------------------\n");
-   printf("### bas raw a | -xx- -yy- xd- yd- | len -slope-- icept -rad- deg | q r curve cc c t u\n");
-   for (i = 0; i < a_count; ++i) {
-      POINT_show (a_curr + i, i);
-   }
-   printf("### bas raw a | -xx- -yy- xd- yd- | len -slope-- icept -rad- deg | q r curve cc c t u\n");
-   printf("-------------------------------------------------------------------------------------\n");
-   printf("\n");
-   //---(complete)-------------------------------#
-   return 0;
-}
-
-char          /*----: display all information on an individual point ---------*/
-POINT_show         (tPOINT *a_curr, int a_num)
-{
-   float s  = a_curr->s;
-   int   b  = a_curr->b;
-   if (s > 999) {
-      s = 999.99;
-      b = 999;
-   }
-   if (s < -999) {
-      s = -999.99;
-      b = -999;
-   }
-   printf("%3d %3d %3d %c", a_num, a_curr->p_bas, a_curr->p_raw, a_curr->fake);
-   printf(" | %4d %4d %3d %3d", a_curr->xpos, a_curr->ypos, a_curr->xd, a_curr->yd);
-   printf(" | %3d %8.2f %5d %5.2f %3d", a_curr->l, s, b, a_curr->r, a_curr->d);
-   printf(" | %1d %1d %5.1f %2d %c %c %s\n", a_curr->q, a_curr->ra, a_curr->c, a_curr->cc, a_curr->ca, a_curr->t, a_curr->use);
-   return 0;
-}
 
 
 /*=================================(end-code)=================================*/

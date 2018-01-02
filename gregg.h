@@ -205,8 +205,8 @@
 
 
 /* rapidly evolving version number to aid with visual change confirmation     */
-#define VER_NUM   "5.0m"
-#define VER_TXT   "yVIKEYS added and very simple modal framework added"
+#define VER_NUM   "5.0n"
+#define VER_TXT   "rename source code files and move some functions"
 
 
 #define     LEN_RECD      2000

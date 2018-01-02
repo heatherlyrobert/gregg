@@ -226,8 +226,9 @@ DRAW_command       (void)
    glOrtho         ( 0.0f, win.w_wide, 0.0f, win.c_tall,  -500.0,   500.0);
    glMatrixMode    (GL_MODELVIEW);
    /*---(background)---------------------*/
+   if (my.key_error == 'y')  glColor4f    (0.15f, 0.00f, 0.00f, 1.0f);
+   else                      glColor4f    (0.00f, 0.00f, 0.15f, 1.0f);
    glPushMatrix    (); {
-      glColor4f    (0.00f, 0.00f, 0.15f, 1.0f);
       glBegin         (GL_POLYGON); {
          glVertex3f  (0.0f      , win.c_tall,  0.0f);
          glVertex3f  (win.w_wide, win.c_tall,  0.0f);
@@ -238,10 +239,10 @@ DRAW_command       (void)
    /*---(display)------------------------*/
    glPushMatrix    (); {
       glColor4f    (1.00f, 1.00f, 1.00f, 1.00f);
-      glTranslatef (    5.0f,    0.0f,    0.0f);
-      yFONT_print  (win.font_bg,  12, YF_BOTLEF, win.c_text);
+      glTranslatef (    5.0f,    1.0f,    0.0f);
+      yFONT_print  (win.font_bg,  11, YF_BOTLEF, win.c_text);
       glTranslatef (win.c_wide - 10.0,   0.0f,    0.0f);
-      yFONT_print  (win.font_bg,  12, YF_BOTRIG, my.keys);
+      yFONT_print  (win.font_bg,  11, YF_BOTRIG, my.keys);
    } glPopMatrix   ();
    /*---(complete)-----------------------*/
    return;

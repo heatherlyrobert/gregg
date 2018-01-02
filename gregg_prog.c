@@ -160,6 +160,7 @@ PROG_final (void)
    OUT_init   ();
    if (out_start > 0) o.curr = out_start;
    TOUCH_init ();
+   yVIKEYS_mode_mesg (win.c_text, CMDS_current ());
    /*---(complete)-----------------------*/
    DEBUG_TOPS   yLOG_exit     (__FUNCTION__);
    return 0;
