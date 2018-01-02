@@ -34,16 +34,16 @@ static tCOMMAND  s_cmds  [MAX_CMDS] = {
    /* 1    123456789-12   12   123    12   1    1   123456789-123456789-123456789-   12345   12   123456789-123456789-123456789-123456789-123456789-123456789-  1234 */
    /*---(file)---------------------------*/
    /*cat   ---name-----  len  abbrev len  act  drw  ---pointer--------------------   terms  cnt   ---desc-----------------------------------------------------  disp */
-   /*> { 'f', "file"        ,  0, "f"   ,  0, 'y', '-', .f.s   = FILE_rename          , "s"    ,  0, "change the current spreadsheet file name"                    , "" },   <* 
-    *> { 'f', "read"        ,  0, "r"   ,  0, '-', '-', NULL                          , ""     ,  0, "read the current spreadsheet from file"                      , "" },   <* 
+   { 'f', "file"        ,  0, "f"   ,  0, 'y', '-', .f.s   = FILE_rename          , "s"    ,  0, "change the current spreadsheet file name"                    , "" },
+   /*> { 'f', "read"        ,  0, "r"   ,  0, '-', '-', NULL                          , ""     ,  0, "read the current spreadsheet from file"                      , "" },   <* 
     *> { 'f', "edit"        ,  0, "e"   ,  0, '-', '-', NULL                          , ""     ,  0, "re-read the current spreadsheet from file"                   , "" },   <* 
     *> { 'f', "write"       ,  0, "w"   ,  0, 'y', '-', .f.v   = FILE_write           , ""     ,  0, "write the current spreadsheet to file"                       , "" },   <* 
     *> { 'f', "writeall"    ,  0, "wa"  ,  0, 'y', '-', .f.v   = FILE_write           , ""     ,  0, "write the current spreadsheet to file"                       , "" },   <* 
-    *> { 'f', "writeas"     ,  0, "was" ,  0, 'y', '-', .f.s   = FILE_writeas         , "s"    ,  0, "write the current spreadsheet to a temp filename"            , "" },   <* 
-    *> { 'f', "quit"        ,  0, "q"   ,  0, 'y', '-', .f.v   = KEYS_quit            , ""     ,  0, "quit current file (if no changes), exit if the only file"    , "" },   <* 
-    *> { 'f', "quitall"     ,  0, "qa"  ,  0, 'y', '-', .f.v   = KEYS_quit            , ""     ,  0, "quit all files (if no changes), and exit"                    , "" },   <* 
-    *> { 'f', "writequit"   ,  0, "wq"  ,  0, 'y', '-', .f.v   = KEYS_writequit       , ""     ,  0, ""                                                            , "" },   <* 
-    *> { 'f', "writequitall",  0, "wqa" ,  0, 'y', '-', .f.v   = KEYS_writequit       , ""     ,  0, ""                                                            , "" },   <*/
+    *> { 'f', "writeas"     ,  0, "was" ,  0, 'y', '-', .f.s   = FILE_writeas         , "s"    ,  0, "write the current spreadsheet to a temp filename"            , "" },   <*/
+   { 'f', "quit"        ,  0, "q"   ,  0, 'y', '-', .f.v   = USER_quit            , ""     ,  0, "quit current file (if no changes), exit if the only file"    , "" },
+   { 'f', "quitall"     ,  0, "qa"  ,  0, 'y', '-', .f.v   = USER_quit            , ""     ,  0, "quit all files (if no changes), and exit"                    , "" },
+   { 'f', "writequit"   ,  0, "wq"  ,  0, 'y', '-', .f.v   = USER_writequit       , ""     ,  0, ""                                                            , "" },
+   { 'f', "writequitall",  0, "wqa" ,  0, 'y', '-', .f.v   = USER_writequit       , ""     ,  0, ""                                                            , "" },
    /*---(done)---------------------------*/
    { '-', "END-OF-LIST" ,  0, ""    ,  0, '-', '-', NULL                          , ""     ,  0, ""                                                            , "" },
 };
@@ -54,7 +54,47 @@ static int s_ncmd = 0;
 char
 USER_init            (void)
 {
+   /*---(locals)-----------+-----+-----+-*/
+   int         i           = 0;
+   DEBUG_USER   yLOG_enter   (__FUNCTION__);
+   DEBUG_USER   yLOG_note    ("basic init");
+   /*---(modes)--------------------------*/
    yVIKEYS_mode_change (MODE_MAP, ":" , "horz=0HhlL$");
+   /*---(commands)-----------------------*/
+   s_ncmd = 0;
+   for (i = 0; i < MAX_CMDS; ++i) {
+      DEBUG_USER   yLOG_value   ("i"         , i);
+      if (strcmp (s_cmds [i].name, "END-OF-LIST") == 0)   break;
+      ++s_ncmd;
+      DEBUG_USER   yLOG_info    ("name"      , s_cmds [i].name );
+      s_cmds [i].len   = strlen (s_cmds [i].name );
+      DEBUG_USER   yLOG_value   ("len"       , s_cmds [i].len  );
+      s_cmds [i].nterm = strlen (s_cmds [i].terms);
+      DEBUG_USER   yLOG_info    ("abbr"      , s_cmds [i].abbr );
+      s_cmds [i].alen  = strlen (s_cmds [i].abbr );
+      DEBUG_USER   yLOG_value   ("alen"      , s_cmds [i].alen );
+      s_cmds [i].nterm = strlen (s_cmds [i].terms);
+      DEBUG_USER   yLOG_value   ("nterm"     , s_cmds [i].nterm);
+      if (s_cmds [i].f.v == NULL)   s_cmds [i].active = '-';
+      DEBUG_USER   yLOG_char    ("active"    , s_cmds [i].active);
+   }
+   /*---(complete)-----------------------*/
+   DEBUG_USER   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+USER_quit            (void)
+{
+   my.quit = 'y';
+   return 0;
+}
+
+char
+USER_writequit       (void)
+{
+   my.quit = 'y';
+   return 0;
 }
 
 
@@ -64,12 +104,12 @@ USER_init            (void)
 /*====================------------------------------------====================*/
 PRIV void  o___COMMAND_________o () { return; }
 
-char        CMDS_start           (void) { strncpy     (s_command , ":", LEN_RECD); return 0; }
-char        CMDS_clear           (void) { strncpy     (s_command , "" , LEN_RECD); return 0; }
-char*       CMDS_current         (void) { return s_command; }
+char        USER_cmds_start      (void) { strncpy     (s_command , ":", LEN_RECD); return 0; }
+char        USER_cmds_clear      (void) { strncpy     (s_command , "" , LEN_RECD); return 0; }
+char*       USER_cmds_curr       (void) { return s_command; }
 
 char         /*-> tbd --------------------------------[ ------ [ge.#M5.1C#.#7]*/ /*-[03.0000.013.L]-*/ /*-[--.---.---.--]-*/
-CMDS_execute       (char *a_command)
+USER_cmds_exec     (char *a_command)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
@@ -229,16 +269,18 @@ USER_cmds_mode     (char a_major, char a_minor)
    /*---(check for control keys)---------*/
    if (x_quoted != 'y') {
       switch (a_minor) {
-      case   G_KEY_RETURN : yVIKEYS_mode_exit ();
-                            rc = CMDS_execute (s_command);
-                            DEBUG_USER   yLOG_note    ("return, execute command");
-                            DEBUG_USER   yLOG_exit    (__FUNCTION__);
-                            return rc;   /* return  */
-      case   G_KEY_ESCAPE : yVIKEYS_mode_exit ();
-                            CMDS_clear ();
-                            DEBUG_USER   yLOG_note    ("escape, ignore command");
-                            DEBUG_USER   yLOG_exit    (__FUNCTION__);
-                            return 0;
+      case   G_KEY_RETURN : case   G_KEY_ENTER  :
+         DEBUG_USER   yLOG_note    ("return/enter, execute command");
+         yVIKEYS_mode_exit ();
+         rc = USER_cmds_exec (s_command);
+         DEBUG_USER   yLOG_exit    (__FUNCTION__);
+         return rc;   /* return  */
+      case   G_KEY_ESCAPE :
+         DEBUG_USER   yLOG_note    ("escape, ignore command");
+         yVIKEYS_mode_exit ();
+         USER_cmds_clear ();
+         DEBUG_USER   yLOG_exit    (__FUNCTION__);
+         return 0;
       }
    }
    /*---(check for backspace)------------*/
@@ -256,14 +298,8 @@ USER_cmds_mode     (char a_major, char a_minor)
       DEBUG_USER   yLOG_exit    (__FUNCTION__);
       return 0;
    }
-   /*---(handle space)-------------------*/
    /*---(normal characters)--------------*/
    DEBUG_USER   yLOG_note    ("update command line");
-   if (a_minor == G_KEY_RETURN)    a_minor = G_CHAR_RETURN;
-   if (a_minor == G_KEY_ESCAPE)    a_minor = G_CHAR_ESCAPE;
-   if (a_minor == G_KEY_TAB   )    a_minor = G_CHAR_TAB;
-   if (a_minor == G_KEY_BS    )    a_minor = G_CHAR_BS;
-   if (a_minor == G_KEY_SPACE )    a_minor = G_CHAR_SPACE;
    snprintf (x_temp, 10, "%c", a_minor);
    strcat   (s_command, x_temp);
    x_len = strlen (s_command);
@@ -322,11 +358,25 @@ USER_map_mode        (char a_major, char a_minor)
       switch (a_minor) {
       case ':'      :
          yVIKEYS_mode_enter  (MODE_COMMAND);
-         CMDS_start ();
+         USER_cmds_start ();
          DEBUG_USER   yLOG_exit    (__FUNCTION__);
          return 0;
          break;
       }
+      /*---(simple keys)--------------*/
+      switch (a_minor) {
+      case '0' : o.cavg  = 0;      break;
+      case 'H' : o.cavg -= 5;      break;
+      case 'h' : o.cavg -= 1;      break;
+      case 'l' : o.cavg += 1;      break;
+      case 'L' : o.cavg += 5;      break;
+      case '$' : o.cavg  = 100000; break;
+      }
+      /*---(enforce limits)-----------*/
+      if (o.cavg < 1      ) o.cavg = 1;
+      if (o.cavg > o.navg ) o.cavg = o.navg;
+      if (o.curr < 1      ) o.curr = 1;
+      if (o.curr > o.total) o.curr = o.total;
    }
    /*---(complete)------------------------------*/
    DEBUG_USER   yLOG_exit    (__FUNCTION__);

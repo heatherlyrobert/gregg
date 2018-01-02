@@ -28,11 +28,9 @@ main               (int argc, char *argv[])
       return -1;
    }
    /*---(main loop)----------------------*/
-   while (rc != 1) {
-      rc = PROG_event();
-   }
+   rc = PROG_event ();
    /*---(wrapup)-------------------------*/
-   PROG_end();
+   rc = PROG_end   ();
    /*---(complete)-----------------------*/
    return rc;
 }

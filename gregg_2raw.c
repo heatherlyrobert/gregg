@@ -205,25 +205,6 @@ RAW_equalize       (void)
    return 0;
 }
 
-char          /*----: start a new outline ------------------------------------*/
-RAW_read           (int a_x, int a_y)
-{
-   /*---(check for prefix)---------------*/
-   DEBUG__RAW  printf("RAW POINTS (begin)\n");
-   /*---(save points)--------------------*/
-   OUT_clear ();
-   ntries  =  0;
-   RAW_point (a_x, a_y, 'S');
-   o.raw[o.nraw - 1].fake = 'y';
-   RAW_point (a_x, a_y, '-');
-   o.raw[o.nraw - 1].t = '>';
-   /*---(save adjustment)----------------*/
-   s_xadj = 0;
-   s_yadj = 0;
-   /*---(complete)-----------------------*/
-   return 0;
-}
-
 
 
 /*=================================(end-code)=================================*/

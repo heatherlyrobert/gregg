@@ -223,7 +223,7 @@ DRAW_command       (void)
    glViewport      (win.c_left, win.c_bott, win.c_wide, win.c_tall);
    glMatrixMode    (GL_PROJECTION);
    glLoadIdentity  ();
-   glOrtho         ( 0.0f, win.w_wide, 0.0f, win.c_tall,  -500.0,   500.0);
+   glOrtho         ( 0.0f, win.c_wide, 0.0f, win.c_tall,  -500.0,   500.0);
    glMatrixMode    (GL_MODELVIEW);
    /*---(background)---------------------*/
    if (my.key_error == 'y')  glColor4f    (0.15f, 0.00f, 0.00f, 1.0f);
@@ -231,9 +231,18 @@ DRAW_command       (void)
    glPushMatrix    (); {
       glBegin         (GL_POLYGON); {
          glVertex3f  (0.0f      , win.c_tall,  0.0f);
-         glVertex3f  (win.w_wide, win.c_tall,  0.0f);
-         glVertex3f  (win.w_wide, 0.0f     ,  0.0f);
-         glVertex3f  (0.0f      , 0.0f     ,  0.0f);
+         glVertex3f  (win.c_wide, win.c_tall,  0.0f);
+         glVertex3f  (win.c_wide, 0.0f      ,  0.0f);
+         glVertex3f  (0.0f      , 0.0f      ,  0.0f);
+      } glEnd   ();
+   } glPopMatrix   ();
+   glColor4f    (0.00f, 0.00f, 0.50f, 1.0f);
+   glPushMatrix    (); {
+      glBegin         (GL_POLYGON); {
+         glVertex3f  (win.c_wide - 50.0, win.c_tall,  0.0f);
+         glVertex3f  (win.c_wide       , win.c_tall,  0.0f);
+         glVertex3f  (win.c_wide       , 0.0f      ,  0.0f);
+         glVertex3f  (win.c_wide - 50.0, 0.0f      ,  0.0f);
       } glEnd   ();
    } glPopMatrix   ();
    /*---(display)------------------------*/

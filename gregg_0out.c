@@ -4,6 +4,10 @@
 
 const float FULL_CIRCLE  = 2 * 3.14159;   // circle in radians
 
+#define     FILE_LOC    "/var/lib/gregg/"
+#define     FILE_BLANK  "stroke"
+#define     FILE_SUFFIX "d"
+
 
 char
 OUT_init             (void)
@@ -353,6 +357,55 @@ void o___SAVED__________________o (void) {;}
  *>    DEBUG_O  printf("OUT_APPEND (end)\n\n");                                       <* 
  *>    return 0;                                                                      <* 
  *> }                                                                                 <*/
+
+char         /*-> tbd --------------------------------[ leaf   [gc.C55.124.30]*/ /*-[01.0000.112.!]-*/ /*-[--.---.---.--]-*/
+FILE_rename          (char *a_name)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        t           [LEN_STR]   = "";
+   char       *p           = NULL;
+   /*---(header)-------------------------*/
+   DEBUG_INPT   yLOG_enter   (__FUNCTION__);
+   /*---(defense)------------------------*/
+   DEBUG_INPT   yLOG_point   ("a_name"    , a_name);
+   if (a_name == NULL || a_name [0] == 0) {
+      DEBUG_INPT   yLOG_note    ("a_name was null/blank, using defaults");
+      strlcpy (my.f_loc  , FILE_LOC  , LEN_RECD);
+      strlcpy (my.f_name , FILE_BLANK, LEN_RECD);
+      sprintf (my.f_title, "%s.%s"   , my.f_name, FILE_SUFFIX);
+      DEBUG_INPT   yLOG_info    ("my.f_name" , my.f_name);
+      DEBUG_INPT   yLOG_info    ("my.f_title", my.f_title);
+      DEBUG_INPT   yLOG_exit    (__FUNCTION__);
+      return 0;
+   }
+   DEBUG_INPT   yLOG_info    ("a_name"    , a_name);
+   /*---(parse base name)----------------*/
+   strlcpy (t, a_name, LEN_STR);
+   p = strrchr (t, "/");
+   DEBUG_INPT   yLOG_point   ("p"         , p);
+   if (p == NULL) {
+      DEBUG_INPT   yLOG_note    ("name only, no directory");
+      strlcpy (my.f_loc  , FILE_LOC  , LEN_RECD);
+      strlcpy (my.f_name , a_name, LEN_RECD);
+      sprintf (my.f_title, "%s.%s", my.f_name, FILE_SUFFIX);
+      DEBUG_INPT   yLOG_info    ("my.f_name" , my.f_name);
+      DEBUG_INPT   yLOG_info    ("my.f_title", my.f_title);
+      DEBUG_INPT   yLOG_exit    (__FUNCTION__);
+      return 0;
+   }
+   /*---(parse qualified name)-----------*/
+   DEBUG_INPT   yLOG_note    ("fully qualified name, with directory");
+   p = '\0';
+   strlcpy (my.f_loc  , t     , LEN_RECD);
+   strlcpy (my.f_name , p + 1 , LEN_RECD);
+   sprintf (my.f_title, "%s/%s.%s", my.f_loc, my.f_name, FILE_SUFFIX);
+   DEBUG_INPT   yLOG_info    ("my.f_loc"  , my.f_loc);
+   DEBUG_INPT   yLOG_info    ("my.f_name" , my.f_name);
+   DEBUG_INPT   yLOG_info    ("my.f_title", my.f_title);
+   /*---(complete)-----------------------*/
+   DEBUG_INPT   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
 
 
 /*=================================(end-code)=================================*/

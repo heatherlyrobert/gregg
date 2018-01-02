@@ -205,8 +205,8 @@
 
 
 /* rapidly evolving version number to aid with visual change confirmation     */
-#define VER_NUM   "5.0n"
-#define VER_TXT   "rename source code files and move some functions"
+#define VER_NUM   "5.0o"
+#define VER_TXT   "added simple :q, :wq, :wqa commands to test out command mode"
 
 
 #define     LEN_RECD      2000
@@ -289,6 +289,12 @@ struct cACCESSOR {
    int         ypos;
    int         xadj;
    int         yadj;
+   /*---(stroke file)----------*/
+   char        f_loc       [LEN_RECD];      /* specific file location         */
+   char        f_name      [LEN_RECD];      /* full file name                 */
+   char        f_title     [LEN_RECD];      /* specific file base name        */
+   int         f_lines;                     /* file line count                */
+   char        f_recd      [LEN_RECD];      /* current file record            */
    /*---(done)-----------------*/
 } my;
 
@@ -622,6 +628,7 @@ char       out_append           (void);
 char       POINT_calc           (tPOINT*, int);
 char       POINT_list           (tPOINT*, int);
 char       POINT_show           (tPOINT*, int);
+char       FILE_rename          (char *a_name);
 
 /*---(raw)------------------*/
 char       POINT_wipe           (tPOINT *a_pt);
@@ -679,7 +686,9 @@ char        TOUCH__check         (void);
 char        TOUCH_read           (void);
 
 
-char        USER_input           (void);
+char        USER_init            (void);
+char        USER_quit            (void);
+char        USER_writequit       (void);
 char        USER_map_mode        (char a_major, char a_minor);
 char        USER_cmds_mode       (char a_major, char a_minor);
 

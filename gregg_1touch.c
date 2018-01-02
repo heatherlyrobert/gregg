@@ -2,6 +2,7 @@
 #include    "gregg.h"
 
 
+
 #define      MAX_Y       19700.0
 #define      MAX_X       31500.0
 
@@ -25,45 +26,13 @@ static int   s_fileno    = 0;
 static int   s_flags     = 0;
 
 
-#define      REL_MODE    2
-#define      ABS_MODE    3
-
-#define      EV_SYN      0
-#define      EV_KEY      1
-#define      EV_REL      2
-#define      EV_ABS      3
-#define      EV_MISC     4
 
 /*---(struct.re)--------+-----------+-*//*-+----------------------------------*/
+#define     ABS_MODE    3
 #define     ABS_X       0x00
 #define     ABS_Y       0x01
-#define     ABS_Z       0x02
 #define     ABS_PRES    0x18
-#define     ABS_DIST    0x19
-#define     ABS_TILTX   0x1a
-#define     ABS_TILTY   0x1b
-#define     ABS_MISC    0x28
-#define     ABS_SLOT    0x2f
 
-#define     MAX_EVCODE  100
-typedef     struct      cEVCODE     tEVCODE;
-struct cEVCODE {
-   int         code;
-   char        abbr        [LEN_LABEL];
-   char        desc        [LEN_DESC ];
-   int         count;
-};
-tEVCODE     s_evcode   [MAX_EVCODE] = {
-   { ABS_X      , "ABS_X"    , ""                                             , 0 },
-   { ABS_Y      , "ABS_Y"    , ""                                             , 0 },
-   { ABS_PRES   , "PRES"     , ""                                             , 0 },
-   { ABS_DIST   , "DIST"     , ""                                             , 0 },
-   { ABS_TILTX  , "TILT_X"   , ""                                             , 0 },
-   { ABS_TILTY  , "TILT_Y"   , ""                                             , 0 },
-   { ABS_MISC   , "MISC"     , ""                                             , 0 },
-   { ABS_SLOT   , "SLOT"     , ""                                             , 0 },
-   { -1         , "end"      , ""                                             , 0 },
-};
 
 
 /*---(struct.re)--------+-----------+-*//*-+----------------------------------*/
