@@ -237,9 +237,11 @@ DRAW_command       (void)
    } glPopMatrix   ();
    /*---(display)------------------------*/
    glPushMatrix    (); {
-      glTranslatef (    5.0f,    0.0f,    0.0f);
       glColor4f    (1.00f, 1.00f, 1.00f, 1.00f);
+      glTranslatef (    5.0f,    0.0f,    0.0f);
       yFONT_print  (win.font_bg,  12, YF_BOTLEF, win.c_text);
+      glTranslatef (win.c_wide - 10.0,   0.0f,    0.0f);
+      yFONT_print  (win.font_bg,  12, YF_BOTRIG, my.keys);
    } glPopMatrix   ();
    /*---(complete)-----------------------*/
    return;

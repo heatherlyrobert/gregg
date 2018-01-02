@@ -8,7 +8,7 @@ NAME_BASE  = gregg
 # additional standard and outside libraries
 LIB_STD    = 
 # all heatherly libraries used, debug versions whenever available
-LIB_MINE   = -lySTR_debug -lyGLTEX_debug -lyX11_debug -lyFONT_debug -lGL -lX11 -lm
+LIB_MINE   = -lySTR_debug -lyGLTEX_debug -lyVIKEYS_debug -lyX11_debug -lyFONT_debug -lGL -lX11 -lm
 # directory for production code, no trailing slash
 INST_DIR   = /usr/local/bin
 

@@ -200,12 +200,13 @@
 #include    <yX11.h>         /* CUSTOM : heatherly xlib/glx setup/teardown    */
 #include    <yFONT.h>        /* CUSTOM : heatherly texture-mapped fonts       */
 #include    <yGLTEX.h>       /* CUSTOM : heatherly texture handling           */
+#include    <yVIKEYS.h>      /* CUSTOM : heatherly vi_keys standard           */
 
 
 
 /* rapidly evolving version number to aid with visual change confirmation     */
-#define VER_NUM   "5.0n"
-#define VER_TXT   "showing cleaner and more balanced samples"
+#define VER_NUM   "5.0m"
+#define VER_TXT   "yVIKEYS added and very simple modal framework added"
 
 
 #define     LEN_RECD      2000
@@ -273,15 +274,22 @@ struct cWIN {
 /*---(struct.re)--------+-----------+-*//*-+----------------------------------*/
 typedef     struct      cACCESSOR   tACCESSOR;
 struct cACCESSOR {
+   /*---(reporting)------------*/
    char        rptg_touch;
    char        rptg_raw;
    char        rptg_base;
    char        rptg_key;
+   /*---(temp)-----------------*/
+   char        keys        [LEN_LABEL];
+   char        key_error;
+   char        quit;
+   /*---(globals)--------------*/
    char        touch;
    int         xpos;
    int         ypos;
    int         xadj;
    int         yadj;
+   /*---(done)-----------------*/
 } my;
 
 #define     RPTG_TOUCH  if (my.rptg_touch == 'y') 
@@ -433,23 +441,6 @@ extern tCOMBOS combos[MAX_COMBOS];
 
 
 extern int   vowels[16][16];
-#define      NN            3
-#define      NE            2
-#define      EE            1
-#define      SE            0
-#define      SS            7
-#define      SW            6
-#define      WW            5
-#define      NW            4
-#define      nn           11
-#define      ne           10
-#define      ee            9
-#define      se            8
-#define      ss           15
-#define      sw           14
-#define      ww           13
-#define      nw           12
-#define      __            0
 
 /*---(display lists)---------------*/
 GLuint    dl_arrow;
@@ -688,6 +679,9 @@ char        TOUCH__check         (void);
 char        TOUCH_read           (void);
 
 
+char        USER_input           (void);
+char        USER_map_mode        (char a_major, char a_minor);
+char        USER_cmds_mode       (char a_major, char a_minor);
 
 #endif
 /*============================----(source-end)----============================*/

@@ -9,8 +9,9 @@
 int       out_start       = 0;
 
 /*============================--------------------============================*/
-/*===----                              main                            ----===*/
+/*===----                     startup and shutdown                     ----===*/
 /*============================--------------------============================*/
+void o___SHOOTS_________________o (void) {;}
 
 char      verstring    [500];
 
@@ -51,6 +52,10 @@ PROG_init          (void)
    my.rptg_raw   = '-';
    my.rptg_base  = '-';
    my.rptg_key   = '-';
+   /*---(setup vikeys)----------------*/
+   yVIKEYS_mode_init   ();
+   yVIKEYS_mode_enter  (MODE_MAP);
+   USER_init ();
    /*---(debugger : standard)---------*/
    /*> debug.prep   = 'n';     /+ x) program setup and tear-down           +/         <* 
     *> debug.cli    = 'n';     /+ c) command line interface                +/         <* 
@@ -161,7 +166,65 @@ PROG_final (void)
 }
 
 
-/* PURPOSE : process the xwindows event stream                                */
+
+/*============================--------------------============================*/
+/*===----                           handlers                           ----===*/
+/*============================--------------------============================*/
+void o___HANDLERS_______________o (void) {;}
+
+char         /*-> process main loop keyboard input ---[ leaf   [gc.GD1.132.IM]*/ /*-[05.0000.111.R]-*/ /*-[--.---.---.--]-*/
+PROG_main_handle   (char a_key)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   static char x_major     = ' ';      /* saved keystroke                     */
+   static char x_savemode  = '-';
+   char        rc          = 0;
+   /*---(header)-------------------------*/
+   DEBUG_LOOP   yLOG_enter   (__FUNCTION__);
+   DEBUG_LOOP   yLOG_value   ("a_key"     , a_key);
+   /*---(defense)------------------------*/
+   if (a_key < 0) {
+      DEBUG_LOOP   yLOG_exit    (__FUNCTION__);
+      return a_key;
+   }
+   /*---(handle keystroke)---------------*/
+   switch (yVIKEYS_mode_curr ()) {
+   case MODE_MAP      : rc = USER_map_mode   (x_major , a_key);  break;
+   case MODE_COMMAND  : rc = USER_cmds_mode  (x_major , a_key);  break;
+   }
+   /*---(translate unprintable)----------*/
+   if      (a_key == 0       )      snprintf (my.keys,   9, "%2d %c%c"  , 0, x_major, G_CHAR_NULL  );
+   else if (a_key == G_KEY_RETURN)  snprintf (my.keys,   9, "%2d %c%c"  , 0, x_major, G_CHAR_RETURN);
+   else if (a_key == G_KEY_ESCAPE)  snprintf (my.keys,   9, "%2d %c%c"  , 0, x_major, G_CHAR_ESCAPE);
+   else if (a_key == G_KEY_TAB   )  snprintf (my.keys,   9, "%2d %c%c"  , 0, x_major, G_CHAR_TAB   );
+   else if (a_key == G_KEY_BS    )  snprintf (my.keys,   9, "%2d %c%c"  , 0, x_major, G_CHAR_BS    );
+   else if (a_key == G_KEY_SPACE )  snprintf (my.keys,   9, "%2d %c%c"  , 0, x_major, G_CHAR_SPACE );
+   else if (a_key <= G_KEY_SPACE )  snprintf (my.keys,   9, "%2d %c%02x", 0, x_major, a_key);
+   else                             snprintf (my.keys,   9, "%2d %c%c"  , 0, x_major, a_key);
+   /*---(setup for next keystroke)-------*/
+   if      (rc == 0)    x_major = ' ';
+   else if (rc >  0)    x_major = rc;
+   else               { x_major = ' ';  my.key_error = 'y'; }
+   /*---(setup status line)--------------*/
+   if        (yVIKEYS_mode_curr() == MODE_COMMAND) {
+      yVIKEYS_mode_mesg (win.c_text, CMDS_current ());
+   } else if (x_savemode != yVIKEYS_mode_curr()) {
+      yVIKEYS_mode_mesg (win.c_text, CMDS_current ());
+   }
+   x_savemode = yVIKEYS_mode_curr ();
+   /*---(complete)-----------------------*/
+   DEBUG_LOOP   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+
+
+
+/*============================--------------------============================*/
+/*===----                          event loop                          ----===*/
+/*============================--------------------============================*/
+void o___EVENT__________________o (void) {;}
+
 char
 PROG_event()
 {
@@ -215,42 +278,43 @@ PROG_event()
             key_event  = (XKeyEvent *) &EVNT;
             the_bytes = XLookupString((XKeyEvent *) &EVNT, the_key, 5, NULL, NULL);
             if (the_bytes < 1) break;
-            switch (the_key[0]) {
-            case  ']':
-               ++o.curr;
-               DEBUG_T  printf("\n\n=== outline %3d ================================\n\n", o.curr);
-               break;
-            case  '[':
-               --o.curr;
-               DEBUG_T  printf("\n\n=== outline %3d ================================\n\n", o.curr);
-               break;
-            case  'Q':              exit(0);
-            case  '<': --o.cavg;  break;
-            case  '>': ++o.cavg;  break;
-            case  'i':
-            case  'w':
-            case  'x':
-                       if (o.saved != 'y') {
-                          /*> rc = out_append  ();                                    <*/
-                          /*> if (rc == 0) out_read (o.curr);                         <*/
-                       }
-                       dict_read();
-                       return the_key[0];
-                       break;
-            case '0' : o.cavg = 0; break;
-            case 'l' : ++o.cavg; break;
-            case 'h' : --o.cavg; break;
-            case '$' : o.cavg = o.navg - 1; break;
-            }
-            /*---(enforce limits)-----------*/
-            if (o.cavg < 1      ) o.cavg = 1;
-            if (o.cavg > o.navg ) o.cavg = o.navg;
-            if (o.curr < 1      ) o.curr = 1;
-            if (o.curr > o.total) o.curr = o.total;
-            /*---(redraw)------------------*/
-            /*> if (i != o.curr)      out_read (o.curr);                              <*/
-            /*> DRAW_main();                                                          <*/
-            break;
+            PROG_main_handle (the_key [0]);
+            /*> switch (the_key[0]) {                                                                     <* 
+             *> case  ']':                                                                                <* 
+             *>    ++o.curr;                                                                              <* 
+             *>    DEBUG_T  printf("\n\n=== outline %3d ================================\n\n", o.curr);   <* 
+             *>    break;                                                                                 <* 
+             *> case  '[':                                                                                <* 
+             *>    --o.curr;                                                                              <* 
+             *>    DEBUG_T  printf("\n\n=== outline %3d ================================\n\n", o.curr);   <* 
+             *>    break;                                                                                 <* 
+             *> case  'Q':              exit(0);                                                          <* 
+             *> case  '<': --o.cavg;  break;                                                              <* 
+             *> case  '>': ++o.cavg;  break;                                                              <* 
+             *> case  'i':                                                                                <* 
+             *> case  'w':                                                                                <* 
+             *> case  'x':                                                                                <* 
+             *>            if (o.saved != 'y') {                                                          <* 
+             *>               /+> rc = out_append  ();                                    <+/             <* 
+             *>               /+> if (rc == 0) out_read (o.curr);                         <+/             <* 
+             *>            }                                                                              <* 
+             *>            dict_read();                                                                   <* 
+             *>            return the_key[0];                                                             <* 
+             *>            break;                                                                         <* 
+             *> case '0' : o.cavg = 0; break;                                                             <* 
+             *> case 'l' : ++o.cavg; break;                                                               <* 
+             *> case 'h' : --o.cavg; break;                                                               <* 
+             *> case '$' : o.cavg = o.navg - 1; break;                                                    <* 
+             *> }                                                                                         <* 
+             *> /+---(enforce limits)-----------+/                                                        <* 
+             *> if (o.cavg < 1      ) o.cavg = 1;                                                         <* 
+             *> if (o.cavg > o.navg ) o.cavg = o.navg;                                                    <* 
+             *> if (o.curr < 1      ) o.curr = 1;                                                         <* 
+             *> if (o.curr > o.total) o.curr = o.total;                                                   <* 
+             *> /+---(redraw)------------------+/                                                         <* 
+             *> /+> if (i != o.curr)      out_read (o.curr);                              <+/             <* 
+             *> /+> DRAW_main();                                                          <+/             <* 
+             *> break;                                                                                    <*/
 
          case KeyRelease:
             DEBUG_E printf("event (%5d) keyrelease\n", j);

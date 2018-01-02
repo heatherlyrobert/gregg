@@ -3,6 +3,25 @@
 #include "gregg.h"
 
 
+#define      NN            3
+#define      NE            2
+#define      EE            1
+#define      SE            0
+#define      SS            7
+#define      SW            6
+#define      WW            5
+#define      NW            4
+#define      nn           11
+#define      ne           10
+#define      ee            9
+#define      se            8
+#define      ss           15
+#define      sw           14
+#define      ww           13
+#define      nw           12
+#define      __            0
+
+
 
 /* PURPOSE : establish ranges of slopes/angles to classity letters            */
 tRANGES     ranges[MAX_RANGES] = {
