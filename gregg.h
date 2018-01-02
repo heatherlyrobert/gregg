@@ -204,8 +204,8 @@
 
 
 /* rapidly evolving version number to aid with visual change confirmation     */
-#define VER_NUM   "5.0m"
-#define VER_TXT   "average point slider is now working"
+#define VER_NUM   "5.0n"
+#define VER_TXT   "showing cleaner and more balanced samples"
 
 
 #define     LEN_RECD      2000
@@ -357,13 +357,8 @@ struct cDEBUG {
 typedef struct cLOCATION tLOCATION;
 struct cLOCATION
 {
+   /*---(constant)----------*/
    char      n[5];       /* name              */
-   float     ex;         /* ending x          */
-   float     ey;         /* ending y          */
-   int       le;         /* leftmost          */
-   int       ri;         /* rightmost         */
-   int       ln;         /* full length       */
-   int       de;         /* degrees of slope  */
    int       tx;         /* teaching x        */
    int       ty;         /* teaching y        */
    int       sx;         /* ellipse x-radius  */
@@ -376,6 +371,14 @@ struct cLOCATION
    int       ra;         /* range of letter   */
    int       sz;         /* size category     */
    char      fu;         /* function to draw  */
+   /*---(calculated)--------*/
+   float     ex;         /* ending x          */
+   float     ey;         /* ending y          */
+   int       le;         /* leftmost          */
+   int       ri;         /* rightmost         */
+   int       ln;         /* full length       */
+   int       de;         /* degrees of slope  */
+   /*---(done)--------------*/
 };
 extern tLOCATION   loc[MAX_LETTERS];
 

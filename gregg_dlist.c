@@ -74,8 +74,8 @@ dlist_letters(void)
    for (i = 0; i < MAX_LETTERS; ++i) {
       if (strncmp(loc[i].n, "eof", 5) == 0) break;
       if (loc[i].fu != 'l')                 continue;
-      glNewList(dl_solid  + i,  GL_COMPILE);   draw_line   (i, 'n');   glEndList();
-      glNewList(dl_dotted + i,  GL_COMPILE);   draw_line   (i, 'y');   glEndList();
+      glNewList (dl_solid  + i,  GL_COMPILE);   draw_line   (i, 'n');   glEndList();
+      glNewList (dl_dotted + i,  GL_COMPILE);   draw_line   (i, 'y');   glEndList();
    }
    DEBUG__SHAPES  printf("\n");
    /*---(draw ellipses)--------------------*/
@@ -83,8 +83,8 @@ dlist_letters(void)
    for (i = 0; i < MAX_LETTERS; ++i) {
       if (strncmp(loc[i].n, "eof", 5) == 0) break;
       if (loc[i].fu != 'e')                 continue;
-      glNewList(dl_solid  + i,  GL_COMPILE);   draw_ellipse (i, 'n');   glEndList();
-      glNewList(dl_dotted + i,  GL_COMPILE);   draw_ellipse (i, 'y');   glEndList();
+      glNewList (dl_solid  + i,  GL_COMPILE);   draw_ellipse (i, 'n');   glEndList();
+      glNewList (dl_dotted + i,  GL_COMPILE);   draw_ellipse (i, 'y');   glEndList();
    }
    DEBUG__SHAPES  printf("\n");
    /*---(draw circles)---------------------*/
@@ -95,7 +95,7 @@ dlist_letters(void)
       glNewList(dl_solid  + i,  GL_COMPILE);   draw_ellipse(i, 'n');   glEndList();
       glNewList(dl_dotted + i,  GL_COMPILE);   draw_ellipse(i, 'y');   glEndList();
    }
-   DEBUG__SHAPES  printf("\n");
+   printf("\n");
    /*---(draw pie wedges)------------------*/
    DEBUG__SHAPES  printf("wedges   -x- -y- len deg -l- -r- -gr-\n");
    for (i = 0; i < MAX_LETTERS; ++i) {
@@ -215,15 +215,15 @@ draw_ellipse (int a_who, char a_dotted)
    float ax = (a_sx * calpha * cbeta) - (a_sy * salpha * sbeta);
    float ay = (a_sx * calpha * sbeta) + (a_sy * salpha * cbeta);
    /*---(draw dotted outline)-------------------*/
-   glLineWidth(2.0);
-   glPointSize(1.0);
-   glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
+   glLineWidth (2.0);
+   glPointSize (2.0);
+   glColor4f   (0.0f, 0.0f, 0.0f, 1.0f);
    if (a_dotted == 'y') {
       glBegin(GL_POINTS);
       for (i = 0; i <= 360; i += a_st) {
          alpha  = i * DEG2RAD;
-         salpha = sin(alpha);
-         calpha = cos(alpha);
+         salpha = sin (alpha);
+         calpha = cos (alpha);
          x      = (a_sx * calpha * cbeta) - (a_sy * salpha * sbeta) - ax;
          y      = (a_sx * calpha * sbeta) + (a_sy * salpha * cbeta) - ay;
          /*> printf("    %3d) %3.0f, %3.0f\n", i, x, y);                              <*/

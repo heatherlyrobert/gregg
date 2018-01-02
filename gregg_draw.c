@@ -176,9 +176,9 @@ DRAW_primary         (void)
       DRAW_base        ();
       DRAW_keys        ();
       DRAW_curr        ();
-      DRAW_info_counts ();
-      DRAW_info_base   ();
-      DRAW_info_answer ();
+      /*> DRAW_info_counts ();                                                        <* 
+       *> DRAW_info_base   ();                                                        <* 
+       *> DRAW_info_answer ();                                                        <*/
    }
    /*---(complete)-----------------------*/
    return;
@@ -259,7 +259,7 @@ DRAW_back            (void)
    glCallList (dl_back);
    draw_horz   ();
    DRAW_slide_avg ();
-   /*> sample_show ();                                                                <*/
+   sample_show ();
    /*---(mipmaps)------------------------*/
    rc = yGLTEX_draw_end  (s_tex);
    /*---(complete)-----------------------*/
@@ -1182,7 +1182,7 @@ sample_show        (void)
     *> } glPopMatrix();                                                               <*/
    /*---(cycle samples)------------------*/
    glPushMatrix(); {
-      glTranslatef (win.d_xoff, win.d_yoff, win.d_zoff);
+      glTranslatef (win.d_xoff - 50, win.d_yoff + 30, win.d_zoff);
       glScalef              (1.5, 1.5, 1.5);
       for (i = 1; i < MAX_LETTERS && strncmp(loc[i].n, "eof", 5) != 0; ++i) {
          glPushMatrix();
