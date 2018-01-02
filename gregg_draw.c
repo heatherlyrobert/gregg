@@ -203,6 +203,17 @@ DRAW_title         (void)
          glVertex3f  (0.0f      , 0.0f     ,  0.0f);
       } glEnd   ();
    } glPopMatrix   ();
+   if (yURG_debugmode () == 'y') {
+      glPushMatrix    (); {
+         glColor4f    (0.50f, 0.00f, 0.00f, 1.0f);
+         glBegin         (GL_POLYGON); {
+            glVertex3f  (0.0f      , win.t_tall       ,  0.0f);
+            glVertex3f  (win.t_wide, win.t_tall       ,  0.0f);
+            glVertex3f  (win.t_wide, win.t_tall - 50.0,  0.0f);
+            glVertex3f  (0.0f      , win.t_tall - 50.0,  0.0f);
+         } glEnd   ();
+      } glPopMatrix   ();
+   }
    /*---(display)------------------------*/
    glPushMatrix    (); {
       glTranslatef (win.t_wide,   5.0f,    0.0f);

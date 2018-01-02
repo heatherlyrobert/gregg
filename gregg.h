@@ -205,8 +205,8 @@
 
 
 /* rapidly evolving version number to aid with visual change confirmation     */
-#define VER_NUM   "5.0o"
-#define VER_TXT   "added simple :q, :wq, :wqa commands to test out command mode"
+#define VER_NUM   "5.0p"
+#define VER_TXT   "change verion number color in debug mode, change user input also"
 
 
 #define     LEN_RECD      2000
