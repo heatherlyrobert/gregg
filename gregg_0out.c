@@ -6,7 +6,7 @@ const float FULL_CIRCLE  = 2 * 3.14159;   // circle in radians
 
 #define     FILE_LOC    "/var/lib/gregg/"
 #define     FILE_BLANK  "stroke"
-#define     FILE_SUFFIX "d"
+#define     FILE_SUFFIX "db"
 
 
 char
@@ -27,10 +27,10 @@ OUT_init             (void)
     *>    if (len > 1 && s[0] != '#' && s[0] != ' ') ++o.total;                       <* 
     *> }                                                                              <*/
    /*> printf("out_init() - found %d saved outlines\n", o.total);                     <*/
-   o.craw     = 1;
-   o.cavg     = 1;
-   o.ckey     = 1;
-   o.curr     = 1;
+   o.craw     = 0;
+   o.cavg     = 0;
+   o.ckey     = 0;
+   o.curr     = 0;
    return 0;
 }
 
@@ -83,10 +83,10 @@ OUT_clear          (void)
       /*---(clear points)----------------*/
       for (x_pt = 0; x_pt < MAX_POINTS; ++x_pt) {
          p [x_pt].p_raw  = p [x_pt].p_bas  = 0;
-         p [x_pt].xpos  = p [x_pt].ypos  = p [x_pt].xd = p [x_pt].yd = 0;
-         p [x_pt].l  = p [x_pt].b  = p [x_pt].d  = p [x_pt].q  = p [x_pt].cc = 0;
-         p [x_pt].s  = p [x_pt].r  = p [x_pt].ra = p [x_pt].c  = 0.0;
-         p [x_pt].ca = p [x_pt].t  = p [x_pt].fake  = '-';
+         p [x_pt].xpos = p [x_pt].ypos = p [x_pt].xd    = p [x_pt].yd = 0;
+         p [x_pt].l    = p [x_pt].b    = p [x_pt].d     = p [x_pt].q  = p [x_pt].cc = 0;
+         p [x_pt].s    = p [x_pt].r    = p [x_pt].ra    = p [x_pt].c  = 0.0;
+         p [x_pt].ca   = p [x_pt].type = p [x_pt].fake  = '-';
          strlcpy (p [x_pt].use, "-", 5);
       }
       /*---(done)------------------------*/
@@ -174,7 +174,7 @@ POINT_show         (tPOINT *a_curr, int a_num)
    printf("%3d %3d %3d %c", a_num, a_curr->p_bas, a_curr->p_raw, a_curr->fake);
    printf(" | %4d %4d %3d %3d", a_curr->xpos, a_curr->ypos, a_curr->xd, a_curr->yd);
    printf(" | %3d %8.2f %5d %5.2f %3d", a_curr->l, s, b, a_curr->r, a_curr->d);
-   printf(" | %1d %1d %5.1f %2d %c %c %s\n", a_curr->q, a_curr->ra, a_curr->c, a_curr->cc, a_curr->ca, a_curr->t, a_curr->use);
+   printf(" | %1d %1d %5.1f %2d %c %c %s\n", a_curr->q, a_curr->ra, a_curr->c, a_curr->cc, a_curr->ca, a_curr->type, a_curr->use);
    return 0;
 }
 
@@ -310,53 +310,52 @@ void o___SAVED__________________o (void) {;}
  *>    return 0;                                                                                <* 
  *> }                                                                                           <*/
 
-/*> char                                                                              <* 
- *> out_append         (void)                                                         <* 
- *> {                                                                                 <* 
- *>    DEBUG_O  printf("OUT_APPEND (begin)\n");                                       <* 
- *>    /+---(locals)---------------------------+/                                     <* 
- *>    FILE     *f;                                                                   <* 
- *>    char      d[500]     = "";                                                     <* 
- *>    int i;                                                                         <* 
- *>    /+---(open file)------------------------+/                                     <* 
- *>    f = fopen(oname, "a");                                                         <* 
- *>    if (f == NULL) {                                                               <* 
- *>       DEBUG_O  printf("   could not open output file\n");                         <* 
- *>       DEBUG_O  printf("OUT_APPEND (end)\n\n");                                    <* 
- *>       return -1;                                                                  <* 
- *>    }                                                                              <* 
- *>    DEBUG_O  printf("   file open for append\n");                                  <* 
- *>    /+---(write date)-----------------------+/                                     <* 
- *>    time_t      time_date = time(NULL);                                            <* 
- *>    struct tm*  curr_time = localtime(&time_date);                                 <* 
- *>    char        asc_time[20];                                                      <* 
- *>    strftime(asc_time, 20, "%y.%m.%d.%H.%M.%S", curr_time);                        <* 
- *>    strncpy(d, asc_time, 100);                                                     <* 
- *>    char  *n = strchr(d, '\n');                                                    <* 
- *>    if (n != NULL)  *n = '\0';                                                     <* 
- *>    fprintf(f, "%-20.20s | ", d);                                                  <* 
- *>    /+---(leave space for answer)-----------+/                                     <* 
- *>    fprintf(f, "%-20.20s | ", " ");                                                <* 
- *>    /+---(leave space for notes)------------+/                                     <* 
- *>    fprintf(f, "%-30.30s | ", " ");                                                <* 
- *>    /+---(write count)----------------------+/                                     <* 
- *>    fprintf(f, "%03d | ", o.nraw);                                                 <* 
- *>    /+---(process)--------------------------+/                                     <* 
- *>    for (i = 0; i < o.nraw; ++i) {                                                 <* 
- *>       fprintf(f, "(%+04d,%+04d)", o.raw[i].xpos, o.raw[i].ypos);                        <* 
- *>    }                                                                              <* 
- *>    /+---(finish off record)----------------+/                                     <* 
- *>    fprintf(f, " |\n");                                                            <* 
- *>    fflush(f);                                                                     <* 
- *>    fclose(f);                                                                     <* 
- *>    /+---(touch up some vars)---------------+/                                     <* 
- *>    o.saved    = 'y';                                                              <* 
- *>    ++o.total;                                                                     <* 
- *>    o.curr = o.total;                                                              <* 
- *>    /+---(complete)-------------------------+/                                     <* 
- *>    DEBUG_O  printf("OUT_APPEND (end)\n\n");                                       <* 
- *>    return 0;                                                                      <* 
- *> }                                                                                 <*/
+char
+out_append         (void)
+{
+   /*---(locals)---------------------------*/
+   FILE     *f;
+   char      d[500]     = "";
+   int i;
+   /*---(header)-------------------------*/
+   DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
+   /*---(open file)------------------------*/
+   f = fopen (my.f_full, "a");
+   if (f == NULL) {
+      DEBUG_O  printf("   could not open output file\n");
+      DEBUG_O  printf("OUT_APPEND (end)\n\n");
+      return -1;
+   }
+   DEBUG_O  printf("   file open for append\n");
+   /*---(write date)-----------------------*/
+   time_t      time_date = time(NULL);
+   struct tm*  curr_time = localtime(&time_date);
+   char        asc_time[20];
+   strftime(asc_time, 20, "%y.%m.%d.%H.%M.%S", curr_time);
+   strncpy(d, asc_time, 100);
+   char  *n = strchr(d, '\n');
+   if (n != NULL)  *n = '\0';
+   fprintf(f, "%-20.20s | ", d);
+   /*---(leave space for answer)-----------*/
+   fprintf(f, "%-20.20s | ", " ");
+   /*---(leave space for notes)------------*/
+   fprintf(f, "%-30.30s | ", " ");
+   /*---(write count)----------------------*/
+   fprintf(f, "%03d | ", o.nraw);
+   /*---(process)--------------------------*/
+   for (i = 0; i < o.nraw; ++i)  fprintf(f, ";%d,%d", o.raw[i].xpos, o.raw[i].ypos);
+   /*---(finish off record)----------------*/
+   fprintf(f, " |\n");
+   fflush(f);
+   fclose(f);
+   /*---(touch up some vars)---------------*/
+   o.saved    = 'y';
+   ++o.total;
+   o.curr = o.total;
+   /*---(complete)-------------------------*/
+   DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
 
 char         /*-> tbd --------------------------------[ leaf   [gc.C55.124.30]*/ /*-[01.0000.112.!]-*/ /*-[--.---.---.--]-*/
 FILE_rename          (char *a_name)
@@ -365,45 +364,48 @@ FILE_rename          (char *a_name)
    char        t           [LEN_STR]   = "";
    char       *p           = NULL;
    /*---(header)-------------------------*/
-   DEBUG_INPT   yLOG_enter   (__FUNCTION__);
+   DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
    /*---(defense)------------------------*/
-   DEBUG_INPT   yLOG_point   ("a_name"    , a_name);
+   DEBUG_OUTP   yLOG_point   ("a_name"    , a_name);
    if (a_name == NULL || a_name [0] == 0) {
-      DEBUG_INPT   yLOG_note    ("a_name was null/blank, using defaults");
+      DEBUG_OUTP   yLOG_note    ("a_name was null/blank, using defaults");
       strlcpy (my.f_loc  , FILE_LOC  , LEN_RECD);
       strlcpy (my.f_name , FILE_BLANK, LEN_RECD);
       sprintf (my.f_title, "%s.%s"   , my.f_name, FILE_SUFFIX);
-      DEBUG_INPT   yLOG_info    ("my.f_name" , my.f_name);
-      DEBUG_INPT   yLOG_info    ("my.f_title", my.f_title);
-      DEBUG_INPT   yLOG_exit    (__FUNCTION__);
+      sprintf (my.f_full , "%s%s.%s" , my.f_loc, my.f_name, FILE_SUFFIX);
+      DEBUG_OUTP   yLOG_info    ("my.f_name" , my.f_name);
+      DEBUG_OUTP   yLOG_info    ("my.f_title", my.f_title);
+      DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
       return 0;
    }
-   DEBUG_INPT   yLOG_info    ("a_name"    , a_name);
+   DEBUG_OUTP   yLOG_info    ("a_name"    , a_name);
    /*---(parse base name)----------------*/
    strlcpy (t, a_name, LEN_STR);
    p = strrchr (t, "/");
-   DEBUG_INPT   yLOG_point   ("p"         , p);
+   DEBUG_OUTP   yLOG_point   ("p"         , p);
    if (p == NULL) {
-      DEBUG_INPT   yLOG_note    ("name only, no directory");
+      DEBUG_OUTP   yLOG_note    ("name only, no directory");
       strlcpy (my.f_loc  , FILE_LOC  , LEN_RECD);
       strlcpy (my.f_name , a_name, LEN_RECD);
       sprintf (my.f_title, "%s.%s", my.f_name, FILE_SUFFIX);
-      DEBUG_INPT   yLOG_info    ("my.f_name" , my.f_name);
-      DEBUG_INPT   yLOG_info    ("my.f_title", my.f_title);
-      DEBUG_INPT   yLOG_exit    (__FUNCTION__);
+      sprintf (my.f_full , "%s%s.%s" , my.f_loc, my.f_name, FILE_SUFFIX);
+      DEBUG_OUTP   yLOG_info    ("my.f_name" , my.f_name);
+      DEBUG_OUTP   yLOG_info    ("my.f_title", my.f_title);
+      DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
       return 0;
    }
    /*---(parse qualified name)-----------*/
-   DEBUG_INPT   yLOG_note    ("fully qualified name, with directory");
+   DEBUG_OUTP   yLOG_note    ("fully qualified name, with directory");
    p = '\0';
    strlcpy (my.f_loc  , t     , LEN_RECD);
    strlcpy (my.f_name , p + 1 , LEN_RECD);
    sprintf (my.f_title, "%s/%s.%s", my.f_loc, my.f_name, FILE_SUFFIX);
-   DEBUG_INPT   yLOG_info    ("my.f_loc"  , my.f_loc);
-   DEBUG_INPT   yLOG_info    ("my.f_name" , my.f_name);
-   DEBUG_INPT   yLOG_info    ("my.f_title", my.f_title);
+   sprintf (my.f_full , "%s%s.%s" , my.f_loc, my.f_name, FILE_SUFFIX);
+   DEBUG_OUTP   yLOG_info    ("my.f_loc"  , my.f_loc);
+   DEBUG_OUTP   yLOG_info    ("my.f_name" , my.f_name);
+   DEBUG_OUTP   yLOG_info    ("my.f_title", my.f_title);
    /*---(complete)-----------------------*/
-   DEBUG_INPT   yLOG_exit    (__FUNCTION__);
+   DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
    return 0;
 }
 

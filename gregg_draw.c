@@ -177,9 +177,18 @@ DRAW_primary         (void)
       DRAW_keys        ();
       DRAW_curr        ();
       /*> DRAW_info_counts ();                                                        <* 
-       *> DRAW_info_base   ();                                                        <* 
-       *> DRAW_info_answer ();                                                        <*/
+       *> DRAW_info_base   ();                                                        <*/
+      DRAW_info_answer ();
    }
+   glPushMatrix    (); {
+      glColor4f    (0.00f, 0.00f, 0.00f, 1.0f);
+      glTranslatef (win.m_xmin +  3.0, win.m_ymin + 43.0,    0.0f);
+      yFONT_print  (win.font_bg,  12, YF_BOTLEF, my.f_full);
+      glTranslatef (0.0              , -20.0            ,    0.0f);
+      yFONT_print  (win.font_bg,  12, YF_BOTLEF, o.actual);
+      glTranslatef (0.0              , -20.0            ,    0.0f);
+      yFONT_print  (win.font_bg,  12, YF_BOTLEF, o.word);
+   } glPopMatrix   ();
    /*---(complete)-----------------------*/
    return;
 }
@@ -788,7 +797,7 @@ DRAW_base          (void)
    glBegin     (GL_POINTS);
    for (i = 0; i < o.navg; ++i) {
       if      (o.avg[i].ca    == 'x') glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
-      else if (o.avg[i].t     == 'm') glColor4f(1.0f, 0.0f, 1.0f, 1.0f);
+      else if (o.avg[i].type  == 'm') glColor4f(1.0f, 0.0f, 1.0f, 1.0f);
       else if (o.bas[i].fake  == 'y') glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
       else                            glColor4f(0.7f, 0.7f, 0.0f, 1.0f);
       glVertex3f( o.avg[i].xpos, o.avg[i].ypos, z);
@@ -827,7 +836,7 @@ DRAW_keys          (void)
       glEnd();
       glPopMatrix();
       /*---(draw the segment)------------*/
-      if (o.key[i].t != '>') {
+      if (o.key[i].type != '>') {
          glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
          glLineWidth(2.0);
          glBegin(GL_LINES);
@@ -836,7 +845,7 @@ DRAW_keys          (void)
          glEnd();
       }
       /*---(draw the hidden lines)-------*/
-      if (i > 0 && o.key[i].t == '>') {
+      if (i > 0 && o.key[i].type == '>') {
          glColor4f(0.5f, 0.5f, 0.5f, 1.0f);
          glLineWidth(2.0);
          glBegin(GL_LINES);
@@ -845,7 +854,7 @@ DRAW_keys          (void)
          glEnd();
       }
       /*---(draw the S extension)--------*/
-      if (o.key[i].t == '>') {
+      if (o.key[i].type == '>') {
          pt = o.key[i].p_bas - 1;
          glEnable(GL_LINE_STIPPLE);
          glLineStipple(1, 0x3333);
@@ -858,7 +867,7 @@ DRAW_keys          (void)
          glDisable(GL_LINE_STIPPLE);
       }
       /*---(draw the F extension)--------*/
-      if (o.key[i + 1].t == '>' || i + 1 == o.nkey) {
+      if (o.key[i + 1].type == '>' || i + 1 == o.nkey) {
          pt = o.key[i].p_bas + 1;
          glEnable(GL_LINE_STIPPLE);
          glLineStipple(1, 0x3333);
@@ -943,7 +952,7 @@ DRAW_info_base       (void)
       FONT__label   ("d"   , t);
       snprintf      (t, 100, "%4d",   o.avg[o.cavg - 1].q);
       FONT__label   ("q"   , t);
-      snprintf      (t, 100, "   %c", o.avg[o.cavg - 1].t);
+      snprintf      (t, 100, "   %c", o.avg[o.cavg - 1].type);
       FONT__label   ("t"   , t);
       /*---(done)------------------------*/
    } glPopMatrix();
@@ -1035,7 +1044,7 @@ DRAW_info (void)
    FONT__label ("d"   , msg);
    snprintf(msg, 100, "%4d",   o.avg[o.cavg - 1].q);
    FONT__label ("q"   , msg);
-   snprintf(msg, 100, "   %c", o.avg[o.cavg - 1].t);
+   snprintf(msg, 100, "   %c", o.avg[o.cavg - 1].type);
    FONT__label ("t"   , msg);
    /*---(calculated)------------------------*/
    int  xkey = KEY_find(o.cavg - 1);
@@ -1070,7 +1079,7 @@ DRAW_info (void)
       FONT__label ("d"   , msg);
       snprintf(msg, 100, "%4d",   o.key[xkey].q);
       FONT__label ("q"   , msg);
-      snprintf(msg, 100, "   %c", o.key[xkey].t);
+      snprintf(msg, 100, "   %c", o.key[xkey].type);
       FONT__label ("t"   , msg);
       /*---(advanced)--------------------------*/
       snprintf(msg, 100, "%4d"  , o.key[xkey].ra);

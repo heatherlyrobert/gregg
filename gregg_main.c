@@ -30,7 +30,8 @@ main               (int argc, char *argv[])
    /*---(main loop)----------------------*/
    rc = PROG_event ();
    /*---(wrapup)-------------------------*/
-   rc = PROG_end   ();
+   rc = PROG_finish ();
+   rc = PROG_end    ();
    /*---(complete)-----------------------*/
    return rc;
 }

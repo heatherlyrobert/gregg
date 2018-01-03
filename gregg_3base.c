@@ -32,7 +32,7 @@ bas_add            (int a_raw)
    o.bas[o.nbas].p_bas = o.avg[o.navg].p_bas = o.nbas;
    o.bas[o.nbas].xpos  = o.avg[o.navg].xpos  = o.raw[a_raw].xpos;
    o.bas[o.nbas].ypos  = o.avg[o.navg].ypos  = o.raw[a_raw].ypos;
-   o.bas[o.nbas].t     = o.avg[o.navg].t     = o.raw[a_raw].t;
+   o.bas[o.nbas].type  = o.avg[o.navg].type  = o.raw[a_raw].type;
    strncpy(o.bas[o.nbas].use, "-", 5);
    strncpy(o.avg[o.nbas].use, "-", 5);
    ++o.nbas;
@@ -45,9 +45,9 @@ bas_calc           (void)
 {
    int i;
    for (i = 0; i < o.nbas; ++i) {
-      if (o.bas[i].t     == 'S') continue;
-      if (o.bas[i - 1].t == 'S') continue;
-      if (o.bas[i].t     == 'F') continue;
+      if (o.bas[i].type     == 'S') continue;
+      if (o.bas[i - 1].type == 'S') continue;
+      if (o.bas[i].type     == 'F') continue;
       POINT_calc (o.bas + i, 'n');
       POINT_calc (o.avg + i, 'a');
    }
@@ -62,14 +62,14 @@ bas_extend         (void)
    int       i         = 0;            /* loop iterator -- bas points         */
    /*---(beginning)----------------------*/
    for (i = 0; i < o.nbas; ++i) {
-      if (o.avg[i].t == 'S') {
+      if (o.avg[i].type == 'S') {
          rad = o.avg[i + 2].r;
          o.bas[i].xpos  = o.avg[i].xpos  = o.bas[i + 1].xpos - (20 * cos(rad)) ;
          o.bas[i].ypos  = o.avg[i].ypos  = o.bas[i + 1].xpos - (20 * sin(rad)) ;
          DEBUG__BAS  printf("   extended beg %4d to %4dx, %4dy for circle detection\n", 0, o.bas[i].xpos, o.bas[i].ypos);
       }
       /*---(ending)-------------------------*/
-      if (o.avg[i].t == 'F') {
+      if (o.avg[i].type == 'F') {
          rad = o.bas[i - 1].r;
          o.bas[i].xpos  = o.avg[i].xpos  = o.bas[i - 1].xpos + (20 * cos(rad)) ;
          o.bas[i].ypos  = o.avg[i].ypos  = o.bas[i - 1].ypos + (20 * sin(rad)) ;
@@ -90,8 +90,8 @@ bas_sharpen        (void)
    /*---(process)------------------------*/
    DEBUG__BAS  printf("   sharp tolerance set to >= %d\n", sharp);
    for (i = 1; i < o.nbas - 1; ++i) {
-      if (o.avg[i].t == 'S' || o.avg[i - 1].t == 'S') continue;
-      if (o.avg[i].t == 'F' || o.avg[i + 1].t == 'F') continue;
+      if (o.avg[i].type == 'S' || o.avg[i - 1].type == 'S') continue;
+      if (o.avg[i].type == 'F' || o.avg[i + 1].type == 'F') continue;
       if (o.avg[i - 1].q == 0)                        continue;
       /*---(calculate)-------------------*/
       d1     = o.avg[i - 1].d;
@@ -125,28 +125,28 @@ BASE_filter        (void)
    o.nbas = o.navg = 0;
    /*---(find additional points)---------*/
    for (i = 0; i < o.nraw; ++i) {
-      DEBUG__BAS  printf("%3d [%c] ", i, o.raw[i].t);
+      DEBUG__BAS  printf("%3d [%c] ", i, o.raw[i].type);
       /*---(handle starts)---------------*/
-      if (o.raw[i].t == 'S') {
+      if (o.raw[i].type == 'S') {
          DEBUG__BAS  printf("S/>                    ACCEPT\n");
          bas_add (i);
          o.bas[o.nbas - 1].fake = 'y';
          bas_add (i + 1);
-         o.bas[o.nbas - 1].t = '>';
-         o.avg[o.nbas - 1].t = '>';
-         /*> strcpy(o.bas[o.nbas - 1].t, ">");                                        <* 
-          *> strcpy(o.avg[o.nbas - 1].t, ">");                                        <*/
+         o.bas[o.nbas - 1].type = '>';
+         o.avg[o.nbas - 1].type = '>';
+         /*> strcpy(o.bas[o.nbas - 1].type, ">");                                        <* 
+          *> strcpy(o.avg[o.nbas - 1].type, ">");                                        <*/
          ++i;
          continue;
       }
       /*---(handle finsishes)------------*/
-      if (o.raw[i].t == 'F') {
+      if (o.raw[i].type == 'F') {
          DEBUG__BAS  printf("F                      ACCEPT\n");
          xd   = fabs(o.raw[i].xpos - o.bas[o.nbas - 1].xpos);
          yd   = fabs(o.raw[i].ypos - o.bas[o.nbas - 1].ypos);
          dist = sqrt((xd * xd) + (yd * yd));
-         if (dist <=  3.0 && o.bas[o.nbas - 1].t!= '>') {
-            DEBUG__BAS  printf("too close to F         reject, i=%c, i-1=%c\n", o.raw[i].t, o.raw[i - 1].t);
+         if (dist <=  3.0 && o.bas[o.nbas - 1].type!= '>') {
+            DEBUG__BAS  printf("too close to F         reject, i=%c, i-1=%c\n", o.raw[i].type, o.raw[i - 1].type);
             --o.nbas;
             --o.navg;
          }

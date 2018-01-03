@@ -161,7 +161,7 @@ match_calc (int a_start, int a_count)
    /*---(other)---------------------------------*/
    o.tmp[1].ra  = opens.r;
    o.tmp[0].ca  = o.tmp[1].ca  = '-';
-   o.tmp[0].t   = o.tmp[1].t   = '-';
+   o.tmp[0].type   = o.tmp[1].type   = '-';
    strncpy(o.tmp[0].use, "-", 3);
    strncpy(o.tmp[1].use, "-", 3);
    /*---(complete)------------------------------*/
@@ -253,7 +253,7 @@ match_flatten    (void)
    while (i < o.nkey - 1) {
       DEBUG__LINES  printf("   %3d/%3d) q=%d and q=%d ", i, i + 1, o.key[i].q, o.key[i + 1].q);
       /*---(skip start and finishes)-----*/
-      if (o.key[i    ].t == '>' || o.key[i + 1].t == '>') {
+      if (o.key[i    ].type == '>' || o.key[i + 1].type == '>') {
          DEBUG__LINES  printf(": touches a line start, skipping\n");
          ++i;
          continue;
@@ -321,7 +321,7 @@ match_squeeze    (void)
    while (i < o.nkey - 1) {
       DEBUG__LINES  printf("   %3d/%3d) q=%d and %3d q=%d ", i, i + 1, o.key[i].q, i + 1, o.key[i + 1].q);
       /*---(skip start and finishes)-----*/
-      if (o.key[i    ].t == '>' || o.key[i + 1].t == '>') {
+      if (o.key[i    ].type == '>' || o.key[i + 1].type == '>') {
          DEBUG__LINES  printf(": touches a line start, skipping\n");
          ++i;
          continue;
@@ -1214,14 +1214,14 @@ circle_size        (int a_one, int a_two)
    _disty   = abs(o.bas[mid2].ypos - o.bas[mid1].ypos);
    _dist1   = (int) sqrt((_distx * _distx) + (_disty * _disty));
    DEBUG__CIRCLES  printf("   midpoints  : _distx=%3d, _disty=%3d, _dist1=%3d\n", _distx, _disty, _dist1);
-   o.avg[mid1].t = 'm';
-   o.avg[mid2].t = 'm';
+   o.avg[mid1].type = 'm';
+   o.avg[mid2].type = 'm';
    /*---(get half mark)------------------*/
    _distx   = abs(o.bas[half].xpos - o.bas[a_one].xpos);
    _disty   = abs(o.bas[half].ypos - o.bas[a_one].ypos);
    _dist2   = (int) sqrt((_distx * _distx) + (_disty * _disty));
    DEBUG__CIRCLES  printf("   halfpoints : _distx=%3d, _disty=%3d, _dist2=%3d\n", _distx, _disty, _dist2);
-   o.avg[half].t = 'm';
+   o.avg[half].type = 'm';
    /*---(averagge)-----------------------*/
    _dist = (_dist1 + _dist2) / 2.0;
    DEBUG__CIRCLES  printf("   so, _dist =%3d\n", _dist);
@@ -1393,7 +1393,7 @@ circle_identify    (int a_p1, int a_p3)
       return -1;
    }
    for (i = p2; i <= p4; ++i) {
-      if (o.key[i].t == 'S') {
+      if (o.key[i].type == 'S') {
          DEBUG__CIRCLES  printf("   REJECTED, crosses a stroke start at %2d\n", i);
          return -1;
       }
@@ -1432,8 +1432,8 @@ circle_driver      (void)
    int       pt;
    /*---(add end points)-----------------*/
    for (i = 0; i < o.navg; ++i) {
-      if (o.avg[i].t == 'S') KEY_add (i, 'y', 'S');
-      if (o.avg[i].t == 'F') KEY_add (i, 'y', 'F');
+      if (o.avg[i].type == 'S') KEY_add (i, 'y', 'S');
+      if (o.avg[i].type == 'F') KEY_add (i, 'y', 'F');
    }
    KEY_calc  ('c');
    /*---(report out)---------------------*/
@@ -1453,7 +1453,7 @@ circle_driver      (void)
    }
    /*---(put points back)----------------*/
    for (i = 0; i < o.nkey; ++i) {
-      if (o.key[i].t == 'S' || o.key[i].t == 'F') {
+      if (o.key[i].type == 'S' || o.key[i].type == 'F') {
          KEY_del (i);
          --i;
       }

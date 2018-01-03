@@ -26,21 +26,21 @@ KEY__swap          (int a_i, int a_j)
    x  = o.key[a_i].xpos;
    y  = o.key[a_i].ypos;
    a  = o.key[a_i].fake;
-   t  = o.key[a_i].t;
+   t  = o.key[a_i].type;
    strncpy(u, o.key[a_i].use, 5);
    o.key[a_i].p_raw = o.key[a_j].p_raw;
    o.key[a_i].p_bas = o.key[a_j].p_bas;
    o.key[a_i].xpos = o.key[a_j].xpos;
    o.key[a_i].ypos = o.key[a_j].ypos;
    o.key[a_i].fake = o.key[a_j].fake;
-   o.key[a_i].t = o.key[a_j].t;
+   o.key[a_i].type = o.key[a_j].type;
    strncpy(o.key[a_i].use, o.key[a_j].use, 5);
    o.key[a_j].p_raw = or;
    o.key[a_j].p_bas = p;
    o.key[a_j].xpos = x;
    o.key[a_j].ypos = y;
    o.key[a_j].fake = a;
-   o.key[a_j].t = t;
+   o.key[a_j].type = t;
    strncpy(o.key[a_j].use, u, 5);
    return 0;
 }
@@ -135,8 +135,8 @@ KEY_calc           (char a_mode)
       o.key[i].q  = o.key[i].ra = o.key[i].c  = o.key[i].cc = 0;
       o.key[i].ca = '-';
       /*---(filter)----------------------*/
-      if (a_mode == 'n' && o.key[i].t == '>') continue;
-      if (a_mode == 'c' && o.key[i].t == 'S') continue;
+      if (a_mode == 'n' && o.key[i].type == '>') continue;
+      if (a_mode == 'c' && o.key[i].type == 'S') continue;
       /*---(calculate)-------------------*/
       POINT_calc (o.key + i, 'n');
       key_curve (i);
@@ -175,7 +175,7 @@ KEY_add            (int a_pt, char a_fake, char a_type)
    strncpy(o.key[o.nkey].use, "-", 5);
    /*---(add params)---------------------*/
    o.key[o.nkey].fake = a_fake;
-   o.key[o.nkey].t = a_type;
+   o.key[o.nkey].type = a_type;
    /*---(update the keys)----------------*/
    ++o.nkey;
    KEY__sort ();
@@ -198,7 +198,7 @@ KEY_del            (int a_pt)
       o.key[i - 1].xpos = o.key[i].xpos;
       o.key[i - 1].ypos = o.key[i].ypos;
       o.key[i - 1].fake = o.key[i].fake;
-      o.key[i - 1].t = o.key[i].t;
+      o.key[i - 1].type = o.key[i].type;
       strncpy(o.key[i - 1].use, o.key[i].use, 5);
    }
    --o.nkey;
@@ -213,7 +213,7 @@ KEY_prep           (void)
    int     nclean  = 0;
    DEBUG__KEY  printf("   preparing for matching\n");
    for (i = 0 ; i < o.nkey; ++i) {
-      if (o.key[i].t == '>') {
+      if (o.key[i].type == '>') {
          strncpy(o.key[i].use, ">", 5);
       }
    }
@@ -227,7 +227,7 @@ KEY__clean           (void)
    int     nclean  = 0;
    DEBUG__KEY  printf("   cleaning for similar points\n");
    for (i = 1 ; i < o.nkey; ++i) {
-      if (o.key[i].t == '>')            continue;
+      if (o.key[i].type == '>')            continue;
       if (o.key[i].q == o.key[i - 1].q) {
          DEBUG__KEY  printf("   cleaned out %d\n", i);
          KEY_del(i - 1);
@@ -249,7 +249,7 @@ KEY__extend        (void)
    int       pt        = 0;
    /*---(beginning)----------------------*/
    for (i = 0; i < o.nkey; ++i) {
-      if (o.key[i    ].t == '>') {
+      if (o.key[i    ].type == '>') {
          pt  = o.key[i    ].p_bas - 1;
          rad = o.key[i + 1].r;
          o.bas[pt].xpos  = o.avg[pt].xpos  = o.key[i].xpos - (20 * cos(rad)) ;
@@ -257,7 +257,7 @@ KEY__extend        (void)
          DEBUG__KEY  printf("   extended beg %4d to %4dx, %4dy for circle detection\n", pt, o.bas[pt].xpos, o.bas[pt].ypos);
       }
       /*---(ending)-------------------------*/
-      if (o.key[i + 1].t == '>' || i + 1 == o.nkey) {
+      if (o.key[i + 1].type == '>' || i + 1 == o.nkey) {
          pt  = o.key[i    ].p_bas + 1;
          rad = o.key[i    ].r;
          o.bas[pt].xpos  = o.avg[pt].xpos  = o.key[i].xpos + (20 * cos(rad)) ;
@@ -283,11 +283,11 @@ KEY__sharpen       (void)
    /*---(beginning)----------------------*/
    DEBUG__KEY  printf("   pushing key points into corners/extremes\n");
    for (i = 0 ; i < o.nkey; ++i) {
-      if (o.key[i    ].t == '>') {
+      if (o.key[i    ].type == '>') {
          DEBUG__KEY  printf("      #00 [SKIPPING] (%3d) stroke beginning ------\n", i);
          continue;
       }
-      if (o.key[i    ].t == '>' || i+ 1 == o.nkey) {
+      if (o.key[i    ].type == '>' || i+ 1 == o.nkey) {
          DEBUG__KEY  printf("      #00 [SKIPPING] (%3d) stroke ending ---------\n", i);
          continue;
       }
@@ -412,12 +412,12 @@ KEY_filter         (void)
    /*---(process)------------------------*/
    for (i = 1; i < o.navg - 1; ++i) {
       /*---(filter)----------------------*/
-      if      (o.avg[i].t == 'S')  continue;
-      if      (o.avg[i].t == 'F')  continue;
+      if      (o.avg[i].type == 'S')  continue;
+      if      (o.avg[i].type == 'F')  continue;
       /*---(mark)------------------------*/
-      if        (o.avg[i + 1].t == 'F') {
+      if        (o.avg[i + 1].type == 'F') {
          KEY_add (i, '-', '-');
-      } else if (o.avg[i - 1].t == 'S') {
+      } else if (o.avg[i - 1].type == 'S') {
          KEY_add (i, '-', '>');
       } else if (o.avg[i - 1].q == 0) {
          continue;

@@ -205,8 +205,8 @@
 
 
 /* rapidly evolving version number to aid with visual change confirmation     */
-#define VER_NUM   "5.0p"
-#define VER_TXT   "change verion number color in debug mode, change user input also"
+#define VER_NUM   "5.1a"
+#define VER_TXT   "added lots of defensiveness and unit testing to raw point processing"
 
 
 #define     LEN_RECD      2000
@@ -291,8 +291,9 @@ struct cACCESSOR {
    int         yadj;
    /*---(stroke file)----------*/
    char        f_loc       [LEN_RECD];      /* specific file location         */
-   char        f_name      [LEN_RECD];      /* full file name                 */
-   char        f_title     [LEN_RECD];      /* specific file base name        */
+   char        f_name      [LEN_RECD];      /* base name                      */
+   char        f_title     [LEN_RECD];      /* base and suffix (for display)  */
+   char        f_full      [LEN_RECD];      /* loc, base, and suffix          */
    int         f_lines;                     /* file line count                */
    char        f_recd      [LEN_RECD];      /* current file record            */
    /*---(done)-----------------*/
@@ -303,6 +304,8 @@ struct cACCESSOR {
 #define     RPTG_BASE   if (my.rptg_base  == 'y') 
 #define     RPTG_KEY    if (my.rptg_key   == 'y') 
 
+
+extern char unit_answer  [LEN_STR];
 
 
 /*===[[ DEBUGGER : GENERIC ]]=================================================*/
@@ -487,10 +490,12 @@ typedef struct timespec  tTSPEC;
 #define     PART_MAIN      'o'
 #define     PART_CONTINUE  'c'
 
+#define     POINT_TYPES    "S>-F"
 #define     POINT_START    'S'
 #define     POINT_HEAD     '>'
 #define     POINT_NORMAL   '-'
 #define     POINT_FINISH   'F'
+#define     POINT_FAKE     'y'
 
 #define     MODE_CURSOR    '-'
 #define     MODE_TOUCH     'y'
@@ -501,6 +506,7 @@ struct cPOINT
 {
    int         p_raw;                  // tie to raw point
    int         p_bas;                  // tie to basic point
+   char        type;                   // type of key point (sharp or rounded)
    int         xpos;                   // xpos
    int         ypos;                   // ypos
    int         xd;                     // x-dist from last xpos
@@ -515,7 +521,6 @@ struct cPOINT
    float       c;                      // pixels of curvature at mid point
    char        ca;                     // curve anomolies '-' = normal, 'x' = jittery
    char        cc;                     // curve category : +1, 0, -1                    
-   char        t;                      // type of key point (sharp or rounded)
    char        use         [5];        /* use of this point in outline        */
    char        fake;                   /* artificial point or not (y/n)       */
 };
@@ -570,6 +575,7 @@ char       PROG_args            (int argc, char *argv[]);
 char       PROG_begin           (void);
 char       PROG_final           (void);
 char       PROG_event           (void);
+char       PROG_finish          (void);
 char       PROG_end             (void);
 
 char       DRAW_init            (void);
@@ -631,11 +637,12 @@ char       POINT_show           (tPOINT*, int);
 char       FILE_rename          (char *a_name);
 
 /*---(raw)------------------*/
-char       POINT_wipe           (tPOINT *a_pt);
+char       RAW__point           (int a_x, int a_y, char a_type);
 char       RAW_touch            (int a_x, int a_y);
 char       RAW_normal           (int a_x, int a_y);
 char       RAW_lift             (int a_x, int a_y);
 char       RAW_equalize         (void);
+char*      RAW__unit            (char *a_question, int a_num);
 
 /*---(base)-----------------*/
 char       BASE_filter       (void);

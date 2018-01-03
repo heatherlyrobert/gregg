@@ -374,7 +374,7 @@ words_heads (void)           /* list the head of each index                   */
          for (j = 0; j < MAX_LETTERS; j++) {
             for (k = 0; k < MAX_LETTERS; k++) {
                if (out_index[i][j][k] != NULL) {
-                  printf("%3d %3d %3d\n", i, j, k);
+                  /*> printf("%3d %3d %3d\n", i, j, k);                               <*/
                   words_listg(out_index[i][j][k]);
                }
             }
@@ -386,7 +386,7 @@ words_heads (void)           /* list the head of each index                   */
          for (j = 0; j < 27; j++) {
             for (k = 0; k < 27; k++) {
                if (eng_index[i][j][k] != NULL) {
-                  printf("%3d %3d %3d\n", i, j, k);
+                  /*> printf("%3d %3d %3d\n", i, j, k);                               <*/
                   words_liste(eng_index[i][j][k]);
                }
             }
@@ -402,7 +402,7 @@ words_listg  (                /* list words for an index number                *
 {
    tWORDS   *nextg = a_head;
    while (nextg != NULL) {
-      printf("              %s\n", nextg->english);
+      /*> printf("              %s\n", nextg->english);                               <*/
       nextg = nextg->nextg;
    }
    return 0;
@@ -414,7 +414,7 @@ words_liste  (                /* list words for an index number                *
 {
    tWORDS   *nexte = a_head;
    while (nexte != NULL) {
-      printf("              %s\n", nexte->english);
+      /*> printf("              %s\n", nexte->english);                               <*/
       nexte = nexte->nexte;
    }
    return 0;

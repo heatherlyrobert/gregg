@@ -279,12 +279,18 @@ PROG_event()
    return 1;
 }
 
-/* PURPOSE : drive the program closure activities                             */
 char
-PROG_end(void)
+PROG_finish          (void)
 {
    TOUCH_wrap ();
    DRAW_wrap  ();
+   DEBUG_T printf("\npetal writing v03 ----------------------------------end---\n\n");
+   return 0;
+}
+
+char
+PROG_end             (void)
+{
    DEBUG_T printf("\npetal writing v03 ----------------------------------end---\n\n");
    return 0;
 }
@@ -293,44 +299,39 @@ PROG_end(void)
 /*============================--------------------============================*/
 /*===----                         unit testing                         ----===*/
 /*============================--------------------============================*/
+void o___UNITTEST_______________o (void) {;}
 
-#define       LEN_TEXT  2000
-char          unit_answer [ LEN_TEXT ];
-
-char*
-unit_accessor(char *a_question, int a_num)
+char         /*-> set up programgents/debugging ------[ light  [uz.320.011.05]*/ /*-[00.0000.00#.#]-*/ /*-[--.---.---.--]-*/
+PROG__unitquiet     (void)
 {
-   if        (strcmp(a_question, "raw")         == 0) {
-      if (o.nraw == 0) {
-         snprintf(unit_answer, LEN_TEXT, "Raw Point (%4d) : there are no dots", a_num);
-      } else if (a_num < 0) {
-         snprintf(unit_answer, LEN_TEXT, "Raw Point (%4d) : can not be negative", a_num);
-      } else if (a_num >= o.nraw) {
-         snprintf(unit_answer, LEN_TEXT, "Raw Point (%4d) : out of range %3d to %3d", a_num, 0, o.nraw - 1);
-      } else
-         snprintf(unit_answer, LEN_TEXT, "Raw Point (%4d) : %4dx, %4dy, %4dc", a_num, o.raw[a_num].xpos, o.raw[a_num].ypos, o.nraw);
-   } else if        (strcmp(a_question, "bas")         == 0) {
-      if (o.nbas == 0) {
-         snprintf(unit_answer, LEN_TEXT, "Bas Point (%4d) : there are no dots", a_num);
-      } else if (a_num < 0) {
-         snprintf(unit_answer, LEN_TEXT, "Bas Point (%4d) : can not be negative", a_num);
-      } else if (a_num >= o.nbas) {
-         snprintf(unit_answer, LEN_TEXT, "Bas Point (%4d) : out of range %3d to %3d", a_num, 0, o.nraw - 1);
-      } else
-         snprintf(unit_answer, LEN_TEXT, "Bas Point (%4d) : %4dx, %4dy, %4dc", a_num, o.raw[a_num].xpos, o.raw[a_num].ypos, o.nraw);
-   } else if        (strcmp(a_question, "num_raw")     == 0) {
-      snprintf(unit_answer, LEN_TEXT, "Raw Count        : %4dc", o.nraw);
-   } else if        (strcmp(a_question, "num_bas")     == 0) {
-      snprintf(unit_answer, LEN_TEXT, "Bas Count        : %4dc", o.nbas);
-   } else if        (strcmp(a_question, "num_avg")     == 0) {
-      snprintf(unit_answer, LEN_TEXT, "Avg Count        : %4dc", o.navg);
-   } else if        (strcmp(a_question, "num_key")     == 0) {
-      snprintf(unit_answer, LEN_TEXT, "Key Count        : %4dc", o.nkey);
-   } else if        (strcmp(a_question, "prepared")    == 0) {
-      snprintf(unit_answer, LEN_TEXT, "Prepared  (%4d) : %s", o.curr, o.grade);
-   }
-   return unit_answer;
+   char       *x_args [1]  = { "gregg" };
+   yURG_logger (1, x_args);
+   PROG_init   ();
+   yURG_urgs   (1, x_args);
+   PROG_args   (1, x_args);
+   PROG_begin  ();
+   return 0;
 }
+
+char         /*-> set up programgents/debugging ------[ light  [uz.320.011.05]*/ /*-[00.0000.00#.!]-*/ /*-[--.---.---.--]-*/
+PROG__unitloud      (void)
+{
+   char       *x_args [2]  = { "gregg_unit", "@@kitchen"    };
+   yURG_logger (2, x_args);
+   PROG_init   ();
+   yURG_urgs   (2, x_args);
+   PROG_args   (2, x_args);
+   PROG_begin  ();
+   return 0;
+}
+
+char         /*-> set up program urgents/debugging ---[ light  [uz.210.001.01]*/ /*-[00.0000.00#.!]-*/ /*-[--.---.---.--]-*/
+PROG__unitend       (void)
+{
+   PROG_end       ();
+   return 0;
+}
+
 
 
 /*============================----(source-end)----============================*/

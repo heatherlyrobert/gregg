@@ -1,0 +1,221 @@
+
+
+
+
+#23456789-12  123  123456789-123456789-123456789-12345  123456789-123456789-  123456789-123456789-123456789-123456789-123456789-123456789-123456789-  123456789-  123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-  -  123456789-123456789- 
+#==(verb)===  ver  ===========(description)===========  =====(function)=====  ========================(arguments)===================================  ==(test)==  ==========================(results)=================================================================  t  ========(var)======= 
+PREP          v21  include the prototype headers                                - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   - - - - -   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+   incl       v21  include public header                gregg.h               - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   - - - - -   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+
+
+
+#23456789-12  123  123456789-123456789-123456789-12345  123456789-123456789-  123456789-123456789-123456789-123456789-123456789-123456789-123456789-  123456789-  123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-  -  123456789-123456789- 
+#==(verb)===  ver  ===========(description)===========  =====(function)=====  ========================(arguments)===================================  ==(test)==  ==========================(results)=================================================================  t  ========(var)======= 
+SCRP          v21  (RAW   ) check base point recording                          RAW__point                                                              ((01.---))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+
+   COND       v21  initialize the testing environment                           - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((01.001))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+     exec     v21  start testing                        PROG__unitquiet                                                                               i_equal     0                                                                                                    
+
+   GROUP      v21  check defense on stroke starts                               - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   - - - - -   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+
+   COND       v21  FAIL, try to add incorrect starts                            - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((01.003))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+     exec     v21  call point add                       RAW__point            0     , 0      , POINT_NORMAL                                           i_lesser    0                                                                                                    
+     get      v21  review types                         RAW__unit             "types"        , 0                                                      s_equal     RAW types        :  0 [                                             ]                                
+     exec     v21  call point add                       RAW__point            0     , 0      , POINT_HEAD                                             i_lesser    0                                                                                                    
+     get      v21  review types                         RAW__unit             "types"        , 0                                                      s_equal     RAW types        :  0 [                                             ]                                
+     exec     v21  call point add                       RAW__point            0     , 0      , POINT_FINISH                                           i_lesser    0                                                                                                    
+     get      v21  review types                         RAW__unit             "types"        , 0                                                      s_equal     RAW types        :  0 [                                             ]                                
+
+   COND       v21  add a start point                                            - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((01.003))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+     exec     v21  call point add                       RAW__point            0     , 0      , POINT_START                                            i_equal     0                                                                                                    
+     get      v21  review types                         RAW__unit             "types"        , 0                                                      s_equal     RAW types        :  1 [S                                            ]                                
+
+   COND       v21  FAIL, try to add incorrect heads                             - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((01.003))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+     exec     v21  call point add                       RAW__point            0     , 0      , POINT_NORMAL                                           i_lesser    0                                                                                                    
+     get      v21  review types                         RAW__unit             "types"        , 0                                                      s_equal     RAW types        :  1 [S                                            ]                                
+     exec     v21  call point add                       RAW__point            0     , 0      , POINT_START                                            i_lesser    0                                                                                                    
+     get      v21  review types                         RAW__unit             "types"        , 0                                                      s_equal     RAW types        :  1 [S                                            ]                                
+     exec     v21  call point add                       RAW__point            0     , 0      , POINT_FINISH                                           i_lesser    0                                                                                                    
+     get      v21  review types                         RAW__unit             "types"        , 0                                                      s_equal     RAW types        :  1 [S                                            ]                                
+
+   COND       v21  add a head point                                             - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((01.003))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+     exec     v21  call point add                       RAW__point            0     , 0      , POINT_HEAD                                             i_equal     0                                                                                                    
+     get      v21  review types                         RAW__unit             "types"        , 0                                                      s_equal     RAW types        :  2 [S>                                           ]                                
+
+   COND       v21  FAIL, try to add incorrect point types                       - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((01.003))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+     exec     v21  call point add                       RAW__point            0     , 0      , POINT_START                                            i_lesser    0                                                                                                    
+     get      v21  review types                         RAW__unit             "types"        , 0                                                      s_equal     RAW types        :  2 [S>                                           ]                                
+     exec     v21  call point add                       RAW__point            0     , 0      , POINT_HEAD                                             i_lesser    0                                                                                                    
+     get      v21  review types                         RAW__unit             "types"        , 0                                                      s_equal     RAW types        :  2 [S>                                           ]                                
+
+   GROUP      v21  check adding more points to a stroke                         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   - - - - -   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+
+   COND       v21  FAIL, try to add a duplicate point                           - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((01.003))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+     exec     v21  call point add                       RAW__point            0     , 0      , POINT_NORMAL                                           i_lesser    0                                                                                                    
+     get      v21  review types                         RAW__unit             "types"        , 0                                                      s_equal     RAW types        :  2 [S>                                           ]                                
+
+   COND       v21  add a another point                                          - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((01.003))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+     exec     v21  call point add                       RAW__point            1     , 0      , POINT_NORMAL                                           i_equal     0                                                                                                    
+     get      v21  review types                         RAW__unit             "types"        , 0                                                      s_equal     RAW types        :  3 [S>-                                          ]                                
+
+   COND       v21  FAIL, try to add a duplicate again                           - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((01.003))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+     exec     v21  call point add                       RAW__point            1     , 0      , POINT_NORMAL                                           i_lesser    0                                                                                                    
+     get      v21  review types                         RAW__unit             "types"        , 0                                                      s_equal     RAW types        :  3 [S>-                                          ]                                
+
+   COND       v21  add a another point                                          - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((01.003))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+     exec     v21  call point add                       RAW__point            1     , 1      , POINT_NORMAL                                           i_equal     0                                                                                                    
+     get      v21  review types                         RAW__unit             "types"        , 0                                                      s_equal     RAW types        :  4 [S>--                                         ]                                
+
+   GROUP      v21  check finishing a stroke                                     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   - - - - -   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+
+   COND       v21  FAIL, try to add incorrect point types                       - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((01.003))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+     exec     v21  call point add                       RAW__point            1     , 1      , POINT_START                                            i_lesser    0                                                                                                    
+     get      v21  review types                         RAW__unit             "types"        , 0                                                      s_equal     RAW types        :  4 [S>--                                         ]                                
+     exec     v21  call point add                       RAW__point            1     , 1      , POINT_HEAD                                             i_lesser    0                                                                                                    
+     get      v21  review types                         RAW__unit             "types"        , 0                                                      s_equal     RAW types        :  4 [S>--                                         ]                                
+
+   COND       v21  FAIL, try to add a non-dup finish point                      - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((01.003))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+     exec     v21  call point add                       RAW__point            2     , 1      , POINT_FINISH                                           i_lesser    0                                                                                                    
+     get      v21  review types                         RAW__unit             "types"        , 0                                                      s_equal     RAW types        :  4 [S>--                                         ]                                
+     exec     v21  call point add                       RAW__point            0     , 0      , POINT_FINISH                                           i_lesser    0                                                                                                    
+     get      v21  review types                         RAW__unit             "types"        , 0                                                      s_equal     RAW types        :  4 [S>--                                         ]                                
+
+   COND       v21  add a correct finish                                         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((01.003))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+     exec     v21  call point add                       RAW__point            1     , 1      , POINT_FINISH                                           i_equal     0                                                                                                    
+     get      v21  review types                         RAW__unit             "types"        , 0                                                      s_equal     RAW types        :  5 [S>--F                                        ]                                
+
+   COND       v21  FAIL, try a duplicate finish                                 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((01.003))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+     exec     v21  call point add                       RAW__point            1     , 1      , POINT_FINISH                                           i_lesser    0                                                                                                    
+     get      v21  review types                         RAW__unit             "types"        , 0                                                      s_equal     RAW types        :  5 [S>--F                                        ]                                
+
+   GROUP      v21  check continuing to another stroke                           - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   - - - - -   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+
+   COND       v21  FAIL, try to add incorrect point types                       - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((01.003))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+     exec     v21  call point add                       RAW__point            1     , 2      , POINT_NORMAL                                           i_lesser    0                                                                                                    
+     get      v21  review types                         RAW__unit             "types"        , 0                                                      s_equal     RAW types        :  5 [S>--F                                        ]                                
+     exec     v21  call point add                       RAW__point            1     , 2      , POINT_HEAD                                             i_lesser    0                                                                                                    
+     get      v21  review types                         RAW__unit             "types"        , 0                                                      s_equal     RAW types        :  5 [S>--F                                        ]                                
+     exec     v21  call point add                       RAW__point            1     , 2      , POINT_FINISH                                           i_lesser    0                                                                                                    
+     get      v21  review types                         RAW__unit             "types"        , 0                                                      s_equal     RAW types        :  5 [S>--F                                        ]                                
+
+   COND       v21  add a another stroke strart                                  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((01.003))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+     exec     v21  call point add                       RAW__point            0     , 0      , POINT_START                                            i_equal     0                                                                                                    
+     get      v21  review types                         RAW__unit             "types"        , 0                                                      s_equal     RAW types        :  6 [S>--FS                                       ]                                
+
+   GROUP      v21  wrap up                                                      - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   - - - - -   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+
+   COND       v21  complete testing                                             - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((01.011))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+     exec     v21  stop testing                         PROG__unitend                                                                                 i_equal     0                                                                                                    
+
+
+
+#23456789-12  123  123456789-123456789-123456789-12345  123456789-123456789-  123456789-123456789-123456789-123456789-123456789-123456789-123456789-  123456789-  123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-  -  123456789-123456789- 
+#==(verb)===  ver  ===========(description)===========  =====(function)=====  ========================(arguments)===================================  ==(test)==  ==========================(results)=================================================================  t  ========(var)======= 
+SCRP          v21  (RAW   ) use public functions to record points               RAW_touch, RAW_normal, RAW_lift                                         ((01.---))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+
+   COND       v21  initialize the testing environment                           - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((01.001))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+     exec     v21  start testing                        PROG__unitquiet                                                                               i_equal     0                                                                                                    
+
+   GROUP      v21  create a small normal                                        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   - - - - -   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+
+   COND       v21  touch down                                                   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((01.003))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+     exec     v21  call touch                           RAW_touch             0     , 0                                                               i_equal     0                                                                                                    
+     get      v21  review types                         RAW__unit             "types"        , 0                                                      s_equal     RAW types        :  2 [S>                                           ]                                
+
+   COND       v21  move                                                         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((01.003))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+     exec     v21  call normal                          RAW_normal            1     , 0                                                               i_equal     0                                                                                                    
+     get      v21  review types                         RAW__unit             "types"        , 0                                                      s_equal     RAW types        :  3 [S>-                                          ]                                
+
+   COND       v21  move                                                         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((01.003))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+     exec     v21  call normal                          RAW_normal            2     , 0                                                               i_equal     0                                                                                                    
+     get      v21  review types                         RAW__unit             "types"        , 0                                                      s_equal     RAW types        :  4 [S>--                                         ]                                
+
+   COND       v21  move (duplicate)                                             - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((01.003))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+     exec     v21  call normal                          RAW_normal            2     , 0                                                               i_lesser    0                                                                                                    
+     get      v21  review types                         RAW__unit             "types"        , 0                                                      s_equal     RAW types        :  4 [S>--                                         ]                                
+
+   COND       v21  finish (dup with last, so just add finish)                   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((01.003))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+     exec     v21  call lift                            RAW_lift              2     , 0                                                               i_equal     0                                                                                                    
+     get      v21  review types                         RAW__unit             "types"        , 0                                                      s_equal     RAW types        :  5 [S>--F                                        ]                                
+
+   COND       v21  finish (duplicate)                                           - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((01.003))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+     exec     v21  call lift                            RAW_lift              2     , 0                                                               i_lesser    0                                                                                                    
+     get      v21  review types                         RAW__unit             "types"        , 0                                                      s_equal     RAW types        :  5 [S>--F                                        ]                                
+
+   GROUP      v21  restart a new stroke                                         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   - - - - -   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+
+   COND       v21  touch down                                                   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((01.003))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+     exec     v21  call touch                           RAW_touch             0     , 0                                                               i_equal     0                                                                                                    
+     get      v21  review types                         RAW__unit             "types"        , 0                                                      s_equal     RAW types        :  2 [S>                                           ]                                
+
+   COND       v21  add back the rest of a stroke                                - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((01.003))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+     exec     v21  call normal                          RAW_normal            1     , 0                                                               i_equal     0                                                                                                    
+     exec     v21  call normal                          RAW_normal            2     , 0                                                               i_equal     0                                                                                                    
+     exec     v21  call normal                          RAW_normal            2     , 0                                                               i_lesser    0                                                                                                    
+     exec     v21  call lift                            RAW_lift              2     , 0                                                               i_equal     0                                                                                                    
+     get      v21  review types                         RAW__unit             "types"        , 0                                                      s_equal     RAW types        :  5 [S>--F                                        ]                                
+
+   GROUP      v21  continue the outline                                         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   - - - - -   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+
+   COND       v21  touch down                                                   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((01.003))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+     exec     v21  call touch                           RAW_touch             35    , 0                                                               i_equal     0                                                                                                    
+     get      v21  review types                         RAW__unit             "types"        , 0                                                      s_equal     RAW types        :  7 [S>--FS>                                      ]                                
+
+   COND       v21  add some more                                                - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((01.003))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+     exec     v21  call normal                          RAW_normal            36    , 0                                                               i_equal     0                                                                                                    
+     exec     v21  call normal                          RAW_normal            37    , 0                                                               i_equal     0                                                                                                    
+
+   COND       v21  finish                                                       - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((01.003))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+     exec     v21  call lift                            RAW_lift              38    , 0                                                               i_equal     0                                                                                                    
+     get      v21  review types                         RAW__unit             "types"        , 0                                                      s_equal     RAW types        : 11 [S>--FS>---F                                  ]                                
+
+   GROUP      v21  touch inside restart radius                                  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   - - - - -   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+
+   COND       v21  touch down                                                   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((01.003))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+     exec     v21  call touch                           RAW_touch             34    , 0                                                               i_equal     0                                                                                                    
+     get      v21  review types                         RAW__unit             "types"        , 0                                                      s_equal     RAW types        :  2 [S>                                           ]                                
+
+   GROUP      v21  start a prefixed outline                                     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   - - - - -   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+
+   COND       v21  touch down                                                   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((01.003))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+     exec     v21  call touch                           RAW_touch             -30   , 30                                                              i_equal     0                                                                                                    
+     get      v21  review types                         RAW__unit             "types"        , 0                                                      s_equal     RAW types        :  2 [S>                                           ]                                
+
+   COND       v21  add some more                                                - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((01.003))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+     exec     v21  call normal                          RAW_normal            -30   , 29                                                              i_equal     0                                                                                                    
+     exec     v21  call normal                          RAW_normal            -30   , 28                                                              i_equal     0                                                                                                    
+
+   COND       v21  finish                                                       - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((01.003))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+     exec     v21  call lift                            RAW_lift              -30   , 27                                                              i_equal     0                                                                                                    
+     get      v21  review types                         RAW__unit             "types"        , 0                                                      s_equal     RAW types        :  6 [S>---F                                       ]                                
+
+   COND       v21  touch down in reset area                                     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((01.003))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+     exec     v21  call touch                           RAW_touch             0     , 0                                                               i_equal     0                                                                                                    
+     get      v21  review types                         RAW__unit             "types"        , 0                                                      s_equal     RAW types        :  8 [S>---FS>                                     ]                                
+
+   COND       v21  add back the rest of a stroke                                - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((01.003))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+     exec     v21  call normal                          RAW_normal            1     , 0                                                               i_equal     0                                                                                                    
+     exec     v21  call normal                          RAW_normal            2     , 0                                                               i_equal     0                                                                                                    
+     exec     v21  call normal                          RAW_normal            2     , 0                                                               i_lesser    0                                                                                                    
+     exec     v21  call lift                            RAW_lift              2     , 0                                                               i_equal     0                                                                                                    
+     get      v21  review types                         RAW__unit             "types"        , 0                                                      s_equal     RAW types        : 11 [S>---FS>--F                                  ]                                
+
+   GROUP      v21  continue the outline                                         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   - - - - -   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+
+   COND       v21  touch down                                                   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((01.003))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+     exec     v21  call touch                           RAW_touch             35    , 0                                                               i_equal     0                                                                                                    
+     get      v21  review types                         RAW__unit             "types"        , 0                                                      s_equal     RAW types        : 13 [S>---FS>--FS>                                ]                                
+
+   COND       v21  add some more                                                - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((01.003))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+     exec     v21  call normal                          RAW_normal            36    , 0                                                               i_equal     0                                                                                                    
+     exec     v21  call normal                          RAW_normal            37    , 0                                                               i_equal     0                                                                                                    
+
+   COND       v21  finish                                                       - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((01.003))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+     exec     v21  call lift                            RAW_lift              38    , 0                                                               i_equal     0                                                                                                    
+     get      v21  review types                         RAW__unit             "types"        , 0                                                      s_equal     RAW types        : 17 [S>---FS>--FS>---F                            ]                                
+
+   GROUP      v21  wrap up                                                      - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   - - - - -   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+
+   COND       v21  complete testing                                             - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((01.011))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+     exec     v21  stop testing                         PROG__unitend                                                                                 i_equal     0                                                                                                    
+
