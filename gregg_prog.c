@@ -156,8 +156,6 @@ PROG_final (void)
    /*---(header)-------------------------*/
    DEBUG_TOPS   yLOG_enter    (__FUNCTION__);
    DRAW_init  ();
-   /*> yXINIT_start (win.w_title, win.w_wide, win.w_tall, YX_FOCUSABLE, YX_FIXED, debug_old.prep);   <*/
-   /*> dlist_init ();                                                                 <*/
    OUT_init   ();
    if (out_start > 0) o.curr = out_start;
    TOUCH_init ();

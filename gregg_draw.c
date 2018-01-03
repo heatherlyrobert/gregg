@@ -39,14 +39,14 @@ DRAW_init            (void)
    /*---(header)-------------------------*/
    DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
    /*---(stuff)--------------------------*/
-   rc = DRAW__resize ('i', "gregg_input"    , 520, 370);
+   rc = DRAW__resize ('i', "gregg_input"    , 560, 370);
    rc = yXINIT_start (win.w_title, win.w_wide, win.w_tall, YX_FOCUSABLE, YX_FIXED, '-');
    rc = yGLTEX_init     ();
    glClearColor    (0.3f, 0.5f, 0.3f, 1.0f);       /* nice medium green          */
    rc = FONT__load      ();
    rc = dlist_init ();
-   win.tex_h        =  700;
-   win.tex_w        = 1000;
+   /*> win.tex_h        =  700;                                                       <*/
+   /*> win.tex_w        = 1000;                                                       <*/
    rc = yGLTEX_new (&s_tex, &s_fbo, &s_depth, win.tex_w, win.tex_h);
    rc = DRAW_back ();
    /*---(complete)-----------------------*/
@@ -71,17 +71,19 @@ DRAW__resize       (cchar a_format, cchar *a_title, cint a_wide, cint a_tall)
    /*---(widths)-------------------------*/
    win.w_wide = a_wide;
    win.t_wide =  20;
+   win.r_wide =  40;
    win.m_wide = win.c_wide = a_wide - win.t_wide;
    /*---(lefts)--------------------------*/
    win.t_left =   0;
    win.m_left = win.c_left = win.t_wide;
+   win.r_left = win.m_left + win.m_wide;
    /*---(talls)--------------------------*/
    win.w_tall = win.t_tall = a_tall;
    win.c_tall =  20;  
-   win.m_tall = a_tall - win.c_tall;
+   win.m_tall = win.r_tall = a_tall - win.c_tall;
    /*---(bottoms)------------------------*/
-   win.c_bott = win.t_bott =   0;  
-   win.m_bott = win.c_bott + win.c_tall;
+   win.c_bott = win.t_bott = win.r_bott =   0;  
+   win.m_bott = win.r_bott = win.c_bott + win.c_tall;
    /*---(main)---------------------------*/
    win.m_ymax   =  125;
    win.m_ymin   =  win.m_ymax - win.m_tall;
@@ -95,11 +97,15 @@ DRAW__resize       (cchar a_format, cchar *a_title, cint a_wide, cint a_tall)
    win.d_bar       =    20;
    win.d_ansx      =   200;
    win.d_ansy      =  -160;
+   /*---(texture)------------------------*/
+   win.tex_h        = win.m_tall * 2.0;
+   win.tex_w        = win.m_wide * 2.0;
    /*---(readout)------------------------*/
    DEBUG_GRAF   yLOG_complex ("window"    , "bott %3d, left %3d, wide %3d, tall %3d", 0         , 0         , win.w_wide, win.w_tall);
    DEBUG_GRAF   yLOG_complex ("title"     , "bott %3d, left %3d, wide %3d, tall %3d", win.t_bott, win.t_left, win.t_wide, win.t_tall);
    DEBUG_GRAF   yLOG_complex ("command"   , "bott %3d, left %3d, wide %3d, tall %3d", win.c_bott, win.c_left, win.c_wide, win.c_tall);
    DEBUG_GRAF   yLOG_complex ("primary"   , "bott %3d, left %3d, wide %3d, tall %3d", win.m_bott, win.m_left, win.m_wide, win.m_tall);
+   DEBUG_GRAF   yLOG_complex ("ribbon"    , "bott %3d, left %3d, wide %3d, tall %3d", win.r_bott, win.r_left, win.r_wide, win.r_tall);
    DEBUG_GRAF   yLOG_complex ("data"      , "xoff %3d, yoff %3d, zoff %3d, pnt  %3d", win.d_xoff, win.d_yoff, win.d_zoff, win.d_point);
    DEBUG_GRAF   yLOG_complex ("answer"    , "ansx %3d, ansy %3d, bar  %3d"          , win.d_ansx, win.d_ansy, win.d_bar);
    /*---(complete)-----------------------*/
@@ -144,34 +150,19 @@ DRAW_primary         (void)
       glBindTexture(GL_TEXTURE_2D, s_tex);
       /*> glColor4f    (0.20f, 0.20f, 0.20f, 1.0f);                                   <*/
       glBegin         (GL_POLYGON); {
-         glTexCoord2d (     0.00 ,      1.00);
+         glTexCoord2d (    0.00 ,      1.00);
          glVertex3f  (win.m_xmin + 3, win.m_ymax - 3,  0.0f);
-         glTexCoord2d (     1.00 ,      1.00);
+         glTexCoord2d (    1.00 ,      1.00);
          glVertex3f  (win.m_xmax - 3, win.m_ymax - 3,  0.0f);
-         glTexCoord2d (     1.00 ,      0.00);
+         glTexCoord2d (    1.00 ,      0.00);
          glVertex3f  (win.m_xmax - 3, win.m_ymin + 3,  0.0f);
-         glTexCoord2d (     0.00 ,      0.00);
+         glTexCoord2d (    0.00 ,      0.00);
          glVertex3f  (win.m_xmin + 3, win.m_ymin + 3,  0.0f);
       } glEnd   ();
       glBindTexture(GL_TEXTURE_2D, 0);
    } glPopMatrix   ();
-   /*---(background)---------------------*/
-   /*> glPushMatrix(); {                                                              <* 
-    *>    glBindTexture(GL_TEXTURE_2D, s_tex);                                        <* 
-    *>    glBegin(GL_QUAD_STRIP); {                                                   <* 
-    *>       glTexCoord2d (     0.00 ,      0.00);                                    <* 
-    *>       glVertex3f   (win.m_xmin, win.m_ymin,   0.00);                           <* 
-    *>       glTexCoord2d (     0.00 ,      1.00);                                    <* 
-    *>       glVertex3f   (win.m_xmin, win.m_ymax,   0.00);                           <* 
-    *>       glTexCoord2d (     1.00 ,      0.00);                                    <* 
-    *>       glVertex3f   (win.m_xmax, win.m_ymin,   0.00);                           <* 
-    *>       glTexCoord2d (     1.00 ,      1.00);                                    <* 
-    *>       glVertex3f   (win.m_xmax, win.m_ymax,   0.00);                           <* 
-    *>    } glEnd();                                                                  <* 
-    *>    glBindTexture(GL_TEXTURE_2D, 0);                                            <* 
-    *> } glPopMatrix();                                                               <*/
    /*---(parts)--------------------------*/
-   /*> DRAW_slide_avg ();                                                             <*/
+   DRAW_cursor      ();
    if (my.touch != 'y') {
       DRAW_base        ();
       DRAW_keys        ();
@@ -274,7 +265,7 @@ DRAW_command       (void)
       yFONT_print  (win.font_bg,  11, YF_BOTRIG, my.keys);
    } glPopMatrix   ();
    /*---(complete)-----------------------*/
-   return;
+   return 0;
 }
 
 char
@@ -283,15 +274,43 @@ DRAW_back            (void)
    /*---(locals)-----------+-----------+-*/
    char        rce         =  -10;
    char        rc          =    0;
+   int         i           =    0;
+   float       x_xmin      =    0;
+   float       x_xmax      =    0;
    /*---(header)-------------------------*/
    DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
    /*---(setup)--------------------------*/
    rc = yGLTEX_draw_start   (s_fbo, YGLTEX_GREGG, win.tex_w, win.tex_h, 2.0);
    /*---(draw)---------------------------*/
-   glCallList (dl_back);
-   draw_horz   ();
-   DRAW_slide_avg ();
-   sample_show ();
+   /*> glCallList (dl_back);                                                          <*/
+   /*> draw_horz   ();                                                                <*/
+   /*> DRAW_slide_avg ();                                                             <*/
+   /*> sample_show ();                                                                <*/
+   /*---(ribbon)-------------------------*/
+   x_xmin = win.m_xmax - win.r_wide + 2;
+   x_xmax = win.m_xmax;
+   glPushMatrix    (); {
+      glTranslatef  (0.0       , 0.0       , 10.0);
+      glColor4f    (0.25f, 0.40f, 0.25f, 1.0f);
+      glBegin         (GL_POLYGON); {
+         glVertex3f  (x_xmin    , win.m_ymax,  0.0f);
+         glVertex3f  (x_xmax    , win.m_ymax,  0.0f);
+         glVertex3f  (x_xmax    , win.m_ymin,  0.0f);
+         glVertex3f  (x_xmin    , win.m_ymin,  0.0f);
+      } glEnd   ();
+   } glPopMatrix   ();
+   glPushMatrix    (); {
+      glColor4f    (1.00f, 1.00f, 1.00f, 1.0f);
+      /*> glBegin         (GL_POLYGON); {                                             <* 
+       *>    glVertex3f  (0.0       , 10.0      ,  0.0f);                             <* 
+       *>    glVertex3f  (10.0      , 10.0      ,  0.0f);                             <* 
+       *>    glVertex3f  (10.0      , 0.0       ,  0.0f);                             <* 
+       *>    glVertex3f  (0.0       , 0.0       ,  0.0f);                             <* 
+       *> } glEnd   ();                                                               <*/
+      /*> glTranslatef   (x_xmin    , win.m_ymax, 60.0);                              <*/
+      yFONT_symbol (1.5, 1, 1, 0);
+   } glPopMatrix   ();
+
    /*---(mipmaps)------------------------*/
    rc = yGLTEX_draw_end  (s_tex);
    /*---(complete)-----------------------*/
@@ -325,7 +344,6 @@ DRAW_main (void)
    DRAW_title       ();
    DRAW_command     ();
    DRAW_primary     ();
-   DRAW_cursor ();
    /*> draw_oslider();                                                                <*/
    /*> draw_kslider();                                                                <*/
    /*> DRAW_raws   ();                                                                <*/
@@ -401,7 +419,7 @@ char
 DRAW_slide_avg       (void)
 {
    float   x_lef = win.m_xmin;
-   float   x_rig = win.m_xmax +  2;
+   float   x_rig = win.m_xmax - win.r_wide +  2;
    float   x_top = win.m_ymin + 40;
    float   x_bot = win.m_ymin;
    float   x_cnt =  50;
@@ -1137,6 +1155,12 @@ FONT__load           (void)
    win.font_sm = yFONT_load (win.face_sm);
    if (win.font_sm < 0) {
       fprintf(stderr, "Problem loading %s\n", win.face_sm);
+      exit(1);
+   }
+   win.icons  = yFONT_symload (ICON_SET, 20, 25, '-');
+   printf ("sym = %d\n", win.icons);
+   if (win.icons < 0) {
+      fprintf(stderr, "Problem loading %s\n", ICON_SET);
       exit(1);
    }
    return 0;

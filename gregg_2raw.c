@@ -9,10 +9,25 @@ PRIV int     s_yadj    = 0;
 
 
 /*
+ *
+ *   raw data points are very jagged and clunky.  the tend to only move one
+ *   pixel at a time and only horizontally and vertically.  but, cleansing
+ *   raw points before recording them can eliminate later clues.  i feel it is
+ *   better to over-collect and clean in a later stage.
+ *
  *   START and FINISH points are duplicates.  they are created to enable later
  *   checking for circles.  the START and FINISH points can be "extended" to
- *   look for reasonable intersections.
+ *   look for reasonable intersections.  while this could be done temporarily
+ *   later, i found it programatically useful to do it early.
  *
+ *   when i store outlines in databases, i will either store the raw data points
+ *   or final answer, likely both.  the reason is that later algorithms may
+ *   find additional alternatives or different answers provided the same points.
+ *   why not allow for reinterpretation.
+ *
+ *   the only "modification" to the raw source data i will currently allow is
+ *   baselining the start point to zero.  this is incredibly useful in crazy
+ *   pen/touch based applications and allows easier cross outline comparisions.
  *
  *
  */

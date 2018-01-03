@@ -205,8 +205,8 @@
 
 
 /* rapidly evolving version number to aid with visual change confirmation     */
-#define VER_NUM   "5.1a"
-#define VER_TXT   "added lots of defensiveness and unit testing to raw point processing"
+#define VER_NUM   "5.1b"
+#define VER_TXT   "technically able to load iconset through yFONT now ;)"
 
 
 #define     LEN_RECD      2000
@@ -258,17 +258,24 @@ struct cWIN {
    int         d_bar;                       /* control bar height             */
    int         d_ansx;                      /* answer x offset                */
    int         d_ansy;                      /* answer y offset                */
+   /*---(ribbon sizes)------*/
+   int         r_wide;                      /* width  of ribbon/button bar    */
+   int         r_left;                      /* left   of ribbon/button bar    */
+   int         r_tall;                      /* height of ribbon/button bar    */
+   int         r_bott;                      /* bottom of ribbon/button bar    */
    /*---(fonts)-------------*/
    char        face_bg     [50];
    int         font_bg;
    char        face_sm     [50];
    int         font_sm;
+   int         icons;
    /*---(texture)-----------*/
    int         tex_h;                  /* texture height                      */
    int         tex_w;                  /* texture width                       */
    /*---(done)--------------*/
 } win;
 
+#define     ICON_SET  "/usr/local/share/fonts/outline_icons.png"
 
 
 /*---(struct.re)--------+-----------+-*//*-+----------------------------------*/
