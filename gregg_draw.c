@@ -169,7 +169,7 @@ DRAW_primary         (void)
       DRAW_curr        ();
       /*> DRAW_info_counts ();                                                        <* 
        *> DRAW_info_base   ();                                                        <*/
-      DRAW_info_answer ();
+      /*> DRAW_info_answer ();                                                        <*/
    }
    glPushMatrix    (); {
       glColor4f    (0.00f, 0.00f, 0.00f, 1.0f);
@@ -275,6 +275,7 @@ DRAW_back            (void)
    char        rce         =  -10;
    char        rc          =    0;
    int         i           =    0;
+   int         j           =    0;
    float       x_xmin      =    0;
    float       x_xmax      =    0;
    /*---(header)-------------------------*/
@@ -282,10 +283,10 @@ DRAW_back            (void)
    /*---(setup)--------------------------*/
    rc = yGLTEX_draw_start   (s_fbo, YGLTEX_GREGG, win.tex_w, win.tex_h, 2.0);
    /*---(draw)---------------------------*/
-   /*> glCallList (dl_back);                                                          <*/
-   /*> draw_horz   ();                                                                <*/
-   /*> DRAW_slide_avg ();                                                             <*/
-   /*> sample_show ();                                                                <*/
+   glCallList (dl_back);
+   draw_horz   ();
+   DRAW_slide_avg ();
+   sample_show ();
    /*---(ribbon)-------------------------*/
    x_xmin = win.m_xmax - win.r_wide + 2;
    x_xmax = win.m_xmax;
@@ -308,7 +309,15 @@ DRAW_back            (void)
        *>    glVertex3f  (0.0       , 0.0       ,  0.0f);                             <* 
        *> } glEnd   ();                                                               <*/
       /*> glTranslatef   (x_xmin    , win.m_ymax, 60.0);                              <*/
-      yFONT_symbol (1.5, 1, 1, 0);
+      glTranslatef  (win.m_xmax - 37, 128       , 10.0);
+      for (i = 30; i >= 30; --i) {
+         for (j = 0; j < 10; ++j) {
+            yFONT_symbol (1.8, j , i, 0);
+            /*> glTranslatef  (35.0      , 0.0       ,  0.0);                         <*/
+            glTranslatef  (0         , -35.0     ,  0.0);
+         }
+         /*> glTranslatef  (-35 * 7   , -35       ,  0.0);                            <*/
+      }
    } glPopMatrix   ();
 
    /*---(mipmaps)------------------------*/
@@ -1157,8 +1166,7 @@ FONT__load           (void)
       fprintf(stderr, "Problem loading %s\n", win.face_sm);
       exit(1);
    }
-   win.icons  = yFONT_symload (ICON_SET, 20, 25, '-');
-   printf ("sym = %d\n", win.icons);
+   win.icons  = yFONT_symload (ICON_SET, 20, 32, '-');
    if (win.icons < 0) {
       fprintf(stderr, "Problem loading %s\n", ICON_SET);
       exit(1);
