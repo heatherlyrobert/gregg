@@ -205,8 +205,8 @@
 
 
 /* rapidly evolving version number to aid with visual change confirmation     */
-#define VER_NUM   "5.1c"
-#define VER_TXT   "shows yFONT icons properly, no worries ;)"
+#define VER_NUM   "5.1d"
+#define VER_TXT   "sample of icons displayed and show properly.  whoo-hoo"
 
 
 #define     LEN_RECD      2000

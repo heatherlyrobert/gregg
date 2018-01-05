@@ -167,14 +167,15 @@ DRAW_primary         (void)
       DRAW_base        ();
       DRAW_keys        ();
       DRAW_curr        ();
-      /*> DRAW_info_counts ();                                                        <* 
-       *> DRAW_info_base   ();                                                        <*/
+      DRAW_info_counts ();
+      /*> DRAW_info_base   ();                                                        <*/
       /*> DRAW_info_answer ();                                                        <*/
    }
    glPushMatrix    (); {
-      glColor4f    (0.00f, 0.00f, 0.00f, 1.0f);
+      glColor4f    (0.20f, 0.20f, 0.20f, 1.0f);
       glTranslatef (win.m_xmin +  3.0, win.m_ymin + 43.0,    0.0f);
       yFONT_print  (win.font_bg,  12, YF_BOTLEF, my.f_full);
+      glColor4f    (0.00f, 0.00f, 0.00f, 1.0f);
       glTranslatef (0.0              , -20.0            ,    0.0f);
       yFONT_print  (win.font_bg,  12, YF_BOTLEF, o.actual);
       glTranslatef (0.0              , -20.0            ,    0.0f);
@@ -278,6 +279,8 @@ DRAW_back            (void)
    int         j           =    0;
    float       x_xmin      =    0;
    float       x_xmax      =    0;
+   int         x_side      =    0;
+   float       x_left      =    0;
    /*---(header)-------------------------*/
    DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
    /*---(setup)--------------------------*/
@@ -288,8 +291,10 @@ DRAW_back            (void)
    DRAW_slide_avg ();
    sample_show ();
    /*---(ribbon)-------------------------*/
-   x_xmin = win.m_xmax - win.r_wide + 2;
+   x_xmin = win.m_xmax - win.r_wide;
    x_xmax = win.m_xmax;
+   x_side = 35;
+   x_left = x_side + (win.r_wide - x_side) / 2.0;
    glPushMatrix    (); {
       glTranslatef  (0.0       , 0.0       , 10.0);
       glColor4f    (0.25f, 0.40f, 0.25f, 1.0f);
@@ -309,15 +314,28 @@ DRAW_back            (void)
        *>    glVertex3f  (0.0       , 0.0       ,  0.0f);                             <* 
        *> } glEnd   ();                                                               <*/
       /*> glTranslatef   (x_xmin    , win.m_ymax, 60.0);                              <*/
-      glTranslatef  (win.m_xmax - 37, 128       , 10.0);
-      for (i = 30; i >= 30; --i) {
-         for (j = 0; j < 10; ++j) {
-            yFONT_symbol (1.8, j , i, 0);
-            /*> glTranslatef  (35.0      , 0.0       ,  0.0);                         <*/
-            glTranslatef  (0         , -35.0     ,  0.0);
-         }
-         /*> glTranslatef  (-35 * 7   , -35       ,  0.0);                            <*/
-      }
+      glTranslatef  (win.m_xmax - x_left, 125       , 10.0);
+      /*> yFONT_icon ("data"    , "save"      , 30);                                  <*/
+      yFONT_icon ("align"   , "layers"    , x_side);
+      glTranslatef  (0         , -x_side    ,  0.0);
+      yFONT_icon ("sec"     , "bodyscan"  , x_side);
+      glTranslatef  (0         , -x_side    ,  0.0);
+      yFONT_icon ("sci"     , "atom"      , x_side);
+      glTranslatef  (0         , -x_side    ,  0.0);
+      yFONT_icon ("tech"    , "stepper"   , x_side);
+      glTranslatef  (0         , -x_side    ,  0.0);
+      yFONT_icon ("sci"     , "virus"     , x_side);
+      glTranslatef  (0         , -x_side    ,  0.0);
+      yFONT_icon ("tools"   , "bottle"    , x_side);
+      glTranslatef  (0         , -x_side    ,  0.0);
+      yFONT_icon ("draw"    , "resolution", x_side);
+      glTranslatef  (0         , -x_side    ,  0.0);
+      yFONT_icon ("sec"     , "spy"       , x_side);
+      glTranslatef  (0         , -x_side    ,  0.0);
+      yFONT_icon ("tools"   , "tape"      , x_side);
+      glTranslatef  (0         , -x_side    ,  0.0);
+      yFONT_icon ("touch"   , "phonepad"  , x_side);
+      glTranslatef  (0         , -x_side    ,  0.0);
    } glPopMatrix   ();
 
    /*---(mipmaps)------------------------*/
@@ -926,7 +944,7 @@ DRAW_info_counts     (void)
    /*---(point counts)-------------------*/
    glColor4f     (0.0f, 0.0f, 0.0f, 1.0f);
    glPushMatrix  (); {
-      glTranslatef  (win.d_xoff, win.d_yoff, win.d_zoff);
+      glTranslatef  (win.m_xmax - 125.0, win.m_ymin + 28.0, 50);
       snprintf      (t, 100, "%4d", o.nraw);
       FONT__label   ("raw#", t);
       snprintf      (t, 100, "%4d", o.navg);
@@ -1166,7 +1184,8 @@ FONT__load           (void)
       fprintf(stderr, "Problem loading %s\n", win.face_sm);
       exit(1);
    }
-   win.icons  = yFONT_symload (ICON_SET, 20, 32, '-');
+   /*> win.icons  = yFONT_symload (ICON_SET, 20, 33, '-');                            <*/
+   win.icons  = yFONT_iconload ();
    if (win.icons < 0) {
       fprintf(stderr, "Problem loading %s\n", ICON_SET);
       exit(1);

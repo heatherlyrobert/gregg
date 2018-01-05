@@ -3,13 +3,8 @@
 
 
 
-/*============================--------------------============================*/
-/*===----                          basic points                        ----===*/
-/*============================--------------------============================*/
-void o___BAS_POINTS_____________o (void) {;}
-
 PRIV int      /*----: locate a basic point based on its raw point ------------*/
-bas_find           (int a_raw)
+BASE__find            (int a_raw)
 {
    int i = 0;
    for (i = 0; i < o.nbas; ++i) {
@@ -19,11 +14,11 @@ bas_find           (int a_raw)
 }
 
 PRIV char     /*----: add an additional basic point from a raw point ---------*/
-bas_add            (int a_raw)
+BASE__add            (int a_raw)
 {
    int       rc        = 0;
    DEBUG__BAS  printf("   %3d : ", a_raw);
-   if ((rc = bas_find(a_raw)) >= 0) {
+   if ((rc = BASE__find (a_raw)) >= 0) {
       DEBUG__BAS  printf("REJECTED, already exists as %4d\n", rc);
       return -1;
    }
@@ -41,7 +36,7 @@ bas_add            (int a_raw)
 }
 
 PRIV char     /*----: calculate additional information on basic points -------*/
-bas_calc           (void)
+BASE__calc           (void)
 {
    int i;
    for (i = 0; i < o.nbas; ++i) {
@@ -55,7 +50,7 @@ bas_calc           (void)
 }
 
 PRIV char     /*----: move the beg/end points out to test circles ------------*/
-bas_extend         (void)
+BASE__extend         (void)
 {
    /*---(locals)-------------------------*/
    float     rad       = 0.0;          /* radians                             */
@@ -81,7 +76,7 @@ bas_extend         (void)
 }
 
 PRIV char     /*----: push bas points as far as possible into sharp corners --*/
-bas_sharpen        (void)
+BASE__sharpen        (void)
 {
    /*---(locals)-------------------------*/
    int       d1, d2, dd;                    /* calculated angles              */
@@ -129,13 +124,11 @@ BASE_filter        (void)
       /*---(handle starts)---------------*/
       if (o.raw[i].type == 'S') {
          DEBUG__BAS  printf("S/>                    ACCEPT\n");
-         bas_add (i);
+         BASE__add (i);
          o.bas[o.nbas - 1].fake = 'y';
-         bas_add (i + 1);
+         BASE__add (i + 1);
          o.bas[o.nbas - 1].type = '>';
          o.avg[o.nbas - 1].type = '>';
-         /*> strcpy(o.bas[o.nbas - 1].type, ">");                                        <* 
-          *> strcpy(o.avg[o.nbas - 1].type, ">");                                        <*/
          ++i;
          continue;
       }
@@ -150,8 +143,8 @@ BASE_filter        (void)
             --o.nbas;
             --o.navg;
          }
-         bas_add (i - 1);
-         bas_add (i);
+         BASE__add (i - 1);
+         BASE__add (i);
          o.bas[o.nbas - 1].fake = 'y';
          continue;
       }
@@ -161,7 +154,7 @@ BASE_filter        (void)
       dist = sqrt((xd * xd) + (yd * yd));
       if (dist >  3.0) {
          DEBUG__BAS  printf("good distance  %6.2f  ACCEPT\n", dist);
-         bas_add (i);
+         BASE__add (i);
       } else {
          DEBUG__BAS  printf("too close with %6.2f\n", dist);
       }
@@ -169,10 +162,10 @@ BASE_filter        (void)
    /*---(end points)---------------------*/
    DEBUG__BAS  printf("   added %4d total bas points\n\n", o.nbas);
    /*---(run calculations)---------------*/
-   bas_calc    ();
-   /*> bas_extend  ();                                                                <*/
-   bas_sharpen ();
-   bas_calc    ();
+   BASE__calc    ();
+   BASE__extend  ();
+   BASE__sharpen ();
+   BASE__calc    ();
    /*---(complete)-----------------------*/
    DEBUG__BAS  printf("BAS POINTS (end)\n\n");
    return 0;

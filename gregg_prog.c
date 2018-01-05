@@ -56,7 +56,8 @@ PROG_init          (void)
    /*---(setup vikeys)----------------*/
    yVIKEYS_mode_init   ();
    yVIKEYS_mode_enter  (MODE_MAP);
-   USER_init ();
+   USER_init   ();
+   FILE_rename ("");
    /*---(debugger : standard)---------*/
    /*> debug.prep   = 'n';     /+ x) program setup and tear-down           +/         <* 
     *> debug.cli    = 'n';     /+ c) command line interface                +/         <* 
