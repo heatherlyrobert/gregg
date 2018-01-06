@@ -316,25 +316,25 @@ DRAW_back            (void)
       /*> glTranslatef   (x_xmin    , win.m_ymax, 60.0);                              <*/
       glTranslatef  (win.m_xmax - x_left, 125       , 10.0);
       /*> yFONT_icon ("data"    , "save"      , 30);                                  <*/
-      yFONT_icon ("align"   , "layers"    , x_side);
+      yFONT_icon ("align"   , "layers"      , x_side);
       glTranslatef  (0         , -x_side    ,  0.0);
-      yFONT_icon ("sec"     , "bodyscan"  , x_side);
+      yFONT_icon ("sec"     , "bodyscan"    , x_side);
       glTranslatef  (0         , -x_side    ,  0.0);
-      yFONT_icon ("sci"     , "atom"      , x_side);
+      yFONT_icon ("map"     , "well"        , x_side);
       glTranslatef  (0         , -x_side    ,  0.0);
-      yFONT_icon ("tech"    , "stepper"   , x_side);
+      yFONT_icon ("tech"    , "stack"       , x_side);
       glTranslatef  (0         , -x_side    ,  0.0);
-      yFONT_icon ("sci"     , "virus"     , x_side);
+      yFONT_icon ("sci"     , "virus"       , x_side);
       glTranslatef  (0         , -x_side    ,  0.0);
-      yFONT_icon ("tools"   , "bottle"    , x_side);
+      yFONT_icon ("tools"   , "shredder"    , x_side);
       glTranslatef  (0         , -x_side    ,  0.0);
-      yFONT_icon ("draw"    , "resolution", x_side);
+      yFONT_icon ("draw"    , "resolution"  , x_side);
       glTranslatef  (0         , -x_side    ,  0.0);
-      yFONT_icon ("sec"     , "spy"       , x_side);
+      yFONT_icon ("sec"     , "spy"         , x_side);
       glTranslatef  (0         , -x_side    ,  0.0);
-      yFONT_icon ("tools"   , "tape"      , x_side);
+      yFONT_icon ("money"   , "metronome"   , x_side);
       glTranslatef  (0         , -x_side    ,  0.0);
-      yFONT_icon ("touch"   , "phonepad"  , x_side);
+      yFONT_icon ("touch"   , "phonepad"    , x_side);
       glTranslatef  (0         , -x_side    ,  0.0);
    } glPopMatrix   ();
 
