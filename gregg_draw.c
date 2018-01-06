@@ -173,13 +173,25 @@ DRAW_primary         (void)
    }
    glPushMatrix    (); {
       glColor4f    (0.20f, 0.20f, 0.20f, 1.0f);
-      glTranslatef (win.m_xmin +  3.0, win.m_ymin + 43.0,    0.0f);
-      yFONT_print  (win.font_bg,  12, YF_BOTLEF, my.f_full);
+      glTranslatef (win.m_xmax - 50.0, win.m_ymin + 75.0,    0.0f);
+      yFONT_print  (win.font_bg,  12, YF_BOTRIG, my.f_full);
+   } glPopMatrix   ();
+   glPushMatrix    (); {
       glColor4f    (0.00f, 0.00f, 0.00f, 1.0f);
-      glTranslatef (0.0              , -20.0            ,    0.0f);
+      glTranslatef (win.m_xmin +  3.0, win.m_ymin + 23.0,    0.0f);
       yFONT_print  (win.font_bg,  12, YF_BOTLEF, o.actual);
       glTranslatef (0.0              , -20.0            ,    0.0f);
       yFONT_print  (win.font_bg,  12, YF_BOTLEF, o.word);
+   } glPopMatrix   ();
+   glPushMatrix    (); {
+      glColor4f    (1.00f, 1.00f, 1.00f, 1.0f);
+      glTranslatef (100.0, -100.0, 0.0);
+      words_result ();
+   } glPopMatrix   ();
+   glPushMatrix    (); {
+      glColor4f    (1.00f, 1.00f, 1.00f, 1.0f);
+      glTranslatef (150.0, -150.0, 0.0);
+      words_display("you have skill limit");
    } glPopMatrix   ();
    /*---(complete)-----------------------*/
    return;
@@ -289,7 +301,7 @@ DRAW_back            (void)
    glCallList (dl_back);
    draw_horz   ();
    DRAW_slide_avg ();
-   sample_show ();
+   /*> sample_show ();                                                                <*/
    /*---(ribbon)-------------------------*/
    x_xmin = win.m_xmax - win.r_wide;
    x_xmax = win.m_xmax;
@@ -307,26 +319,10 @@ DRAW_back            (void)
    } glPopMatrix   ();
    glPushMatrix    (); {
       glColor4f    (1.00f, 1.00f, 1.00f, 1.0f);
-      /*> glBegin         (GL_POLYGON); {                                             <* 
-       *>    glVertex3f  (0.0       , 10.0      ,  0.0f);                             <* 
-       *>    glVertex3f  (10.0      , 10.0      ,  0.0f);                             <* 
-       *>    glVertex3f  (10.0      , 0.0       ,  0.0f);                             <* 
-       *>    glVertex3f  (0.0       , 0.0       ,  0.0f);                             <* 
-       *> } glEnd   ();                                                               <*/
-      /*> glTranslatef   (x_xmin    , win.m_ymax, 60.0);                              <*/
       glTranslatef  (win.m_xmax - x_left, 125       , 10.0);
-      /*> yFONT_icon ("data"    , "save"      , 30);                                  <*/
+      yFONT_icon ("talk"    , "video_cam"   , x_side);
+      glTranslatef  (0         , -x_side    ,  0.0);
       yFONT_icon ("align"   , "layers"      , x_side);
-      glTranslatef  (0         , -x_side    ,  0.0);
-      yFONT_icon ("sec"     , "bodyscan"    , x_side);
-      glTranslatef  (0         , -x_side    ,  0.0);
-      yFONT_icon ("map"     , "well"        , x_side);
-      glTranslatef  (0         , -x_side    ,  0.0);
-      yFONT_icon ("tech"    , "stack"       , x_side);
-      glTranslatef  (0         , -x_side    ,  0.0);
-      yFONT_icon ("sci"     , "virus"       , x_side);
-      glTranslatef  (0         , -x_side    ,  0.0);
-      yFONT_icon ("tools"   , "shredder"    , x_side);
       glTranslatef  (0         , -x_side    ,  0.0);
       yFONT_icon ("draw"    , "resolution"  , x_side);
       glTranslatef  (0         , -x_side    ,  0.0);
@@ -337,7 +333,27 @@ DRAW_back            (void)
       yFONT_icon ("touch"   , "phonepad"    , x_side);
       glTranslatef  (0         , -x_side    ,  0.0);
    } glPopMatrix   ();
-
+   glPushMatrix    (); {
+      glTranslatef  (win.m_xmax - (x_side * 10) - 12, win.m_ymin + x_side + 40, 10.0);
+      glColor4f    (1.00f, 1.00f, 1.00f, 1.0f);
+      yFONT_icon ("play"    , "first"       , x_side);
+      glTranslatef  (x_side    , 0.0        ,  0.0);
+      yFONT_icon ("play"    , "prev"        , x_side);
+      glTranslatef  (x_side    , 0.0        ,  0.0);
+      yFONT_icon ("play"    , "next"        , x_side);
+      glTranslatef  (x_side    , 0.0        ,  0.0);
+      yFONT_icon ("play"    , "last"        , x_side);
+      glTranslatef  (x_side    , 0.0        ,  0.0);
+      yFONT_icon ("play"    , "play"        , x_side);
+      glTranslatef  (x_side    , 0.0        ,  0.0);
+      yFONT_icon ("play"    , "pause"       , x_side);
+      glTranslatef  (x_side    , 0.0        ,  0.0);
+      yFONT_icon ("play"    , "slower"      , x_side);
+      glTranslatef  (x_side    , 0.0        ,  0.0);
+      yFONT_icon ("play"    , "normal"      , x_side);
+      glTranslatef  (x_side    , 0.0        ,  0.0);
+      yFONT_icon ("play"    , "faster"      , x_side);
+   } glPopMatrix   ();
    /*---(mipmaps)------------------------*/
    rc = yGLTEX_draw_end  (s_tex);
    /*---(complete)-----------------------*/
@@ -380,7 +396,6 @@ DRAW_main (void)
    /*> draw_bands  ();                                                                <*/
    /*> draw_saved  ();                                                                <*/
    /*> draw_horz   ();                                                                <*/
-   /*> words_result ();                                                               <*/
    /*> sample_draw ();                                                                <*/
    /*---(word)-----------------------------*/
    /*> glPushMatrix();                                                                <* 
@@ -448,7 +463,7 @@ DRAW_slide_avg       (void)
    float   x_lef = win.m_xmin;
    float   x_rig = win.m_xmax - win.r_wide +  2;
    float   x_top = win.m_ymin + 40;
-   float   x_bot = win.m_ymin;
+   float   x_bot = win.m_ymin +  0;
    float   x_cnt =  50;
    float   x_inc = (x_rig - x_lef) / x_cnt;
    float   z     =   20.0;
@@ -951,6 +966,13 @@ DRAW_info_counts     (void)
       FONT__label   ("avg#", t);
       snprintf      (t, 100, "%4d", o.nkey);
       FONT__label   ("key#", t);
+   } glPopMatrix ();
+   glPushMatrix  (); {
+      glTranslatef  (win.m_xmax - 225.0, win.m_ymin + 28.0, 50);
+      snprintf      (t, 100, "%4d", o.total);
+      FONT__label   ("rec#", t);
+      snprintf      (t, 100, "%4d", o.curr);
+      FONT__label   ("cur#", t);
    } glPopMatrix ();
    /*---(complete)-----------------------*/
    return 0;

@@ -205,10 +205,11 @@
 
 
 /* rapidly evolving version number to aid with visual change confirmation     */
-#define VER_NUM   "5.1e"
-#define VER_TXT   "tested new addition of icons in yFONT"
+#define VER_NUM   "5.1g"
+#define VER_TXT   "reads and parses any outline from stroke file"
 
 
+#define     LEN_HUGE     10000
 #define     LEN_RECD      2000
 #define     LEN_STR        200
 #define     LEN_DESC       100
@@ -294,8 +295,6 @@ struct cACCESSOR {
    char        touch;
    int         xpos;
    int         ypos;
-   int         xadj;
-   int         yadj;
    /*---(stroke file)----------*/
    char        f_loc       [LEN_RECD];      /* specific file location         */
    char        f_name      [LEN_RECD];      /* base name                      */
@@ -545,6 +544,9 @@ struct cOUTLINE
    char      expect [50];              /* expected result of interpretation   */
    char      note   [50];              /* textual description                 */
    char      saved;                    /* flag to indicate whether saved      */
+   int       complexity;               /* how complex is outline in general   */
+   int       messiness;                /* how messy is outline                */
+   char      points [LEN_RECD];        /* raw data points from file           */
    /*---(match)--------------------------*/
    char      letters[50];              /* detailed match result               */
    char      actual [50];              /* actual match result                 */
@@ -553,6 +555,8 @@ struct cOUTLINE
    /*---(points)-------------------------*/
    int       nraw;                     /* number of raw points                */
    int       craw;                     /* current average point               */
+   int       xadj;
+   int       yadj;
    tPOINT    raw[MAX_POINTS];          /* raw points                          */
    int       nbas;                     /* number of basic points              */
    tPOINT    bas[MAX_POINTS];          /* basic points                        */
@@ -635,9 +639,12 @@ char       dlist_init        (void);
 /*---(outline)--------------*/
 char       OUT_init             (void);
 char       OUT_clear            (void);
-char       out_pick             (int);
+char       OUT__open            (char *a_mode);
+char       OUT__close           (void);
+char       OUT_count            (void);
+char       OUT_pick             (int a_num);
+char       OUT_append           (void);
 char       out_read             (int);
-char       out_append           (void);
 char       POINT_calc           (tPOINT*, int);
 char       POINT_list           (tPOINT*, int);
 char       POINT_show           (tPOINT*, int);
@@ -648,6 +655,7 @@ char       RAW__point           (int a_x, int a_y, char a_type);
 char       RAW_touch            (int a_x, int a_y);
 char       RAW_normal           (int a_x, int a_y);
 char       RAW_lift             (int a_x, int a_y);
+char       RAW_load             (char *a_points);
 char       RAW_equalize         (void);
 char*      RAW__unit            (char *a_question, int a_num);
 

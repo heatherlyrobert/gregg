@@ -8,25 +8,21 @@ const float FULL_CIRCLE  = 2 * 3.14159;   // circle in radians
 #define     FILE_BLANK  "stroke"
 #define     FILE_SUFFIX "db"
 
+static FILE  *s_file = NULL;
+static char   s_recd [LEN_HUGE] = "";
+static int    s_len  =    0;
+static char   s_fields    [20][LEN_RECD];
+static int    s_nfield    =   0;
+
 
 char
 OUT_init             (void)
 {
    OUT_clear ();
    /*---(locals)---------------------------*/
-   FILE     *f;
    char      s[MAX_LINE]   = "";
    int       i             = 0;
    int       len           = 0;
-   /*---(open file)------------------------*/
-   /*> f = fopen(fname, "r");                                                         <* 
-    *> if (f == NULL) return -1;                                                      <*/
-   /*---(count records)--------------------*/
-   /*> for (i = 0; fgets(s, MAX_LINE, f) ; ++i) {                                     <* 
-    *>    len = strlen(s);                                                            <* 
-    *>    if (len > 1 && s[0] != '#' && s[0] != ' ') ++o.total;                       <* 
-    *> }                                                                              <*/
-   /*> printf("out_init() - found %d saved outlines\n", o.total);                     <*/
    o.craw     = 0;
    o.cavg     = 0;
    o.ckey     = 0;
@@ -285,48 +281,237 @@ void o___SAVED__________________o (void) {;}
  *>          y = atoi(p);                                                                       <* 
  *>          /+> printf("out_read %4dx, %4dy\n", x, y);                                <+/      <* 
  *>          if      (i == 0)               RAW_read  (x, y);                                   <* 
- *>          else if (i == x_count - 1)     RAW_end   (x, y);                                   <* 
- *>          else                           RAW_add   (x, y);                                   <* 
- *>          sprintf(x_info, "(%04d) x=%03d, y=%03d", i, x, y);                                 <* 
- *>       }                                                                                     <* 
- *>    }                                                                                        <* 
- *>    DEBUG_I  printf("   took in %4d points\n", o.nraw);                                      <* 
- *>    DEBUG_I  printf("OUTLINE READ (end)\n\n");                                               <* 
- *>    DEBUG__RAW  POINT_list (o.raw, o.nraw);                                                     <* 
- *>    DEBUG__RAW  printf("RAW POINTS (end)\n\n");                                              <* 
- *>    o.craw     = 1;                                                                          <* 
- *>    o.cavg     = 1;                                                                          <* 
- *>    o.ckey     = 1;                                                                          <* 
- *>    o.saved    = 'y';                                                                        <* 
- *>    fclose(f);                                                                               <* 
- *>    BASE_filter   ();                                                                        <* 
- *>    KEY_filter    ();                                                                        <* 
- *>    match_flatten ();                                                                        <* 
- *>    match_squeeze ();                                                                        <* 
- *>    circle_driver ();                                                                        <* 
- *>    match_sharps  ();                                                                        <* 
- *>    match_driver  ();                                                                        <* 
- *>    /+> DEBUG__KEY  POINT_list (o.key, o.nkey);                                           <+/   <* 
- *>    return 0;                                                                                <* 
- *> }                                                                                           <*/
+*>          else if (i == x_count - 1)     RAW_end   (x, y);                                   <* 
+*>          else                           RAW_add   (x, y);                                   <* 
+*>          sprintf(x_info, "(%04d) x=%03d, y=%03d", i, x, y);                                 <* 
+*>       }                                                                                     <* 
+*>    }                                                                                        <* 
+*>    DEBUG_I  printf("   took in %4d points\n", o.nraw);                                      <* 
+*>    DEBUG_I  printf("OUTLINE READ (end)\n\n");                                               <* 
+*>    DEBUG__RAW  POINT_list (o.raw, o.nraw);                                                     <* 
+*>    DEBUG__RAW  printf("RAW POINTS (end)\n\n");                                              <* 
+*>    o.craw     = 1;                                                                          <* 
+*>    o.cavg     = 1;                                                                          <* 
+*>    o.ckey     = 1;                                                                          <* 
+*>    o.saved    = 'y';                                                                        <* 
+*>    fclose(f);                                                                               <* 
+*>    BASE_filter   ();                                                                        <* 
+*>    KEY_filter    ();                                                                        <* 
+*>    match_flatten ();                                                                        <* 
+*>    match_squeeze ();                                                                        <* 
+*>    circle_driver ();                                                                        <* 
+*>    match_sharps  ();                                                                        <* 
+*>    match_driver  ();                                                                        <* 
+*>    /+> DEBUG__KEY  POINT_list (o.key, o.nkey);                                           <+/   <* 
+*>    return 0;                                                                                <* 
+*> }                                                                                           <*/
+
 
 char
-out_append         (void)
+OUT__open          (char *a_mode)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   /*---(header)-------------------------*/
+   DEBUG_INPT   yLOG_senter  (__FUNCTION__);
+   /*---(open file)------------------------*/
+   s_file = fopen (my.f_full, a_mode);
+   DEBUG_INPT   yLOG_spoint  (s_file);
+   --rce;  if (s_file == NULL) {
+      DEBUG_INPT   yLOG_snote   ("could not open");
+      DEBUG_INPT   yLOG_sexitr  (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_INPT   yLOG_snote   ("openned");
+   /*---(complete)-------------------------*/
+   DEBUG_INPT   yLOG_sexit   (__FUNCTION__);
+   return 0;
+}
+
+char
+OUT__read          (void)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
+   /*---(header)-------------------------*/
+   DEBUG_INPT   yLOG_senter  (__FUNCTION__);
+   /*---(read a line)--------------------*/
+   while (1) {
+      fgets (s_recd, LEN_HUGE, s_file);
+      if (feof (s_file)) {
+         DEBUG_INPT   yLOG_note    ("end of file");
+         DEBUG_INPT   yLOG_sexit   (__FUNCTION__);
+         return 0;
+      }
+      s_len = strllen (s_recd, LEN_HUGE);
+      DEBUG_INPT   yLOG_value   ("s_len"     , s_len);
+      if (s_len < 10)             continue;
+      if (s_recd [0] == '#')      continue;
+      if (s_recd [0] == ' ')      continue;
+      DEBUG_INPT   yLOG_note    ("good record");
+      break;
+   }
+   /*---(complete)-------------------------*/
+   DEBUG_INPT   yLOG_sexit   (__FUNCTION__);
+   return 1;
+}
+
+char
+OUT__parse         (void)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
+   char       *p           = NULL;
+   char       *q           = "";
+   char       *r           = NULL;
+   /*---(header)-------------------------*/
+   DEBUG_INPT   yLOG_senter  (__FUNCTION__);
+   /*---(cleanse)---------------------*/
+   for (s_nfield = 0; s_nfield < 20; ++s_nfield) {
+      strlcpy (s_fields [s_nfield], "", LEN_RECD);
+   }
+   s_nfield = 0;
+   /*---(parse fields)----------------*/
+   p = strtok_r (s_recd, q, &r);
+   while (p != NULL) {
+      strltrim  (p, ySTR_BOTH, LEN_RECD);
+      strncpy   (s_fields [s_nfield++], p, LEN_RECD);
+      p = strtok_r (NULL     , q, &r);
+   }
+   --rce;  if (s_nfield < 1) {
+      DEBUG_INPT   yLOG_snote   ("no fields found");
+      DEBUG_INPT   yLOG_sexitr  (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_INPT   yLOG_sint    (s_nfield);
+   /*---(place in globals)---------------*/
+   if (s_nfield >=  1)  strlcpy (o.when  , s_fields [0], LEN_DESC);
+   if (s_nfield >=  2)  strlcpy (o.expect, s_fields [1], LEN_DESC);
+   if (s_nfield >=  3)  o.complexity  = atoi (s_fields [2]);
+   if (s_nfield >=  4)  o.messiness   = atoi (s_fields [3]);
+   if (s_nfield >=  5)  strlcpy (o.note  , s_fields [4], LEN_DESC);
+   if (s_nfield >=  7)  strlcpy (o.points, s_fields [6], LEN_RECD);
+   /*---(complete)-----------------------*/
+   DEBUG_INPT   yLOG_sexit   (__FUNCTION__);
+   return 0;
+}
+
+char
+OUT__close         (void)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
+   /*---(header)-------------------------*/
+   DEBUG_INPT   yLOG_senter  (__FUNCTION__);
+   /*---(flush)----------------------------*/
+   fflush (s_file);
+   DEBUG_INPT   yLOG_snote   ("flushed");
+   /*---(close file)-----------------------*/
+   rc = fclose (s_file);
+   DEBUG_INPT   yLOG_svalue  ("rc"        , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_INPT   yLOG_snote   ("could not close");
+      DEBUG_INPT   yLOG_sexitr  (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_INPT   yLOG_snote   ("closed");
+   /*---(complete)-------------------------*/
+   DEBUG_INPT   yLOG_sexit   (__FUNCTION__);
+   return 0;
+}
+
+char
+OUT_count          (void)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rc          =    0;
+   /*---(header)-------------------------*/
+   DEBUG_INPT   yLOG_enter   (__FUNCTION__);
+   /*---(open file)------------------------*/
+   rc = OUT__open ("r");
+   DEBUG_INPT   yLOG_value   ("rc"        , rc);
+   if (rc < 0) {
+      DEBUG_INPT   yLOG_exitr   (__FUNCTION__, rc);
+      return rc;
+   }
+   /*---(count records)--------------------*/
+   o.total = 0;
+   while (1) {
+      rc = OUT__read ();
+      if (rc <= 0)  break;
+      ++o.total;
+   }
+   DEBUG_INPT   yLOG_value   ("o.total"   , o.total);
+   /*---(finish off record)----------------*/
+   OUT__close ();
+   /*---(complete)-------------------------*/
+   DEBUG_INPT   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+OUT_pick           (int a_num)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
+   int         x_num       =    0;
+   /*---(header)-------------------------*/
+   DEBUG_INPT   yLOG_enter   (__FUNCTION__);
+   /*---(open file)------------------------*/
+   rc = OUT__open ("r");
+   DEBUG_INPT   yLOG_value   ("rc"        , rc);
+   if (rc < 0) {
+      DEBUG_INPT   yLOG_exitr   (__FUNCTION__, rc);
+      return rc;
+   }
+   /*---(count records)--------------------*/
+   while (1) {
+      rc = OUT__read ();
+      if (rc <= 0)         break;
+      if (x_num == a_num)  break;
+      ++x_num;
+   }
+   /*---(finish off record)----------------*/
+   OUT__close ();
+   /*---(check for trouble)----------------*/
+   --rce;  if (x_num != a_num) {
+      DEBUG_INPT   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(parse)----------------------------*/
+   OUT__parse ();
+   o.saved    = 'y';
+   RAW_load  (o.points);
+   /*---(complete)-------------------------*/
+   DEBUG_INPT   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+OUT_append         (void)
 {
    /*---(locals)---------------------------*/
-   FILE     *f;
-   char      d[500]     = "";
-   int i;
+   char        rc          = 0;
+   char        d           [500];
+   int         i           = 0;
    /*---(header)-------------------------*/
    DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
-   /*---(open file)------------------------*/
-   f = fopen (my.f_full, "a");
-   if (f == NULL) {
-      DEBUG_O  printf("   could not open output file\n");
-      DEBUG_O  printf("OUT_APPEND (end)\n\n");
-      return -1;
+   /*---(check for saved)------------------*/
+   if (o.saved == 'y') {
+      DEBUG_INPT   yLOG_note    ("already saved");
+      DEBUG_INPT   yLOG_exit    (__FUNCTION__);
+      return 0;
    }
-   DEBUG_O  printf("   file open for append\n");
+   /*---(open file)------------------------*/
+   rc = OUT__open ("a");
+   if (rc < 0) {
+      DEBUG_INPT   yLOG_exitr   (__FUNCTION__, rc);
+      return rc;
+   }
    /*---(write date)-----------------------*/
    time_t      time_date = time(NULL);
    struct tm*  curr_time = localtime(&time_date);
@@ -335,19 +520,32 @@ out_append         (void)
    strncpy(d, asc_time, 100);
    char  *n = strchr(d, '\n');
    if (n != NULL)  *n = '\0';
-   fprintf(f, "%-20.20s | ", d);
+   fprintf (s_file, "%-20.20s  ", d);
    /*---(leave space for answer)-----------*/
-   fprintf(f, "%-20.20s | ", " ");
+   fprintf (s_file, "%-30.30s  ", o.actual);
+   fprintf (s_file, "%c  ", '-');
+   fprintf (s_file, "%c  ", '-');
    /*---(leave space for notes)------------*/
-   fprintf(f, "%-30.30s | ", " ");
+   fprintf (s_file, "%-40.40s  ", " ");
    /*---(write count)----------------------*/
-   fprintf(f, "%03d | ", o.nraw);
+   fprintf (s_file, "%3d  ", o.nraw);
    /*---(process)--------------------------*/
-   for (i = 0; i < o.nraw; ++i)  fprintf(f, ";%d,%d", o.raw[i].xpos, o.raw[i].ypos);
+   for (i = 0; i < o.nraw; ++i) {
+      switch (o.raw [i].type) {
+      case POINT_START   :
+         fprintf (s_file, ";TOUCH,%d,%d", o.raw[i].xpos + o.xadj, o.raw[i].ypos + o.yadj);
+         break;
+      case POINT_FINISH  :
+         fprintf (s_file, ";LIFT,%d,%d", o.raw[i].xpos + o.xadj, o.raw[i].ypos + o.yadj);
+         break;
+      default :
+         fprintf (s_file, ";%d,%d", o.raw[i].xpos + o.xadj, o.raw[i].ypos + o.yadj);
+         break;
+      }
+   }
    /*---(finish off record)----------------*/
-   fprintf(f, " |\n");
-   fflush(f);
-   fclose(f);
+   fprintf (s_file, " \n");
+   OUT__close ();
    /*---(touch up some vars)---------------*/
    o.saved    = 'y';
    ++o.total;
@@ -376,6 +574,9 @@ FILE_rename          (char *a_name)
       DEBUG_OUTP   yLOG_info    ("my.f_name" , my.f_name);
       DEBUG_OUTP   yLOG_info    ("my.f_title", my.f_title);
       DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
+      OUT_count ();
+      DEBUG_OUTP   yLOG_value   ("o.total"   , o.total);
+      OUT_pick  (0);
       return 0;
    }
    DEBUG_OUTP   yLOG_info    ("a_name"    , a_name);
@@ -391,6 +592,9 @@ FILE_rename          (char *a_name)
       sprintf (my.f_full , "%s%s.%s" , my.f_loc, my.f_name, FILE_SUFFIX);
       DEBUG_OUTP   yLOG_info    ("my.f_name" , my.f_name);
       DEBUG_OUTP   yLOG_info    ("my.f_title", my.f_title);
+      OUT_count ();
+      DEBUG_OUTP   yLOG_value   ("o.total"   , o.total);
+      OUT_pick  (0);
       DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
       return 0;
    }
@@ -404,6 +608,9 @@ FILE_rename          (char *a_name)
    DEBUG_OUTP   yLOG_info    ("my.f_loc"  , my.f_loc);
    DEBUG_OUTP   yLOG_info    ("my.f_name" , my.f_name);
    DEBUG_OUTP   yLOG_info    ("my.f_title", my.f_title);
+   OUT_count ();
+   DEBUG_OUTP   yLOG_value   ("o.total"   , o.total);
+   OUT_pick  (0);
    /*---(complete)-----------------------*/
    DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
    return 0;

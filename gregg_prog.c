@@ -57,6 +57,7 @@ PROG_init          (void)
    yVIKEYS_mode_init   ();
    yVIKEYS_mode_enter  (MODE_MAP);
    USER_init   ();
+   OUT_init   ();
    FILE_rename ("");
    /*---(debugger : standard)---------*/
    /*> debug.prep   = 'n';     /+ x) program setup and tear-down           +/         <* 
@@ -157,7 +158,6 @@ PROG_final (void)
    /*---(header)-------------------------*/
    DEBUG_TOPS   yLOG_enter    (__FUNCTION__);
    DRAW_init  ();
-   OUT_init   ();
    if (out_start > 0) o.curr = out_start;
    TOUCH_init ();
    yVIKEYS_mode_mesg (win.c_text, USER_cmds_curr ());

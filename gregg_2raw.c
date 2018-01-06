@@ -4,8 +4,6 @@
 
 
 PRIV char    stype     = '-';          /* p=prefix, o=outline, c=continue     */
-PRIV int     s_xadj    = 0;
-PRIV int     s_yadj    = 0;
 
 
 /*
@@ -153,8 +151,8 @@ RAW_touch            (int a_x, int a_y)
    if (r < SIZE_R2) {
       if (stype != 'p')  OUT_clear ();
       stype   = PART_MAIN;
-      s_xadj  = a_x;
-      s_yadj  = a_y;
+      o.xadj  = a_x;
+      o.yadj  = a_y;
    } else if (a_x < 0.0 && a_y > 0.0) {
       OUT_clear ();
       stype   = PART_PREFIX;
@@ -198,6 +196,7 @@ RAW_lift             (int a_x, int a_y)
    if (rc == 0)  rc = match_sharps  ();
    if (rc == 0)  rc = match_driver  ();
    if (rc <  0)  return rc;
+   if (rc == 0)  rc = OUT_append    ();
    /*---(reporting)----------------------*/
    RPTG_RAW   POINT_list (o.raw, o.nraw);
    RPTG_BASE  POINT_list (o.avg, o.navg);
@@ -206,15 +205,70 @@ RAW_lift             (int a_x, int a_y)
    return 0;
 }
 
+char
+RAW_load           (char *a_points)
+{
+   /*---(locals)-------------------------*/
+   char     *p         = NULL;         /* coord pointer                       */
+   char     *q         = ";,";         /* point delimiters                    */
+   char     *r         = NULL;         /* context                             */
+   int       x         =    0;
+   int       y         =    0;
+   char      x_type    =  '-';
+   /*---(read head)----------------------*/
+   printf ("%s\n", a_points);
+   p = strtok_r (a_points, q, &r);
+   /*---(get point pairs)----------------*/
+   while (p != NULL) {
+      /*> printf ("[%s]\n", p);                                                       <*/
+      switch (p[0]) {
+      case 'T' :
+         /*> printf ("   touch type\n");                                              <*/
+         x_type = 'T';
+         p = strtok_r (NULL, q, &r);
+         break;
+      case 'L' :
+         /*> printf ("   lift type\n");                                               <*/
+         x_type = 'L';
+         p = strtok_r (NULL, q, &r);
+         break;
+      default :
+         x_type = '-';
+         /*> printf ("   normal type\n");                                             <*/
+         break;
+      }
+      if (p == NULL)  break;
+      x = atoi (p);
+      p = strtok_r (NULL, q, &r);
+      if (p == NULL)  break;
+      y = atoi (p);
+      switch (x_type) {
+      case 'T' :
+         RAW_touch  (x, y);
+         o.saved = 'y';
+         break;
+      case 'L' :
+         RAW_lift   (x, y);
+         break;
+      default  :
+         RAW_normal (x, y);
+         break;
+      }
+      p = strtok_r (NULL, q, &r);
+      if (p == NULL)  break;
+   }
+   return 0;
+}
+
 char          /*----: make raw xy relative to neutral origin -----------------*/
 RAW_equalize       (void)
 {
    /*---(locals)-----------+-----+-----+-*/
    int         i           =    0;
-   DEBUG__RAW  printf("   adjust all by %dx, %dy\n", s_xadj, s_yadj);
+   DEBUG__RAW  printf("   adjust all by %dx, %dy\n", o.xadj, o.yadj);
    for (i = 0; i < o.nraw; ++i) {
-      o.raw[i].xpos   -= s_xadj;
-      o.raw[i].ypos   -= s_yadj;
+      o.raw[i].xpos   -= o.xadj;
+      o.raw[i].ypos   -= o.yadj;
    }
    return 0;
 }

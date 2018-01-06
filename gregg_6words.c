@@ -429,7 +429,7 @@ words_find (                 /* locate a word in the translation dictionary   */
    for (i = 0; i < MAX_WORDS; ++i) {
       if (strncmp(words[i].english, "eof",  MAX_LEN) == 0)  return -1;
       if (strncmp(words[i].english, a_word, MAX_LEN) != 0)  continue;
-      DEBUG__WRITING  printf("%3d) <<%s>>\n", i, words[i].english);
+      /*> DEBUG__WRITING  printf("%3d) <<%s>>\n", i, words[i].english);               <*/
       return  i;
    }
    return  0;
@@ -583,9 +583,9 @@ words_outline (              /* draw a gregg outline to the screen            */
          if (temp > right) right = temp;
       }
       posx += loc[ltr].ex;
-         printf("      %02d (%03d) %-5.5s :: ", i, ltr, loc[ltr].n);
-         printf("tx = %4.0f, px  = %4d, py  = %4d, le  = %4d, ri = %4d\n",
-               loc[ltr].ex, posx, posy, left, right);
+         /*> printf("      %02d (%03d) %-5.5s :: ", i, ltr, loc[ltr].n);              <* 
+          *> printf("tx = %4.0f, px  = %4d, py  = %4d, le  = %4d, ri = %4d\n",        <* 
+          *>       loc[ltr].ex, posx, posy, left, right);                             <*/
    }
    if (outx - left + right > 280) { /* 260 small, 360 pad */
       outx  = BASX;     /* reset to left margin      */
