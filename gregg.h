@@ -205,8 +205,8 @@
 
 
 /* rapidly evolving version number to aid with visual change confirmation     */
-#define VER_NUM   "5.1g"
-#define VER_TXT   "reads and parses any outline from stroke file"
+#define VER_NUM   "5.1h"
+#define VER_TXT   "fixed word display and updated dictionary format"
 
 
 #define     LEN_HUGE     10000
@@ -287,10 +287,14 @@ struct cACCESSOR {
    char        rptg_raw;
    char        rptg_base;
    char        rptg_key;
+   char        rptg_dict;
+   char        rptg_letter;
    /*---(temp)-----------------*/
    char        keys        [LEN_LABEL];
    char        key_error;
    char        quit;
+   char        words       [LEN_RECD];
+   char        guide       [LEN_RECD];
    /*---(globals)--------------*/
    char        touch;
    int         xpos;
@@ -305,10 +309,12 @@ struct cACCESSOR {
    /*---(done)-----------------*/
 } my;
 
-#define     RPTG_TOUCH  if (my.rptg_touch == 'y') 
-#define     RPTG_RAW    if (my.rptg_raw   == 'y') 
-#define     RPTG_BASE   if (my.rptg_base  == 'y') 
-#define     RPTG_KEY    if (my.rptg_key   == 'y') 
+#define     RPTG_TOUCH  if (my.rptg_touch  == 'y') 
+#define     RPTG_RAW    if (my.rptg_raw    == 'y') 
+#define     RPTG_BASE   if (my.rptg_base   == 'y') 
+#define     RPTG_KEY    if (my.rptg_key    == 'y') 
+#define     RPTG_DICT   if (my.rptg_dict   == 'y') 
+#define     RPTG_LETTER if (my.rptg_letter == 'y') 
 
 
 extern char unit_answer  [LEN_STR];
@@ -403,7 +409,7 @@ struct cLOCATION
    int       de;         /* degrees of slope  */
    /*---(done)--------------*/
 };
-extern tLOCATION   loc[MAX_LETTERS];
+extern tLOCATION   g_loc [MAX_LETTERS];
 
 
 #define   MAX_RANGES      15
@@ -506,6 +512,8 @@ typedef struct timespec  tTSPEC;
 #define     MODE_CURSOR    '-'
 #define     MODE_TOUCH     'y'
 #define     MODE_CONTROL   'c'
+#define     MODE_SLIDER    's'
+#define     MODE_PLAYER    'p'
 
 typedef struct cPOINT tPOINT;
 struct cPOINT
@@ -684,12 +692,14 @@ char       match_flatten     (void);
 char       match_squeeze     (void);
 
 char       dict_read         (void);
-int        words_find        (char *);
 int        words_outstring   (char *);
-char       words_display     (char *);
+
+int        WORDS_find            (char* a_word);
+char       WORDS_start           (void);
+char       WORDS_outline         (int);
+char       WORDS_display         (char* a_words, char a_base);
+
 int        words_translate   (int);
-char       words_start       (void);
-char       words_outline     (int);
 int        words_vowel       (int, int);
 int        words_consonant   (int, int);
 char       words_result      (void);

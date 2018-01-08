@@ -188,11 +188,6 @@ DRAW_primary         (void)
       glTranslatef (100.0, -100.0, 0.0);
       words_result ();
    } glPopMatrix   ();
-   glPushMatrix    (); {
-      glColor4f    (1.00f, 1.00f, 1.00f, 1.0f);
-      glTranslatef (150.0, -150.0, 0.0);
-      words_display("you have skill limit");
-   } glPopMatrix   ();
    /*---(complete)-----------------------*/
    return;
 }
@@ -301,7 +296,7 @@ DRAW_back            (void)
    glCallList (dl_back);
    draw_horz   ();
    DRAW_slide_avg ();
-   /*> sample_show ();                                                                <*/
+   sample_show ();
    /*---(ribbon)-------------------------*/
    x_xmin = win.m_xmax - win.r_wide;
    x_xmax = win.m_xmax;
@@ -326,16 +321,16 @@ DRAW_back            (void)
       glTranslatef  (0         , -x_side    ,  0.0);
       yFONT_icon ("draw"    , "resolution"  , x_side);
       glTranslatef  (0         , -x_side    ,  0.0);
-      yFONT_icon ("sec"     , "spy"         , x_side);
-      glTranslatef  (0         , -x_side    ,  0.0);
-      yFONT_icon ("money"   , "metronome"   , x_side);
-      glTranslatef  (0         , -x_side    ,  0.0);
-      yFONT_icon ("touch"   , "phonepad"    , x_side);
-      glTranslatef  (0         , -x_side    ,  0.0);
+      yFONT_icon ("tools"   , "shower"      , x_side);
    } glPopMatrix   ();
    glPushMatrix    (); {
-      glTranslatef  (win.m_xmax - (x_side * 10) - 12, win.m_ymin + x_side + 40, 10.0);
+      glTranslatef  (win.m_xmin + 5, win.m_ymin + x_side + 40, 10.0);
       glColor4f    (1.00f, 1.00f, 1.00f, 1.0f);
+      glTranslatef  (x_side    , 0.0        ,  0.0);
+      glTranslatef  (x_side    , 0.0        ,  0.0);
+      glTranslatef  (x_side    , 0.0        ,  0.0);
+      glTranslatef  (x_side    , 0.0        ,  0.0);
+      glTranslatef  (x_side    , 0.0        ,  0.0);
       yFONT_icon ("play"    , "first"       , x_side);
       glTranslatef  (x_side    , 0.0        ,  0.0);
       yFONT_icon ("play"    , "prev"        , x_side);
@@ -353,6 +348,16 @@ DRAW_back            (void)
       yFONT_icon ("play"    , "normal"      , x_side);
       glTranslatef  (x_side    , 0.0        ,  0.0);
       yFONT_icon ("play"    , "faster"      , x_side);
+   } glPopMatrix   ();
+   glPushMatrix    (); {
+      glColor4f    (1.00f, 1.00f, 1.00f, 1.0f);
+      glTranslatef (150.0, -150.0, 0.0);
+      WORDS_display (my.words, 'y');
+   } glPopMatrix   ();
+   glPushMatrix    (); {
+      glColor4f    (1.00f, 1.00f, 1.00f, 1.0f);
+      glTranslatef (0.0, 0.0, 0.0);
+      WORDS_display (my.guide, '-');
    } glPopMatrix   ();
    /*---(mipmaps)------------------------*/
    rc = yGLTEX_draw_end  (s_tex);
@@ -406,17 +411,7 @@ DRAW_main (void)
     *> yFONT_print(win.font_bg,  18, YF_BOTLEF, o.actual);                             <* 
     *> glPopMatrix();                                                                 <*/
    DEBUG_WIND   yLOG_note     ("post-printing");
-   /*> words_display("MA MAD MAM MANK MACH MATN MANT MAF MAP MAR MAK AM");            <*/
-   /*> words_display("DA DAD DAM DANK DACH DATN DANT DAF DAP DAR DAK AD");            <*/
-   /*> words_display("CHA CHAD CHAM CHANK CHACH CHATN CHANT CHAF CHAP CHAR CHAK ACH");   <*/
-   /*> words_display("NGA NGAD NGAM NGANK NGACH NGATN NGANT NGAF NGAP NGAR NGAK ANG");   <*/
-   /*> words_display("KA KAD KAM KANK KACH KATN KANT KAF KAP KAR KAK AK");            <*/
-   /*> words_display("RA RAD RAM RANK RACH RATN RANT RAF RAP RAR RAK AR");            <*/
-   /*> words_display("FA FAD FAM FANK FACH FATN FANT FAF FAP FAR FAK AF");            <*/
-   /*> words_display("PA PAD PAM PANK PACH PATN PANT PAF PAP PAR PAK AP");            <*/
-   /*> words_display("TNA TNAD TNAM TNANK TNACH TNATN TNANT TNAF TNAP TNAR TNAK ATN");   <*/
-   /*> words_display("NTA NTAD NTAM NTANK NTACH NTATN NTANT NTAF NTAP NTAR NTAK ANT");   <*/
-   /*> words_display("get letter because matter say task late different draft cover project table discount fact first following had forward house line appreciate about");   <*/
+   /*> WORDS_display("get letter because matter say task late different draft cover project table discount fact first following had forward house line appreciate about", '-');   <*/
    /*---(force the redraw)-----------------*/
    glXSwapBuffers(DISP, BASE);
    glFlush();
@@ -651,7 +646,7 @@ static void      o___GUIDES__________________o (void) {;}
  *>       if (strncmp(groups[j].gr, "eof", 5)              == 0) break;                <* 
  *>       if (groups[i].fl[0] != a_quad)  continue;                                    <* 
  *>       for (j = 0; j < MAX_LETTERS; ++j) {                                          <* 
- *>          if (strncmp(loc[j].n, "eof", 5)              == 0) break;                 <* 
+ *>          if (strncmp(g_loc[j].n, "eof", 5)              == 0) break;                 <* 
  *>       }                                                                            <* 
  *>    }                                                                               <* 
  *>    /+---(complete)-----------------------+/                                        <* 
@@ -1289,10 +1284,10 @@ sample_show        (void)
    glPushMatrix(); {
       glTranslatef (win.d_xoff - 50, win.d_yoff + 30, win.d_zoff);
       glScalef              (1.5, 1.5, 1.5);
-      for (i = 1; i < MAX_LETTERS && strncmp(loc[i].n, "eof", 5) != 0; ++i) {
+      for (i = 1; i < MAX_LETTERS && strncmp(g_loc[i].n, "eof", 5) != 0; ++i) {
          glPushMatrix();
-         glTranslatef(loc[i].tx, loc[i].ty,  0.0);
-         yFONT_print(win.font_sm,  5, YF_BOTRIG, loc[i].n);
+         glTranslatef(g_loc[i].tx, g_loc[i].ty,  0.0);
+         yFONT_print(win.font_sm,  5, YF_BOTRIG, g_loc[i].n);
          glCallList(dl_dotted + i);
          glPopMatrix();
       }
@@ -1324,10 +1319,10 @@ sample_show        (void)
  *>    /+---(cycle samples)------------------+/                                                 <* 
  *>    glPushMatrix(); {                                                                        <* 
  *>       glScalef(2.0, 2.0, 2.0);                                                              <* 
- *>       for (i = 0; i < MAX_LETTERS && strncmp(loc[i].n, "eof", 5) != 0; ++i) {               <* 
+ *>       for (i = 0; i < MAX_LETTERS && strncmp(g_loc[i].n, "eof", 5) != 0; ++i) {               <* 
  *>          glPushMatrix();                                                                    <* 
- *>          glTranslatef(loc[i].tx, loc[i].ty,  0.0);                                          <* 
- *>          yFONT_print(win.font_sm,  5, YF_BOTRIG, loc[i].n);                                 <* 
+ *>          glTranslatef(g_loc[i].tx, g_loc[i].ty,  0.0);                                          <* 
+ *>          yFONT_print(win.font_sm,  5, YF_BOTRIG, g_loc[i].n);                                 <* 
  *>          glCallList(dl_dotted + i);                                                         <* 
  *>          glPopMatrix();                                                                     <* 
  *>       }                                                                                     <* 

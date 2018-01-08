@@ -588,17 +588,17 @@ match_location     (int a_rule, int a_beg, int a_opens, int a_size)
    trys_ltr = 0;
    for (j = 0; j < MAX_LETTERS; ++j) {
       /*---(primary filtering)---------------*/
-      if (strncmp(loc[j].n, "eof", 5)              == 0) break;
-      if (strncmp(groups[a_rule].gr, loc[j].gr, 5) != 0) continue;
+      if (strncmp (g_loc[j].n, "eof", 5)              == 0) break;
+      if (strncmp (groups[a_rule].gr, g_loc[j].gr, 5) != 0) continue;
       /*---(screen letters)------------------*/
       ++trys_ltr;
       if (trys_ltr <= 3) {
-         DEBUG__MATCHES  printf("%1d:%-2.2s ", loc[j].sz, loc[j].n);
+         DEBUG__MATCHES  printf("%1d:%-2.2s ", g_loc[j].sz, g_loc[j].n);
       }
-      if (loc[j].sz != a_size                          ) continue;
+      if (g_loc[j].sz != a_size                          ) continue;
       /*---(give results)-----------------*/
       rc = 1;
-      strncpy(match, loc[j].n, 5);
+      strncpy (match, g_loc[j].n, 5);
    }
    for (j = trys_ltr; j < 3; ++j) {
       DEBUG__MATCHES  printf(".:.. ");

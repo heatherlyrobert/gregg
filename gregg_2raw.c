@@ -216,7 +216,6 @@ RAW_load           (char *a_points)
    int       y         =    0;
    char      x_type    =  '-';
    /*---(read head)----------------------*/
-   printf ("%s\n", a_points);
    p = strtok_r (a_points, q, &r);
    /*---(get point pairs)----------------*/
    while (p != NULL) {

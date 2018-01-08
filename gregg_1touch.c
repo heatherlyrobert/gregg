@@ -168,6 +168,56 @@ TOUCH_control        (int a_x, int a_y)
    int         x_total     =    0;
    /*---(defense)------------------------*/
    if (s_touch != MODE_CONTROL)   return 0;
+   printf ("touched controls\n");
+   /*---(complete)-----------------------*/
+   return  0;
+}
+
+char             /* [------] read input event -------------------------------*/
+TOUCH_player         (int a_x, int a_y)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   int         x_inc       =    0;
+   int         x_slot      =    0;
+   /*---(defense)------------------------*/
+   if (s_touch != MODE_PLAYER)    return 0;
+   x_inc = win.m_wide / 35.0;
+   x_slot = trunc ((a_x - win.m_xmin - 5) / 35);
+   /*> printf ("player x=%4d, w=%4d, i=%4d, s=%4d\n", a_x, win.m_wide, x_inc, x_slot);   <*/
+   /*> printf ("o.curr = %4d, o.total = %4d\n", o.curr, o.total);                     <*/
+   switch (x_slot) {
+   case  5 :
+      o.curr = 0;
+      break;
+   case  6 :
+      --o.curr;
+      break;
+   case  7 :
+      ++o.curr;
+      break;
+   case  8 :
+      o.curr = o.total;
+      break;
+   }
+   /*> printf ("o.curr = %4d, o.total = %4d\n", o.curr, o.total);                     <*/
+   if (o.curr <  0      )  o.curr = 0;
+   if (o.curr >= o.total)  o.curr = o.total - 1;
+   /*> printf ("o.curr = %4d, o.total = %4d\n", o.curr, o.total);                     <*/
+   OUT_pick (o.curr);
+   /*---(complete)-----------------------*/
+   return  0;
+}
+
+char             /* [------] read input event -------------------------------*/
+TOUCH_slider         (int a_x, int a_y)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   int         x_xpos      =    0;
+   int         x_xinc      =    0;
+   int         i           =    0;
+   int         x_total     =    0;
+   /*---(defense)------------------------*/
+   if (s_touch != MODE_SLIDER)    return 0;
    if (o.navg  <=    0)           return 0;
    /*---(process)------------------------*/
    x_xpos = a_x - win.m_xmin;
@@ -228,9 +278,15 @@ TOUCH_read           (void)
       /*---(touch)-----------------------*/
       if      (s_touch == MODE_CURSOR && x_event.value >= 25) {
          DEBUG_TOUCH  yLOG_note    ("new touch");
-         if (s_ypos <= -175) {
+         if (s_ypos <= -180) {
+            s_touch = MODE_SLIDER;
+            TOUCH_slider  (s_xpos, s_ypos);
+         } else if (s_xpos >= win.m_xmax - 40) {
             s_touch = MODE_CONTROL;
             TOUCH_control (s_xpos, s_ypos);
+         } else if (s_ypos <= -140) {
+            s_touch = MODE_PLAYER;
+            TOUCH_player  (s_xpos, s_ypos);
          } else {
             s_touch = MODE_TOUCH;
             RAW_touch (s_xpos, s_ypos);
@@ -285,7 +341,7 @@ TOUCH_read           (void)
    my.xpos  = s_xpos;
    my.ypos  = s_ypos;
    if (s_touch == MODE_TOUCH  )  RAW_normal    (s_xpos, s_ypos);
-   if (s_touch == MODE_CONTROL)  TOUCH_control (s_xpos, s_ypos);
+   if (s_touch == MODE_SLIDER )  TOUCH_slider  (s_xpos, s_ypos);
    ++s_line;
    /*---(headers and line breaks)--------*/
    RPTG_TOUCH {

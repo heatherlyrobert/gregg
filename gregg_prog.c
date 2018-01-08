@@ -48,11 +48,16 @@ PROG_init          (void)
    strcpy (win.face_bg, "comfortaa");
    strcpy (win.face_sm, "courier");
    /*---(reporting flags)-------------*/
-   my.rptg_touch = '-';
-   my.rptg_raw   = '-';
-   my.rptg_base  = '-';
-   my.rptg_key   = '-';
-   my.quit       = '-';
+   my.rptg_touch  = '-';
+   my.rptg_raw    = '-';
+   my.rptg_base   = '-';
+   my.rptg_key    = '-';
+   my.rptg_dict   = '-';
+   my.rptg_letter = '-';
+   my.quit        = '-';
+   /*---(other)-----------------------*/
+   strlcpy (my.words, "", LEN_RECD);
+   strlcpy (my.guide, "", LEN_RECD);
    /*---(setup vikeys)----------------*/
    yVIKEYS_mode_init   ();
    yVIKEYS_mode_enter  (MODE_MAP);
@@ -103,10 +108,12 @@ PROG_args          (int argc, char *argv[])
       a = argv[i];
       if (a[0] == '@')  continue;
       DEBUG_ARGS  yLOG_info    ("cli arg", a);
-      if      (strncmp(a, "--rptg-touch"        , 20) == 0)   my.rptg_touch = 'y';
-      else if (strncmp(a, "--rptg-raw"          , 20) == 0)   my.rptg_raw   = 'y';
-      else if (strncmp(a, "--rptg-base"         , 20) == 0)   my.rptg_base  = 'y';
-      else if (strncmp(a, "--rptg-key"          , 20) == 0)   my.rptg_key   = 'y';
+      if      (strncmp(a, "--rptg-touch"        , 20) == 0)   my.rptg_touch   = 'y';
+      else if (strncmp(a, "--rptg-raw"          , 20) == 0)   my.rptg_raw     = 'y';
+      else if (strncmp(a, "--rptg-base"         , 20) == 0)   my.rptg_base    = 'y';
+      else if (strncmp(a, "--rptg-key"          , 20) == 0)   my.rptg_key     = 'y';
+      else if (strncmp(a, "--rptg-dict"         , 20) == 0)   my.rptg_dict    = 'y';
+      else if (strncmp(a, "--rptg-letter"       , 20) == 0)   my.rptg_letter  = 'y';
       /*> else if (strncmp(a, "@x", 5) == 0)  debug.top = debug.prep        = 'y';    <* 
        *> else if (strncmp(a, "@i", 5) == 0)  debug.top = debug.input       = 'y';    <* 
        *> else if (strncmp(a, "@o", 5) == 0)  debug.top = debug.output      = 'y';    <* 
