@@ -44,11 +44,31 @@ static tCOMMAND  s_cmds  [MAX_CMDS] = {
    { 'f', "quitall"     ,  0, "qa"  ,  0, 'y', '-', .f.v   = USER_quit            , ""     ,  0, "quit all files (if no changes), and exit"                    , "" },
    { 'f', "writequit"   ,  0, "wq"  ,  0, 'y', '-', .f.v   = USER_writequit       , ""     ,  0, ""                                                            , "" },
    { 'f', "writequitall",  0, "wqa" ,  0, 'y', '-', .f.v   = USER_writequit       , ""     ,  0, ""                                                            , "" },
+   { 'f', "word"        ,  0, ""    ,  0, 'y', '-', .f.s   = USER_words           , "a"    ,  0, ""                                                            , "" },
+   { 'f', "guide"       ,  0, ""    ,  0, 'y', '-', .f.s   = USER_guide           , "a"    ,  0, ""                                                            , "" },
    /*---(done)---------------------------*/
    { '-', "END-OF-LIST" ,  0, ""    ,  0, '-', '-', NULL                          , ""     ,  0, ""                                                            , "" },
 };
 static int s_ncmd = 0;
 
+
+
+
+char
+USER_words           (char *a_words)
+{
+   strlcpy (my.words, a_words, LEN_DESC);
+   DRAW_back ();
+   return 0;
+}
+
+char
+USER_guide           (char *a_guide)
+{
+   strlcpy (my.guide, a_guide, LEN_DESC);
+   DRAW_back ();
+   return 0;
+}
 
 
 char

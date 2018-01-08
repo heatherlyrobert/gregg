@@ -170,24 +170,24 @@ DRAW_primary         (void)
       DRAW_info_counts ();
       /*> DRAW_info_base   ();                                                        <*/
       /*> DRAW_info_answer ();                                                        <*/
+      glPushMatrix    (); {
+         glColor4f    (0.20f, 0.20f, 0.20f, 1.0f);
+         glTranslatef (win.m_xmax - 50.0, win.m_ymin + 75.0,    0.0f);
+         yFONT_print  (win.font_bg,  12, YF_BOTRIG, my.f_full);
+      } glPopMatrix   ();
+      glPushMatrix    (); {
+         glColor4f    (0.00f, 0.00f, 0.00f, 1.0f);
+         glTranslatef (win.m_xmin +  3.0, win.m_ymin + 23.0,    0.0f);
+         yFONT_print  (win.font_bg,  12, YF_BOTLEF, o.actual);
+         glTranslatef (0.0              , -20.0            ,    0.0f);
+         yFONT_print  (win.font_bg,  12, YF_BOTLEF, o.word);
+      } glPopMatrix   ();
+      glPushMatrix    (); {
+         glColor4f    (1.00f, 1.00f, 1.00f, 1.0f);
+         glTranslatef ( 25.0,  -25.0, 0.0);
+         WORDS_result ();
+      } glPopMatrix   ();
    }
-   glPushMatrix    (); {
-      glColor4f    (0.20f, 0.20f, 0.20f, 1.0f);
-      glTranslatef (win.m_xmax - 50.0, win.m_ymin + 75.0,    0.0f);
-      yFONT_print  (win.font_bg,  12, YF_BOTRIG, my.f_full);
-   } glPopMatrix   ();
-   glPushMatrix    (); {
-      glColor4f    (0.00f, 0.00f, 0.00f, 1.0f);
-      glTranslatef (win.m_xmin +  3.0, win.m_ymin + 23.0,    0.0f);
-      yFONT_print  (win.font_bg,  12, YF_BOTLEF, o.actual);
-      glTranslatef (0.0              , -20.0            ,    0.0f);
-      yFONT_print  (win.font_bg,  12, YF_BOTLEF, o.word);
-   } glPopMatrix   ();
-   glPushMatrix    (); {
-      glColor4f    (1.00f, 1.00f, 1.00f, 1.0f);
-      glTranslatef (100.0, -100.0, 0.0);
-      words_result ();
-   } glPopMatrix   ();
    /*---(complete)-----------------------*/
    return;
 }
@@ -295,8 +295,7 @@ DRAW_back            (void)
    /*---(draw)---------------------------*/
    glCallList (dl_back);
    draw_horz   ();
-   DRAW_slide_avg ();
-   sample_show ();
+   SHOW_SAMPLE  sample_show ();
    /*---(ribbon)-------------------------*/
    x_xmin = win.m_xmax - win.r_wide;
    x_xmax = win.m_xmax;
@@ -312,43 +311,48 @@ DRAW_back            (void)
          glVertex3f  (x_xmin    , win.m_ymin,  0.0f);
       } glEnd   ();
    } glPopMatrix   ();
-   glPushMatrix    (); {
-      glColor4f    (1.00f, 1.00f, 1.00f, 1.0f);
-      glTranslatef  (win.m_xmax - x_left, 125       , 10.0);
-      yFONT_icon ("talk"    , "video_cam"   , x_side);
-      glTranslatef  (0         , -x_side    ,  0.0);
-      yFONT_icon ("align"   , "layers"      , x_side);
-      glTranslatef  (0         , -x_side    ,  0.0);
-      yFONT_icon ("draw"    , "resolution"  , x_side);
-      glTranslatef  (0         , -x_side    ,  0.0);
-      yFONT_icon ("tools"   , "shower"      , x_side);
-   } glPopMatrix   ();
-   glPushMatrix    (); {
-      glTranslatef  (win.m_xmin + 5, win.m_ymin + x_side + 40, 10.0);
-      glColor4f    (1.00f, 1.00f, 1.00f, 1.0f);
-      glTranslatef  (x_side    , 0.0        ,  0.0);
-      glTranslatef  (x_side    , 0.0        ,  0.0);
-      glTranslatef  (x_side    , 0.0        ,  0.0);
-      glTranslatef  (x_side    , 0.0        ,  0.0);
-      glTranslatef  (x_side    , 0.0        ,  0.0);
-      yFONT_icon ("play"    , "first"       , x_side);
-      glTranslatef  (x_side    , 0.0        ,  0.0);
-      yFONT_icon ("play"    , "prev"        , x_side);
-      glTranslatef  (x_side    , 0.0        ,  0.0);
-      yFONT_icon ("play"    , "next"        , x_side);
-      glTranslatef  (x_side    , 0.0        ,  0.0);
-      yFONT_icon ("play"    , "last"        , x_side);
-      glTranslatef  (x_side    , 0.0        ,  0.0);
-      yFONT_icon ("play"    , "play"        , x_side);
-      glTranslatef  (x_side    , 0.0        ,  0.0);
-      yFONT_icon ("play"    , "pause"       , x_side);
-      glTranslatef  (x_side    , 0.0        ,  0.0);
-      yFONT_icon ("play"    , "slower"      , x_side);
-      glTranslatef  (x_side    , 0.0        ,  0.0);
-      yFONT_icon ("play"    , "normal"      , x_side);
-      glTranslatef  (x_side    , 0.0        ,  0.0);
-      yFONT_icon ("play"    , "faster"      , x_side);
-   } glPopMatrix   ();
+   SHOW_CONTROL {
+      glPushMatrix    (); {
+         glColor4f    (1.00f, 1.00f, 1.00f, 1.0f);
+         glTranslatef  (win.m_xmax - x_left, 125       , 10.0);
+         yFONT_icon ("talk"    , "video_cam"   , x_side);
+         glTranslatef  (0         , -x_side    ,  0.0);
+         yFONT_icon ("align"   , "layers"      , x_side);
+         glTranslatef  (0         , -x_side    ,  0.0);
+         yFONT_icon ("draw"    , "resolution"  , x_side);
+         glTranslatef  (0         , -x_side    ,  0.0);
+         yFONT_icon ("tools"   , "shower"      , x_side);
+      } glPopMatrix   ();
+   }
+   SHOW_PLAYER {
+      DRAW_slide_avg ();
+      glPushMatrix    (); {
+         glTranslatef  (win.m_xmin + 5, win.m_ymin + x_side + 40, 10.0);
+         glColor4f    (1.00f, 1.00f, 1.00f, 1.0f);
+         glTranslatef  (x_side    , 0.0        ,  0.0);
+         glTranslatef  (x_side    , 0.0        ,  0.0);
+         glTranslatef  (x_side    , 0.0        ,  0.0);
+         glTranslatef  (x_side    , 0.0        ,  0.0);
+         glTranslatef  (x_side    , 0.0        ,  0.0);
+         yFONT_icon ("play"    , "first"       , x_side);
+         glTranslatef  (x_side    , 0.0        ,  0.0);
+         yFONT_icon ("play"    , "prev"        , x_side);
+         glTranslatef  (x_side    , 0.0        ,  0.0);
+         yFONT_icon ("play"    , "next"        , x_side);
+         glTranslatef  (x_side    , 0.0        ,  0.0);
+         yFONT_icon ("play"    , "last"        , x_side);
+         glTranslatef  (x_side    , 0.0        ,  0.0);
+         yFONT_icon ("play"    , "play"        , x_side);
+         glTranslatef  (x_side    , 0.0        ,  0.0);
+         yFONT_icon ("play"    , "pause"       , x_side);
+         glTranslatef  (x_side    , 0.0        ,  0.0);
+         yFONT_icon ("play"    , "slower"      , x_side);
+         glTranslatef  (x_side    , 0.0        ,  0.0);
+         yFONT_icon ("play"    , "normal"      , x_side);
+         glTranslatef  (x_side    , 0.0        ,  0.0);
+         yFONT_icon ("play"    , "faster"      , x_side);
+      } glPopMatrix   ();
+   }
    glPushMatrix    (); {
       glColor4f    (1.00f, 1.00f, 1.00f, 1.0f);
       glTranslatef (150.0, -150.0, 0.0);

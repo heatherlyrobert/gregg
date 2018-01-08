@@ -48,13 +48,16 @@ PROG_init          (void)
    strcpy (win.face_bg, "comfortaa");
    strcpy (win.face_sm, "courier");
    /*---(reporting flags)-------------*/
-   my.rptg_touch  = '-';
-   my.rptg_raw    = '-';
-   my.rptg_base   = '-';
-   my.rptg_key    = '-';
-   my.rptg_dict   = '-';
-   my.rptg_letter = '-';
-   my.quit        = '-';
+   my.rptg_touch   = '-';
+   my.rptg_raw     = '-';
+   my.rptg_base    = '-';
+   my.rptg_key     = '-';
+   my.rptg_dict    = '-';
+   my.rptg_letter  = '-';
+   my.show_control = '-';
+   my.show_sample  = '-';
+   my.show_player  = '-';
+   my.quit         = '-';
    /*---(other)-----------------------*/
    strlcpy (my.words, "", LEN_RECD);
    strlcpy (my.guide, "", LEN_RECD);
@@ -114,6 +117,9 @@ PROG_args          (int argc, char *argv[])
       else if (strncmp(a, "--rptg-key"          , 20) == 0)   my.rptg_key     = 'y';
       else if (strncmp(a, "--rptg-dict"         , 20) == 0)   my.rptg_dict    = 'y';
       else if (strncmp(a, "--rptg-letter"       , 20) == 0)   my.rptg_letter  = 'y';
+      else if (strncmp(a, "--show-control"      , 20) == 0)   my.show_control = 'y';
+      else if (strncmp(a, "--show-player"       , 20) == 0)   my.show_player  = 'y';
+      else if (strncmp(a, "--show-sample"       , 20) == 0)   my.show_sample  = 'y';
       /*> else if (strncmp(a, "@x", 5) == 0)  debug.top = debug.prep        = 'y';    <* 
        *> else if (strncmp(a, "@i", 5) == 0)  debug.top = debug.input       = 'y';    <* 
        *> else if (strncmp(a, "@o", 5) == 0)  debug.top = debug.output      = 'y';    <* 
@@ -276,7 +282,7 @@ PROG_event()
       if (my.quit == 'y')  break;
       ++x_loop;
       TOUCH_read ();
-      if ((x_loop % 25) == 0)  DRAW_main();
+      if ((x_loop % 20) == 0)  DRAW_main();
       /*---(sleeping)--------------------*/
       nanosleep    (&x_dur, NULL);
    }

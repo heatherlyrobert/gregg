@@ -205,8 +205,8 @@
 
 
 /* rapidly evolving version number to aid with visual change confirmation     */
-#define VER_NUM   "5.1h"
-#define VER_TXT   "fixed word display and updated dictionary format"
+#define VER_NUM   "5.1i"
+#define VER_TXT   "added toggles/commands for showing screen elements"
 
 
 #define     LEN_HUGE     10000
@@ -289,6 +289,10 @@ struct cACCESSOR {
    char        rptg_key;
    char        rptg_dict;
    char        rptg_letter;
+   /*---(displaying)-----------*/
+   char        show_control;                /* show control buttons to right  */
+   char        show_sample;                 /* show sample strokes for ref    */
+   char        show_player;                 /* show player controls           */
    /*---(temp)-----------------*/
    char        keys        [LEN_LABEL];
    char        key_error;
@@ -309,12 +313,16 @@ struct cACCESSOR {
    /*---(done)-----------------*/
 } my;
 
-#define     RPTG_TOUCH  if (my.rptg_touch  == 'y') 
-#define     RPTG_RAW    if (my.rptg_raw    == 'y') 
-#define     RPTG_BASE   if (my.rptg_base   == 'y') 
-#define     RPTG_KEY    if (my.rptg_key    == 'y') 
-#define     RPTG_DICT   if (my.rptg_dict   == 'y') 
-#define     RPTG_LETTER if (my.rptg_letter == 'y') 
+#define     RPTG_TOUCH   if (my.rptg_touch   == 'y') 
+#define     RPTG_RAW     if (my.rptg_raw     == 'y') 
+#define     RPTG_BASE    if (my.rptg_base    == 'y') 
+#define     RPTG_KEY     if (my.rptg_key     == 'y') 
+#define     RPTG_DICT    if (my.rptg_dict    == 'y') 
+#define     RPTG_LETTER  if (my.rptg_letter  == 'y') 
+
+#define     SHOW_CONTROL if (my.show_control == 'y') 
+#define     SHOW_SAMPLE  if (my.show_sample  == 'y') 
+#define     SHOW_PLAYER  if (my.show_player  == 'y') 
 
 
 extern char unit_answer  [LEN_STR];
@@ -696,13 +704,13 @@ int        words_outstring   (char *);
 
 int        WORDS_find            (char* a_word);
 char       WORDS_start           (void);
-char       WORDS_outline         (int);
+char       WORDS_outline         (int   a_index, char a_base);
 char       WORDS_display         (char* a_words, char a_base);
 
 int        words_translate   (int);
 int        words_vowel       (int, int);
 int        words_consonant   (int, int);
-char       words_result      (void);
+char       WORDS_result      (void);
 
 char      *str_trim          (char *);
 
@@ -718,6 +726,8 @@ char        TOUCH__check         (void);
 char        TOUCH_read           (void);
 
 
+char        USER_words           (char *a_words);
+char        USER_guide           (char *a_guide);
 char        USER_init            (void);
 char        USER_quit            (void);
 char        USER_writequit       (void);

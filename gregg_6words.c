@@ -348,10 +348,10 @@ dict_read          (void)            /* read the translation dictionary         
          continue;
       }
       curr = DICT__append    (x_eng, x_gregg);
-      rc   = DICT__attrib   (curr, x_ver, x_src, x_page, x_type);
-      rc   = english_add    (curr, prev);
-      prev = gregg_find     (x_gregg);
-      rc   = gregg_add      (curr, prev);
+      rc   = DICT__attrib    (curr, x_ver, x_src, x_page, x_type);
+      rc   = english_add     (curr, prev);
+      prev = gregg_find      (x_gregg);
+      rc   = gregg_add       (curr, prev);
 
       ++n;
    }
@@ -438,8 +438,10 @@ WORDS_find           (char *a_word)
    --rce;  if (a_word == NULL)  return rce;
    /*---(search)-------------------------*/
    for (i = 0; i < MAX_WORDS; ++i) {
+      printf ("reviewing %d, %s, %s\n", i, s_words [i].english, s_words [i].gregg);
       if (strncmp (s_words[i].english, "eof",  MAX_LEN) == 0)  return -1;
       if (strncmp (s_words[i].english, a_word, MAX_LEN) != 0)  continue;
+      printf ("FOUND     %d, %s, %s\n", i, s_words [i].english, s_words [i].gregg);
       return  i;
    }
    /*---(complete)-----------------------*/
@@ -521,13 +523,14 @@ WORDS_display        (char *a_words, char a_base)
    p0 = p = strtok_r(x_words, q, &s);
    /*> printf("ok so far\n");                                                         <*/
    if (p == NULL) return -1;
-   /*> WORDS_start();                                                                 <*/
+   WORDS_start();
    /*> printf("ok so again\n");                                                       <*/
    while (1) {
       pn = x_words + (p - p0);
-      i = WORDS_find(pn);
+      /*> i = WORDS_find (pn);                                                        <*/
+      i = english_find (pn);
       /*> printf("\nsource = %p, word = %s, index = %d\n", x_words, pn, i);           <*/
-      WORDS_outline (i);
+      WORDS_outline (i, a_base);
       p = strtok_r(NULL, q, &s);
       if (p == NULL) break;
    }
@@ -538,14 +541,16 @@ char
 WORDS_start (void)           /* reset outline display to beginning of page    */
 {  /*-T=initializer-------S=procedure-------I=file------------*=unknown-------*/
    /*---(initialize)-----------------------*/
-   outx  = BASX;
-   outy  = BASY;
+   /*> outx  = BASX;                                                                  <*/
+   /*> outy  = BASY;                                                                  <*/
+   outx  = 0.0;
+   outy  = 0.0;
    /*---(complete)-------------------------*/
    return 0;
 }
 
 char          /*----: display the stylized outline of the current word -------*/
-words_result       (void)
+WORDS_result       (void)
 {
    /*---(locals)-------------------------*/
    int       i;
@@ -559,8 +564,9 @@ words_result       (void)
    /*---(take first word)----------------*/
    p = strtok(xword, q);
    if (p != NULL) {
-      i = WORDS_find(p);
-      WORDS_outline(i);
+      /*> i = WORDS_find(p);                                                          <*/
+      i = english_find (p);
+      WORDS_outline (i, '-');
    }
    /*---(complete)-----------------------*/
    return 0;
@@ -572,7 +578,7 @@ WORDS__width         (int a_index)
 }
 
 char
-WORDS_outline        (int a_index)
+WORDS_outline        (int a_index, char a_base)
 {
    /*---(locals)--------------------------------*/
    int    letter = 0;        /* current letter                                */
@@ -609,23 +615,22 @@ WORDS_outline        (int a_index)
    /*---(continue the base line)----------------*/
    printf("   drawing...\n");
    printf("      starting at %4dx, %4dy\n", outx - left, outy);
-   glPushMatrix(); {
-      glTranslatef (outx - left,  outy,  0.0);
-      glColor4f    (0.0f, 0.0f, 0.0f, 0.7f);
-      glLineWidth  ( 3.0);
-      glBegin (GL_LINES); {
-         glVertex3f   (left            , 0, 50);
-         glVertex3f   (right + OUT_XGAP, 0, 50);
-      } glEnd ();
-      glPointSize  (10.0);
-      glBegin (GL_POINTS); {
-         glVertex3f   (left            , 0, 50);
-         glVertex3f   (right + OUT_XGAP, 0, 50);
-      } glEnd ();
-   } glPopMatrix();
-
-   /*> return 0;                                                                      <*/
-
+   if (a_base == 'y') {
+      glPushMatrix(); {
+         glTranslatef (outx - left,  outy,  0.0);
+         glColor4f    (0.0f, 0.0f, 0.0f, 0.7f);
+         glLineWidth  ( 3.0);
+         glBegin (GL_LINES); {
+            glVertex3f   (left            , 0, 50);
+            glVertex3f   (right + OUT_XGAP, 0, 50);
+         } glEnd ();
+         glPointSize  (10.0);
+         glBegin (GL_POINTS); {
+            glVertex3f   (left            , 0, 50);
+            glVertex3f   (right + OUT_XGAP, 0, 50);
+         } glEnd ();
+      } glPopMatrix();
+   }
    /*---(LOOP)----------------------------------*/
    posx = posy = 0;
    /*---(set outline starting point)------------*/
@@ -643,7 +648,7 @@ WORDS_outline        (int a_index)
        *> }                                                                           <*/
       /*---(draw letter)------------------------*/
       /*> glColor4f(0.0f, 0.0f, 0.5f, 0.7f);                                          <*/
-      glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
+      glColor4f (0.0f, 0.0f, 0.0f, 0.7f);
       if (g_loc[letter].fu == 'c') {
          /*> offset = words_vowel(i, count) - 1;                                      <*/
          offset = 0;
