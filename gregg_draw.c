@@ -315,6 +315,8 @@ DRAW_back            (void)
       glPushMatrix    (); {
          glColor4f    (1.00f, 1.00f, 1.00f, 1.0f);
          glTranslatef  (win.m_xmax - x_left, 125       , 10.0);
+         yFONT_icon ("play"    , "dj"          , x_side);
+         glTranslatef  (0         , -x_side    ,  0.0);
          yFONT_icon ("talk"    , "video_cam"   , x_side);
          glTranslatef  (0         , -x_side    ,  0.0);
          yFONT_icon ("align"   , "layers"      , x_side);
@@ -706,8 +708,8 @@ draw_saved         (void)
    else                glColor4f(1.0f, 0.0f, 0.0f, 0.5f);
    for (d = 0; d <= 360; d +=  1) {
       rad = d * DEG2RAD;
-      x   = SIZE_R1 * cos(rad);
-      y   = SIZE_R1 * sin(rad);
+      x   = SIZE_SML_AVG * cos(rad);
+      y   = SIZE_SML_AVG * sin(rad);
       glVertex3f( x, y, z);
    }
    glEnd();

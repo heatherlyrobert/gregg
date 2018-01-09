@@ -205,8 +205,8 @@
 
 
 /* rapidly evolving version number to aid with visual change confirmation     */
-#define VER_NUM   "5.1i"
-#define VER_TXT   "added toggles/commands for showing screen elements"
+#define VER_NUM   "5.1j"
+#define VER_TXT   "cleaned-up and simplified background drawing"
 
 
 #define     LEN_HUGE     10000
@@ -495,13 +495,14 @@ extern int   g_transy;
 #define   MAX_LINE     10000
 
 /*  clean   8, 15, 22, 30, 39, 48, 64       */
-#define   SIZE_M0          8
-#define   SIZE_R1         16
-#define   SIZE_M1         25
-#define   SIZE_R2         35
-#define   SIZE_M2         47
-#define   SIZE_R3         62
-#define   SIZE_M3         78
+#define   SIZE_CENTER       2
+#define   SIZE_SML_MIN      8
+#define   SIZE_SML_AVG     16
+#define   SIZE_SML_MAX     25
+#define   SIZE_MED_AVG     35
+#define   SIZE_MED_MAX     47
+#define   SIZE_LRG_AVG     62
+#define   SIZE_LRG_MAX     78
 
 typedef struct timespec  tTSPEC;
 
@@ -689,7 +690,7 @@ int        KEY_find          (int);
 
 char       match_sharps      (void);
 
-char       match_driver      (void);
+char       MATCH_driver      (void);
 char       match_calc        (int, int);
 
 int        match_size        (int);

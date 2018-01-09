@@ -178,11 +178,11 @@ match_size (int a_len)
     * larger          is 6/24/40
     */
    int    x_size  = -1;
-   if      (a_len < SIZE_M0)    x_size = 0;
-   else if (a_len < SIZE_M1)    x_size = 1;
-   else if (a_len < SIZE_M2)    x_size = 2;
-   else if (a_len < SIZE_M3)    x_size = 3;
-   else                         x_size = 4;
+   if      (a_len < SIZE_SML_MIN)    x_size = 0;
+   else if (a_len < SIZE_SML_MAX)    x_size = 1;
+   else if (a_len < SIZE_MED_MAX)    x_size = 2;
+   else if (a_len < SIZE_LRG_MAX)    x_size = 3;
+   else                              x_size = 4;
    return x_size;
 }
 
@@ -455,7 +455,7 @@ match_shape        (int a_rule, int a_beg)
 }
 
 PRIV char     /*----: get number of open points from current -----------------*/
-match_opens        (int a_beg)
+MATCH__available   (int a_beg)
 {
    /*---(locals)-------------------------*/
    int   end       = 0;      /* last open point (before end or sharp)         */
@@ -489,7 +489,7 @@ match_opens        (int a_beg)
 }
 
 PRIV char     /*----: clean out jogs, jitters, and tails ---------------------*/
-match_prep         (void)
+MATCH__prep        (void)
 {
    /*---(locals)-------------------------*/
    int       i         = 0;                 /* loop iterator -- key points    */
@@ -519,7 +519,7 @@ match_cleanup      (void)
    /*---(clean out little leftovers)-----*/
    for (i = 1; i < o.nkey; ++i) {
       if (strncmp(o.key[i].use, "-", 5) != 0) continue;
-      if (o.key[i].l < SIZE_M0) {
+      if (o.key[i].l < SIZE_SML_MIN) {
          KEY_label(i, 1, "*");
          ++nclean;
       } else {
@@ -672,7 +672,7 @@ match_group        (int a_beg, int a_opens, char *a_group)
 }
 
 char          /*----: walk through rules for all normal letters --------------*/
-match_driver       (void)
+MATCH_driver       (void)
 {
    /*---(locals)-------------------------*/
    int   beg       = 0;      /* current open point                            */
@@ -682,11 +682,11 @@ match_driver       (void)
    int   trys_ltr  = 0;      /* number of possible letter rules               */
    /*---(process)------------------------*/
    DEBUG__MATCHES  printf("\nMATCHING LETTERS (beg)--------------------\n");
-   match_prep      ();
+   MATCH__prep     ();
    DEBUG__MATCHES  POINT_list (o.key, o.nkey);
    for (beg = 0; beg < o.nkey - 1; ++beg) {
       /*---(get open point count)------------------*/
-      match_opens(beg);
+      MATCH__available (beg);
       if (opens.sharps < 1)  continue;
       /*---(work from longest to shortest)---------*/
       for (count = 7; count > 0; --count) {

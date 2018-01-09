@@ -301,7 +301,7 @@ void o___SAVED__________________o (void) {;}
 *>    match_squeeze ();                                                                        <* 
 *>    circle_driver ();                                                                        <* 
 *>    match_sharps  ();                                                                        <* 
-*>    match_driver  ();                                                                        <* 
+*>    MATCH_driver  ();                                                                        <* 
 *>    /+> DEBUG__KEY  POINT_list (o.key, o.nkey);                                           <+/   <* 
 *>    return 0;                                                                                <* 
 *> }                                                                                           <*/

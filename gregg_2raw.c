@@ -148,7 +148,7 @@ RAW_touch            (int a_x, int a_y)
    /*---(calculate)----------------------*/
    r  = sqrt((a_x * a_x) + (a_y * a_y));
    /*---(assign type)--------------------*/
-   if (r < SIZE_R2) {
+   if (r < SIZE_MED_AVG) {
       if (stype != 'p')  OUT_clear ();
       stype   = PART_MAIN;
       o.xadj  = a_x;
@@ -194,7 +194,7 @@ RAW_lift             (int a_x, int a_y)
    if (rc == 0)  rc = match_squeeze ();
    if (rc == 0)  rc = circle_driver ();
    if (rc == 0)  rc = match_sharps  ();
-   if (rc == 0)  rc = match_driver  ();
+   if (rc == 0)  rc = MATCH_driver  ();
    if (rc <  0)  return rc;
    if (rc == 0)  rc = OUT_append    ();
    /*---(reporting)----------------------*/

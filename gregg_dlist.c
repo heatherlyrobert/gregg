@@ -14,7 +14,7 @@ const float  ICON_BOLD[4] = { 0.7f, 0.0f, 0.0f, 1.0f };
 PRIV char  dlist_arrow      (void);
 PRIV char  dlist_letters    (void);
 PRIV char  dlist_arrowed    (void);
-PRIV char  dlist_back       (void);
+PRIV char  DLIST_back       (void);
 
 PRIV char  draw_line        (int, char);
 
@@ -28,7 +28,7 @@ dlist_init         (void)
    dlist_arrow();
    dlist_letters();
    dlist_arrowed();
-   dlist_back();
+   DLIST_back();
    DEBUG_G  printf("   - done\n\n");
    return 0;
 }
@@ -355,9 +355,9 @@ draw_arc (float a_beg, float a_end, int a_color, int a_z)
 {
    /*---(locals)-----------+-----+-----+-*/
    float x, y;
-   float     r = SIZE_R3 * 2.5;
+   float     r = SIZE_LRG_AVG * 2.5;
    float       j           = 0.0;
-   if (a_color == 2) r = SIZE_M3;
+   if (a_color == 2) r = SIZE_LRG_MAX;
    /*---(defense)------------------------*/
    if (a_beg == a_end) return -1;
    /*---(color)--------------------------*/
@@ -588,8 +588,15 @@ dlist_arrowed      (void)
    return 0;
 }
 
-PRIV char     /*----: create display list for degree marks -------------------*/
-dlist_backdeg      (void)
+
+
+/*====================------------------------------------====================*/
+/*===----                     background elements                      ----===*/
+/*====================------------------------------------====================*/
+static void      o___BACKGROUND______________o (void) {;}
+
+char         /*-> degree tickmarks for background ----[ ------ [ge.C70.13#.E1]*/ /*-[02.0000.03#.T]-*/ /*-[--.---.---.--]-*/
+BACK__degticks     (void)
 {
    /*---(locals)-------------------------*/
    float d, rad;
@@ -599,7 +606,7 @@ dlist_backdeg      (void)
    glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
    glLineWidth(2.0);
    z   = 2;
-   r   = SIZE_R3 * 1.75;
+   r   = SIZE_LRG_AVG * 1.75;
    /*---(mark degrees)-------------------*/
    glBegin(GL_LINES); {
       for (d = 0; d <= 360; d += 15) {
@@ -622,7 +629,7 @@ dlist_backdeg      (void)
 }
 
 PRIV char     /*----: create display list for range fan ----------------------*/
-dlist_backfan      (void)
+BACK__rangefan     (void)
 {
    /*---(locals)-------------------------*/
    float     d, rad;                   /* degrees and radians                 */
@@ -631,7 +638,7 @@ dlist_backfan      (void)
    int       i;                        /* loop iterator -- range              */
    char      msg[100];
    float     radius = 130;
-   float     r = SIZE_R3 * 2;
+   float     r = SIZE_LRG_AVG * 2;
    /*---(mark ranges)--------------------*/
    for (i = 0; i < MAX_RANGES; ++i) {
       if (strncmp(ranges[i].nam, "eof", 5) == 0) break;
@@ -642,10 +649,10 @@ dlist_backfan      (void)
       glLineWidth(1.0);
       /*---(arc)---------------------------*/
       if (ranges[i].len == 1) {
-         r  = SIZE_R3 * 1.75;
+         r  = SIZE_LRG_AVG * 1.75;
          z  =   -2.00;
       } else {
-         r  = SIZE_R3 * 1.3;
+         r  = SIZE_LRG_AVG * 1.3;
          z  =   -1.00;
       }
       glLineWidth(0.8);
@@ -680,8 +687,8 @@ dlist_backfan      (void)
          z  =    1.00;
          glBegin(GL_LINES); {
             rad = (ranges[i].tar) * DEG2RAD;
-            x = SIZE_R3 * cos(rad);
-            y = SIZE_R3 * sin(rad);
+            x = SIZE_LRG_AVG * cos(rad);
+            y = SIZE_LRG_AVG * sin(rad);
             glVertex3f(   x,   y,   z);
             x = (r + 60) * cos(rad);
             y = (r + 60) * sin(rad);
@@ -693,139 +700,107 @@ dlist_backfan      (void)
    return 0;
 }
 
-PRIV char     /*----: create display list for ranging rings ------------------*/
-dlist_backring     (void)
+char
+DLIST__ring_center   (float a_size, float a_thick)
 {
-   /*---(locals)-------------------------*/
-   float     d, rad;                   /* degrees and radians                 */
-   float     x, y, z;                  /* cartesian coordinates               */
-   int       i;                        /* loop iterator -- ring               */
-   glLineWidth(0.8);
-   /*---(center disk)--------------------*/
-   z  =    3.00;
-   glBegin(GL_POLYGON);
-   glColor4f(0.3f, 0.5f, 0.3f, 0.5f);       /* nice medium grey            */
-   for (d = 0; d <= 360; d +=  1) {
-      rad = d * DEG2RAD;
-      x   = SIZE_R3 * cos(rad);
-      y   = SIZE_R3 * sin(rad);
-      glVertex3f( x, y, z);
-   }
-   glEnd();
-   /*---(alignment dot)------------------*/
-   z  =    4.00;
-   glBegin(GL_LINE_STRIP);
-   glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
-   for (d = 0; d <= 360; d +=  1) {
-      rad = d * DEG2RAD;
-      x   = 2  * cos(rad);
-      y   = 2  * sin(rad);
-      glVertex3f( x, y, z);
-   }
-   glEnd();
-   /*---(minimum)------------------------*/
-   glEnable(GL_LINE_STIPPLE);
-   glLineStipple(1, 0x3333);
-   glBegin(GL_LINE_STRIP);
-   glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
-   for (d = -140; d <=  75; d +=  1) {
-      rad = d * DEG2RAD;
-      x   = SIZE_M0 * cos(rad);
-      y   = SIZE_M0 * sin(rad);
-      glVertex3f( x, y, z);
-   }
-   glEnd();
-   glDisable(GL_LINE_STIPPLE);
-   /*---(size one -- u,n,o)-----------------*/
-   glLineWidth(2.0);
-   glBegin(GL_LINE_STRIP);
-   glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
-   for (d = 0; d <= 360; d +=  1) {
-      rad = d * DEG2RAD;
-      x   = SIZE_R1 * cos(rad);
-      y   = SIZE_R1 * sin(rad);
-      glVertex3f( x, y, z);
-   }
-   glEnd();
-   glLineWidth(0.8);
-   glEnable(GL_LINE_STIPPLE);
-   glLineStipple(1, 0x3333);
-   glBegin(GL_LINE_STRIP);
-   glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
-   for (d = -140; d <=  75; d +=  1) {
-      rad = d * DEG2RAD;
-      x   = SIZE_M1 * cos(rad);
-      y   = SIZE_M1 * sin(rad);
-      glVertex3f( x, y, z);
-   }
-   glEnd();
-   glDisable(GL_LINE_STIPPLE);
-   /*---(size two)--------------------------*/
-   glLineWidth (15.0);
-   glBegin(GL_LINE_STRIP);
-   glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
-   for (d = 0; d <= 360; d +=  1) {
-      rad = d * DEG2RAD;
-      x   = SIZE_R2 * cos(rad);
-      y   = SIZE_R2 * sin(rad);
-      glVertex3f( x, y, z);
-   }
-   glEnd();
-   glLineWidth(0.8);
-   glEnable(GL_LINE_STIPPLE);
-   glLineStipple(1, 0x3333);
-   glBegin(GL_LINE_STRIP);
-   glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
-   for (d = -140; d <=  75; d +=  1) {
-      rad = d * DEG2RAD;
-      x   = SIZE_M2 * cos(rad);
-      y   = SIZE_M2 * sin(rad);
-      glVertex3f( x, y, z + 1);
-   }
-   glEnd();
-   glDisable(GL_LINE_STIPPLE);
-   /*---(size three)------------------------*/
-   glLineWidth(3.0);
-   glBegin(GL_LINE_STRIP);
-   glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
-   for (d = 0; d <= 360; d +=  1) {
-      rad = d * DEG2RAD;
-      x   = SIZE_R3 * cos(rad);
-      y   = SIZE_R3 * sin(rad);
-      glVertex3f( x, y, z + 1);
-   }
-   glEnd();
-   glLineWidth(0.8);
-   glEnable(GL_LINE_STIPPLE);
-   glLineStipple(1, 0x3333);
-   glBegin(GL_LINE_STRIP);
-   glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
-   for (d = -140; d <=  75; d +=  1) {
-      rad = d * DEG2RAD;
-      x   = SIZE_M3 * cos(rad);
-      y   = SIZE_M3 * sin(rad);
-      glVertex3f( x, y, z + 1);
-   }
-   glEnd();
-   glDisable(GL_LINE_STIPPLE);
-   /*---(middle)----------------------------*/
-   for (i = SIZE_R3 * 1.7; i < 500; i += SIZE_R3 * 1.7) {
-      glBegin(GL_LINE_STRIP);
-      glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
-      for (d = 0; d <= 360; d +=  2) {
-         rad = d * DEG2RAD;
-         x   = i * cos(rad);
-         y   = i * sin(rad);
-         glVertex3f( x, y, z);
+   /*---(locals)-----------+-----+-----+-*/
+   float       d           =  0.0;          /* degrees                        */
+   float       r           =  0.0;          /* radians                        */
+   float       x           =  0.0;          /* x position                     */
+   float       y           =  0.0;          /* y position                     */
+   /*---(draw)---------------------------*/
+   glLineWidth   (a_thick);
+   glColor4f     (0.3f, 0.5f, 0.3f, 0.5f);       /* nice medium grey            */
+   glBegin  (GL_POLYGON); {
+      for (d = 0; d <= 360; d += 1) {
+         r   = d * DEG2RAD;
+         x   = a_size * cos (r);
+         y   = a_size * sin (r);
+         glVertex3f ( x, y, 3);
       }
-      glEnd();
+   } glEnd();
+   /*---(complete)-----------------------*/
+   return 0;
+}
+
+char
+DLIST__ring_avg      (float a_size, float a_thick)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   float       d           =  0.0;          /* degrees                        */
+   float       r           =  0.0;          /* radians                        */
+   float       x           =  0.0;          /* x position                     */
+   float       y           =  0.0;          /* y position                     */
+   /*---(draw)---------------------------*/
+   glLineWidth   (a_thick);
+   glColor4f     (1.0f, 1.0f, 1.0f, 0.5f);
+   glBegin  (GL_LINE_STRIP); {
+      for (d = 0; d <= 360; d += 1) {
+         r   = d * DEG2RAD;
+         x   = a_size * cos (r);
+         y   = a_size * sin (r);
+         glVertex3f ( x, y, 5);
+      }
+   } glEnd();
+   /*---(complete)-----------------------*/
+   return 0;
+}
+
+char
+DLIST__ring_minmax   (float a_size, float a_thick)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   float       d           =  0.0;          /* degrees                        */
+   float       r           =  0.0;          /* radians                        */
+   float       x           =  0.0;          /* x position                     */
+   float       y           =  0.0;          /* y position                     */
+   /*---(draw)---------------------------*/
+   glLineWidth   (a_thick);
+   glEnable      (GL_LINE_STIPPLE);
+   glLineStipple (1, 0x3333);
+   glColor4f     (1.0f, 1.0f, 1.0f, 0.5f);
+   glBegin  (GL_LINE_STRIP); {
+      glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
+      for (d = -140; d <=  75; d +=  1) {
+         r   = d * DEG2RAD;
+         x   = a_size * cos (r);
+         y   = a_size * sin (r);
+         glVertex3f ( x, y, 5);
+      }
+   } glEnd();
+   glDisable(GL_LINE_STIPPLE);
+   /*---(complete)-----------------------*/
+   return 0;
+}
+
+PRIV char     /*----: create display list for ranging rings ------------------*/
+BACK__rangerings   (void)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   int         i           =    0;          /* loop iterator -- ring          */
+   /*---(center disk)--------------------*/
+   DLIST__ring_center (SIZE_LRG_AVG ,  0.8);
+   DLIST__ring_avg    (SIZE_CENTER ,  0.8);
+   /*---(size one -- u,n,o)-----------------*/
+   DLIST__ring_minmax (SIZE_SML_MIN,  0.8);
+   DLIST__ring_avg    (SIZE_SML_AVG,  2.0);
+   DLIST__ring_minmax (SIZE_SML_MAX,  0.8);
+   /*---(size two)--------------------------*/
+   DLIST__ring_avg    (SIZE_MED_AVG, 15.0);
+   DLIST__ring_minmax (SIZE_MED_MAX,  0.8);
+   /*---(size three)------------------------*/
+   DLIST__ring_avg    (SIZE_LRG_AVG,  3.0);
+   DLIST__ring_minmax (SIZE_LRG_MAX,  0.8);
+   /*---(middle)----------------------------*/
+   for (i = SIZE_LRG_AVG * 1.7; i < 500; i += SIZE_LRG_AVG * 1.7) {
+      DLIST__ring_avg    (i,  0.8);
    }
    /*---(complete)-----------------------*/
    return 0;
 }
 
 PRIV char     /*----: create display list for guide lines --------------------*/
-dlist_backguide    (void)
+BACK__guidelines   (void)
 {
    /*---(locals)-------------------------*/
    float     z;                        /* cartesian coordinates               */
@@ -858,27 +833,26 @@ dlist_backguide    (void)
 }
 
 PRIV char     /*----: create display list for entry background ---------------*/
-dlist_back         (void)
+DLIST_back         (void)
 {
-   DEBUG_X  printf("   - dlist_back() . . . . . . . . . . . ");
    /*---(begin)-----------------------------*/
    dl_back = glGenLists(1);
    glNewList(dl_back, GL_COMPILE);
    /*---(locals)----------------------------*/
-   float   r1 =  SIZE_R1;
-   float   r2 =  SIZE_R2;
-   float   r3 =  SIZE_R3;
+   float   r1 =  SIZE_SML_AVG;
+   float   r2 =  SIZE_MED_AVG;
+   float   r3 =  SIZE_LRG_AVG;
    float   z  =  0.00;
    float   d;
    float   rad, min, beg, end, max;
    float   x, y;
    /*---(draw peices)----------------------*/
-   glPushMatrix();
-   dlist_backdeg   ();
-   dlist_backfan   ();
-   dlist_backring  ();
-   dlist_backguide ();
-   glPopMatrix();
+   glPushMatrix(); {
+      BACK__degticks   ();
+      BACK__rangefan   ();
+      BACK__rangerings ();
+      BACK__guidelines ();
+   } glPopMatrix();
    /*---(end)-------------------------------*/
    glEndList();
    DEBUG_X  printf("success\n");
