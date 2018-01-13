@@ -205,8 +205,8 @@
 
 
 /* rapidly evolving version number to aid with visual change confirmation     */
-#define VER_NUM   "5.1j"
-#define VER_TXT   "cleaned-up and simplified background drawing"
+#define VER_NUM   "5.1k"
+#define VER_TXT   "created a color setting routine to harmonize colors a little"
 
 
 #define     LEN_HUGE     10000
@@ -242,6 +242,12 @@ struct cWIN {
    int         c_left;                      /* left   of command line         */
    int         c_tall;                      /* height of command line         */
    int         c_bott;                      /* bottom of command line         */
+   /*---(status sizes)------*/
+   char        s_text      [LEN_DESC];      /* current text in status line    */
+   int         s_wide;                      /* width  of status line          */
+   int         s_left;                      /* left   of status line          */
+   int         s_tall;                      /* height of status line          */
+   int         s_bott;                      /* bottom of status line          */
    /*---(main sizes)--------*/
    int         m_wide;                      /* width  of main window          */
    int         m_left;                      /* left   of main window          */
@@ -324,6 +330,9 @@ struct cACCESSOR {
 #define     SHOW_SAMPLE  if (my.show_sample  == 'y') 
 #define     SHOW_PLAYER  if (my.show_player  == 'y') 
 
+/*---(run as)----------*/
+#define     RUN_USER           'i'      /* running in user mode (ncurses)     */
+#define     RUN_TEST           '-'      /* running as a test    (no ncurses)  */
 
 extern char unit_answer  [LEN_STR];
 
@@ -475,7 +484,7 @@ extern int   vowels[16][16];
 GLuint    dl_arrow;
 GLuint    dl_solid;
 GLuint    dl_dotted;
-GLuint    dl_arrowed;
+/*> GLuint    dl_arrowed;                                                             <*/
 GLuint    dl_undo;
 GLuint    dl_redo;
 GLuint    dl_clear;
@@ -588,6 +597,19 @@ struct cOUTLINE
 } o;
 
 
+#define     COLOR_BASE          'b'
+#define     COLOR_DARK          '-'
+#define     COLOR_LIGHT         '+'
+#define     COLOR_MUTED         'm'
+#define     COLOR_ACC_L         '1'
+#define     COLOR_ACC_D         '2'
+#define     COLOR_ACC_O         'o'
+#define     COLOR_TXT_L         'w'
+#define     COLOR_TXT_D         'k'
+#define     COLOR_GRID_L        'g'
+#define     COLOR_GRID_D        'G'
+#define     COLOR_BLACK         'K'
+
 
 /*============================--------------------============================*/
 /*===----                           prototypes                         ----===*/
@@ -609,6 +631,7 @@ char       PROG_end             (void);
 char       DRAW_init            (void);
 char       DRAW__resize         (cchar a_format, cchar *a_title, cint a_wide, cint a_tall);
 char       DRAW_wrap            (void);
+char       DRAW_set_color       (char a_color);
 
 char       DRAW_main            (void);
 char       DRAW_back            (void);
@@ -733,7 +756,7 @@ char        USER_init            (void);
 char        USER_quit            (void);
 char        USER_writequit       (void);
 char        USER_map_mode        (char a_major, char a_minor);
-char        USER_cmds_mode       (char a_major, char a_minor);
+/*> char        USER_cmds_mode       (char a_major, char a_minor);                    <*/
 
 #endif
 /*============================----(source-end)----============================*/

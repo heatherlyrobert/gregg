@@ -75,29 +75,21 @@ char
 USER_init            (void)
 {
    /*---(locals)-----------+-----+-----+-*/
-   int         i           = 0;
+   int         i           =    0;
+   char        rc          =    0;
    DEBUG_USER   yLOG_enter   (__FUNCTION__);
    DEBUG_USER   yLOG_note    ("basic init");
    /*---(modes)--------------------------*/
-   yVIKEYS_mode_change (MODE_MAP, ":" , "horz=0HhlL$");
-   /*---(commands)-----------------------*/
-   s_ncmd = 0;
-   for (i = 0; i < MAX_CMDS; ++i) {
-      DEBUG_USER   yLOG_value   ("i"         , i);
-      if (strcmp (s_cmds [i].name, "END-OF-LIST") == 0)   break;
-      ++s_ncmd;
-      DEBUG_USER   yLOG_info    ("name"      , s_cmds [i].name );
-      s_cmds [i].len   = strlen (s_cmds [i].name );
-      DEBUG_USER   yLOG_value   ("len"       , s_cmds [i].len  );
-      s_cmds [i].nterm = strlen (s_cmds [i].terms);
-      DEBUG_USER   yLOG_info    ("abbr"      , s_cmds [i].abbr );
-      s_cmds [i].alen  = strlen (s_cmds [i].abbr );
-      DEBUG_USER   yLOG_value   ("alen"      , s_cmds [i].alen );
-      s_cmds [i].nterm = strlen (s_cmds [i].terms);
-      DEBUG_USER   yLOG_value   ("nterm"     , s_cmds [i].nterm);
-      if (s_cmds [i].f.v == NULL)   s_cmds [i].active = '-';
-      DEBUG_USER   yLOG_char    ("active"    , s_cmds [i].active);
-   }
+   yVIKEYS_mode_change (MODE_MAP, ":9" , "horz=0HhlL$");
+   /*---(file)---------------------------*/
+   rc = yVIKEYS_cmds_add ('f', "file"        , "f"   , "s"    , FILE_rename          , "change the current spreadsheet file name"                    );
+   rc = yVIKEYS_cmds_add ('f', "write"       , "w"   , ""     , OUT_append           , "write the current spreadsheet to file"                       );
+   rc = yVIKEYS_cmds_add ('f', "quit"        , "q"   , ""     , USER_quit            , "quit current file (if no changes), exit if the only file"    );
+   rc = yVIKEYS_cmds_add ('f', "quitall"     , "qa"  , ""     , USER_quit            , "quit all files (if no changes), and exit"                    );
+   rc = yVIKEYS_cmds_add ('f', "writequit"   , "wq"  , ""     , USER_writequit       , ""                                                            );
+   rc = yVIKEYS_cmds_add ('f', "writequitall", "wqa" , ""     , USER_writequit       , ""                                                            );
+   rc = yVIKEYS_cmds_add ('f', "word"        , ""    , "s"    , USER_words           , ""                                                            );
+   rc = yVIKEYS_cmds_add ('f', "guide"       , ""    , "s"    , USER_guide           , ""                                                            );
    /*---(complete)-----------------------*/
    DEBUG_USER   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -124,211 +116,211 @@ USER_writequit       (void)
 /*====================------------------------------------====================*/
 PRIV void  o___COMMAND_________o () { return; }
 
-char        USER_cmds_start      (void) { strncpy     (s_command , ":", LEN_RECD); return 0; }
-char        USER_cmds_clear      (void) { strncpy     (s_command , "" , LEN_RECD); return 0; }
-char*       USER_cmds_curr       (void) { return s_command; }
+/*> char        USER_cmds_start      (void) { strncpy     (s_command , ":", LEN_RECD); return 0; }   <*/
+/*> char        USER_cmds_clear      (void) { strncpy     (s_command , "" , LEN_RECD); return 0; }   <*/
+/*> char*       USER_cmds_curr       (void) { return s_command; }                     <*/
 
-char         /*-> tbd --------------------------------[ ------ [ge.#M5.1C#.#7]*/ /*-[03.0000.013.L]-*/ /*-[--.---.---.--]-*/
-USER_cmds_exec     (char *a_command)
-{
-   /*---(locals)-----------+-----+-----+-*/
-   char        rce         =  -10;
-   char        rc          =    0;
-   char       *p           = NULL;
-   char       *q           = " ";
-   char       *r           = NULL;
-   char        x_work      [LEN_RECD]   = "";
-   int         x_len       = 0;
-   char        x_flag      = '-';
-   char        x_fields    [10][LEN_RECD];
-   char        x_all       [LEN_RECD]       = "";
-   int         x_nfield    =  0;
-   int         i           = 0;
-   /*---(header)-------------------------*/
-   DEBUG_USER   yLOG_enter   (__FUNCTION__);
-   DEBUG_USER   yLOG_point   ("a_command" , a_command);
-   --rce;  if (a_command == NULL) {
-      DEBUG_USER   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   DEBUG_USER   yLOG_info    ("a_command" , a_command);
-   /*---(prepare)------------------------*/
-   strlcpy (x_work, a_command, LEN_RECD);
-   x_len = strlen (x_work);
-   for (i = 0; i < x_len; ++i) {
-      if ((uchar) x_work [i] == G_CHAR_SPACE)   x_work [i] = G_KEY_SPACE;
-   }
-   DEBUG_USER   yLOG_info    ("x_work"    , x_work);
-   /*---(parse command)------------------*/
-   p     = strtok_r (x_work, q, &r);
-   ++p;
-   x_len = strlen (p);
-   DEBUG_USER   yLOG_info    ("g_cmd"     , p);
-   if (strlen (x_work) > x_len)  strlcpy (x_all, p + x_len + 1, LEN_RECD);
-   DEBUG_USER   yLOG_info    ("x_all"     , x_all);
-   /*---(system commands)----------------*/
-   if (p[0] == '!') {
-      rc = system (a_command + 2);
-      return rc;
-   }
-   /*---(parse)--------------------------*/
-   for (i = 0; i < 10; ++i)  strlcpy (x_fields [i], "", LEN_RECD);
-   for (i = 0; i < 10; ++i) {
-      DEBUG_USER   yLOG_value   ("i"         , i);
-      DEBUG_USER   yLOG_info    ("p"         , p);
-      strlcpy (x_fields [i], p, LEN_RECD);
-      x_nfield = i + 1;
-      p = strtok_r (NULL  , q, &r);
-      if (p == NULL)  break;
-   }
-   /*---(run)----------------------------*/
-   for (i = 0; i < s_ncmd; ++i) {
-      DEBUG_USER   yLOG_value   ("i"         , i);
-      DEBUG_USER   yLOG_info    ("name"      , s_cmds [i].name);
-      DEBUG_USER   yLOG_info    ("abbr"      , s_cmds [i].abbr);
-      /*---(filter)----------------------*/
-      if (x_len > 3) {
-         if (s_cmds [i].len != x_len)                         continue;
-         if (s_cmds [i].name [0] != x_fields [0][0])          continue;
-         if (strcmp (s_cmds [i].name, x_fields [0]) != 0)     continue;
-      } else {
-         if (s_cmds [i].alen != x_len)                        continue;
-         if (s_cmds [i].abbr [0] != x_fields [0][0])          continue;
-         if (strcmp (s_cmds [i].abbr, x_fields [0]) != 0)     continue;
-      }
-      /*---(execute)---------------------*/
-      DEBUG_USER   yLOG_note    ("found it");
-      if        (strcmp (s_cmds [i].terms, ""    ) == 0) {
-         DEBUG_USER   yLOG_note    ("void type, no args");
-         rc = s_cmds [i].f.v   ();
-      } else if (strcmp (s_cmds [i].terms, "c"   ) == 0) {
-         DEBUG_USER   yLOG_note    ("one char arg");
-         rc = s_cmds [i].f.c   (x_fields [1][0]);
-      } else if (strcmp (s_cmds [i].terms, "s"   ) == 0) {
-         DEBUG_USER   yLOG_note    ("one string arg");
-         rc = s_cmds [i].f.s   (x_fields [1]);
-      } else if (strcmp (s_cmds [i].terms, "a"   ) == 0) {
-         DEBUG_USER   yLOG_note    ("one long string arg");
-         rc = s_cmds [i].f.s   (x_all);
-      } else if (strcmp (s_cmds [i].terms, "ss"  ) == 0) {
-         DEBUG_USER   yLOG_note    ("two string args");
-         rc = s_cmds [i].f.ss  (x_fields [1], x_fields [1]);
-      } else if (strcmp (s_cmds [i].terms, "is"  ) == 0) {
-         DEBUG_USER   yLOG_note    ("integer arg and string arg");
-         rc = s_cmds [i].f.is  (atoi (x_fields [1]), x_fields [1]);
-      } else {
-         DEBUG_USER   yLOG_note    ("crazy other shit, please update or fix");
-         my.key_error = 'y';
-      }
-      DEBUG_USER   yLOG_value   ("rc"        , rc);
-      break;
-   }
-   /*---(complete)-----------------------*/
-   DEBUG_USER   yLOG_exit    (__FUNCTION__);
-   return rc;
-   /*---(complete)-----------------------*/
-   return 0;
-}
+/*> char         /+-> tbd --------------------------------[ ------ [ge.#M5.1C#.#7]+/ /+-[03.0000.013.L]-+/ /+-[--.---.---.--]-+/   <* 
+ *> USER_cmds_exec     (char *a_command)                                                                                           <* 
+ *> {                                                                                                                              <* 
+ *>    /+---(locals)-----------+-----+-----+-+/                                                                                    <* 
+ *>    char        rce         =  -10;                                                                                             <* 
+ *>    char        rc          =    0;                                                                                             <* 
+ *>    char       *p           = NULL;                                                                                             <* 
+ *>    char       *q           = " ";                                                                                              <* 
+ *>    char       *r           = NULL;                                                                                             <* 
+ *>    char        x_work      [LEN_RECD]   = "";                                                                                  <* 
+ *>    int         x_len       = 0;                                                                                                <* 
+ *>    char        x_flag      = '-';                                                                                              <* 
+ *>    char        x_fields    [10][LEN_RECD];                                                                                     <* 
+ *>    char        x_all       [LEN_RECD]       = "";                                                                              <* 
+ *>    int         x_nfield    =  0;                                                                                               <* 
+ *>    int         i           = 0;                                                                                                <* 
+ *>    /+---(header)-------------------------+/                                                                                    <* 
+ *>    DEBUG_USER   yLOG_enter   (__FUNCTION__);                                                                                   <* 
+ *>    DEBUG_USER   yLOG_point   ("a_command" , a_command);                                                                        <* 
+ *>    --rce;  if (a_command == NULL) {                                                                                            <* 
+ *>       DEBUG_USER   yLOG_exitr   (__FUNCTION__, rce);                                                                           <* 
+ *>       return rce;                                                                                                              <* 
+ *>    }                                                                                                                           <* 
+ *>    DEBUG_USER   yLOG_info    ("a_command" , a_command);                                                                        <* 
+ *>    /+---(prepare)------------------------+/                                                                                    <* 
+ *>    strlcpy (x_work, a_command, LEN_RECD);                                                                                      <* 
+ *>    x_len = strlen (x_work);                                                                                                    <* 
+ *>    for (i = 0; i < x_len; ++i) {                                                                                               <* 
+ *>       if ((uchar) x_work [i] == G_CHAR_SPACE)   x_work [i] = G_KEY_SPACE;                                                      <* 
+ *>    }                                                                                                                           <* 
+ *>    DEBUG_USER   yLOG_info    ("x_work"    , x_work);                                                                           <* 
+ *>    /+---(parse command)------------------+/                                                                                    <* 
+ *>    p     = strtok_r (x_work, q, &r);                                                                                           <* 
+ *>    ++p;                                                                                                                        <* 
+ *>    x_len = strlen (p);                                                                                                         <* 
+ *>    DEBUG_USER   yLOG_info    ("g_cmd"     , p);                                                                                <* 
+ *>    if (strlen (x_work) > x_len)  strlcpy (x_all, p + x_len + 1, LEN_RECD);                                                     <* 
+ *>    DEBUG_USER   yLOG_info    ("x_all"     , x_all);                                                                            <* 
+ *>    /+---(system commands)----------------+/                                                                                    <* 
+ *>    if (p[0] == '!') {                                                                                                          <* 
+ *>       rc = system (a_command + 2);                                                                                             <* 
+ *>       return rc;                                                                                                               <* 
+ *>    }                                                                                                                           <* 
+ *>    /+---(parse)--------------------------+/                                                                                    <* 
+ *>    for (i = 0; i < 10; ++i)  strlcpy (x_fields [i], "", LEN_RECD);                                                             <* 
+ *>    for (i = 0; i < 10; ++i) {                                                                                                  <* 
+ *>       DEBUG_USER   yLOG_value   ("i"         , i);                                                                             <* 
+ *>       DEBUG_USER   yLOG_info    ("p"         , p);                                                                             <* 
+ *>       strlcpy (x_fields [i], p, LEN_RECD);                                                                                     <* 
+ *>       x_nfield = i + 1;                                                                                                        <* 
+ *>       p = strtok_r (NULL  , q, &r);                                                                                            <* 
+ *>       if (p == NULL)  break;                                                                                                   <* 
+ *>    }                                                                                                                           <* 
+ *>    /+---(run)----------------------------+/                                                                                    <* 
+ *>    for (i = 0; i < s_ncmd; ++i) {                                                                                              <* 
+ *>       DEBUG_USER   yLOG_value   ("i"         , i);                                                                             <* 
+ *>       DEBUG_USER   yLOG_info    ("name"      , s_cmds [i].name);                                                               <* 
+ *>       DEBUG_USER   yLOG_info    ("abbr"      , s_cmds [i].abbr);                                                               <* 
+ *>       /+---(filter)----------------------+/                                                                                    <* 
+ *>       if (x_len > 3) {                                                                                                         <* 
+ *>          if (s_cmds [i].len != x_len)                         continue;                                                        <* 
+ *>          if (s_cmds [i].name [0] != x_fields [0][0])          continue;                                                        <* 
+ *>          if (strcmp (s_cmds [i].name, x_fields [0]) != 0)     continue;                                                        <* 
+ *>       } else {                                                                                                                 <* 
+ *>          if (s_cmds [i].alen != x_len)                        continue;                                                        <* 
+ *>          if (s_cmds [i].abbr [0] != x_fields [0][0])          continue;                                                        <* 
+ *>          if (strcmp (s_cmds [i].abbr, x_fields [0]) != 0)     continue;                                                        <* 
+ *>       }                                                                                                                        <* 
+ *>       /+---(execute)---------------------+/                                                                                    <* 
+ *>       DEBUG_USER   yLOG_note    ("found it");                                                                                  <* 
+ *>       if        (strcmp (s_cmds [i].terms, ""    ) == 0) {                                                                     <* 
+ *>          DEBUG_USER   yLOG_note    ("void type, no args");                                                                     <* 
+ *>          rc = s_cmds [i].f.v   ();                                                                                             <* 
+ *>       } else if (strcmp (s_cmds [i].terms, "c"   ) == 0) {                                                                     <* 
+ *>          DEBUG_USER   yLOG_note    ("one char arg");                                                                           <* 
+ *>          rc = s_cmds [i].f.c   (x_fields [1][0]);                                                                              <* 
+ *>       } else if (strcmp (s_cmds [i].terms, "s"   ) == 0) {                                                                     <* 
+ *>          DEBUG_USER   yLOG_note    ("one string arg");                                                                         <* 
+ *>          rc = s_cmds [i].f.s   (x_fields [1]);                                                                                 <* 
+ *>       } else if (strcmp (s_cmds [i].terms, "a"   ) == 0) {                                                                     <* 
+ *>          DEBUG_USER   yLOG_note    ("one long string arg");                                                                    <* 
+ *>          rc = s_cmds [i].f.s   (x_all);                                                                                        <* 
+ *>       } else if (strcmp (s_cmds [i].terms, "ss"  ) == 0) {                                                                     <* 
+ *>          DEBUG_USER   yLOG_note    ("two string args");                                                                        <* 
+ *>          rc = s_cmds [i].f.ss  (x_fields [1], x_fields [1]);                                                                   <* 
+ *>       } else if (strcmp (s_cmds [i].terms, "is"  ) == 0) {                                                                     <* 
+ *>          DEBUG_USER   yLOG_note    ("integer arg and string arg");                                                             <* 
+ *>          rc = s_cmds [i].f.is  (atoi (x_fields [1]), x_fields [1]);                                                            <* 
+ *>       } else {                                                                                                                 <* 
+ *>          DEBUG_USER   yLOG_note    ("crazy other shit, please update or fix");                                                 <* 
+ *>          my.key_error = 'y';                                                                                                   <* 
+ *>       }                                                                                                                        <* 
+ *>       DEBUG_USER   yLOG_value   ("rc"        , rc);                                                                            <* 
+ *>       break;                                                                                                                   <* 
+ *>    }                                                                                                                           <* 
+ *>    /+---(complete)-----------------------+/                                                                                    <* 
+ *>    DEBUG_USER   yLOG_exit    (__FUNCTION__);                                                                                   <* 
+ *>    return rc;                                                                                                                  <* 
+ *>    /+---(complete)-----------------------+/                                                                                    <* 
+ *>    return 0;                                                                                                                   <* 
+ *> }                                                                                                                              <*/
 
-char         /*-> process keys for input/append ------[ ------ [gc.LE5.266.I3]*/ /*-[05.0000.102.M]-*/ /*-[--.---.---.--]-*/
-USER_cmds_mode     (char a_major, char a_minor)
-{
-   /*---(locals)-----------+-----+-----+-*/
-   int         x_len       = 0;
-   char        x_temp      [11]        = "";
-   char        rc          =    0;
-   char        x_majors    [LEN_LABEL] = ": ";
-   static char x_quoted    = '-';
-   static char x_escaped   = '-';
-   /*---(header)--------------------s----*/
-   DEBUG_USER   yLOG_enter   (__FUNCTION__);
-   DEBUG_USER   yLOG_value   ("a_major"   , a_major);
-   DEBUG_USER   yLOG_value   ("a_minor"   , a_minor);
-   /*---(get existing len)---------------*/
-   DEBUG_USER   yLOG_info    ("s_command" , s_command);
-   x_len = strlen (s_command);
-   DEBUG_USER   yLOG_value   ("x_len"     , x_len);
-   /*---(check for quoting)--------------*/
-   if (x_escaped != 'y' && a_minor == G_KEY_DQUOTE) {
-      if (x_quoted != 'y') {
-         DEBUG_USER   yLOG_note    ("entering quoted string");
-         x_quoted = 'y';
-      } else {
-         DEBUG_USER   yLOG_note    ("exiting quoted string");
-         x_quoted = '-';
-      }
-   }
-   /*---(check for special codes)--------*/
-   if (x_escaped != 'y' && a_minor == G_KEY_BSLASH) {
-      x_escaped = 'y';
-      DEBUG_USER   yLOG_note    ("begin escaped character");
-      DEBUG_USER   yLOG_exit    (__FUNCTION__);
-      return 0;
-   } else if (x_escaped == 'y') {
-      x_escaped = '-';
-      DEBUG_USER   yLOG_note    ("convert escaped character");
-      switch (a_minor) {
-      case 'n'      :  a_minor = G_CHAR_RETURN;  break;  /* return char           */
-      case 'e'      :  a_minor = G_CHAR_ESCAPE;  break;  /* escape char           */
-      case 't'      :  a_minor = G_CHAR_TAB;     break;  /* tab char              */
-      case 'b'      :  a_minor = G_CHAR_BS;      break;  /* backspace char        */
-      case 's'      :  a_minor = G_CHAR_SPACE;   break;  /* visual space          */
-      case 'f'      :  a_minor = G_CHAR_FIELD;   break;  /* field delimiter       */
-      case 'g'      :  a_minor = G_CHAR_GROUP;   break;  /* group delimiter       */
-      case '0'      :  a_minor = G_CHAR_NULL;    break;  /* null                  */
-      case 'a'      :  a_minor = G_CHAR_ALT;     break;  /* alt prefix            */
-      case 'c'      :  a_minor = G_CHAR_CONTROL; break;  /* control prefix        */
-      case 'w'      :  a_minor = G_CHAR_WAIT;    break;  /* wait/pause            */
-      case 'p'      :  a_minor = G_CHAR_BREAK;   break;  /* break point           */
-      case 'h'      :  a_minor = G_CHAR_HALT;    break;  /* halt  <C-c>           */
-      case 'd'      :  a_minor = G_CHAR_DISPLAY; break;  /* force redisplay       */
-      case G_KEY_DQUOTE :  a_minor = G_KEY_DQUOTE;       break;  /* quote without quoting */
-      default       :  a_minor = G_CHAR_SPACE;   break;
-      }
-   }
-   /*---(check for control keys)---------*/
-   if (x_quoted != 'y') {
-      switch (a_minor) {
-      case   G_KEY_RETURN : case   G_KEY_ENTER  :
-         DEBUG_USER   yLOG_note    ("return/enter, execute command");
-         yVIKEYS_mode_exit ();
-         rc = USER_cmds_exec (s_command);
-         DEBUG_USER   yLOG_exit    (__FUNCTION__);
-         return rc;   /* return  */
-      case   G_KEY_ESCAPE :
-         DEBUG_USER   yLOG_note    ("escape, ignore command");
-         yVIKEYS_mode_exit ();
-         USER_cmds_clear ();
-         DEBUG_USER   yLOG_exit    (__FUNCTION__);
-         return 0;
-      }
-   }
-   /*---(check for backspace)------------*/
-   if (a_minor == G_KEY_DEL || a_minor == G_KEY_BS) {
-      DEBUG_USER   yLOG_note    ("bs/del, remove character");
-      --x_len;
-      if (s_command [x_len] == G_KEY_DQUOTE) {
-         if (x_quoted == 'y')  x_quoted = '-';
-         else                  x_quoted = 'y';
-      }
-      if (x_len < 0)   x_len = 0;
-      s_command [x_len] = '\0';
-      DEBUG_USER   yLOG_info    ("s_command" , s_command);
-      DEBUG_USER   yLOG_value   ("x_len"     , x_len);
-      DEBUG_USER   yLOG_exit    (__FUNCTION__);
-      return 0;
-   }
-   /*---(normal characters)--------------*/
-   DEBUG_USER   yLOG_note    ("update command line");
-   snprintf (x_temp, 10, "%c", a_minor);
-   strcat   (s_command, x_temp);
-   x_len = strlen (s_command);
-   DEBUG_USER   yLOG_info    ("s_command" , s_command);
-   DEBUG_USER   yLOG_value   ("x_len"     , x_len);
-   /*---(complete)-----------------------*/
-   DEBUG_USER   yLOG_exit    (__FUNCTION__);
-   return 0;
-}
+/*> char         /+-> process keys for input/append ------[ ------ [gc.LE5.266.I3]+/ /+-[05.0000.102.M]-+/ /+-[--.---.---.--]-+/   <* 
+ *> USER_cmds_mode     (char a_major, char a_minor)                                                                                <* 
+ *> {                                                                                                                              <* 
+ *>    /+---(locals)-----------+-----+-----+-+/                                                                                    <* 
+ *>    int         x_len       = 0;                                                                                                <* 
+ *>    char        x_temp      [11]        = "";                                                                                   <* 
+ *>    char        rc          =    0;                                                                                             <* 
+ *>    char        x_majors    [LEN_LABEL] = ": ";                                                                                 <* 
+ *>    static char x_quoted    = '-';                                                                                              <* 
+ *>    static char x_escaped   = '-';                                                                                              <* 
+ *>    /+---(header)--------------------s----+/                                                                                    <* 
+ *>    DEBUG_USER   yLOG_enter   (__FUNCTION__);                                                                                   <* 
+ *>    DEBUG_USER   yLOG_value   ("a_major"   , a_major);                                                                          <* 
+ *>    DEBUG_USER   yLOG_value   ("a_minor"   , a_minor);                                                                          <* 
+ *>    /+---(get existing len)---------------+/                                                                                    <* 
+ *>    DEBUG_USER   yLOG_info    ("s_command" , s_command);                                                                        <* 
+ *>    x_len = strlen (s_command);                                                                                                 <* 
+ *>    DEBUG_USER   yLOG_value   ("x_len"     , x_len);                                                                            <* 
+ *>    /+---(check for quoting)--------------+/                                                                                    <* 
+ *>    if (x_escaped != 'y' && a_minor == G_KEY_DQUOTE) {                                                                          <* 
+ *>       if (x_quoted != 'y') {                                                                                                   <* 
+ *>          DEBUG_USER   yLOG_note    ("entering quoted string");                                                                 <* 
+ *>          x_quoted = 'y';                                                                                                       <* 
+ *>       } else {                                                                                                                 <* 
+ *>          DEBUG_USER   yLOG_note    ("exiting quoted string");                                                                  <* 
+ *>          x_quoted = '-';                                                                                                       <* 
+ *>       }                                                                                                                        <* 
+ *>    }                                                                                                                           <* 
+ *>    /+---(check for special codes)--------+/                                                                                    <* 
+ *>    if (x_escaped != 'y' && a_minor == G_KEY_BSLASH) {                                                                          <* 
+ *>       x_escaped = 'y';                                                                                                         <* 
+ *>       DEBUG_USER   yLOG_note    ("begin escaped character");                                                                   <* 
+ *>       DEBUG_USER   yLOG_exit    (__FUNCTION__);                                                                                <* 
+ *>       return 0;                                                                                                                <* 
+ *>    } else if (x_escaped == 'y') {                                                                                              <* 
+ *>       x_escaped = '-';                                                                                                         <* 
+ *>       DEBUG_USER   yLOG_note    ("convert escaped character");                                                                 <* 
+ *>       switch (a_minor) {                                                                                                       <* 
+ *>       case 'n'      :  a_minor = G_CHAR_RETURN;  break;  /+ return char           +/                                           <* 
+ *>       case 'e'      :  a_minor = G_CHAR_ESCAPE;  break;  /+ escape char           +/                                           <* 
+ *>       case 't'      :  a_minor = G_CHAR_TAB;     break;  /+ tab char              +/                                           <* 
+ *>       case 'b'      :  a_minor = G_CHAR_BS;      break;  /+ backspace char        +/                                           <* 
+ *>       case 's'      :  a_minor = G_CHAR_SPACE;   break;  /+ visual space          +/                                           <* 
+ *>       case 'f'      :  a_minor = G_CHAR_FIELD;   break;  /+ field delimiter       +/                                           <* 
+ *>       case 'g'      :  a_minor = G_CHAR_GROUP;   break;  /+ group delimiter       +/                                           <* 
+ *>       case '0'      :  a_minor = G_CHAR_NULL;    break;  /+ null                  +/                                           <* 
+ *>       case 'a'      :  a_minor = G_CHAR_ALT;     break;  /+ alt prefix            +/                                           <* 
+ *>       case 'c'      :  a_minor = G_CHAR_CONTROL; break;  /+ control prefix        +/                                           <* 
+ *>       case 'w'      :  a_minor = G_CHAR_WAIT;    break;  /+ wait/pause            +/                                           <* 
+ *>       case 'p'      :  a_minor = G_CHAR_BREAK;   break;  /+ break point           +/                                           <* 
+ *>       case 'h'      :  a_minor = G_CHAR_HALT;    break;  /+ halt  <C-c>           +/                                           <* 
+ *>       case 'd'      :  a_minor = G_CHAR_DISPLAY; break;  /+ force redisplay       +/                                           <* 
+ *>       case G_KEY_DQUOTE :  a_minor = G_KEY_DQUOTE;       break;  /+ quote without quoting +/                                   <* 
+ *>       default       :  a_minor = G_CHAR_SPACE;   break;                                                                        <* 
+ *>       }                                                                                                                        <* 
+ *>    }                                                                                                                           <* 
+ *>    /+---(check for control keys)---------+/                                                                                    <* 
+ *>    if (x_quoted != 'y') {                                                                                                      <* 
+ *>       switch (a_minor) {                                                                                                       <* 
+ *>       case   G_KEY_RETURN : case   G_KEY_ENTER  :                                                                              <* 
+ *>          DEBUG_USER   yLOG_note    ("return/enter, execute command");                                                          <* 
+ *>          yVIKEYS_mode_exit ();                                                                                                 <* 
+ *>          rc = USER_cmds_exec (s_command);                                                                                      <* 
+ *>          DEBUG_USER   yLOG_exit    (__FUNCTION__);                                                                             <* 
+ *>          return rc;   /+ return  +/                                                                                            <* 
+ *>       case   G_KEY_ESCAPE :                                                                                                    <* 
+ *>          DEBUG_USER   yLOG_note    ("escape, ignore command");                                                                 <* 
+ *>          yVIKEYS_mode_exit ();                                                                                                 <* 
+ *>          yVIKEYS_cmds_clear ();                                                                                                <* 
+ *>          DEBUG_USER   yLOG_exit    (__FUNCTION__);                                                                             <* 
+ *>          return 0;                                                                                                             <* 
+ *>       }                                                                                                                        <* 
+ *>    }                                                                                                                           <* 
+ *>    /+---(check for backspace)------------+/                                                                                    <* 
+ *>    if (a_minor == G_KEY_DEL || a_minor == G_KEY_BS) {                                                                          <* 
+ *>       DEBUG_USER   yLOG_note    ("bs/del, remove character");                                                                  <* 
+ *>       --x_len;                                                                                                                 <* 
+ *>       if (s_command [x_len] == G_KEY_DQUOTE) {                                                                                 <* 
+ *>          if (x_quoted == 'y')  x_quoted = '-';                                                                                 <* 
+ *>          else                  x_quoted = 'y';                                                                                 <* 
+ *>       }                                                                                                                        <* 
+ *>       if (x_len < 0)   x_len = 0;                                                                                              <* 
+ *>       s_command [x_len] = '\0';                                                                                                <* 
+ *>       DEBUG_USER   yLOG_info    ("s_command" , s_command);                                                                     <* 
+ *>       DEBUG_USER   yLOG_value   ("x_len"     , x_len);                                                                         <* 
+ *>       DEBUG_USER   yLOG_exit    (__FUNCTION__);                                                                                <* 
+ *>       return 0;                                                                                                                <* 
+ *>    }                                                                                                                           <* 
+ *>    /+---(normal characters)--------------+/                                                                                    <* 
+ *>    DEBUG_USER   yLOG_note    ("update command line");                                                                          <* 
+ *>    snprintf (x_temp, 10, "%c", a_minor);                                                                                       <* 
+ *>    strcat   (s_command, x_temp);                                                                                               <* 
+ *>    x_len = strlen (s_command);                                                                                                 <* 
+ *>    DEBUG_USER   yLOG_info    ("s_command" , s_command);                                                                        <* 
+ *>    DEBUG_USER   yLOG_value   ("x_len"     , x_len);                                                                            <* 
+ *>    /+---(complete)-----------------------+/                                                                                    <* 
+ *>    DEBUG_USER   yLOG_exit    (__FUNCTION__);                                                                                   <* 
+ *>    return 0;                                                                                                                   <* 
+ *> }                                                                                                                              <*/
 
 
 
@@ -374,13 +366,19 @@ USER_map_mode        (char a_major, char a_minor)
    /*---(single key)---------------------*/
    --rce;
    if (a_major == ' ') {
+      /*---(multiplier)------------------*/
+      if (strchr ("123456789"  , a_minor) != 0) {
+         yVIKEYS_mode_enter  (SMOD_REPEAT);
+         DEBUG_USER   yLOG_exit    (__FUNCTION__);
+         return a_minor;
+      }
       /*---(mode switch)-----------------*/
       switch (a_minor) {
       case ':'      :
          yVIKEYS_mode_enter  (MODE_COMMAND);
-         USER_cmds_start ();
+         yVIKEYS_cmds_start ();
          DEBUG_USER   yLOG_exit    (__FUNCTION__);
-         return 0;
+         return a_minor;
          break;
       }
       /*---(simple keys)--------------*/
