@@ -3,53 +3,53 @@
 
 
 
-char    s_command    [LEN_RECD];
+/*> char    s_command    [LEN_RECD];                                                  <*/
 char    s_search     [LEN_RECD];
 
 
 
-#define  MAX_CMDS      1000
-typedef  struct cCOMMAND  tCOMMAND;
-struct  cCOMMAND {
-   char        ccat;                        /* category                       */
-   char        name        [LEN_LABEL];     /* full command name              */
-   char        len;                         /* length of name                 */
-   char        abbr        [LEN_LABEL];     /* abbreviation of name           */
-   char        alen;                        /* length of abbreviation         */
-   char        active;                      /* ready to use                   */
-   char        redraw;                      /* redraw afterwards              */
-   union {
-      char        (*v   ) (void);           /* function pointer               */
-      char        (*c   ) (char);           /* function pointer               */
-      char        (*s   ) (char*);          /* function pointer               */
-      char        (*is  ) (int  , char*);   /* function pointer               */
-      char        (*ss  ) (char*, char*);   /* function pointer               */
-   } f;
-   char        terms       [LEN_LABEL];     /* type of terms/args             */
-   char        nterm;                       /* number of terms/args           */
-   char        desc        [LEN_DESC];      /* descriptive label              */
-   char        disp        [LEN_DESC];      /* display version of command     */
-};
-static tCOMMAND  s_cmds  [MAX_CMDS] = {
-   /* 1    123456789-12   12   123    12   1    1   123456789-123456789-123456789-   12345   12   123456789-123456789-123456789-123456789-123456789-123456789-  1234 */
-   /*---(file)---------------------------*/
-   /*cat   ---name-----  len  abbrev len  act  drw  ---pointer--------------------   terms  cnt   ---desc-----------------------------------------------------  disp */
-   { 'f', "file"        ,  0, "f"   ,  0, 'y', '-', .f.s   = FILE_rename          , "s"    ,  0, "change the current spreadsheet file name"                    , "" },
-   /*> { 'f', "read"        ,  0, "r"   ,  0, '-', '-', NULL                          , ""     ,  0, "read the current spreadsheet from file"                      , "" },   <*/
-   /*> { 'f', "edit"        ,  0, "e"   ,  0, '-', '-', NULL                          , ""     ,  0, "re-read the current spreadsheet from file"                   , "" },   <*/
-   { 'f', "write"       ,  0, "w"   ,  0, 'y', '-', .f.v   = OUT_append           , ""     ,  0, "write the current spreadsheet to file"                       , "" },
-   /*> { 'f', "writeall"    ,  0, "wa"  ,  0, 'y', '-', .f.v   = FILE_write           , ""     ,  0, "write the current spreadsheet to file"                       , "" },   <*/
-   /*> { 'f', "writeas"     ,  0, "was" ,  0, 'y', '-', .f.s   = FILE_writeas         , "s"    ,  0, "write the current spreadsheet to a temp filename"            , "" },   <*/
-   { 'f', "quit"        ,  0, "q"   ,  0, 'y', '-', .f.v   = USER_quit            , ""     ,  0, "quit current file (if no changes), exit if the only file"    , "" },
-   { 'f', "quitall"     ,  0, "qa"  ,  0, 'y', '-', .f.v   = USER_quit            , ""     ,  0, "quit all files (if no changes), and exit"                    , "" },
-   { 'f', "writequit"   ,  0, "wq"  ,  0, 'y', '-', .f.v   = USER_writequit       , ""     ,  0, ""                                                            , "" },
-   { 'f', "writequitall",  0, "wqa" ,  0, 'y', '-', .f.v   = USER_writequit       , ""     ,  0, ""                                                            , "" },
-   { 'f', "word"        ,  0, ""    ,  0, 'y', '-', .f.s   = USER_words           , "a"    ,  0, ""                                                            , "" },
-   { 'f', "guide"       ,  0, ""    ,  0, 'y', '-', .f.s   = USER_guide           , "a"    ,  0, ""                                                            , "" },
-   /*---(done)---------------------------*/
-   { '-', "END-OF-LIST" ,  0, ""    ,  0, '-', '-', NULL                          , ""     ,  0, ""                                                            , "" },
-};
-static int s_ncmd = 0;
+/*> #define  MAX_CMDS      1000                                                                                                                                                        <* 
+ *> typedef  struct cCOMMAND  tCOMMAND;                                                                                                                                                <* 
+ *> struct  cCOMMAND {                                                                                                                                                                 <* 
+ *>    char        ccat;                        /+ category                       +/                                                                                                   <* 
+ *>    char        name        [LEN_LABEL];     /+ full command name              +/                                                                                                   <* 
+ *>    char        len;                         /+ length of name                 +/                                                                                                   <* 
+ *>    char        abbr        [LEN_LABEL];     /+ abbreviation of name           +/                                                                                                   <* 
+ *>    char        alen;                        /+ length of abbreviation         +/                                                                                                   <* 
+ *>    char        active;                      /+ ready to use                   +/                                                                                                   <* 
+ *>    char        redraw;                      /+ redraw afterwards              +/                                                                                                   <* 
+ *>    union {                                                                                                                                                                         <* 
+ *>       char        (*v   ) (void);           /+ function pointer               +/                                                                                                   <* 
+ *>       char        (*c   ) (char);           /+ function pointer               +/                                                                                                   <* 
+ *>       char        (*s   ) (char*);          /+ function pointer               +/                                                                                                   <* 
+ *>       char        (*is  ) (int  , char*);   /+ function pointer               +/                                                                                                   <* 
+ *>       char        (*ss  ) (char*, char*);   /+ function pointer               +/                                                                                                   <* 
+ *>    } f;                                                                                                                                                                            <* 
+ *>    char        terms       [LEN_LABEL];     /+ type of terms/args             +/                                                                                                   <* 
+ *>    char        nterm;                       /+ number of terms/args           +/                                                                                                   <* 
+ *>    char        desc        [LEN_DESC];      /+ descriptive label              +/                                                                                                   <* 
+ *>    char        disp        [LEN_DESC];      /+ display version of command     +/                                                                                                   <* 
+ *> };                                                                                                                                                                                 <* 
+ *> static tCOMMAND  s_cmds  [MAX_CMDS] = {                                                                                                                                            <* 
+ *>    /+ 1    123456789-12   12   123    12   1    1   123456789-123456789-123456789-   12345   12   123456789-123456789-123456789-123456789-123456789-123456789-  1234 +/            <* 
+ *>    /+---(file)---------------------------+/                                                                                                                                        <* 
+ *>    /+cat   ---name-----  len  abbrev len  act  drw  ---pointer--------------------   terms  cnt   ---desc-----------------------------------------------------  disp +/            <* 
+ *>    { 'f', "file"        ,  0, "f"   ,  0, 'y', '-', .f.s   = FILE_rename          , "s"    ,  0, "change the current spreadsheet file name"                    , "" },             <* 
+ *>    /+> { 'f', "read"        ,  0, "r"   ,  0, '-', '-', NULL                          , ""     ,  0, "read the current spreadsheet from file"                      , "" },   <+/   <* 
+ *>    /+> { 'f', "edit"        ,  0, "e"   ,  0, '-', '-', NULL                          , ""     ,  0, "re-read the current spreadsheet from file"                   , "" },   <+/   <* 
+ *>    { 'f', "write"       ,  0, "w"   ,  0, 'y', '-', .f.v   = OUT_append           , ""     ,  0, "write the current spreadsheet to file"                       , "" },             <* 
+ *>    /+> { 'f', "writeall"    ,  0, "wa"  ,  0, 'y', '-', .f.v   = FILE_write           , ""     ,  0, "write the current spreadsheet to file"                       , "" },   <+/   <* 
+ *>    /+> { 'f', "writeas"     ,  0, "was" ,  0, 'y', '-', .f.s   = FILE_writeas         , "s"    ,  0, "write the current spreadsheet to a temp filename"            , "" },   <+/   <* 
+ *>    { 'f', "quit"        ,  0, "q"   ,  0, 'y', '-', .f.v   = USER_quit            , ""     ,  0, "quit current file (if no changes), exit if the only file"    , "" },             <* 
+ *>    { 'f', "quitall"     ,  0, "qa"  ,  0, 'y', '-', .f.v   = USER_quit            , ""     ,  0, "quit all files (if no changes), and exit"                    , "" },             <* 
+ *>    { 'f', "writequit"   ,  0, "wq"  ,  0, 'y', '-', .f.v   = USER_writequit       , ""     ,  0, ""                                                            , "" },             <* 
+ *>    { 'f', "writequitall",  0, "wqa" ,  0, 'y', '-', .f.v   = USER_writequit       , ""     ,  0, ""                                                            , "" },             <* 
+ *>    { 'f', "word"        ,  0, ""    ,  0, 'y', '-', .f.s   = USER_words           , "a"    ,  0, ""                                                            , "" },             <* 
+ *>    { 'f', "guide"       ,  0, ""    ,  0, 'y', '-', .f.s   = USER_guide           , "a"    ,  0, ""                                                            , "" },             <* 
+ *>    /+---(done)---------------------------+/                                                                                                                                        <* 
+ *>    { '-', "END-OF-LIST" ,  0, ""    ,  0, '-', '-', NULL                          , ""     ,  0, ""                                                            , "" },             <* 
+ *> };                                                                                                                                                                                 <* 
+ *> static int s_ncmd = 0;                                                                                                                                                             <*/
 
 
 

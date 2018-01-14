@@ -205,8 +205,8 @@
 
 
 /* rapidly evolving version number to aid with visual change confirmation     */
-#define VER_NUM   "5.1k"
-#define VER_TXT   "created a color setting routine to harmonize colors a little"
+#define VER_NUM   "5.1l"
+#define VER_TXT   "ninty percent of window sizes and show/hide are moved to yVIKEYS_view"
 
 
 #define     LEN_HUGE     10000
@@ -226,33 +226,12 @@ typedef     const int           cint;
 struct cWIN {
    /*---(header)------------*/
    char        w_format;                    /* format identifier              */
-   /*---(window sizes)------*/
-   char        w_title     [LEN_DESC];      /* window title                   */
-   int         w_wide;                      /* window width                   */
-   int         w_tall;                      /* window heigth                  */
-   /*---(title sizes)-------*/
-   char        t_text      [LEN_DESC];      /* title text                     */
-   int         t_wide;                      /* width  of title line           */
-   int         t_left;                      /* left   of title line           */
-   int         t_tall;                      /* height of title line           */
-   int         t_bott;                      /* bottom of title line           */
    /*---(command sizes)-----*/
+   char        c_on;                        /* show command y/n               */
    char        c_text      [LEN_DESC];      /* current text in command mode   */
-   int         c_wide;                      /* width  of command line         */
-   int         c_left;                      /* left   of command line         */
-   int         c_tall;                      /* height of command line         */
-   int         c_bott;                      /* bottom of command line         */
-   /*---(status sizes)------*/
-   char        s_text      [LEN_DESC];      /* current text in status line    */
-   int         s_wide;                      /* width  of status line          */
-   int         s_left;                      /* left   of status line          */
-   int         s_tall;                      /* height of status line          */
-   int         s_bott;                      /* bottom of status line          */
    /*---(main sizes)--------*/
    int         m_wide;                      /* width  of main window          */
-   int         m_left;                      /* left   of main window          */
    int         m_tall;                      /* height of main window          */
-   int         m_bott;                      /* bottom of main window          */
    int         m_ymax;                      /* from center to top             */
    int         m_ymin;                      /* from center to bottom          */
    int         m_xmax;                      /* from center to right           */
@@ -267,9 +246,6 @@ struct cWIN {
    int         d_ansy;                      /* answer y offset                */
    /*---(ribbon sizes)------*/
    int         r_wide;                      /* width  of ribbon/button bar    */
-   int         r_left;                      /* left   of ribbon/button bar    */
-   int         r_tall;                      /* height of ribbon/button bar    */
-   int         r_bott;                      /* bottom of ribbon/button bar    */
    /*---(fonts)-------------*/
    char        face_bg     [50];
    int         font_bg;
@@ -609,6 +585,7 @@ struct cOUTLINE
 #define     COLOR_GRID_L        'g'
 #define     COLOR_GRID_D        'G'
 #define     COLOR_BLACK         'K'
+#define     COLOR_WARN          'W'
 
 
 /*============================--------------------============================*/
@@ -629,7 +606,7 @@ char       PROG_finish          (void);
 char       PROG_end             (void);
 
 char       DRAW_init            (void);
-char       DRAW__resize         (cchar a_format, cchar *a_title, cint a_wide, cint a_tall);
+/*> char       DRAW__resize         (cchar a_format, cchar *a_title, cint a_wide, cint a_tall);   <*/
 char       DRAW_wrap            (void);
 char       DRAW_set_color       (char a_color);
 

@@ -31,16 +31,58 @@ static uint s_depth     =     0;            /* depth buffer                   */
 /*====================------------------------------------====================*/
 static void      o___PROGRAM_________________o (void) {;}
 
+char
+DRAW_sizer           (int a_wide, int a_tall)
+{
+   yX11_resize (a_wide, a_tall);
+   return 0;
+}
+
+char
+DRAW__resize_TEMP  (cint a_wide, cint a_tall)
+{
+   /*---(header)----------------------*/
+   DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
+   /*---(widths)-------------------------*/
+   win.r_wide   =  40;
+   /*---(main)---------------------------*/
+   win.m_ymax   =  125;
+   win.m_ymin   =  win.m_ymax - a_tall;
+   win.m_xmin   = -125;
+   win.m_xmax   =  win.m_xmin + a_wide;
+   /*---(detailed text)------------------*/
+   win.d_xoff   =   200;
+   win.d_yoff   =   100;
+   win.d_zoff   =   100;
+   win.d_point  =     8;
+   win.d_bar    =    20;
+   win.d_ansx   =   200;
+   win.d_ansy   =  -160;
+   /*---(texture)------------------------*/
+   win.tex_h    = a_tall * 2.0;
+   win.tex_w    = a_wide * 2.0;
+   /*---(readout)------------------------*/
+   DEBUG_GRAF   yLOG_complex ("data"      , "xoff %3d, yoff %3d, zoff %3d, pnt  %3d", win.d_xoff, win.d_yoff, win.d_zoff, win.d_point);
+   DEBUG_GRAF   yLOG_complex ("answer"    , "ansx %3d, ansy %3d, bar  %3d"          , win.d_ansx, win.d_ansy, win.d_bar);
+   /*---(complete)-----------------------*/
+   DEBUG_GRAF   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
 char         /*-> tbd --------------------------------[ shoot  [gz.742.001.01]*/ /*-[00.0000.112.!]-*/ /*-[--.---.---.--]-*/
 DRAW_init            (void)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rc          =    0;
+   int         x_wide, x_tall;
    /*---(header)-------------------------*/
    DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
    /*---(stuff)--------------------------*/
-   rc = DRAW__resize ('i', "gregg_input"    , 560, 385);
-   rc = yX11_start (win.w_title, win.w_wide, win.w_tall, YX_FOCUSABLE, YX_FIXED, '-');
+   rc = DRAW__resize_TEMP    (560, 385);
+   rc = yVIKEYS_view_init    (DRAW_sizer);
+   rc = yVIKEYS_view_resize  ('-', "gregg shorthand interpreter"    , 560, 385, 'y');
+   rc = yVIKEYS_view_corners ('w', NULL, NULL, &x_wide, &x_tall, NULL);
+   rc = yX11_start ("gregg_input", x_wide, x_tall, YX_FOCUSABLE, YX_FIXED, '-');
    rc = yGLTEX_init     ();
    glClearColor    (0.3f, 0.5f, 0.3f, 1.0f);       /* nice medium green          */
    rc = FONT__load      ();
@@ -54,65 +96,6 @@ DRAW_init            (void)
    return 0;
 }
 
-char
-DRAW__resize       (cchar a_format, cchar *a_title, cint a_wide, cint a_tall)
-{
-   /*---(header)----------------------*/
-   DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
-   /*---(text fields)--------------------*/
-   DEBUG_GRAF   yLOG_snote   ("text");
-   win.w_format = a_format;
-   strlcpy (win.w_title, a_title, LEN_DESC);
-   DEBUG_GRAF   yLOG_info    ("w_title"   , win.w_title);
-   strlcpy (win.t_text , "Gregg Shorthand Interpreter", LEN_DESC);
-   DEBUG_GRAF   yLOG_info    ("t_text"    , win.t_text);
-   strlcpy (win.c_text , ":command line"              , LEN_DESC);
-   DEBUG_GRAF   yLOG_info    ("c_text"    , win.c_text);
-   /*---(widths)-------------------------*/
-   win.w_wide = a_wide;
-   win.t_wide =  15;
-   win.r_wide =  40;
-   win.m_wide = win.c_wide = win.s_wide = a_wide - win.t_wide;
-   /*---(lefts)--------------------------*/
-   win.t_left =   0;
-   win.m_left = win.c_left = win.s_left = win.t_wide;
-   win.r_left = win.m_left + win.m_wide;
-   /*---(talls)--------------------------*/
-   win.w_tall = win.t_tall = a_tall;
-   win.c_tall = win.s_tall =  15;  
-   win.m_tall = win.r_tall = a_tall - win.c_tall - win.s_tall;
-   /*---(bottoms)------------------------*/
-   win.c_bott = win.t_bott = win.r_bott =   0;  
-   win.s_bott = win.c_tall;
-   win.m_bott = win.r_bott = win.s_bott + win.s_tall;
-   /*---(main)---------------------------*/
-   win.m_ymax   =  125;
-   win.m_ymin   =  win.m_ymax - win.m_tall;
-   win.m_xmin   = -125;
-   win.m_xmax   =  win.m_xmin + win.m_wide;
-   /*---(detailed text)------------------*/
-   win.d_xoff      =   200;
-   win.d_yoff      =   100;
-   win.d_zoff      =   100;
-   win.d_point     =     8;
-   win.d_bar       =    20;
-   win.d_ansx      =   200;
-   win.d_ansy      =  -160;
-   /*---(texture)------------------------*/
-   win.tex_h        = win.m_tall * 2.0;
-   win.tex_w        = win.m_wide * 2.0;
-   /*---(readout)------------------------*/
-   DEBUG_GRAF   yLOG_complex ("window"    , "bott %3d, left %3d, wide %3d, tall %3d", 0         , 0         , win.w_wide, win.w_tall);
-   DEBUG_GRAF   yLOG_complex ("title"     , "bott %3d, left %3d, wide %3d, tall %3d", win.t_bott, win.t_left, win.t_wide, win.t_tall);
-   DEBUG_GRAF   yLOG_complex ("command"   , "bott %3d, left %3d, wide %3d, tall %3d", win.c_bott, win.c_left, win.c_wide, win.c_tall);
-   DEBUG_GRAF   yLOG_complex ("primary"   , "bott %3d, left %3d, wide %3d, tall %3d", win.m_bott, win.m_left, win.m_wide, win.m_tall);
-   DEBUG_GRAF   yLOG_complex ("ribbon"    , "bott %3d, left %3d, wide %3d, tall %3d", win.r_bott, win.r_left, win.r_wide, win.r_tall);
-   DEBUG_GRAF   yLOG_complex ("data"      , "xoff %3d, yoff %3d, zoff %3d, pnt  %3d", win.d_xoff, win.d_yoff, win.d_zoff, win.d_point);
-   DEBUG_GRAF   yLOG_complex ("answer"    , "ansx %3d, ansy %3d, bar  %3d"          , win.d_ansx, win.d_ansy, win.d_bar);
-   /*---(complete)-----------------------*/
-   DEBUG_GRAF   yLOG_exit    (__FUNCTION__);
-   return 0;
-}
 
 char
 DRAW_wrap            (void)
@@ -169,13 +152,17 @@ DRAW_set_color       (char a_color)
    case  'G' :  /* contrast 2  COLOR_GRID_D   */
       glColor4f (0.00f, 0.00f, 0.00f, 0.70f);
       break;
-   case  'k' :  /* dark text   COLOR_TXT_L    */
+   case  'k' :  /* dark text   COLOR_TXT_D    */
       glColor4f (0.20f, 0.20f, 0.20f, 1.00f);
       break;
-   case  'w' :  /* white text  COLOR_TXT_D    */
+   case  'w' :  /* white text  COLOR_TXT_L    */
+      glColor4f (0.00f, 0.00f, 0.00f, 0.70f);
       break;
    case  'K' :  /* dark text   COLOR_BLACK    */
       glColor4f (0.00f, 0.00f, 0.00f, 1.00f);
+      break;
+   case  'W' :  /* dark text   COLOR_WARN     */
+      glColor4f (0.25f, 0.00f, 0.00f, 1.00f);
       break;
    }
    return 0;
@@ -185,8 +172,12 @@ DRAW_set_color       (char a_color)
 char
 DRAW_primary         (void)
 {
+   char     x_on = 'y';
+   int      x_left, x_bott, x_wide, x_tall;
+   x_on = yVIKEYS_view_corners  ('m', &x_left, &x_bott, &x_wide, &x_tall, NULL);
+   /*> printf ("t %c %3d %3d %3d %3d %s\n", x_on, x_left, x_bott, x_wide, x_tall, x_text);   <*/
    /*---(setup view)---------------------*/
-   glViewport      (win.m_left, win.m_bott, win.m_wide, win.m_tall);
+   glViewport      (x_left, x_bott, x_wide, x_tall);
    glMatrixMode    (GL_PROJECTION);
    glLoadIdentity  ();
    glOrtho         (win.m_xmin, win.m_xmax, win.m_ymin, win.m_ymax,  -500.0,   500.0);
@@ -217,12 +208,12 @@ DRAW_primary         (void)
       /*> DRAW_info_answer ();                                                        <*/
       /*> glPushMatrix    (); {                                                       <* 
        *>    glColor4f    (0.20f, 0.20f, 0.20f, 1.0f);                                <* 
-       *>    glTranslatef (win.m_xmax - 50.0, win.m_ymin + 75.0,    0.0f);            <* 
+       *>    glTranslatef (x_xmax - 50.0, x_ymin + 75.0,    0.0f);            <* 
        *>    yFONT_print  (win.font_bg,  12, YF_BOTRIG, my.f_full);                   <* 
        *> } glPopMatrix   ();                                                         <*/
       /*> glPushMatrix    (); {                                                       <* 
        *>    glColor4f    (0.00f, 0.00f, 0.00f, 1.0f);                                <* 
-       *>    glTranslatef (win.m_xmin +  3.0, win.m_ymin + 23.0,    0.0f);            <* 
+       *>    glTranslatef (x_xmin +  3.0, x_ymin + 23.0,    0.0f);            <* 
        *>    yFONT_print  (win.font_bg,  12, YF_BOTLEF, o.actual);                    <* 
        *>    glTranslatef (0.0              , -20.0            ,    0.0f);            <* 
        *>    yFONT_print  (win.font_bg,  12, YF_BOTLEF, o.word);                      <* 
@@ -233,6 +224,28 @@ DRAW_primary         (void)
        *>    WORDS_result ();                                                         <* 
        *> } glPopMatrix   ();                                                         <*/
    }
+   if (win.c_on == '-' && yVIKEYS_mode_curr() == MODE_COMMAND) {
+      glPushMatrix    (); {
+         DRAW_set_color (COLOR_DARK );
+         glBegin         (GL_POLYGON); {
+            glVertex3f  (-75.0f  , -80.0f, 50.0f);
+            glVertex3f  (300.0f  , -80.0f, 50.0f);
+            glVertex3f  (300.0f  , -95.0f, 50.0f);
+            glVertex3f  (-75.0f  , -95.0f, 50.0f);
+         } glEnd   ();
+         DRAW_set_color (COLOR_BLACK);
+         glBegin(GL_LINE_STRIP); {
+            glVertex3f  (-75.0f  , -80.0f, 50.0f);
+            glVertex3f  (300.0f  , -80.0f, 50.0f);
+            glVertex3f  (300.0f  , -95.0f, 50.0f);
+            glVertex3f  (-75.0f  , -95.0f, 50.0f);
+            glVertex3f  (-75.0f  , -80.0f, 50.0f);
+         } glEnd   ();
+         DRAW_set_color (COLOR_TXT_L);
+         glTranslatef (-73.0f, -95.0f,   60.0f);
+         yFONT_print  (win.font_sm,  11, YF_BOTLEF, yVIKEYS_cmds_curr ());
+      } glPopMatrix   ();
+   }
    /*---(complete)-----------------------*/
    return;
 }
@@ -240,41 +253,46 @@ DRAW_primary         (void)
 char
 DRAW_title         (void)
 {
+   char     x_on;
+   int      x_left, x_bott, x_wide, x_tall;
+   char     x_text        [LEN_DESC];
+   x_on = yVIKEYS_view_corners  ('t', &x_left, &x_bott, &x_wide, &x_tall, x_text);
+   /*> printf ("t %c %3d %3d %3d %3d %s\n", x_on, x_left, x_bott, x_wide, x_tall, x_text);   <*/
+   if (x_on == '-')  return 0;
    /*---(setup view)---------------------*/
-   glViewport      (win.t_left, win.t_bott, win.t_wide, win.t_tall);
+   glViewport      (x_left, x_bott, x_wide, x_tall);
    glMatrixMode    (GL_PROJECTION);
    glLoadIdentity  ();
-   glOrtho         ( 0.0f, win.t_wide, 0.0f, win.t_tall,  -500.0,   500.0);
+   glOrtho         ( 0.0f, x_wide, 0.0f, x_tall,  -500.0,   500.0);
    glMatrixMode    (GL_MODELVIEW);
    /*---(background)---------------------*/
    glPushMatrix    (); {
       DRAW_set_color (COLOR_ACC_D);
-      /*> glColor4f    (0.40f, 0.40f, 0.00f, 1.0f);                                   <*/
       glBegin         (GL_POLYGON); {
-         glVertex3f  (0.0f      , win.t_tall,  0.0f);
-         glVertex3f  (win.t_wide, win.t_tall,  0.0f);
-         glVertex3f  (win.t_wide, 0.0f     ,  0.0f);
-         glVertex3f  (0.0f      , 0.0f     ,  0.0f);
+         glVertex3f  (0.0f  , x_tall,  0.0f);
+         glVertex3f  (x_wide, x_tall,  0.0f);
+         glVertex3f  (x_wide, 0.0f  ,  0.0f);
+         glVertex3f  (0.0f  , 0.0f  ,  0.0f);
       } glEnd   ();
    } glPopMatrix   ();
    if (yURG_debugmode () == 'y') {
       glPushMatrix    (); {
          glColor4f    (0.50f, 0.00f, 0.00f, 1.0f);
          glBegin         (GL_POLYGON); {
-            glVertex3f  (0.0f      , win.t_tall       ,  0.0f);
-            glVertex3f  (win.t_wide, win.t_tall       ,  0.0f);
-            glVertex3f  (win.t_wide, win.t_tall - 50.0,  0.0f);
-            glVertex3f  (0.0f      , win.t_tall - 50.0,  0.0f);
+            glVertex3f  (0.0f  , x_tall       ,  0.0f);
+            glVertex3f  (x_wide, x_tall       ,  0.0f);
+            glVertex3f  (x_wide, x_tall - 50.0,  0.0f);
+            glVertex3f  (0.0f  , x_tall - 50.0,  0.0f);
          } glEnd   ();
       } glPopMatrix   ();
    }
    /*---(display)------------------------*/
    glPushMatrix    (); {
-      glTranslatef (win.t_wide - 1,   2.0f,    0.0f);
+      glTranslatef (x_wide - 1,   2.0f,    0.0f);
       glColor4f    (0.00f, 0.00f, 0.00f, 1.00f);
       glRotatef    ( 90.0, 0.0f, 0.0f, 1.0f);
-      yFONT_print  (win.font_sm,  11, YF_BOTLEF, win.t_text);
-      glTranslatef (win.t_tall - 10.0,   0.0f,    0.0f);
+      yFONT_print  (win.font_sm,  11, YF_BOTLEF, x_text);
+      glTranslatef (x_tall - 10.0,   0.0f,    0.0f);
       yFONT_print  (win.font_sm,  11, YF_BOTRIG, VER_NUM);
    } glPopMatrix   ();
    /*---(complete)-----------------------*/
@@ -284,28 +302,35 @@ DRAW_title         (void)
 char
 DRAW_status        (void)
 {
+   char     x_on;
+   int      x_left, x_bott, x_wide, x_tall;
+   char     x_text        [LEN_DESC];
+   x_on = yVIKEYS_view_corners  ('s', &x_left, &x_bott, &x_wide, &x_tall, x_text);
+   /*> printf ("s %c %3d %3d %3d %3d %s\n", x_on, x_left, x_bott, x_wide, x_tall, x_text);   <*/
+   if (x_on == '-')  return 0;
    /*---(setup view)---------------------*/
-   glViewport      (win.s_left, win.s_bott, win.s_wide, win.s_tall);
+   glViewport      (x_left, x_bott, x_wide, x_tall);
    glMatrixMode    (GL_PROJECTION);
    glLoadIdentity  ();
-   glOrtho         ( 0.0f, win.s_wide, 0.0f, win.s_tall,  -500.0,   500.0);
+   glOrtho         ( 0.0f, x_wide, 0.0f, x_tall,  -500.0,   500.0);
    glMatrixMode    (GL_MODELVIEW);
    /*---(background)---------------------*/
-   if (my.key_error == 'y')  glColor4f    (0.15f, 0.00f, 0.00f, 1.0f);
-   else                      glColor4f    (0.25f, 0.40f, 0.25f, 1.0f);
+   if (my.key_error == 'y') DRAW_set_color (COLOR_WARN );
+   else                     DRAW_set_color (COLOR_DARK );
    glPushMatrix    (); {
       glBegin         (GL_POLYGON); {
-         glVertex3f  (0.0f      , win.s_tall,  0.0f);
-         glVertex3f  (win.s_wide, win.s_tall,  0.0f);
-         glVertex3f  (win.s_wide, 0.0f      ,  0.0f);
+         glVertex3f  (0.0f      , x_tall,  0.0f);
+         glVertex3f  (x_wide, x_tall,  0.0f);
+         glVertex3f  (x_wide, 0.0f      ,  0.0f);
          glVertex3f  (0.0f      , 0.0f      ,  0.0f);
       } glEnd   ();
    } glPopMatrix   ();
    /*---(display)------------------------*/
    glPushMatrix    (); {
-      glColor4f    (1.00f, 1.00f, 1.00f, 0.70f);
+      DRAW_set_color (COLOR_TXT_L);
+      /*> glColor4f    (1.00f, 1.00f, 1.00f, 0.70f);                                  <*/
       glTranslatef (    3.0f,    1.0f,    0.0f);
-      yFONT_print  (win.font_sm,  11, YF_BOTLEF, win.s_text);
+      yFONT_print  (win.font_sm,  11, YF_BOTLEF, x_text);
    } glPopMatrix   ();
    /*---(complete)-----------------------*/
    return 0;
@@ -314,11 +339,18 @@ DRAW_status        (void)
 char
 DRAW_command       (void)
 {
+   char     x_on;
+   int      x_left, x_bott, x_wide, x_tall;
+   char     x_text        [LEN_DESC];
+   x_on = yVIKEYS_view_corners  ('c', &x_left, &x_bott, &x_wide, &x_tall, x_text);
+   /*> printf ("c %c %3d %3d %3d %3d %s\n", x_on, x_left, x_bott, x_wide, x_tall, x_text);   <*/
+   win.c_on = x_on;
+   if (x_on == '-')  return 0;
    /*---(setup view)---------------------*/
-   glViewport      (win.c_left, win.c_bott, win.c_wide, win.c_tall);
+   glViewport      (x_left, x_bott, x_wide, x_tall);
    glMatrixMode    (GL_PROJECTION);
    glLoadIdentity  ();
-   glOrtho         ( 0.0f, win.c_wide, 0.0f, win.c_tall,  -500.0,   500.0);
+   glOrtho         ( 0.0f, x_wide, 0.0f, x_tall,  -500.0,   500.0);
    glMatrixMode    (GL_MODELVIEW);
    /*---(background)---------------------*/
    /*> glColor4f    (1.00f, 1.00f, 1.00f, 1.0f);                                      <*/
@@ -326,9 +358,9 @@ DRAW_command       (void)
    /*> glColor4f    (0.25f, 0.40f, 0.25f, 1.0f);                                      <*/
    glPushMatrix    (); {
       glBegin         (GL_POLYGON); {
-         glVertex3f  (0.0f      , win.c_tall,  0.0f);
-         glVertex3f  (win.c_wide, win.c_tall,  0.0f);
-         glVertex3f  (win.c_wide, 0.0f      ,  0.0f);
+         glVertex3f  (0.0f      , x_tall,  0.0f);
+         glVertex3f  (x_wide, x_tall,  0.0f);
+         glVertex3f  (x_wide, 0.0f      ,  0.0f);
          glVertex3f  (0.0f      , 0.0f      ,  0.0f);
       } glEnd   ();
    } glPopMatrix   ();
@@ -336,10 +368,10 @@ DRAW_command       (void)
    /*> glColor4f    (0.70f, 0.70f, 0.70f, 1.0f);                                      <*/
    glPushMatrix    (); {
       glBegin         (GL_POLYGON); {
-         glVertex3f  (win.c_wide - 43.0, win.c_tall,  0.0f);
-         glVertex3f  (win.c_wide       , win.c_tall,  0.0f);
-         glVertex3f  (win.c_wide       , 0.0f      ,  0.0f);
-         glVertex3f  (win.c_wide - 43.0, 0.0f      ,  0.0f);
+         glVertex3f  (x_wide - 43.0, x_tall,  0.0f);
+         glVertex3f  (x_wide       , x_tall,  0.0f);
+         glVertex3f  (x_wide       , 0.0f      ,  0.0f);
+         glVertex3f  (x_wide - 43.0, 0.0f      ,  0.0f);
       } glEnd   ();
    } glPopMatrix   ();
    /*---(display)------------------------*/
@@ -347,8 +379,8 @@ DRAW_command       (void)
    /*> glColor4f    (0.00f, 0.00f, 0.00f, 0.00f);                                     <*/
    glPushMatrix    (); {
       glTranslatef (    3.0f,    1.0f,    0.0f);
-      yFONT_print  (win.font_sm,  11, YF_BOTLEF, win.c_text);
-      glTranslatef (win.c_wide - 45.0,   0.0f,    0.0f);
+      yFONT_print  (win.font_sm,  11, YF_BOTLEF, x_text);
+      glTranslatef (x_wide - 45.0,   0.0f,    0.0f);
       yFONT_print  (win.font_sm,  11, YF_BOTLEF, my.keys);
    } glPopMatrix   ();
    /*---(complete)-----------------------*/
@@ -393,25 +425,25 @@ DRAW_back            (void)
    SHOW_CONTROL {
       glPushMatrix    (); {
          glColor4f    (1.00f, 1.00f, 1.00f, 1.0f);
-         glTranslatef  (win.m_xmax - x_left, 125       , 10.0);
+         glTranslatef  (win.m_xmax - x_left, 122       , 10.0);
          yFONT_icon ("play"    , "dj"          , x_side);
-         glTranslatef  (0         , -x_side    ,  0.0);
+         glTranslatef  (0         , -x_side - 3,  0.0);
          yFONT_icon ("talk"    , "video_cam"   , x_side);
-         glTranslatef  (0         , -x_side    ,  0.0);
+         glTranslatef  (0         , -x_side - 3,  0.0);
          yFONT_icon ("align"   , "layers"      , x_side);
-         glTranslatef  (0         , -x_side    ,  0.0);
+         glTranslatef  (0         , -x_side - 3,  0.0);
          yFONT_icon ("draw"    , "resolution"  , x_side);
-         glTranslatef  (0         , -x_side    ,  0.0);
+         glTranslatef  (0         , -x_side - 3,  0.0);
          yFONT_icon ("tools"   , "shower"      , x_side);
-         glTranslatef  (0         , -x_side    ,  0.0);
+         glTranslatef  (0         , -x_side - 3,  0.0);
          yFONT_icon ("tools"   , "shower"      , x_side);
-         glTranslatef  (0         , -x_side    ,  0.0);
+         glTranslatef  (0         , -x_side - 3,  0.0);
          yFONT_icon ("tools"   , "shower"      , x_side);
-         glTranslatef  (0         , -x_side    ,  0.0);
+         glTranslatef  (0         , -x_side - 3,  0.0);
          yFONT_icon ("tools"   , "shower"      , x_side);
-         glTranslatef  (0         , -x_side    ,  0.0);
+         glTranslatef  (0         , -x_side - 3,  0.0);
          yFONT_icon ("tools"   , "shower"      , x_side);
-         glTranslatef  (0         , -x_side    ,  0.0);
+         glTranslatef  (0         , -x_side - 3,  0.0);
          yFONT_icon ("tools"   , "shower"      , x_side);
       } glPopMatrix   ();
    }
