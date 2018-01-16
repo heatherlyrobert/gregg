@@ -205,8 +205,8 @@
 
 
 /* rapidly evolving version number to aid with visual change confirmation     */
-#define VER_NUM   "5.1l"
-#define VER_TXT   "ninty percent of window sizes and show/hide are moved to yVIKEYS_view"
+#define VER_NUM   "5.2a"
+#define VER_TXT   "shoved all things title, status, command, and ribbon to yVIKEYS"
 
 
 #define     LEN_HUGE     10000
@@ -230,12 +230,12 @@ struct cWIN {
    char        c_on;                        /* show command y/n               */
    char        c_text      [LEN_DESC];      /* current text in command mode   */
    /*---(main sizes)--------*/
-   int         m_wide;                      /* width  of main window          */
-   int         m_tall;                      /* height of main window          */
    int         m_ymax;                      /* from center to top             */
    int         m_ymin;                      /* from center to bottom          */
+   int         m_yfull;                     /* full range of y-axis           */
    int         m_xmax;                      /* from center to right           */
    int         m_xmin;                      /* from center to left            */
+   int         m_xfull;                     /* full range of x-axis           */
    /*---(detail)------------*/
    int         d_xoff;                      /* left offset of text details    */
    int         d_yoff;                      /* top offset of text details     */

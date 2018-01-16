@@ -181,9 +181,9 @@ TOUCH_player         (int a_x, int a_y)
    int         x_slot      =    0;
    /*---(defense)------------------------*/
    if (s_touch != MODE_PLAYER)    return 0;
-   x_inc = win.m_wide / 35.0;
+   x_inc = win.m_xfull / 35.0;
    x_slot = trunc ((a_x - win.m_xmin - 5) / 35);
-   /*> printf ("player x=%4d, w=%4d, i=%4d, s=%4d\n", a_x, win.m_wide, x_inc, x_slot);   <*/
+   /*> printf ("player x=%4d, w=%4d, i=%4d, s=%4d\n", a_x, win.m_xfull, x_inc, x_slot);   <*/
    /*> printf ("o.curr = %4d, o.total = %4d\n", o.curr, o.total);                     <*/
    switch (x_slot) {
    case  5 :
@@ -222,10 +222,10 @@ TOUCH_slider         (int a_x, int a_y)
    /*---(process)------------------------*/
    x_xpos = a_x - win.m_xmin;
    /*> printf ("a_x    %4d, x_xpos %4d\n", a_x, x_xpos);                              <*/
-   x_xinc = win.m_wide / o.navg;
+   x_xinc = win.m_xfull / (o.navg - 2);
    /*> printf ("navg   %4d, x_inc  %4d\n", o.navg, x_xinc);                           <*/
    o.cavg = -1;
-   for (i = 0; i < o.navg; ++i) {
+   for (i = 1; i < o.navg - 1; ++i) {
       /*> printf ("%2d  x_xpos %4d, x_total  %4d\n", i, x_xpos, x_total);             <*/
       if (x_xpos >  x_total) {
          x_total += x_xinc;
@@ -315,7 +315,7 @@ TOUCH_read           (void)
       x_xrel = 1.0 - (x_event.value / MAX_X);
       if (x_xrel >= 0.001 && x_xrel <= 0.999) {
          s_xrel = x_xrel;
-         s_xpos = win.m_xmin + (s_xrel * win.m_wide);
+         s_xpos = win.m_xmin + (s_xrel * win.m_xfull);
       }
       break;
    case  ABS_Y :
@@ -328,7 +328,7 @@ TOUCH_read           (void)
       x_yrel = (x_event.value / MAX_Y);
       if (x_yrel >= 0.001 && x_yrel <= 0.999) {
          s_yrel = x_yrel;
-         s_ypos = win.m_ymin + (s_yrel * win.m_tall);
+         s_ypos = win.m_ymin + (s_yrel * win.m_yfull);
       }
       break;
    default     :
@@ -347,12 +347,12 @@ TOUCH_read           (void)
    RPTG_TOUCH {
       if ((s_line % 15) == 0) {
          printf ("\n");
-         printf ("count  type  -pad-  -rel-  -scr-\n");
+         printf ("count    t  -pad-  -rel-  -scr-    t  -pad-  -rel-  -scr-\n");
       }
       if ((s_line %  3) == 0) {
          printf ("\n");
       }
-      printf ("%5d   X  %5d  %5.3f  %5d   Y  %5d  %5.3f  %5d\n",
+      printf ("%5d    X  %5d  %5.3f  %5d    Y  %5d  %5.3f  %5d\n",
             s_line, s_xpad, s_xrel, s_xpos, s_ypad, s_yrel, s_ypos);
    }
    /*---(reset values)-------------*/

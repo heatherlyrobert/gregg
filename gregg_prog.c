@@ -171,11 +171,14 @@ PROG_begin(void)
 char
 PROG_final (void)
 {
+   /*---(locals)-----------+-----+-----+-*/
+   int         x_wide, x_tall;
    /*---(header)-------------------------*/
    DEBUG_TOPS   yLOG_enter    (__FUNCTION__);
    DRAW_init  ();
-   if (out_start > 0) o.curr = out_start;
+   yVIKEYS_view_corners ('w', NULL, NULL, &x_wide, &x_tall, NULL);
    TOUCH_init ();
+   if (out_start > 0) o.curr = out_start;
    yVIKEYS_mode_mesg (win.c_text, yVIKEYS_cmds_curr ());
    /*---(complete)-----------------------*/
    DEBUG_TOPS   yLOG_exit     (__FUNCTION__);
@@ -350,7 +353,7 @@ PROG_event()
    /*---(for timer)------------------------*/
    /*> struct     timespec timer, remain;                                             <*/
    x_dur.tv_sec    = 0;
-   x_dur.tv_nsec   = 1.0 * 1000000;
+   x_dur.tv_nsec   = 0.5 * 1000000;
    /*---(header)-------------------------*/
    DEBUG_TOPS   yLOG_enter    (__FUNCTION__);
    while (1) {
