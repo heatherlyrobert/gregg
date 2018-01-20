@@ -64,9 +64,10 @@ PROG_init          (void)
    strlcpy (my.words, "", LEN_RECD);
    strlcpy (my.guide, "", LEN_RECD);
    /*---(setup vikeys)----------------*/
-   yVIKEYS_mode_init   ();
-   yVIKEYS_mode_enter  (MODE_MAP);
-   yVIKEYS_cmds_init   ();
+   yVIKEYS_init        ();
+   /*> yVIKEYS_mode_init   ();                                                        <* 
+    *> yVIKEYS_mode_enter  (MODE_MAP);                                                <* 
+    *> yVIKEYS_cmds_init   ();                                                        <*/
    USER_init   ();
    OUT_init   ();
    FILE_rename ("");
@@ -172,14 +173,14 @@ char
 PROG_final (void)
 {
    /*---(locals)-----------+-----+-----+-*/
-   int         x_wide, x_tall;
+   /*> int         x_wide, x_tall;                                                    <*/
    /*---(header)-------------------------*/
    DEBUG_TOPS   yLOG_enter    (__FUNCTION__);
    DRAW_init  ();
-   yVIKEYS_view_corners ('w', NULL, NULL, &x_wide, &x_tall, NULL);
+   /*> yVIKEYS_view_corners ('w', NULL, NULL, &x_wide, &x_tall, NULL);                <*/
    TOUCH_init ();
    if (out_start > 0) o.curr = out_start;
-   yVIKEYS_mode_mesg (win.c_text, yVIKEYS_cmds_curr ());
+   /*> yVIKEYS_mode_mesg (win.c_text, yVIKEYS_cmds_curr ());                          <*/
    /*---(complete)-----------------------*/
    DEBUG_TOPS   yLOG_exit     (__FUNCTION__);
    return 0;
@@ -378,7 +379,7 @@ PROG_event()
       if (my.quit == 'y')  break;
       ++x_loop;
       TOUCH_read ();
-      if ((x_loop % 20) == 0)  DRAW_main();
+      if ((x_loop % 20) == 0)  yVIKEYS_view_all (DRAW_primary, 0.0);
       /*---(sleeping)--------------------*/
       nanosleep    (&x_dur, NULL);
    }

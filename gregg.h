@@ -205,8 +205,8 @@
 
 
 /* rapidly evolving version number to aid with visual change confirmation     */
-#define VER_NUM   "5.2a"
-#define VER_TXT   "shoved all things title, status, command, and ribbon to yVIKEYS"
+#define VER_NUM   "5.2b"
+#define VER_TXT   "using the yVIKEYS_view_all() drawing method now"
 
 
 #define     LEN_HUGE     10000
@@ -610,7 +610,8 @@ char       DRAW_init            (void);
 char       DRAW_wrap            (void);
 char       DRAW_set_color       (char a_color);
 
-char       DRAW_main            (void);
+char       DRAW_primary         (float a_mag);
+/*> char       DRAW_main            (void);                                           <*/
 char       DRAW_back            (void);
 
 char       draw_background      (void);

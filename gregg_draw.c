@@ -177,7 +177,7 @@ DRAW_set_color       (char a_color)
 
 
 char
-DRAW_primary         (void)
+DRAW_primary         (float a_mag)
 {
    char     x_on = 'y';
    int      x_left, x_bott, x_wide, x_tall;
@@ -335,65 +335,6 @@ DRAW_back            (void)
 /*===----                           drivers                            ----===*/
 /*====================------------------------------------====================*/
 static void      o___DRIVERS_________________o (void) {;}
-
-char
-DRAW_main (void)
-{
-   /*---(locals)-----------+------+------+-*/
-   long        x_start;
-   long        x_stop;
-   /*---(header)-------------------------*/
-   DEBUG_WIND   yLOG_enter    (__FUNCTION__);
-   /*> x_start = time_stamp();                                                        <*/
-   glClear         (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-   /*> glLoadIdentity();                                                              <*/
-   /*---(draw)-----------------------------*/
-   /*> DRAW_info();                                                                   <*/
-   DEBUG_WIND   yLOG_note     ("post-godview");
-   /*> glCallList (dl_back);                                                          <*/
-   DEBUG_WIND   yLOG_note     ("post-displist");
-   yVIKEYS_view_title       ();
-   yVIKEYS_view_status      ();
-   yVIKEYS_view_command     ();
-   yVIKEYS_view_ribbon      ();
-   /*> DRAW_title       ();                                                           <*/
-   /*> DRAW_status      ();                                                           <*/
-   /*> DRAW_command     ();                                                           <*/
-   DRAW_primary     ();
-   /*> draw_oslider();                                                                <*/
-   /*> draw_kslider();                                                                <*/
-   /*> DRAW_raws   ();                                                                <*/
-   /*> draw_avgs   ();                                                                <*/
-   /*> DRAW_keys   ();                                                                <*/
-   /*> DRAW_curr   ();                                                                <*/
-   /*> draw_bands  ();                                                                <*/
-   /*> draw_saved  ();                                                                <*/
-   /*> draw_horz   ();                                                                <*/
-   /*> sample_draw ();                                                                <*/
-   /*---(word)-----------------------------*/
-   /*> glPushMatrix();                                                                <* 
-    *> glColor4f(1.0f, 1.0f, 0.0f, 1.0f);                                             <* 
-    *> glTranslatef(  -40.0,  25.0, 10.0);                                            <* 
-    *> yFONT_print(win.font_bg,  18, YF_BOTLEF, o.word);                               <* 
-    *> glTranslatef(    0.0, -85.0,  0.0);                                            <* 
-    *> yFONT_print(win.font_bg,  18, YF_BOTLEF, o.actual);                             <* 
-    *> glPopMatrix();                                                                 <*/
-   DEBUG_WIND   yLOG_note     ("post-printing");
-   /*> WORDS_display("get letter because matter say task late different draft cover project table discount fact first following had forward house line appreciate about", '-');   <*/
-   /*---(force the redraw)-----------------*/
-   glXSwapBuffers(DISP, BASE);
-   glFlush();
-   /*---(complete)-------------------------*/
-   /*> x_stop  = time_stamp();                                                        <*/
-   /*---(complete)-----------------------*/
-   DEBUG_WIND   yLOG_exit     (__FUNCTION__);
-   return 0;
-}
-
-char
-DRAW_work          (void)
-{
-}
 
 long
 time_stamp()                      /* PURPOSE : timestamp in microseconds      */
