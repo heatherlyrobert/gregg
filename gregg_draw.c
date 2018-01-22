@@ -32,13 +32,6 @@ static uint s_depth     =     0;            /* depth buffer                   */
 static void      o___PROGRAM_________________o (void) {;}
 
 char
-DRAW_sizer           (int a_wide, int a_tall)
-{
-   yX11_resize (a_wide, a_tall);
-   return 0;
-}
-
-char
 DRAW__resize_TEMP  (cint a_wide, cint a_tall)
 {
    /*---(header)----------------------*/
@@ -80,11 +73,12 @@ DRAW_init            (void)
    /*---(header)-------------------------*/
    DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
    /*---(stuff)--------------------------*/
-   rc = DRAW__resize_TEMP    (500, 350);
-   rc = yVIKEYS_view_init    (DRAW_sizer, "gregg shorthand interpreter", VER_NUM);
-   rc = yVIKEYS_view_resize  ('-', NULL, 500, 350, 'y');
-   rc = yVIKEYS_view_corners ('w', NULL, NULL, &x_wide, &x_tall, NULL);
-   rc = yX11_start ("gregg_input", x_wide, x_tall, YX_FOCUSABLE, YX_FIXED, '-');
+   rc = DRAW__resize_TEMP        (500, 350);
+   rc = yVIKEYS_view_init        ("gregg shorthand interpreter", VER_NUM, 500, 350, DRAW_primary);
+   /*> rc = yVIKEYS_view_resize      ('-', NULL, 500, 350, 'y');                      <*/
+   rc = yVIKEYS_view_main_coords (-125, 500 - 125, 125 - 350, 125);
+   /*> rc = yVIKEYS_view_corners     ('w', NULL, NULL, &x_wide, &x_tall, NULL);       <*/
+   /*> rc = yX11_start      ("gregg_input", x_wide, x_tall, YX_FOCUSABLE, YX_FIXED, '-');   <*/
    rc = yGLTEX_init     ();
    glClearColor    (0.3f, 0.5f, 0.3f, 1.0f);       /* nice medium green          */
    rc = FONT__load      ();
@@ -114,7 +108,7 @@ DRAW_wrap            (void)
    /*---(stuff)--------------------------*/
    rc = yGLTEX_free (&s_tex, &s_fbo, &s_depth);
    rc = FONT__free       ();
-   rc = yX11_end();
+   rc = yVIKEYS_view_wrap ();
    /*---(complete)-----------------------*/
    DEBUG_GRAF   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -175,38 +169,38 @@ DRAW_set_color       (char a_color)
    return 0;
 }
 
-
 char
 DRAW_primary         (float a_mag)
 {
    char     x_on = 'y';
    int      x_left, x_bott, x_wide, x_tall;
-   x_on = yVIKEYS_view_corners  ('m', &x_left, &x_bott, &x_wide, &x_tall, NULL);
+   int      x_xmin, x_xmax, x_ymin, x_ymax;
+   yVIKEYS_view_corners  ('m', &x_left, &x_bott, &x_wide, &x_tall, NULL);
+   yVIKEYS_view_corners  ('M', &x_xmin, &x_xmax, &x_ymin, &x_ymax, NULL);
    /*> printf ("t %c %3d %3d %3d %3d %s\n", x_on, x_left, x_bott, x_wide, x_tall, x_text);   <*/
-   x_on = yVIKEYS_view_corners  ('c', NULL, NULL, NULL, NULL, NULL);
    /*---(setup view)---------------------*/
    glViewport      (x_left, x_bott, x_wide, x_tall);
    glMatrixMode    (GL_PROJECTION);
    glLoadIdentity  ();
-   glOrtho         (win.m_xmin, win.m_xmax, win.m_ymin, win.m_ymax,  -500.0,   500.0);
+   glOrtho         (x_xmin, x_xmax, x_ymin, x_ymax,  -500.0,   500.0);
    glMatrixMode    (GL_MODELVIEW);
    /*---(background)---------------------*/
    glPushMatrix    (); {
       glBindTexture(GL_TEXTURE_2D, s_tex);
       glBegin         (GL_POLYGON); {
          glTexCoord2d (    0.00 ,      1.00);
-         glVertex3f  (win.m_xmin + 3, win.m_ymax - 3,  0.0f);
+         glVertex3f  (x_xmin + 3, x_ymax - 3,  0.0f);
          glTexCoord2d (    1.00 ,      1.00);
-         glVertex3f  (win.m_xmax - 3, win.m_ymax - 3,  0.0f);
+         glVertex3f  (x_xmax - 3, x_ymax - 3,  0.0f);
          glTexCoord2d (    1.00 ,      0.00);
-         glVertex3f  (win.m_xmax - 3, win.m_ymin + 3,  0.0f);
+         glVertex3f  (x_xmax - 3, x_ymin + 3,  0.0f);
          glTexCoord2d (    0.00 ,      0.00);
-         glVertex3f  (win.m_xmin + 3, win.m_ymin + 3,  0.0f);
+         glVertex3f  (x_xmin + 3, x_ymin + 3,  0.0f);
       } glEnd   ();
       glBindTexture(GL_TEXTURE_2D, 0);
    } glPopMatrix   ();
    /*---(parts)--------------------------*/
-   DRAW_cursor      ();
+   /*> DRAW_cursor      ();                                                           <*/
    if (my.touch != 'y') {
       DRAW_base        ();
       DRAW_keys        ();
@@ -232,28 +226,6 @@ DRAW_primary         (float a_mag)
        *>    WORDS_result ();                                                         <* 
        *> } glPopMatrix   ();                                                         <*/
    }
-   if (x_on == '-' && yVIKEYS_mode_curr() == MODE_COMMAND) {
-      glPushMatrix    (); {
-         DRAW_set_color (COLOR_DARK );
-         glBegin         (GL_POLYGON); {
-            glVertex3f  (-75.0f  , -80.0f, 50.0f);
-            glVertex3f  (300.0f  , -80.0f, 50.0f);
-            glVertex3f  (300.0f  , -95.0f, 50.0f);
-            glVertex3f  (-75.0f  , -95.0f, 50.0f);
-         } glEnd   ();
-         DRAW_set_color (COLOR_BLACK);
-         glBegin(GL_LINE_STRIP); {
-            glVertex3f  (-75.0f  , -80.0f, 50.0f);
-            glVertex3f  (300.0f  , -80.0f, 50.0f);
-            glVertex3f  (300.0f  , -95.0f, 50.0f);
-            glVertex3f  (-75.0f  , -95.0f, 50.0f);
-            glVertex3f  (-75.0f  , -80.0f, 50.0f);
-         } glEnd   ();
-         DRAW_set_color (COLOR_TXT_L);
-         glTranslatef (-73.0f, -95.0f,   60.0f);
-         yFONT_print  (win.font_sm,  11, YF_BOTLEF, yVIKEYS_cmds_curr ());
-      } glPopMatrix   ();
-   }
    /*---(complete)-----------------------*/
    return;
 }
@@ -268,60 +240,61 @@ DRAW_back            (void)
    int         j           =    0;
    float       x_xmin      =    0;
    float       x_xmax      =    0;
+   float       x_ymin      =    0;
+   float       x_ymax      =    0;
    int         x_side      =    0;
    float       x_left      =    0;
    /*---(header)-------------------------*/
    DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
    /*---(setup)--------------------------*/
+   yVIKEYS_view_corners  ('M', &x_xmin, &x_xmax, &x_ymin, &x_ymax, NULL);
    rc = yGLTEX_draw_start   (s_fbo, YGLTEX_GREGG, win.tex_w, win.tex_h, 2.0);
    /*---(draw)---------------------------*/
    glCallList (dl_back);
    draw_horz   ();
    SHOW_SAMPLE  sample_show ();
    /*---(ribbon)-------------------------*/
-   x_xmin = win.m_xmax - win.r_wide;
-   x_xmax = win.m_xmax;
    x_side = win.r_wide - 5;
    x_left = x_side + (win.r_wide - x_side) / 2.0;
-   SHOW_PLAYER {
-      DRAW_slide_avg ();
-      glPushMatrix    (); {
-         glTranslatef  (win.m_xmin + 5, win.m_ymin + x_side + 40, 10.0);
-         glColor4f    (1.00f, 1.00f, 1.00f, 1.0f);
-         glTranslatef  (x_side    , 0.0        ,  0.0);
-         glTranslatef  (x_side    , 0.0        ,  0.0);
-         glTranslatef  (x_side    , 0.0        ,  0.0);
-         glTranslatef  (x_side    , 0.0        ,  0.0);
-         glTranslatef  (x_side    , 0.0        ,  0.0);
-         yFONT_icon ("play"    , "first"       , x_side);
-         glTranslatef  (x_side    , 0.0        ,  0.0);
-         yFONT_icon ("play"    , "prev"        , x_side);
-         glTranslatef  (x_side    , 0.0        ,  0.0);
-         yFONT_icon ("play"    , "next"        , x_side);
-         glTranslatef  (x_side    , 0.0        ,  0.0);
-         yFONT_icon ("play"    , "last"        , x_side);
-         glTranslatef  (x_side    , 0.0        ,  0.0);
-         yFONT_icon ("play"    , "play"        , x_side);
-         glTranslatef  (x_side    , 0.0        ,  0.0);
-         yFONT_icon ("play"    , "pause"       , x_side);
-         glTranslatef  (x_side    , 0.0        ,  0.0);
-         yFONT_icon ("play"    , "slower"      , x_side);
-         glTranslatef  (x_side    , 0.0        ,  0.0);
-         yFONT_icon ("play"    , "normal"      , x_side);
-         glTranslatef  (x_side    , 0.0        ,  0.0);
-         yFONT_icon ("play"    , "faster"      , x_side);
-      } glPopMatrix   ();
-   }
-   glPushMatrix    (); {
-      glColor4f    (1.00f, 1.00f, 1.00f, 1.0f);
-      glTranslatef (150.0, -150.0, 0.0);
-      WORDS_display (my.words, 'y');
-   } glPopMatrix   ();
-   glPushMatrix    (); {
-      glColor4f    (1.00f, 1.00f, 1.00f, 1.0f);
-      glTranslatef (0.0, 0.0, 0.0);
-      WORDS_display (my.guide, '-');
-   } glPopMatrix   ();
+   /*> SHOW_PLAYER {                                                                  <* 
+    *>    DRAW_slide_avg ();                                                          <* 
+    *>    glPushMatrix    (); {                                                       <* 
+    *>       glTranslatef  (x_xmin + 5, win.m_ymin + x_side + 40, 10.0);              <* 
+    *>       glColor4f    (1.00f, 1.00f, 1.00f, 1.0f);                                <* 
+    *>       glTranslatef  (x_side    , 0.0        ,  0.0);                           <* 
+    *>       glTranslatef  (x_side    , 0.0        ,  0.0);                           <* 
+    *>       glTranslatef  (x_side    , 0.0        ,  0.0);                           <* 
+    *>       glTranslatef  (x_side    , 0.0        ,  0.0);                           <* 
+    *>       glTranslatef  (x_side    , 0.0        ,  0.0);                           <* 
+    *>       yFONT_icon ("play"    , "first"       , x_side);                         <* 
+    *>       glTranslatef  (x_side    , 0.0        ,  0.0);                           <* 
+    *>       yFONT_icon ("play"    , "prev"        , x_side);                         <* 
+    *>       glTranslatef  (x_side    , 0.0        ,  0.0);                           <* 
+    *>       yFONT_icon ("play"    , "next"        , x_side);                         <* 
+    *>       glTranslatef  (x_side    , 0.0        ,  0.0);                           <* 
+    *>       yFONT_icon ("play"    , "last"        , x_side);                         <* 
+    *>       glTranslatef  (x_side    , 0.0        ,  0.0);                           <* 
+    *>       yFONT_icon ("play"    , "play"        , x_side);                         <* 
+    *>       glTranslatef  (x_side    , 0.0        ,  0.0);                           <* 
+    *>       yFONT_icon ("play"    , "pause"       , x_side);                         <* 
+    *>       glTranslatef  (x_side    , 0.0        ,  0.0);                           <* 
+    *>       yFONT_icon ("play"    , "slower"      , x_side);                         <* 
+    *>       glTranslatef  (x_side    , 0.0        ,  0.0);                           <* 
+    *>       yFONT_icon ("play"    , "normal"      , x_side);                         <* 
+    *>       glTranslatef  (x_side    , 0.0        ,  0.0);                           <* 
+    *>       yFONT_icon ("play"    , "faster"      , x_side);                         <* 
+    *>    } glPopMatrix   ();                                                         <* 
+    *> }                                                                              <*/
+   /*> glPushMatrix    (); {                                                          <* 
+    *>    glColor4f    (1.00f, 1.00f, 1.00f, 1.0f);                                   <* 
+    *>    glTranslatef (150.0, -150.0, 0.0);                                          <* 
+    *>    WORDS_display (my.words, 'y');                                              <* 
+    *> } glPopMatrix   ();                                                            <*/
+   /*> glPushMatrix    (); {                                                          <* 
+    *>    glColor4f    (1.00f, 1.00f, 1.00f, 1.0f);                                   <* 
+    *>    glTranslatef (0.0, 0.0, 0.0);                                               <* 
+    *>    WORDS_display (my.guide, '-');                                              <* 
+    *> } glPopMatrix   ();                                                            <*/
    /*---(mipmaps)------------------------*/
    rc = yGLTEX_draw_end  (s_tex);
    /*---(complete)-----------------------*/
@@ -424,120 +397,120 @@ DRAW_slide_avg       (void)
    return 0;
 }
 
-char
-draw_kslider()
-{
-   float       i           = 0.0;
-   float   x_lef = -win.m_xmin + (win.d_bar * 3.00);
-   float   x_rig =  win.m_xmax - (win.d_bar * 1.20);
-   float   x_top =  win.m_ymax - (win.d_bar * 0.85);
-   float   x_bot =  win.m_ymax - (win.d_bar * 0.15);
-   float   z     =   10.0;
-   glColor4f(0.3f, 0.6f, 0.3f, 1.0f);       /* nice medium grey            */
-   glBegin(GL_POLYGON);
-   glVertex3f( x_lef, x_top, z);
-   glVertex3f( x_rig, x_top, z);
-   glVertex3f( x_rig, x_bot, z);
-   glVertex3f( x_lef, x_bot, z);
-   glEnd();
-   glLineWidth(1.2);
-   glColor4f(0.7f, 0.7f, 0.7f, 1.0f);
-   glBegin(GL_LINE_STRIP);
-   glVertex3f( x_lef, x_top, z + 0.1);
-   glVertex3f( x_rig, x_top, z + 0.1);
-   glVertex3f( x_rig, x_bot, z + 0.1);
-   glVertex3f( x_lef, x_bot, z + 0.1);
-   glVertex3f( x_lef, x_top, z + 0.1);
-   glEnd();
-   glLineWidth(0.8);
-   if (o.nkey == 0) return 0;
-   glColor4f(0.7f, 0.7f, 0.7f, 1.0f);
-   float x_inc = (x_rig - x_lef - 10) / o.nkey;
-   for (i = x_lef +  5; i <= x_rig -  5; i += x_inc) {
-      glBegin(GL_LINES);
-      glVertex3f( i, x_top, z + 1);
-      glVertex3f( i, x_bot, z + 1);
-      glEnd();
-   }
-   glBegin(GL_LINES);
-   glVertex3f( x_rig -  5, x_top, z + 1);
-   glVertex3f( x_rig -  5, x_bot, z + 1);
-   glEnd();
-   glColor4f(0.2f, 0.4f, 0.2f, 1.0f);       /* nice medium grey            */
-   glBegin(GL_POLYGON);
-   glVertex3f( x_rig     , x_top, z);
-   glVertex3f( x_rig     , x_bot, z);
-   glVertex3f( x_rig -  5, x_bot, z);
-   glVertex3f( x_rig -  5, x_top, z);
-   glEnd();
-   glBegin(GL_POLYGON);
-   glVertex3f( x_lef     , x_top, z);
-   glVertex3f( x_lef     , x_bot, z);
-   glVertex3f( x_lef +  5, x_bot, z);
-   glVertex3f( x_lef +  5, x_top, z);
-   glEnd();
-   /*---(complete)------------------------------*/
-   return 0;
-}
+/*> char                                                                              <* 
+ *> draw_kslider()                                                                    <* 
+ *> {                                                                                 <* 
+ *>    float       i           = 0.0;                                                 <* 
+ *>    float   x_lef = -win.m_xmin + (win.d_bar * 3.00);                              <* 
+ *>    float   x_rig =  win.m_xmax - (win.d_bar * 1.20);                              <* 
+ *>    float   x_top =  win.m_ymax - (win.d_bar * 0.85);                              <* 
+ *>    float   x_bot =  win.m_ymax - (win.d_bar * 0.15);                              <* 
+ *>    float   z     =   10.0;                                                        <* 
+ *>    glColor4f(0.3f, 0.6f, 0.3f, 1.0f);       /+ nice medium grey            +/     <* 
+ *>    glBegin(GL_POLYGON);                                                           <* 
+ *>    glVertex3f( x_lef, x_top, z);                                                  <* 
+ *>    glVertex3f( x_rig, x_top, z);                                                  <* 
+ *>    glVertex3f( x_rig, x_bot, z);                                                  <* 
+ *>    glVertex3f( x_lef, x_bot, z);                                                  <* 
+ *>    glEnd();                                                                       <* 
+ *>    glLineWidth(1.2);                                                              <* 
+ *>    glColor4f(0.7f, 0.7f, 0.7f, 1.0f);                                             <* 
+ *>    glBegin(GL_LINE_STRIP);                                                        <* 
+ *>    glVertex3f( x_lef, x_top, z + 0.1);                                            <* 
+ *>    glVertex3f( x_rig, x_top, z + 0.1);                                            <* 
+ *>    glVertex3f( x_rig, x_bot, z + 0.1);                                            <* 
+ *>    glVertex3f( x_lef, x_bot, z + 0.1);                                            <* 
+ *>    glVertex3f( x_lef, x_top, z + 0.1);                                            <* 
+ *>    glEnd();                                                                       <* 
+ *>    glLineWidth(0.8);                                                              <* 
+ *>    if (o.nkey == 0) return 0;                                                     <* 
+ *>    glColor4f(0.7f, 0.7f, 0.7f, 1.0f);                                             <* 
+ *>    float x_inc = (x_rig - x_lef - 10) / o.nkey;                                   <* 
+ *>    for (i = x_lef +  5; i <= x_rig -  5; i += x_inc) {                            <* 
+ *>       glBegin(GL_LINES);                                                          <* 
+ *>       glVertex3f( i, x_top, z + 1);                                               <* 
+ *>       glVertex3f( i, x_bot, z + 1);                                               <* 
+ *>       glEnd();                                                                    <* 
+ *>    }                                                                              <* 
+ *>    glBegin(GL_LINES);                                                             <* 
+ *>    glVertex3f( x_rig -  5, x_top, z + 1);                                         <* 
+ *>    glVertex3f( x_rig -  5, x_bot, z + 1);                                         <* 
+ *>    glEnd();                                                                       <* 
+ *>    glColor4f(0.2f, 0.4f, 0.2f, 1.0f);       /+ nice medium grey            +/     <* 
+ *>    glBegin(GL_POLYGON);                                                           <* 
+ *>    glVertex3f( x_rig     , x_top, z);                                             <* 
+ *>    glVertex3f( x_rig     , x_bot, z);                                             <* 
+ *>    glVertex3f( x_rig -  5, x_bot, z);                                             <* 
+ *>    glVertex3f( x_rig -  5, x_top, z);                                             <* 
+ *>    glEnd();                                                                       <* 
+ *>    glBegin(GL_POLYGON);                                                           <* 
+ *>    glVertex3f( x_lef     , x_top, z);                                             <* 
+ *>    glVertex3f( x_lef     , x_bot, z);                                             <* 
+ *>    glVertex3f( x_lef +  5, x_bot, z);                                             <* 
+ *>    glVertex3f( x_lef +  5, x_top, z);                                             <* 
+ *>    glEnd();                                                                       <* 
+ *>    /+---(complete)------------------------------+/                                <* 
+ *>    return 0;                                                                      <* 
+ *> }                                                                                 <*/
 
-char
-draw_oslider()
-{
-   float       i           = 0.0;
-   float   x_lef =  win.m_xmax - (win.d_bar * 1.0);
-   float   x_rig =  win.m_xmax - (win.d_bar * 0.2);
-   float   x_top =  win.m_ymax - (win.d_bar * 0.2);
-   float   x_bot = -win.m_ymin + (win.d_bar * 0.2);
-   float   z     =   10.0;
-   /*---(filler)----------------------------*/
-   glColor4f(0.3f, 0.6f, 0.3f, 1.0f);       /* nice medium grey            */
-   glBegin(GL_POLYGON);
-   glVertex3f( x_lef, x_top, z);
-   glVertex3f( x_rig, x_top, z);
-   glVertex3f( x_rig, x_bot, z);
-   glVertex3f( x_lef, x_bot, z);
-   glEnd();
-   /*---(outer box)-------------------------*/
-   /*> glLineWidth(1.0);                                                              <* 
-    *> glColor4f(0.7f, 0.7f, 0.7f, 0.5f);                                             <* 
-    *> glBegin(GL_LINE_STRIP);                                                        <* 
-    *> glVertex3f( x_lef, x_top, z + 0.1);                                            <* 
-    *> glVertex3f( x_rig, x_top, z + 0.1);                                            <* 
-    *> glVertex3f( x_rig, x_bot, z + 0.1);                                            <* 
-    *> glVertex3f( x_lef, x_bot, z + 0.1);                                            <* 
-    *> glVertex3f( x_lef, x_top, z + 0.1);                                            <* 
-    *> glEnd();                                                                       <*/
-   /*---(inner boxes)-----------------------*/
-   glLineWidth(0.8);
-   if (o.total == 0) return 0;
-   glColor4f(0.2f, 0.4f, 0.2f, 1.0f);
-   float x_inc = (x_top - x_bot) / o.total;
-   for (i = x_bot; i <= x_top; i += x_inc) {
-      glBegin(GL_LINES);
-      glVertex3f( x_lef, i, z + 0.2);
-      glVertex3f( x_rig, i, z + 0.2);
-      glEnd();
-   }
-   /*---(current point)---------------------*/
-   /*> float   r1 =   5.0;                                                                 <* 
-    *> float   d;                                                                          <* 
-    *> float   rad;                                                                        <* 
-    *> float   x, y;                                                                       <* 
-    *> glPushMatrix();                                                                     <* 
-    *> glTranslatef( x_lef + 7, x_top - 5 - (x_inc * o.curr) + (x_inc * 0.5),    0.0);   <* 
-    *> glBegin(GL_POLYGON);                                                                <* 
-    *> glColor4f(1.0f, 1.0f, 1.0f, 1.0f);                                                  <* 
-    *> for (d = 0; d <= 360; d += 10) {                                                    <* 
-    *>    rad = d * DEG2RAD;                                                               <* 
-    *>    x   = r1 * cos(rad);                                                             <* 
-    *>    y   = r1 * sin(rad);                                                             <* 
-    *>    glVertex3f( x, y, z);                                                            <* 
-    *> }                                                                                   <* 
-    *> glEnd();                                                                            <* 
-    *> glPopMatrix();                                                                      <*/
-   /*---(complete)--------------------------*/
-   return 0;
-}
+/*> char                                                                                             <* 
+ *> draw_oslider()                                                                                   <* 
+ *> {                                                                                                <* 
+ *>    float       i           = 0.0;                                                                <* 
+ *>    float   x_lef =  win.m_xmax - (win.d_bar * 1.0);                                              <* 
+ *>    float   x_rig =  win.m_xmax - (win.d_bar * 0.2);                                              <* 
+ *>    float   x_top =  win.m_ymax - (win.d_bar * 0.2);                                              <* 
+ *>    float   x_bot = -win.m_ymin + (win.d_bar * 0.2);                                              <* 
+ *>    float   z     =   10.0;                                                                       <* 
+ *>    /+---(filler)----------------------------+/                                                   <* 
+ *>    glColor4f(0.3f, 0.6f, 0.3f, 1.0f);       /+ nice medium grey            +/                    <* 
+ *>    glBegin(GL_POLYGON);                                                                          <* 
+ *>    glVertex3f( x_lef, x_top, z);                                                                 <* 
+ *>    glVertex3f( x_rig, x_top, z);                                                                 <* 
+ *>    glVertex3f( x_rig, x_bot, z);                                                                 <* 
+ *>    glVertex3f( x_lef, x_bot, z);                                                                 <* 
+ *>    glEnd();                                                                                      <* 
+ *>    /+---(outer box)-------------------------+/                                                   <* 
+ *>    /+> glLineWidth(1.0);                                                              <*         <* 
+ *>     *> glColor4f(0.7f, 0.7f, 0.7f, 0.5f);                                             <*         <* 
+ *>     *> glBegin(GL_LINE_STRIP);                                                        <*         <* 
+ *>     *> glVertex3f( x_lef, x_top, z + 0.1);                                            <*         <* 
+ *>     *> glVertex3f( x_rig, x_top, z + 0.1);                                            <*         <* 
+ *>     *> glVertex3f( x_rig, x_bot, z + 0.1);                                            <*         <* 
+ *>     *> glVertex3f( x_lef, x_bot, z + 0.1);                                            <*         <* 
+ *>     *> glVertex3f( x_lef, x_top, z + 0.1);                                            <*         <* 
+ *>     *> glEnd();                                                                       <+/        <* 
+ *>    /+---(inner boxes)-----------------------+/                                                   <* 
+ *>    glLineWidth(0.8);                                                                             <* 
+ *>    if (o.total == 0) return 0;                                                                   <* 
+ *>    glColor4f(0.2f, 0.4f, 0.2f, 1.0f);                                                            <* 
+ *>    float x_inc = (x_top - x_bot) / o.total;                                                      <* 
+ *>    for (i = x_bot; i <= x_top; i += x_inc) {                                                     <* 
+ *>       glBegin(GL_LINES);                                                                         <* 
+ *>       glVertex3f( x_lef, i, z + 0.2);                                                            <* 
+ *>       glVertex3f( x_rig, i, z + 0.2);                                                            <* 
+ *>       glEnd();                                                                                   <* 
+ *>    }                                                                                             <* 
+ *>    /+---(current point)---------------------+/                                                   <* 
+ *>    /+> float   r1 =   5.0;                                                                 <*    <* 
+ *>     *> float   d;                                                                          <*    <* 
+ *>     *> float   rad;                                                                        <*    <* 
+ *>     *> float   x, y;                                                                       <*    <* 
+ *>     *> glPushMatrix();                                                                     <*    <* 
+ *>     *> glTranslatef( x_lef + 7, x_top - 5 - (x_inc * o.curr) + (x_inc * 0.5),    0.0);   <*      <* 
+ *>     *> glBegin(GL_POLYGON);                                                                <*    <* 
+ *>     *> glColor4f(1.0f, 1.0f, 1.0f, 1.0f);                                                  <*    <* 
+ *>     *> for (d = 0; d <= 360; d += 10) {                                                    <*    <* 
+ *>     *>    rad = d * DEG2RAD;                                                               <*    <* 
+ *>     *>    x   = r1 * cos(rad);                                                             <*    <* 
+ *>     *>    y   = r1 * sin(rad);                                                             <*    <* 
+ *>     *>    glVertex3f( x, y, z);                                                            <*    <* 
+ *>     *> }                                                                                   <*    <* 
+ *>     *> glEnd();                                                                            <*    <* 
+ *>     *> glPopMatrix();                                                                      <+/   <* 
+ *>    /+---(complete)--------------------------+/                                                   <* 
+ *>    return 0;                                                                                     <* 
+ *> }                                                                                                <*/
 
 
 /*====================------------------------------------====================*/
@@ -1101,14 +1074,14 @@ static void      o___FONTS___________________o (void) {;}
 char
 FONT__load           (void)
 {
-   win.font_sm = yFONT_load (win.face_sm);
-   if (win.font_sm < 0) {
-      fprintf(stderr, "Problem loading %s\n", win.face_sm);
-      exit(1);
-   }
    win.font_bg = yFONT_load (win.face_bg);
    if (win.font_bg < 0) {
       fprintf(stderr, "Problem loading %s\n", win.face_bg);
+      exit(1);
+   }
+   win.font_sm = yFONT_load (win.face_sm);
+   if (win.font_sm < 0) {
+      fprintf(stderr, "Problem loading %s\n", win.face_sm);
       exit(1);
    }
    /*> win.icons  = yFONT_symload (ICON_SET, 20, 33, '-');                            <*/

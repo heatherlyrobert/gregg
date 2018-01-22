@@ -11,7 +11,7 @@ const float  ICON_FORE[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
 const float  ICON_BOLD[4] = { 0.7f, 0.0f, 0.0f, 1.0f };
 
 
-PRIV char  dlist_arrow      (void);
+/*> PRIV char  dlist_arrow      (void);                                               <*/
 PRIV char  dlist_letters    (void);
 /*> PRIV char  dlist_arrowed    (void);                                               <*/
 PRIV char  DLIST_back       (void);
@@ -25,7 +25,7 @@ dlist_init         (void)
    DEBUG_G  printf("   - clear letters\n\n");
    DEBUG_G  printf("   - create buttons\n\n");
    radius_button = (win.d_bar / 2.5);
-   dlist_arrow();
+   /*> dlist_arrow();                                                                 <*/
    dlist_letters();
    /*> dlist_arrowed();                                                               <*/
    DLIST_back();
@@ -76,29 +76,29 @@ DLIST__show          (int a_who, char a_dotted)
 }
 
 
-PRIV char
-dlist_arrow(void)
-{
-   DEBUG_X  printf("   - dlist_arrow()  . . . . . . . . . . ");
-   /*---(begin)-----------------------------*/
-   dl_arrow = glGenLists(1);
-   glNewList(dl_arrow, GL_COMPILE);
-   /*---(locals)----------------------------*/
-   float   r1 =  radius_button;
-   float   z  =  40.00;
-   /*---(interior)--------------------------*/
-   glBegin(GL_POLYGON);
-   glVertex3f( -r1, -r1, z);
-   glVertex3f( 0.0,  r1, z);
-   glVertex3f(  r1, -r1, z);
-   glVertex3f( -r1, -r1, z);
-   glEnd();
-   /*---(end)-------------------------------*/
-   glEndList();
-   DEBUG_X  printf("success\n");
-   /*---(complete)--------------------------*/
-   return 0;
-}
+/*> PRIV char                                                                         <* 
+ *> dlist_arrow(void)                                                                 <* 
+ *> {                                                                                 <* 
+ *>    DEBUG_X  printf("   - dlist_arrow()  . . . . . . . . . . ");                   <* 
+ *>    /+---(begin)-----------------------------+/                                    <* 
+ *>    dl_arrow = glGenLists(1);                                                      <* 
+ *>    glNewList(dl_arrow, GL_COMPILE);                                               <* 
+ *>    /+---(locals)----------------------------+/                                    <* 
+ *>    float   r1 =  radius_button;                                                   <* 
+ *>    float   z  =  40.00;                                                           <* 
+ *>    /+---(interior)--------------------------+/                                    <* 
+ *>    glBegin(GL_POLYGON);                                                           <* 
+ *>    glVertex3f( -r1, -r1, z);                                                      <* 
+ *>    glVertex3f( 0.0,  r1, z);                                                      <* 
+ *>    glVertex3f(  r1, -r1, z);                                                      <* 
+ *>    glVertex3f( -r1, -r1, z);                                                      <* 
+ *>    glEnd();                                                                       <* 
+ *>    /+---(end)-------------------------------+/                                    <* 
+ *>    glEndList();                                                                   <* 
+ *>    DEBUG_X  printf("success\n");                                                  <* 
+ *>    /+---(complete)--------------------------+/                                    <* 
+ *>    return 0;                                                                      <* 
+ *> }                                                                                 <*/
 
 char
 dlist_letters(void)

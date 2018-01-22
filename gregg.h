@@ -205,8 +205,8 @@
 
 
 /* rapidly evolving version number to aid with visual change confirmation     */
-#define VER_NUM   "5.2b"
-#define VER_TXT   "using the yVIKEYS_view_all() drawing method now"
+#define VER_NUM   "5.2c"
+#define VER_TXT   "moved to yVIKEYS_main_input and _handler successfully"
 
 
 #define     LEN_HUGE     10000
@@ -457,7 +457,7 @@ extern tCOMBOS combos[MAX_COMBOS];
 extern int   vowels[16][16];
 
 /*---(display lists)---------------*/
-GLuint    dl_arrow;
+/*> GLuint    dl_arrow;                                                               <*/
 GLuint    dl_solid;
 GLuint    dl_dotted;
 /*> GLuint    dl_arrowed;                                                             <*/
