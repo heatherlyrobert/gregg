@@ -236,11 +236,9 @@ PROG_event()
             break;
          }
       }
-      /*> x_ch = PROG_main_input  (RUN_USER, x_ch);                                   <*/
       x_ch = yVIKEYS_main_input  (RUN_USER, x_ch);
-      /*> PROG_main_handle (x_ch);                                                    <*/
       yVIKEYS_main_handle (x_ch);
-      if (my.quit == 'y')  break;
+      if (yVIKEYS_quit ())  break;
       ++x_loop;
       TOUCH_read ();
       if ((x_loop % 20) == 0)  yVIKEYS_view_all (0.0);

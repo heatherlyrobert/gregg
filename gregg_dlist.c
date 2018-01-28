@@ -251,7 +251,8 @@ draw_ellipse (int a_who, char a_dotted)
    /*---(draw dotted outline)-------------------*/
    glLineWidth (2.0);
    glPointSize (2.0);
-   DRAW_set_color (COLOR_BLACK);
+   yVIKEYS_view_color (YCOLOR_BAS_MIN, 1.00);
+   /*> DRAW_set_color (COLOR_BLACK);                                                  <*/
    /*> glColor4f   (0.0f, 0.0f, 0.0f, 1.0f);                                          <*/
    if (a_dotted == 'y') {
       glBegin(GL_POINTS);
@@ -362,14 +363,10 @@ draw_arc (float a_beg, float a_end, int a_color, int a_z)
    /*---(defense)------------------------*/
    if (a_beg == a_end) return -1;
    /*---(color)--------------------------*/
-   /*> if      (a_color ==  1) glColor4f(0.7f, 0.2f, 0.1f, 0.4f);                     <* 
-    *> else if (a_color ==  2) glColor4f(0.8f, 0.3f, 0.0f, 0.3f);                     <* 
-    *> else if (a_color == -1) glColor4f(0.3f, 0.1f, 0.0f, 0.3f);                     <* 
-    *> else                    glColor4f(1.0f, 0.6f, 0.3f, 0.3f);                     <*/
-   if      (a_color ==  1) DRAW_set_color (COLOR_ACC_D);
-   else if (a_color ==  2) DRAW_set_color (COLOR_ACC_O);
-   else if (a_color == -1) DRAW_set_color (COLOR_MUTED);
-   else                    DRAW_set_color (COLOR_ACC_L);
+   if      (a_color ==  1) yVIKEYS_view_color (YCOLOR_NEG_MED, 0.65);
+   else if (a_color ==  2) yVIKEYS_view_color (YCOLOR_NEG_DRK, 0.65);
+   else if (a_color == -1) yVIKEYS_view_color (YCOLOR_BAS_MUT, 0.65);
+   else                    yVIKEYS_view_color (YCOLOR_NEG_LIG, 0.65);
    /*---(fill)---------------------------*/
    glBegin(GL_POLYGON); {
       glVertex3f(   0,   0,   a_z);
@@ -608,7 +605,7 @@ BACK__degticks     (void)
    float r;
    float x, y, z;
    /*---(prepare)------------------------*/
-   DRAW_set_color (COLOR_GRID_L);
+   yVIKEYS_view_color (YCOLOR_BAS_MAX, 0.65);
    /*> glColor4f(1.0f, 1.0f, 1.0f, 0.5f);                                             <*/
    glLineWidth(2.0);
    z   = 2;
@@ -676,8 +673,7 @@ BACK__rangefan     (void)
          if      (ranges[i].len == 2)                 radius = r + 10;
          else if (strncmp(ranges[i].nam, "", 5) == 0) radius = r - 20;
          else                                         radius = r + 30;
-         DRAW_set_color (COLOR_TXT_D);
-         /*> glColor4f(0.2f, 0.2f, 0.2f, 1.0f);                                       <*/
+         yVIKEYS_view_color (YCOLOR_BAS_MOR, 0.25);
          rad = (ranges[i].tar) * DEG2RAD;
          x =  radius * cos(rad);
          y =  radius * sin(rad);
@@ -689,7 +685,8 @@ BACK__rangefan     (void)
       }
       /*---(target line)-------------------*/
       if (ranges[i].num <= 5) {
-         DRAW_set_color (COLOR_GRID_D);
+         yVIKEYS_view_color (YCOLOR_BAS_MOR, 0.65);
+         /*> DRAW_set_color (COLOR_GRID_D);                                           <*/
          /*> glColor4f(0.0f, 0.0f, 0.0f, 0.7f);                                       <*/
          glLineWidth(2.0);
          z  =    1.00;
@@ -718,7 +715,8 @@ DLIST__ring_center   (float a_size, float a_thick)
    float       y           =  0.0;          /* y position                     */
    /*---(draw)---------------------------*/
    glLineWidth   (a_thick);
-   DRAW_set_color (COLOR_BASE);
+   yVIKEYS_view_color (YCOLOR_BAS_MED, 0.50);
+   /*> DRAW_set_color (COLOR_BASE);                                                   <*/
    /*> glColor4f     (0.3f, 0.5f, 0.3f, 0.5f);       /+ nice medium grey            +/   <*/
    glBegin  (GL_POLYGON); {
       for (d = 0; d <= 360; d += 1) {
@@ -742,7 +740,8 @@ DLIST__ring_avg      (float a_size, float a_thick)
    float       y           =  0.0;          /* y position                     */
    /*---(draw)---------------------------*/
    glLineWidth   (a_thick);
-   DRAW_set_color (COLOR_GRID_L);
+   yVIKEYS_view_color (YCOLOR_BAS_MAX, 0.50);
+   /*> DRAW_set_color (COLOR_GRID_L);                                                 <*/
    /*> glColor4f     (1.0f, 1.0f, 1.0f, 0.5f);                                        <*/
    glBegin  (GL_LINE_STRIP); {
       for (d = 0; d <= 360; d += 1) {
@@ -768,7 +767,8 @@ DLIST__ring_minmax   (float a_size, float a_thick)
    glLineWidth   (a_thick);
    glEnable      (GL_LINE_STIPPLE);
    glLineStipple (1, 0x3333);
-   DRAW_set_color (COLOR_GRID_L);
+   yVIKEYS_view_color (YCOLOR_BAS_MAX, 0.50);
+   /*> DRAW_set_color (COLOR_GRID_L);                                                 <*/
    /*> glColor4f     (1.0f, 1.0f, 1.0f, 0.5f);                                        <*/
    glBegin  (GL_LINE_STRIP); {
       for (d = -140; d <=  75; d +=  1) {
@@ -817,6 +817,7 @@ BACK__guidelines   (void)
    /*---(guides)----------------------------*/
    glLineWidth(0.8);
    z = -10.0;
+   yVIKEYS_view_color (YCOLOR_BAS_MAX, 0.65);
    /*---(45's)-----*/
    glBegin(GL_LINES);
    glVertex3f(  win.m_xmax,    win.m_xmax,  z);

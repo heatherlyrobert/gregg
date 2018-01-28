@@ -206,8 +206,8 @@
 
 
 /* rapidly evolving version number to aid with visual change confirmation     */
-#define VER_NUM   "5.2d"
-#define VER_TXT   "updated to match latest yVIKEYS and yCOLOR"
+#define VER_NUM   "5.2e"
+#define VER_TXT   "uses yVIKEYS_view_color now for all background.  YES!"
 
 
 #define     LEN_HUGE     10000
@@ -609,7 +609,7 @@ char       PROG_end             (void);
 char       DRAW_init            (void);
 /*> char       DRAW__resize         (cchar a_format, cchar *a_title, cint a_wide, cint a_tall);   <*/
 char       DRAW_wrap            (void);
-char       DRAW_set_color       (char a_color);
+/*> char       DRAW_set_color       (char a_color);                                   <*/
 
 char       DRAW_primary         (float a_mag);
 /*> char       DRAW_main            (void);                                           <*/

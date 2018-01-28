@@ -79,7 +79,8 @@ DRAW_init            (void)
    yVIKEYS_view_setup    (YVIKEYS_MAIN     , YVIKEYS_FLAT, YVIKEYS_TOPLEF, -125, 500, 125 - 350, 350, 0, 0, YCOLOR_BAS    , DRAW_primary);
    yVIKEYS_view_colors   (YCOLOR_POS, YCOLOR_BAS, YCOLOR_NEG, YCOLOR_POS);
    yGLTEX_init     ();
-   glClearColor    (0.3f, 0.5f, 0.3f, 1.0f);       /* nice medium green          */
+   /*> glClearColor    (0.3f, 0.5f, 0.3f, 1.0f);       /+ nice medium green          +/   <*/
+   yVIKEYS_view_color_clear (YCOLOR_BAS_MED);
    FONT__load      ();
    dlist_init ();
    yVIKEYS_view_ribbon_add ("play"    , "dj"          );
@@ -119,52 +120,52 @@ DRAW_wrap            (void)
 static void      o___PANELS__________________o (void) {;}
 
 
-char
-DRAW_set_color       (char a_color)
-{
-   switch (a_color) {
-   case  'b' :  /* background  COLOR_BASE     */
-      glColor4f (0.30f, 0.50f, 0.30f, 1.00f);       /* nice medium green          */
-      break;
-   case  '-' :  /* darker      COLOR_DARK     */
-      glColor4f (0.25f, 0.40f, 0.25f, 1.00f);
-      break;
-   case  '+' :  /* lighter     COLOR_LIGHT    */
-      glColor4f (0.40f, 0.65f, 0.35f, 1.00f);
-      break;
-   case  'm' :  /* muted       COLOR_MUTED    */
-      glColor4f (0.30f, 0.10f, 0.00f, 0.30f);
-      break;
-   case  '1' :  /* contrast 1  COLOR_ACC_L    */
-      glColor4f (1.00f, 0.60f, 0.30f, 0.30f);
-      break;
-   case  '2' :  /* contrast 2  COLOR_ACC_D    */
-      glColor4f (0.70f, 0.20f, 0.10f, 0.40f);
-      break;
-   case  '3' :  /* contrast 3  COLOR_ACC_O    */
-      glColor4f (0.80f, 0.30f, 0.00f, 0.30f);
-      break;
-   case  'g' :  /* contrast 2  COLOR_GRID_L   */
-      glColor4f (1.00f, 1.00f, 1.00f, 0.50f);
-      break;
-   case  'G' :  /* contrast 2  COLOR_GRID_D   */
-      glColor4f (0.00f, 0.00f, 0.00f, 0.70f);
-      break;
-   case  'k' :  /* dark text   COLOR_TXT_D    */
-      glColor4f (0.20f, 0.20f, 0.20f, 1.00f);
-      break;
-   case  'w' :  /* white text  COLOR_TXT_L    */
-      glColor4f (0.00f, 0.00f, 0.00f, 0.70f);
-      break;
-   case  'K' :  /* dark text   COLOR_BLACK    */
-      glColor4f (0.00f, 0.00f, 0.00f, 1.00f);
-      break;
-   case  'W' :  /* dark text   COLOR_WARN     */
-      glColor4f (0.25f, 0.00f, 0.00f, 1.00f);
-      break;
-   }
-   return 0;
-}
+/*> char                                                                                   <* 
+ *> DRAW_set_color       (char a_color)                                                    <* 
+ *> {                                                                                      <* 
+ *>    switch (a_color) {                                                                  <* 
+ *>    case  'b' :  /+ background  COLOR_BASE     +/                                       <* 
+ *>       glColor4f (0.30f, 0.50f, 0.30f, 1.00f);       /+ nice medium green          +/   <* 
+ *>       break;                                                                           <* 
+ *>    case  '-' :  /+ darker      COLOR_DARK     +/                                       <* 
+ *>       glColor4f (0.25f, 0.40f, 0.25f, 1.00f);                                          <* 
+ *>       break;                                                                           <* 
+ *>    case  '+' :  /+ lighter     COLOR_LIGHT    +/                                       <* 
+ *>       glColor4f (0.40f, 0.65f, 0.35f, 1.00f);                                          <* 
+ *>       break;                                                                           <* 
+ *>    case  'm' :  /+ muted       COLOR_MUTED    +/                                       <* 
+ *>       glColor4f (0.30f, 0.10f, 0.00f, 0.30f);                                          <* 
+ *>       break;                                                                           <* 
+ *>    case  '1' :  /+ contrast 1  COLOR_ACC_L    +/                                       <* 
+ *>       glColor4f (1.00f, 0.60f, 0.30f, 0.30f);                                          <* 
+ *>       break;                                                                           <* 
+ *>    case  '2' :  /+ contrast 2  COLOR_ACC_D    +/                                       <* 
+ *>       glColor4f (0.70f, 0.20f, 0.10f, 0.40f);                                          <* 
+ *>       break;                                                                           <* 
+ *>    case  '3' :  /+ contrast 3  COLOR_ACC_O    +/                                       <* 
+ *>       glColor4f (0.80f, 0.30f, 0.00f, 0.30f);                                          <* 
+ *>       break;                                                                           <* 
+ *>    case  'g' :  /+ contrast 2  COLOR_GRID_L   +/                                       <* 
+ *>       glColor4f (1.00f, 1.00f, 1.00f, 0.50f);                                          <* 
+ *>       break;                                                                           <* 
+ *>    case  'G' :  /+ contrast 2  COLOR_GRID_D   +/                                       <* 
+ *>       glColor4f (0.00f, 0.00f, 0.00f, 0.70f);                                          <* 
+ *>       break;                                                                           <* 
+ *>    case  'k' :  /+ dark text   COLOR_TXT_D    +/                                       <* 
+ *>       glColor4f (0.20f, 0.20f, 0.20f, 1.00f);                                          <* 
+ *>       break;                                                                           <* 
+ *>    case  'w' :  /+ white text  COLOR_TXT_L    +/                                       <* 
+ *>       glColor4f (0.00f, 0.00f, 0.00f, 0.70f);                                          <* 
+ *>       break;                                                                           <* 
+ *>    case  'K' :  /+ dark text   COLOR_BLACK    +/                                       <* 
+ *>       glColor4f (0.00f, 0.00f, 0.00f, 1.00f);                                          <* 
+ *>       break;                                                                           <* 
+ *>    case  'W' :  /+ dark text   COLOR_WARN     +/                                       <* 
+ *>       glColor4f (0.25f, 0.00f, 0.00f, 1.00f);                                          <* 
+ *>       break;                                                                           <* 
+ *>    }                                                                                   <* 
+ *>    return 0;                                                                           <* 
+ *> }                                                                                      <*/
 
 char
 DRAW_primary         (float a_mag)
@@ -359,7 +360,8 @@ DRAW_slide_avg       (void)
     *>    glVertex3f( x_lef, x_bot, z);                                               <* 
     *>    glEnd();                                                                    <*/
    /*> glColor4f(0.4f, 0.2f, 0.1f, 0.3f);       /+ nice medium grey            +/     <*/
-   DRAW_set_color (COLOR_MUTED);
+   yVIKEYS_view_color (YCOLOR_NEG_MUT, 0.50);
+   /*> DRAW_set_color (COLOR_MUTED);                                                  <*/
    for (i = 0; i < x_cnt; i++) {
       x1 = x_lef + (x_inc * i);
       x2 = x1 + (x_inc * 0.70);

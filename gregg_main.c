@@ -28,7 +28,9 @@ main               (int argc, char *argv[])
       return -1;
    }
    /*---(main loop)----------------------*/
-   rc = PROG_event ();
+   while (!yVIKEYS_quit ()) {
+      rc = PROG_event ();
+   }
    /*---(wrapup)-------------------------*/
    rc = PROG_finish ();
    rc = PROG_end    ();
