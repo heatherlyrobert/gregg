@@ -180,11 +180,13 @@ TOUCH_player         (int a_x, int a_y)
    int         x_inc       =    0;
    int         x_slot      =    0;
    int      x_wide;
-   int      x_xmin, x_xmax, x_ymin, x_ymax;
+   int      x_xmin, x_xmax, x_xlen, x_ymin, x_ymax, x_ylen;
    /*---(defense)------------------------*/
    if (s_touch != MODE_PLAYER)    return 0;
-   yVIKEYS_view_corners  ('m', NULL   , NULL   , &x_wide, NULL   , NULL);
-   yVIKEYS_view_corners  ('M', &x_xmin, &x_xmax, &x_ymin, &x_ymax, NULL);
+   yVIKEYS_view_size     (YVIKEYS_MAIN, NULL   , NULL   , &x_wide, NULL   , NULL);
+   yVIKEYS_view_coords   (YVIKEYS_MAIN, &x_xmin, &x_xlen, &x_ymin, &x_ylen);
+   x_xmax = x_xmin + x_xlen;
+   x_ymax = x_ymin + x_ylen;
    x_inc = x_wide / 35.0;
    x_slot = trunc ((a_x - x_xmin - 5) / 35);
    /*> printf ("player x=%4d, w=%4d, i=%4d, s=%4d\n", a_x, win.m_xfull, x_inc, x_slot);   <*/

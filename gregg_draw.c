@@ -73,25 +73,22 @@ DRAW_init            (void)
    /*---(header)-------------------------*/
    DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
    /*---(stuff)--------------------------*/
-   rc = DRAW__resize_TEMP        (500, 350);
-   rc = yVIKEYS_view_init        ("gregg shorthand interpreter", VER_NUM, 500, 350, DRAW_primary);
-   /*> rc = yVIKEYS_view_resize      ('-', NULL, 500, 350, 'y');                      <*/
-   rc = yVIKEYS_view_main_coords (-125, 500 - 125, 125 - 350, 125);
-   /*> rc = yVIKEYS_view_corners     ('w', NULL, NULL, &x_wide, &x_tall, NULL);       <*/
-   /*> rc = yX11_start      ("gregg_input", x_wide, x_tall, YX_FOCUSABLE, YX_FIXED, '-');   <*/
-   rc = yGLTEX_init     ();
+   DRAW__resize_TEMP     (500, 350);
+   yVIKEYS_view_init     ("gregg shorthand interpreter", VER_NUM, 500, 350, 0);
+   yVIKEYS_view_palette  ( 190, "mpole", "pastel", "earthy");
+   yVIKEYS_view_setup    (YVIKEYS_MAIN     , YVIKEYS_FLAT, YVIKEYS_TOPLEF, -125, 500, 125 - 350, 350, 0, 0, YCOLOR_BAS    , DRAW_primary);
+   yVIKEYS_view_colors   (YCOLOR_POS, YCOLOR_BAS, YCOLOR_NEG, YCOLOR_POS);
+   yGLTEX_init     ();
    glClearColor    (0.3f, 0.5f, 0.3f, 1.0f);       /* nice medium green          */
-   rc = FONT__load      ();
-   rc = dlist_init ();
-   /*> win.tex_h        =  700;                                                       <*/
-   /*> win.tex_w        = 1000;                                                       <*/
+   FONT__load      ();
+   dlist_init ();
    yVIKEYS_view_ribbon_add ("play"    , "dj"          );
    yVIKEYS_view_ribbon_add ("talk"    , "video_cam"   );
    yVIKEYS_view_ribbon_add ("align"   , "layers"      );
    yVIKEYS_view_ribbon_add ("draw"    , "resolution"  );
    yVIKEYS_view_ribbon_add ("tools"   , "shower"      );
-   rc = yGLTEX_new (&s_tex, &s_fbo, &s_depth, win.tex_w, win.tex_h);
-   rc = DRAW_back ();
+   yGLTEX_new (&s_tex, &s_fbo, &s_depth, win.tex_w, win.tex_h);
+   DRAW_back ();
    /*---(complete)-----------------------*/
    DEBUG_GRAF   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -174,9 +171,12 @@ DRAW_primary         (float a_mag)
 {
    char     x_on = 'y';
    int      x_left, x_bott, x_wide, x_tall;
-   int      x_xmin, x_xmax, x_ymin, x_ymax;
-   yVIKEYS_view_corners  ('m', &x_left, &x_bott, &x_wide, &x_tall, NULL);
-   yVIKEYS_view_corners  ('M', &x_xmin, &x_xmax, &x_ymin, &x_ymax, NULL);
+   int      x_xmin, x_xlen, x_xmax;
+   int      x_ymin, x_ylen, x_ymax;
+   yVIKEYS_view_size     (YVIKEYS_MAIN, &x_left, &x_wide, &x_bott, &x_tall, NULL);
+   yVIKEYS_view_coords   (YVIKEYS_MAIN, &x_xmin, &x_xlen, &x_ymin, &x_ylen);
+   x_xmax = x_xmin + x_xlen;
+   x_ymax = x_ymin + x_ylen;
    /*> printf ("t %c %3d %3d %3d %3d %s\n", x_on, x_left, x_bott, x_wide, x_tall, x_text);   <*/
    /*---(setup view)---------------------*/
    glViewport      (x_left, x_bott, x_wide, x_tall);
@@ -189,13 +189,13 @@ DRAW_primary         (float a_mag)
       glBindTexture(GL_TEXTURE_2D, s_tex);
       glBegin         (GL_POLYGON); {
          glTexCoord2d (    0.00 ,      1.00);
-         glVertex3f  (x_xmin + 3, x_ymax - 3,  0.0f);
+         glVertex3f  (x_xmin, x_ymax,  0.0f);
          glTexCoord2d (    1.00 ,      1.00);
-         glVertex3f  (x_xmax - 3, x_ymax - 3,  0.0f);
+         glVertex3f  (x_xmax, x_ymax,  0.0f);
          glTexCoord2d (    1.00 ,      0.00);
-         glVertex3f  (x_xmax - 3, x_ymin + 3,  0.0f);
+         glVertex3f  (x_xmax, x_ymin,  0.0f);
          glTexCoord2d (    0.00 ,      0.00);
-         glVertex3f  (x_xmin + 3, x_ymin + 3,  0.0f);
+         glVertex3f  (x_xmin, x_ymin,  0.0f);
       } glEnd   ();
       glBindTexture(GL_TEXTURE_2D, 0);
    } glPopMatrix   ();
@@ -238,16 +238,20 @@ DRAW_back            (void)
    char        rc          =    0;
    int         i           =    0;
    int         j           =    0;
-   float       x_xmin      =    0;
-   float       x_xmax      =    0;
-   float       x_ymin      =    0;
-   float       x_ymax      =    0;
+   int         x_xmin      =    0;
+   int         x_xmax      =    0;
+   int         x_xlen      =    0;
+   int         x_ymin      =    0;
+   int         x_ymax      =    0;
+   int         x_ylen      =    0;
    int         x_side      =    0;
    float       x_left      =    0;
    /*---(header)-------------------------*/
    DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
    /*---(setup)--------------------------*/
-   yVIKEYS_view_corners  ('M', &x_xmin, &x_xmax, &x_ymin, &x_ymax, NULL);
+   yVIKEYS_view_coords   (YVIKEYS_MAIN, &x_xmin, &x_xlen, &x_ymin, &x_ylen);
+   x_xmax = x_xmin + x_xlen;
+   x_ymax = x_ymin + x_ylen;
    rc = yGLTEX_draw_start   (s_fbo, YGLTEX_GREGG, win.tex_w, win.tex_h, 2.0);
    /*---(draw)---------------------------*/
    glCallList (dl_back);

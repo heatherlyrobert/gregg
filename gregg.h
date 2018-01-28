@@ -201,12 +201,13 @@
 #include    <yFONT.h>        /* CUSTOM : heatherly texture-mapped fonts       */
 #include    <yGLTEX.h>       /* CUSTOM : heatherly texture handling           */
 #include    <yVIKEYS.h>      /* CUSTOM : heatherly vi_keys standard           */
+#include    <yCOLOR.h>       /* CUSTOM : heatherly color handling             */
 
 
 
 /* rapidly evolving version number to aid with visual change confirmation     */
-#define VER_NUM   "5.2c"
-#define VER_TXT   "moved to yVIKEYS_main_input and _handler successfully"
+#define VER_NUM   "5.2d"
+#define VER_TXT   "updated to match latest yVIKEYS and yCOLOR"
 
 
 #define     LEN_HUGE     10000
