@@ -3,6 +3,115 @@
 
 
 
+/*====================------------------------------------====================*/
+/*===----                     mapping for map mode                     ----===*/
+/*====================------------------------------------====================*/
+static void  o___MAPPER__________o () { return; }
+
+char         /*-> when changing outline --------------[ ------ [fe.G67.55#.92]*/ /*-[01.0000.018.!]-*/ /*-[--.---.---.--]-*/
+MAP__xmajor           (void)
+{
+   /*---(locals)-----------+-----------+-*/
+   int         i           =    0;
+   /*---(update x)-----------------------*/
+   for (i = 0; i < o.navg; ++i) {
+      g_xmap.map [i] = i;
+   }
+   /*---(globals)------------------------*/
+   g_xmap.gmin  = g_xmap.amin  = 0;
+   g_xmap.gmax  = g_xmap.amax  = o.navg;
+   g_xmap.avail = o.navg;
+   /*---(screen)-------------------------*/
+   g_xmap.beg   = g_xmap.cur   = g_xmap.end   = g_xmap.len   = g_xmap.tend  = 0;
+   /*---(units)--------------------------*/
+   g_xmap.gbeg  = g_xmap.gcur  = g_xmap.gend  = 0;
+   /*---(complete)-----------------------*/
+   return 0;
+}
+
+char         /*-> when moving between points ---------[ ------ [fe.G67.55#.92]*/ /*-[01.0000.018.!]-*/ /*-[--.---.---.--]-*/
+MAP__xminor           (void)
+{
+   /*---(local movements)----------------*/
+   g_xmap.lmin = g_xmap.prev = 0;
+   g_xmap.lmax = g_xmap.next = o.navg;
+   /*---(screen)-------------------------*/
+   return 0;
+}
+
+char         /*-> when changing files ----------------[ ------ [fe.G67.55#.92]*/ /*-[01.0000.018.!]-*/ /*-[--.---.---.--]-*/
+MAP__ymajor           (void)
+{
+   /*---(locals)-----------+-----------+-*/
+   int         i           =    0;
+   /*---(update y)-----------------------*/
+   for (i = 0; i < o.total; ++i) {
+      g_ymap.map [i] = i;
+   }
+   /*---(globals)------------------------*/
+   g_ymap.gmin  = g_ymap.amin  = 0;
+   g_ymap.gmax  = g_ymap.amax  = o.total - 1;
+   g_ymap.avail = o.total - 1;
+   /*---(screen)-------------------------*/
+   g_ymap.beg   = g_ymap.cur   = g_ymap.end   = g_ymap.len   = g_ymap.tend  = 0;
+   /*---(units)--------------------------*/
+   g_ymap.gbeg  = g_ymap.gcur  = g_ymap.gend  = 0;
+   /*---(complete)-----------------------*/
+   return 0;
+}
+
+char         /*-> when moving between outlines -------[ ------ [fe.G67.55#.92]*/ /*-[01.0000.018.!]-*/ /*-[--.---.---.--]-*/
+MAP__yminor           (void)
+{
+   /*---(local movements)----------------*/
+   g_ymap.lmin = g_ymap.prev = 0;
+   g_ymap.lmax = g_ymap.next = o.total - 1;
+   /*---(complete)-----------------------*/
+   return 0;
+}
+
+char         /*-> mapping coordinator ----------------[ ------ [fe.G67.55#.92]*/ /*-[01.0000.018.!]-*/ /*-[--.---.---.--]-*/
+MAP_mapper           (char a_req)
+{
+   /*---(locals)-----------+-----------+-*/
+   static int  x           = -1;
+   static int  y           = -1;
+   /*---(initialize)---------------------*/
+   /*> printf ("called mapper with %c\n", a_req);                                     <*/
+   if (a_req == YVIKEYS_INIT) {
+      MAP__ymajor ();
+      MAP__yminor ();
+      MAP__xmajor ();
+      MAP__xminor ();
+      o.curr  = g_ymap.cur;
+      o.cavg  = g_xmap.cur;
+   }
+   /*---(initialize)---------------------*/
+   else {
+      if (o.curr != g_ymap.cur) {
+         OUT_pick (o.curr);
+         MAP__yminor ();
+         MAP__xmajor ();
+         MAP__xminor ();
+      }
+      else if (o.cavg != g_xmap.cur) {
+         MAP__xminor ();
+      }
+      o.curr  = g_ymap.cur;
+      o.cavg  = g_xmap.cur;
+   }
+   /*---(complete)-----------------------*/
+   return 0;
+}
+
+
+
+/*====================------------------------------------====================*/
+/*===----                        older stuff                           ----===*/
+/*====================------------------------------------====================*/
+static void  o___OTHER___________o () { return; }
+
+
 char
 USER_words           (char *a_words)
 {
@@ -54,87 +163,11 @@ USER_quit            (void)
 char
 USER_writequit       (void)
 {
+   OUT_append ();
    my.quit = 'y';
    return 0;
 }
 
-
-/*====================------------------------------------====================*/
-/*===----                    normal/map mode                           ----===*/
-/*====================------------------------------------====================*/
-static void  o___NORMAL__________o () { return; }
-
-char         /*-> process keystrokes in normal mode --[ leaf   [ge.#X9.22#.NP]*/ /*-[05.0000.102.!]-*/ /*-[--.---.---.--]-*/
-USER_map_mode        (char a_major, char a_minor)
-{
-   /*---(locals)-----------+-----+-----+-*/
-   char        rce         =  -10;
-   char        rc          =    0;
-   /*---(header)-------------------------*/
-   DEBUG_USER   yLOG_enter   (__FUNCTION__);
-   DEBUG_USER   yLOG_char    ("a_major"   , a_major);
-   DEBUG_USER   yLOG_char    ("a_minor"   , a_minor);
-   /*---(defenses)-----------------------*/
-   DEBUG_USER   yLOG_char    ("mode"      , yVIKEYS_mode_curr ());
-   --rce;  if (yVIKEYS_mode_not (MODE_MAP    )) {
-      DEBUG_USER   yLOG_note    ("not the correct mode");
-      DEBUG_USER   yLOG_exit    (__FUNCTION__);
-      return rce;
-   }
-   /*---(space)--------------------------*/
-   if (a_minor == G_KEY_SPACE ) {
-      DEBUG_USER   yLOG_note    ("space, nothing to do");
-      DEBUG_USER   yLOG_exit    (__FUNCTION__);
-      return  0;
-   }
-   /*---(major mode changes)-------------*/
-   if (a_minor == G_KEY_RETURN) {
-      DEBUG_USER   yLOG_note    ("return, nothing to do");
-      DEBUG_USER   yLOG_exit    (__FUNCTION__);
-      return  0;
-   }
-   if (a_minor == G_KEY_ESCAPE) {
-      DEBUG_USER   yLOG_note    ("escape, nothing to do");
-      DEBUG_USER   yLOG_exit    (__FUNCTION__);
-      return  0;
-   }
-   /*---(single key)---------------------*/
-   --rce;
-   if (a_major == ' ') {
-      /*---(multiplier)------------------*/
-      if (strchr ("123456789"  , a_minor) != 0) {
-         yVIKEYS_mode_enter  (SMOD_REPEAT);
-         DEBUG_USER   yLOG_exit    (__FUNCTION__);
-         return a_minor;
-      }
-      /*---(mode switch)-----------------*/
-      switch (a_minor) {
-      case ':'      :
-         yVIKEYS_mode_enter  (MODE_COMMAND);
-         yVIKEYS_cmds_start ();
-         DEBUG_USER   yLOG_exit    (__FUNCTION__);
-         return a_minor;
-         break;
-      }
-      /*---(simple keys)--------------*/
-      switch (a_minor) {
-      case '0' : o.cavg  = 0;      break;
-      case 'H' : o.cavg -= 5;      break;
-      case 'h' : o.cavg -= 1;      break;
-      case 'l' : o.cavg += 1;      break;
-      case 'L' : o.cavg += 5;      break;
-      case '$' : o.cavg  = 100000; break;
-      }
-      /*---(enforce limits)-----------*/
-      if (o.cavg < 1      ) o.cavg = 1;
-      if (o.cavg > o.navg ) o.cavg = o.navg;
-      if (o.curr < 1      ) o.curr = 1;
-      if (o.curr > o.total) o.curr = o.total;
-   }
-   /*---(complete)------------------------------*/
-   DEBUG_USER   yLOG_exit    (__FUNCTION__);
-   return 0;
-}
 
 
 

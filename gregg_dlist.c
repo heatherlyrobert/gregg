@@ -4,16 +4,9 @@
 
 
 
-float radius_button;
-
-const float  ICON_BACK[4] = { 0.7f, 0.7f, 0.7f, 1.0f };
-const float  ICON_FORE[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
-const float  ICON_BOLD[4] = { 0.7f, 0.0f, 0.0f, 1.0f };
 
 
-/*> PRIV char  dlist_arrow      (void);                                               <*/
 PRIV char  dlist_letters    (void);
-/*> PRIV char  dlist_arrowed    (void);                                               <*/
 PRIV char  DLIST_back       (void);
 
 PRIV char  draw_line        (int, char);
@@ -21,15 +14,12 @@ PRIV char  draw_line        (int, char);
 char
 dlist_init         (void)
 {
-   DEBUG_G  printf("dlist_init() -- drive loading\n");
-   DEBUG_G  printf("   - clear letters\n\n");
-   DEBUG_G  printf("   - create buttons\n\n");
-   radius_button = (win.d_bar / 2.5);
-   /*> dlist_arrow();                                                                 <*/
+   DEBUG_GRAF  printf("dlist_init() -- drive loading\n");
+   DEBUG_GRAF  printf("   - clear letters\n\n");
+   DEBUG_GRAF  printf("   - create buttons\n\n");
    dlist_letters();
-   /*> dlist_arrowed();                                                               <*/
    DLIST_back();
-   DEBUG_G  printf("   - done\n\n");
+   DEBUG_GRAF  printf("   - done\n\n");
    return 0;
 }
 
@@ -55,7 +45,7 @@ DLIST__show          (int a_who, char a_dotted)
       printf ("    %03d   %-5s  %d %d %c  %4d %4d %4d %4d %4d    %5.1f %5.1f %3d %3d    %3d %3d    %-3s\n",
             a_who,
             g_loc [a_who].n,
-            g_loc [a_who].ra,
+            g_loc [a_who].range,
             g_loc [a_who].sz,
             g_loc [a_who].fu,
             g_loc [a_who].sx,
@@ -75,37 +65,12 @@ DLIST__show          (int a_who, char a_dotted)
    return 0;
 }
 
-
-/*> PRIV char                                                                         <* 
- *> dlist_arrow(void)                                                                 <* 
- *> {                                                                                 <* 
- *>    DEBUG_X  printf("   - dlist_arrow()  . . . . . . . . . . ");                   <* 
- *>    /+---(begin)-----------------------------+/                                    <* 
- *>    dl_arrow = glGenLists(1);                                                      <* 
- *>    glNewList(dl_arrow, GL_COMPILE);                                               <* 
- *>    /+---(locals)----------------------------+/                                    <* 
- *>    float   r1 =  radius_button;                                                   <* 
- *>    float   z  =  40.00;                                                           <* 
- *>    /+---(interior)--------------------------+/                                    <* 
- *>    glBegin(GL_POLYGON);                                                           <* 
- *>    glVertex3f( -r1, -r1, z);                                                      <* 
- *>    glVertex3f( 0.0,  r1, z);                                                      <* 
- *>    glVertex3f(  r1, -r1, z);                                                      <* 
- *>    glVertex3f( -r1, -r1, z);                                                      <* 
- *>    glEnd();                                                                       <* 
- *>    /+---(end)-------------------------------+/                                    <* 
- *>    glEndList();                                                                   <* 
- *>    DEBUG_X  printf("success\n");                                                  <* 
- *>    /+---(complete)--------------------------+/                                    <* 
- *>    return 0;                                                                      <* 
- *> }                                                                                 <*/
-
 char
 dlist_letters(void)
 {
    /*---(locals)-----------+-----+-----+-*/
    int         i           = 0;
-   DEBUG_X  printf("   - displist_k1() . . . . . . . . . . . . ");
+   DEBUG_PROG  printf("   - displist_k1() . . . . . . . . . . . . ");
    /*---(begin)-----------------------------*/
    dl_dotted = glGenLists(MAX_LETTERS);
    dl_solid  = glGenLists(MAX_LETTERS);
@@ -168,7 +133,7 @@ dlist_letters(void)
    }
    /*---(complete)--------------------------*/
    RPTG_LETTER  printf("==========================end===\n");
-   DEBUG_X  printf("success\n");
+   DEBUG_PROG  printf("success\n");
    return 0;
 }
 
@@ -199,17 +164,17 @@ draw_line (int a_who, char a_dotted)
    glLineWidth(0.8);
    /*---(get overall calcs)---------------------*/
    o.tmp[0].p_bas   = 0;
-   o.tmp[0].xpos    = 0;
-   o.tmp[0].ypos    = 0;
+   o.tmp[0].x_full    = 0;
+   o.tmp[0].y_full    = 0;
    o.tmp[1].p_bas   = 1;
-   o.tmp[1].xpos    = x;
-   o.tmp[1].ypos    = y;
-   POINT_calc (o.tmp + 1, 'n');
+   o.tmp[1].x_full    = x;
+   o.tmp[1].y_full    = y;
+   POINT_calc (POINTS_TMP, o.tmp + 1, 'n');
    /*---(set size values)-----------------------*/
    g_loc[a_who].ex  = x;
    g_loc[a_who].ey  = y;
-   g_loc[a_who].ln  = o.tmp[1].l;
-   g_loc[a_who].de  = o.tmp[1].d;
+   g_loc[a_who].ln  = o.tmp[1].len;
+   g_loc[a_who].de  = o.tmp[1].degs;
    g_loc[a_who].ri  = right;
    g_loc[a_who].le  = left;
    /*---(report out)----------------------------*/
@@ -252,8 +217,6 @@ draw_ellipse (int a_who, char a_dotted)
    glLineWidth (2.0);
    glPointSize (2.0);
    yVIKEYS_view_color (YCOLOR_BAS_MIN, 1.00);
-   /*> DRAW_set_color (COLOR_BLACK);                                                  <*/
-   /*> glColor4f   (0.0f, 0.0f, 0.0f, 1.0f);                                          <*/
    if (a_dotted == 'y') {
       glBegin(GL_POINTS);
       for (i = 0; i <= 360; i += a_st) {
@@ -297,17 +260,17 @@ draw_ellipse (int a_who, char a_dotted)
    glEnd();
    /*---(get overall calcs)---------------------*/
    o.tmp[0].p_bas   = 0;
-   o.tmp[0].xpos   = 0;
-   o.tmp[0].ypos   = 0;
+   o.tmp[0].x_full   = 0;
+   o.tmp[0].y_full   = 0;
    o.tmp[1].p_bas   = 1;
-   o.tmp[1].xpos   = x;
-   o.tmp[1].ypos   = y;
-   POINT_calc (o.tmp + 1, 'n');
+   o.tmp[1].x_full   = x;
+   o.tmp[1].y_full   = y;
+   POINT_calc (POINTS_TMP, o.tmp + 1, 'n');
    /*---(set size values)-----------------------*/
    g_loc[a_who].ex = x;
    g_loc[a_who].ey = y;
-   g_loc[a_who].ln = o.tmp[1].l;
-   g_loc[a_who].de = o.tmp[1].d;
+   g_loc[a_who].ln = o.tmp[1].len;
+   g_loc[a_who].de = o.tmp[1].degs;
    g_loc[a_who].ri = right;
    g_loc[a_who].le = left;
    /*---(check for i, ai, ae)-------------------*/
@@ -382,28 +345,6 @@ draw_arc (float a_beg, float a_end, int a_color, int a_z)
       y = r * sin(a_end);
       glVertex3f(   x,   y,   a_z);
    } glEnd();
-   /*---(tick marks)-----------------------*/
-   /*> DRAW_set_color (COLOR_GRID_L);                                                 <*/
-   /*> glLineWidth(1.0);                                                              <* 
-    *> glBegin(GL_LINES); {                                                           <* 
-    *>    for (j = a_beg; j <= a_end;  j += 0.025) {                                  <* 
-    *>       x = (r - 10) * cos(j);                                                   <* 
-    *>       y = (r - 10) * sin(j);                                                   <* 
-    *>       glVertex3f(   x,   y,   a_z + 1);                                        <* 
-    *>       x = r * cos(j);                                                          <* 
-    *>       y = r * sin(j);                                                          <* 
-    *>       glVertex3f(   x,   y,   a_z + 1);                                        <* 
-    *>    }                                                                           <* 
-    *> } glEnd();                                                                     <*/
-   /*---(outer boundary)-------------------*/
-   /*> glLineWidth(0.8);                                                              <* 
-    *> glBegin(GL_LINE_STRIP); {                                                      <* 
-    *>    for (j = a_beg; j <= a_end;  j += 0.025) {                                  <* 
-    *>       x = r * cos(j);                                                          <* 
-    *>       y = r * sin(j);                                                          <* 
-    *>       glVertex3f(   x,   y,   a_z + 1);                                        <* 
-    *>    }                                                                           <* 
-    *> } glEnd();                                                                     <*/
    /*---(complete)-------------------------*/
    return 0;
 }
@@ -445,7 +386,7 @@ draw_pie (int a_who)
    }
    glVertex3f( 0, 0, z);
    glEnd();
-   /*> DEBUG__SHAPES  if (g_loc[a_who].ri == 0 && g_loc[a_who].le == 0) printf(" %3.0f %3.0f %3d %3d %3d %3d  %-3s\n", x, y, o.tmp[1].l, o.tmp[1].d, left, right, g_loc[a_who].gr);   <*/
+   /*> DEBUG__SHAPES  if (g_loc[a_who].ri == 0 && g_loc[a_who].le == 0) printf(" %3.0f %3.0f %3d %3d %3d %3d  %-3s\n", x, y, o.tmp[1].len, o.tmp[1].degs, left, right, g_loc[a_who].gr);   <*/
    /*---(set size values)-----------------------*/
    g_loc[a_who].ex = 0;
    g_loc[a_who].ey = 0;
@@ -525,7 +466,7 @@ draw_dot (int a_who)
    }
    glEnd();
    glLineWidth(0.8);
-   /*> DEBUG__SHAPES  if (g_loc[a_who].ri == 0) printf(" %3.0f %3.0f %3d %3d %3d %3d  %-3s\n", x, y, o.tmp[1].l, o.tmp[1].d, left, right, g_loc[a_who].gr);   <*/
+   /*> DEBUG__SHAPES  if (g_loc[a_who].ri == 0) printf(" %3.0f %3.0f %3d %3d %3d %3d  %-3s\n", x, y, o.tmp[1].len, o.tmp[1].degs, left, right, g_loc[a_who].gr);   <*/
    /*---(set size values)-----------------------*/
    g_loc[a_who].ex = 0;
    g_loc[a_who].ey = 0;
@@ -562,34 +503,6 @@ draw_whitespace (int a_who)
    return 0;
 }
 
-/*> char                                                                              <* 
- *> dlist_arrowed      (void)                                                         <* 
- *> {                                                                                 <* 
- *>    DEBUG_X  printf("   - displist_arrow()  . . . . . . . . . . ");                <* 
- *>    /+---(begin)-----------------------------+/                                    <* 
- *>    dl_arrowed = glGenLists(1);                                                    <* 
- *>    glNewList(dl_arrowed, GL_COMPILE);                                             <* 
- *>    float    r1 = 15;                                                              <* 
- *>    float    r2 = 10;                                                              <* 
- *>    /+---(exterior)--------------------------+/                                    <* 
- *>    glColor4f(0.2f, 0.2f, 0.2f, 1.0f);                                             <* 
- *>    glBegin(GL_LINE_STRIP);                                                        <* 
- *>    glVertex3f(-r1,  0, r1);                                                       <* 
- *>    glVertex3f(  0, r2, r1);                                                       <* 
- *>    glVertex3f( r1,  0, r1);                                                       <* 
- *>    glVertex3f( r2,  0, r1);                                                       <* 
- *>    glVertex3f( r2,-r1, r1);                                                       <* 
- *>    glVertex3f(-r2,-r1, r1);                                                       <* 
- *>    glVertex3f(-r2,  0, r1);                                                       <* 
- *>    glVertex3f(-r1,  0, r1);                                                       <* 
- *>    glEnd();                                                                       <* 
- *>    /+---(end)-------------------------------+/                                    <* 
- *>    glEndList();                                                                   <* 
- *>    DEBUG_X  printf("success\n");                                                  <* 
- *>    /+---(complete)--------------------------+/                                    <* 
- *>    return 0;                                                                      <* 
- *> }                                                                                 <*/
-
 
 
 /*====================------------------------------------====================*/
@@ -606,7 +519,6 @@ BACK__degticks     (void)
    float x, y, z;
    /*---(prepare)------------------------*/
    yVIKEYS_view_color (YCOLOR_BAS_MAX, 0.65);
-   /*> glColor4f(1.0f, 1.0f, 1.0f, 0.5f);                                             <*/
    glLineWidth(2.0);
    z   = 2;
    r   = SIZE_LRG_AVG * 1.75;
@@ -686,8 +598,6 @@ BACK__rangefan     (void)
       /*---(target line)-------------------*/
       if (ranges[i].num <= 5) {
          yVIKEYS_view_color (YCOLOR_BAS_MOR, 0.65);
-         /*> DRAW_set_color (COLOR_GRID_D);                                           <*/
-         /*> glColor4f(0.0f, 0.0f, 0.0f, 0.7f);                                       <*/
          glLineWidth(2.0);
          z  =    1.00;
          glBegin(GL_LINES); {
@@ -716,8 +626,6 @@ DLIST__ring_center   (float a_size, float a_thick)
    /*---(draw)---------------------------*/
    glLineWidth   (a_thick);
    yVIKEYS_view_color (YCOLOR_BAS_MED, 0.50);
-   /*> DRAW_set_color (COLOR_BASE);                                                   <*/
-   /*> glColor4f     (0.3f, 0.5f, 0.3f, 0.5f);       /+ nice medium grey            +/   <*/
    glBegin  (GL_POLYGON); {
       for (d = 0; d <= 360; d += 1) {
          r   = d * DEG2RAD;
@@ -741,8 +649,6 @@ DLIST__ring_avg      (float a_size, float a_thick)
    /*---(draw)---------------------------*/
    glLineWidth   (a_thick);
    yVIKEYS_view_color (YCOLOR_BAS_MAX, 0.50);
-   /*> DRAW_set_color (COLOR_GRID_L);                                                 <*/
-   /*> glColor4f     (1.0f, 1.0f, 1.0f, 0.5f);                                        <*/
    glBegin  (GL_LINE_STRIP); {
       for (d = 0; d <= 360; d += 1) {
          r   = d * DEG2RAD;
@@ -768,8 +674,6 @@ DLIST__ring_minmax   (float a_size, float a_thick)
    glEnable      (GL_LINE_STIPPLE);
    glLineStipple (1, 0x3333);
    yVIKEYS_view_color (YCOLOR_BAS_MAX, 0.50);
-   /*> DRAW_set_color (COLOR_GRID_L);                                                 <*/
-   /*> glColor4f     (1.0f, 1.0f, 1.0f, 0.5f);                                        <*/
    glBegin  (GL_LINE_STRIP); {
       for (d = -140; d <=  75; d +=  1) {
          r   = d * DEG2RAD;
@@ -814,31 +718,57 @@ BACK__guidelines   (void)
 {
    /*---(locals)-------------------------*/
    float     z;                        /* cartesian coordinates               */
+   int       x_max;
    /*---(guides)----------------------------*/
+   yVIKEYS_view_bounds (YVIKEYS_MAIN, NULL, &x_max, NULL, NULL);
    glLineWidth(0.8);
-   z = -10.0;
+   z =  -10.0;
    yVIKEYS_view_color (YCOLOR_BAS_MAX, 0.65);
+   /*---(90's)-----*/
+   glBegin(GL_LINES); {
+      glVertex3f ( x_max,  0.0  , z);
+      glVertex3f (-x_max,  0.0  , z);
+   } glEnd();
+   glBegin(GL_LINES); {
+      glVertex3f ( 0.0  ,  x_max, z);
+      glVertex3f ( 0.0  , -x_max, z);
+   } glEnd();
    /*---(45's)-----*/
-   glBegin(GL_LINES);
-   glVertex3f(  win.m_xmax,    win.m_xmax,  z);
-   glVertex3f( -win.m_xmax,   -win.m_xmax,  z);
-   glVertex3f( -win.m_xmax,    win.m_xmax,  z);
-   glVertex3f(  win.m_xmax,   -win.m_xmax,  z);
-   glEnd();
-   /*---(30's)-----*/
-   glBegin(GL_LINES);
-   glVertex3f(  win.m_xmax,    win.m_xmax / 3.0,  z);
-   glVertex3f(         0.0,           0.0 / 3.0,  z);
-   glVertex3f(         0.0,           0.0 / 3.0,  z);
-   glVertex3f(  win.m_xmax,   -win.m_xmax / 3.0,  z);
-   glEnd();
-   /*---(align)----*/
-   z =  10.0;
-   glBegin(GL_LINES);
-   glVertex3f(       -50.0,           0.0,  1.0);
-   glVertex3f(  win.m_xmax,           0.0,  1.0);
-   glEnd();
-   glLineWidth(0.8);
+   glBegin(GL_LINES); {
+      glVertex3f ( x_max,  x_max, z);
+      glVertex3f (-x_max, -x_max, z);
+   } glEnd();
+   glBegin(GL_LINES); {
+      glVertex3f (-x_max,  x_max, z);
+      glVertex3f ( x_max, -x_max, z);
+   } glEnd();
+   /*---(22.5's)---*/
+   glBegin(GL_LINES); {
+      glVertex3f ( 0.0  ,  0.0        ,  z);
+      glVertex3f ( x_max,  x_max * 0.41, z);
+   } glEnd();
+   glBegin(GL_LINES); {
+      glVertex3f ( 0.0  ,  0.0        ,  z);
+      glVertex3f ( x_max, -x_max * 0.41, z);
+   } glEnd();
+   /*---(67.5's)---*/
+   glBegin(GL_LINES); {
+      glVertex3f ( 0.0  ,  0.0        ,  z);
+      glVertex3f ( x_max,  x_max * 2.41, z);
+   } glEnd();
+   glBegin(GL_LINES); {
+      glVertex3f ( 0.0  ,  0.0        ,  z);
+      glVertex3f ( x_max, -x_max * 2.41, z);
+   } glEnd();
+   /*--(157.5's)---*/
+   glBegin(GL_LINES); {
+      glVertex3f ( 0.0  ,  0.0        ,  z);
+      glVertex3f (-x_max,  x_max * 2.41, z);
+   } glEnd();
+   glBegin(GL_LINES); {
+      glVertex3f ( 0.0  ,  0.0        ,  z);
+      glVertex3f (-x_max, -x_max * 2.41, z);
+   } glEnd();
    /*---(complete)-----------------------*/
    return 0;
 }
@@ -866,7 +796,7 @@ DLIST_back         (void)
    } glPopMatrix();
    /*---(end)-------------------------------*/
    glEndList();
-   DEBUG_X  printf("success\n");
+   DEBUG_PROG  printf("success\n");
    /*---(complete)--------------------------*/
    return 0;
 }

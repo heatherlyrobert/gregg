@@ -60,45 +60,13 @@ PROG_init          (void)
    my.show_sample  = '-';
    my.show_player  = '-';
    my.quit         = '-';
+   my.ratio        = GREGG_WACOM;
    /*---(other)-----------------------*/
    strlcpy (my.words, "", LEN_RECD);
    strlcpy (my.guide, "", LEN_RECD);
    /*---(setup vikeys)----------------*/
-   yVIKEYS_init        ();
-   /*> yVIKEYS_mode_init   ();                                                        <* 
-    *> yVIKEYS_mode_enter  (MODE_MAP);                                                <* 
-    *> yVIKEYS_cmds_init   ();                                                        <*/
-   USER_init   ();
-   OUT_init   ();
-   FILE_rename ("");
-   /*---(debugger : standard)---------*/
-   /*> debug.prep   = 'n';     /+ x) program setup and tear-down           +/         <* 
-    *> debug.cli    = 'n';     /+ c) command line interface                +/         <* 
-    *> debug.input  = 'n';     /+ i) text input   (files, stdin, keys)     +/         <* 
-    *> debug.proc   = 'n';     /+ p) main analytics and processing         +/         <* 
-    *> debug.data   = 'n';     /+ d) data structure use and mgmt           +/         <* 
-    *> debug.output = 'n';     /+ o) text output  (files, stdout, keys)    +/         <* 
-    *> debug.graph  = 'n';     /+ g) graphics, drawing, and rendering      +/         <* 
-    *> debug.event  = 'n';     /+ e) event loop                            +/         <* 
-    *> debug.api    = 'n';     /+ x) programming api                       +/         <*/
-   /*---(debugger : specific)---------*/
-   /*> debug.raw    = 'n';     /+ raw points                               +/         <* 
-    *> debug.bas    = 'n';     /+ bas points                               +/         <* 
-    *> debug.key    = 'n';     /+ key points                               +/         <*/
-   /*---(debugger : specific)---------*/
-   /*> debug.sharps   = 'n';   /+ finding sharp corners                    +/         <* 
-    *> debug.circles  = 'n';   /+ finding circles                          +/         <* 
-    *> debug.matches  = 'n';   /+ matching logic                           +/         <* 
-    *> debug.shapes   = 'n';   /+ shape formation in display lists         +/         <* 
-    *> debug.averages = 'n';   /+ shape formation in display lists         +/         <* 
-    *> debug.curves   = 'n';   /+ identifying curviness of lines           +/         <* 
-    *> debug.writing  = 'n';   /+ process of creating outlines             +/         <* 
-    *> debug.dict     = 'n';   /+ reading and loading of the dictionary    +/         <* 
-    *> debug.dicte    = 'n';   /+ output of english word index             +/         <* 
-    *> debug.dictg    = 'n';   /+ output of gregg word index               +/         <*/
-   /*---(summary----------------------*/
-   /*> debug.summ     = 'n';                                                          <* 
-    *> debug.lock     = 'n';                                                          <*/
+   yVIKEYS_init  ();
+   USER_init     ();
    /*---(complete)--------------------*/
    DEBUG_TOPS   yLOG_exit     (__FUNCTION__);
    return 0;
@@ -172,15 +140,21 @@ PROG_begin(void)
 char
 PROG_final (void)
 {
-   /*---(locals)-----------+-----+-----+-*/
-   /*> int         x_wide, x_tall;                                                    <*/
    /*---(header)-------------------------*/
    DEBUG_TOPS   yLOG_enter    (__FUNCTION__);
    DRAW_init  ();
-   /*> yVIKEYS_view_corners ('w', NULL, NULL, &x_wide, &x_tall, NULL);                <*/
    TOUCH_init ();
+   yVIKEYS_view_option (YVIKEYS_BUFFER, "file" , OUT_status, "current file name and stats");
+   yVIKEYS_cmds_direct   (":buffer file");
+   yVIKEYS_cmds_direct   (":keys hide");
+   yVIKEYS_cmds_add      ('e', "dump"        , ""    , "Cs"   , POINT_clipboard      , "save point list to the clipboard");
+   yVIKEYS_cmds_add      ('e', "clip"        , ""    , "Cs"   , POINT_clipboard      , "save point list to the clipboard");
+   yVIKEYS_cmds_add      ('e', "gyges"       , ""    , "Cs"   , POINT_clipboard      , "save point list to the clipboard");
+   yVIKEYS_cmds_add      ('f', "write"       , ""    , ""     , OUT_append           , "save outline to stroke file");
+   OUT_init      ();
+   FILE_rename   ("");
    if (out_start > 0) o.curr = out_start;
-   /*> yVIKEYS_mode_mesg (win.c_text, yVIKEYS_cmds_curr ());                          <*/
+   MAP_mapper    (YVIKEYS_INIT);
    /*---(complete)-----------------------*/
    DEBUG_TOPS   yLOG_exit     (__FUNCTION__);
    return 0;
@@ -210,6 +184,7 @@ PROG_event()
    XKeyEvent *key_event;
    char       the_key[5];
    char       x_ch     = ' ';
+   uchar      x_key    = ' ';
    int        the_bytes;
    char       rc;
    int        x_loop  = 0;
@@ -220,24 +195,24 @@ PROG_event()
    /*---(header)-------------------------*/
    DEBUG_TOPS   yLOG_enter    (__FUNCTION__);
    while (1) {
-      x_ch = -1;
+      x_key = 0;
       if (XPending(DISP)) {
          XNextEvent(DISP, &EVNT);
          ++j;
          switch(EVNT.type) {
          case KeyPress:
-            DEBUG_E printf("event (%5d) keypress\n", j);
+            DEBUG_LOOP  printf("event (%5d) keypress\n", j);
             i = o.curr;
             /*---(get the key)---------------------*/
             key_event  = (XKeyEvent *) &EVNT;
             the_bytes = XLookupString((XKeyEvent *) &EVNT, the_key, 5, NULL, NULL);
             if (the_bytes < 1) break;
-            x_ch = the_key [0];
+            x_key = the_key [0];
             break;
          }
       }
-      x_ch = yVIKEYS_main_input  (RUN_USER, x_ch);
-      yVIKEYS_main_handle (x_ch);
+      x_key = yVIKEYS_main_input  (RUN_USER, x_key);
+      yVIKEYS_main_handle (x_key);
       if (yVIKEYS_quit ())  break;
       ++x_loop;
       TOUCH_read ();
@@ -255,14 +230,14 @@ PROG_finish          (void)
 {
    TOUCH_wrap ();
    DRAW_wrap  ();
-   DEBUG_T printf("\npetal writing v03 ----------------------------------end---\n\n");
+   DEBUG_TOPS    printf("\npetal writing v03 ----------------------------------end---\n\n");
    return 0;
 }
 
 char
 PROG_end             (void)
 {
-   DEBUG_T printf("\npetal writing v03 ----------------------------------end---\n\n");
+   DEBUG_TOPS    printf("\npetal writing v03 ----------------------------------end---\n\n");
    return 0;
 }
 

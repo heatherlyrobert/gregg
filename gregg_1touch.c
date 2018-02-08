@@ -3,8 +3,6 @@
 
 
 
-#define      MAX_Y       19700.0
-#define      MAX_X       31500.0
 
 static char  s_event     [LEN_STR];
 static FILE *s_file      = NULL;
@@ -189,7 +187,7 @@ TOUCH_player         (int a_x, int a_y)
    x_ymax = x_ymin + x_ylen;
    x_inc = x_wide / 35.0;
    x_slot = trunc ((a_x - x_xmin - 5) / 35);
-   /*> printf ("player x=%4d, w=%4d, i=%4d, s=%4d\n", a_x, win.m_xfull, x_inc, x_slot);   <*/
+   /*> printf ("player x=%4d, w=%4d, i=%4d, s=%4d\n", a_x, x_xfull, x_inc, x_slot);   <*/
    /*> printf ("o.curr = %4d, o.total = %4d\n", o.curr, o.total);                     <*/
    switch (x_slot) {
    case  5 :
@@ -222,13 +220,15 @@ TOUCH_slider         (int a_x, int a_y)
    int         x_xinc      =    0;
    int         i           =    0;
    int         x_total     =    0;
+   int      x_xmin, x_xfull;
    /*---(defense)------------------------*/
    if (s_touch != MODE_SLIDER)    return 0;
    if (o.navg  <=    0)           return 0;
    /*---(process)------------------------*/
-   x_xpos = a_x - win.m_xmin;
+   yVIKEYS_view_coords   (YVIKEYS_MAIN, &x_xmin, &x_xfull, NULL, NULL);
+   x_xpos = a_x - x_xmin;
    /*> printf ("a_x    %4d, x_xpos %4d\n", a_x, x_xpos);                              <*/
-   x_xinc = win.m_xfull / (o.navg - 2);
+   x_xinc = x_xfull / (o.navg - 2);
    /*> printf ("navg   %4d, x_inc  %4d\n", o.navg, x_xinc);                           <*/
    o.cavg = -1;
    for (i = 1; i < o.navg - 1; ++i) {
@@ -261,13 +261,20 @@ TOUCH_read           (void)
    char        rce         =  -10;           /* return code for errors         */
    int         rc          =    0;
    tEVENT      x_event;
-   float       x_xrel      =  0.0;
-   float       x_yrel      =  0.0;
+   char        x_real      =  '-';
+   int         x_mwide     =    0;
+   int         x_rwide     =    0;
    /*---(check)--------------------------*/
    rc = TOUCH__check  ();
    if (rc < 0)  return 0;
    /*---(header)-------------------------*/
    DEBUG_TOUCH  yLOG_enter   (__FUNCTION__);
+   /*---(prepare)------------------------*/
+   yVIKEYS_view_bounds   (YVIKEYS_MAIN  , &my.x_min, &my.x_max , &my.y_min, &my.y_max );
+   yVIKEYS_view_coords   (YVIKEYS_MAIN  , NULL     , &x_mwide  , NULL     , &my.y_tall);
+   yVIKEYS_view_coords   (YVIKEYS_RIBBON, NULL     , &x_rwide  , NULL     , &my.y_tall);
+   my.x_wide = x_mwide + x_rwide;
+   my.ratio  = my.x_scale / my.x_wide;
    /*---(read)---------------------------*/
    DEBUG_TOUCH  yLOG_note    ("read event");
    fread (&x_event, sizeof (x_event), 1, s_file);
@@ -282,26 +289,15 @@ TOUCH_read           (void)
       s_pres = x_event.value;
       DEBUG_TOUCH  yLOG_value   ("s_pres"    , s_pres);
       /*---(touch)-----------------------*/
-      if      (s_touch == MODE_CURSOR && x_event.value >= 25) {
+      if      (s_touch == MODE_CURSOR && s_pres >= 25) {
          DEBUG_TOUCH  yLOG_note    ("new touch");
-         if (s_ypos <= -180) {
-            s_touch = MODE_SLIDER;
-            TOUCH_slider  (s_xpos, s_ypos);
-         } else if (s_xpos >= win.m_xmax - 40) {
-            s_touch = MODE_CONTROL;
-            TOUCH_control (s_xpos, s_ypos);
-         } else if (s_ypos <= -140) {
-            s_touch = MODE_PLAYER;
-            TOUCH_player  (s_xpos, s_ypos);
-         } else {
-            s_touch = MODE_TOUCH;
-            RAW_touch (s_xpos, s_ypos);
-         }
+         s_touch = MODE_TOUCH;
+         RAW_touch (s_xpad, s_ypad);
       }
       /*---(release)---------------------*/
-      else if (s_touch != MODE_CURSOR && x_event.value <  25) {
+      else if (s_touch != MODE_CURSOR && s_pres <  25) {
          DEBUG_TOUCH  yLOG_note    ("lifted existing touch");
-         if (s_touch == MODE_TOUCH)  RAW_lift  (s_xpos, s_ypos);
+         if (s_touch == MODE_TOUCH)  RAW_lift  (s_xpad, s_ypad);
          s_touch = MODE_CURSOR;
       }
       ++s_line;
@@ -313,28 +309,40 @@ TOUCH_read           (void)
    switch (x_event.code) {
    case  ABS_X :
       DEBUG_TOUCH  yLOG_note    ("X-movement event");
-      s_xpad = x_event.value;
-      if (s_xpad <= 0) {
-         DEBUG_TOUCH  yLOG_note    ("lifted, i.e., coord went to zero");
+      x_real  = 'y';
+      if (x_event.value <= my.x_scale * 0.01) {
+         DEBUG_TOUCH  yLOG_note    ("lifted, i.e., coord went too low");
          s_touch = MODE_CURSOR;
+         x_real  = '-';
       }
-      x_xrel = 1.0 - (x_event.value / MAX_X);
-      if (x_xrel >= 0.001 && x_xrel <= 0.999) {
-         s_xrel = x_xrel;
-         s_xpos = win.m_xmin + (s_xrel * win.m_xfull);
+      if (x_event.value >= my.x_scale * 0.99) {
+         DEBUG_TOUCH  yLOG_note    ("lifted, i.e., coord went too high");
+         s_touch = MODE_CURSOR;
+         x_real  = '-';
+      }
+      if (x_real == 'y') {
+         s_xpad = my.x_scale - x_event.value;
+         s_xrel = s_xpad / (float) my.x_scale;
+         s_xpos = my.x_min + (s_xrel * my.x_wide);
       }
       break;
    case  ABS_Y :
       DEBUG_TOUCH  yLOG_note    ("Y-movement event");
-      s_ypad = x_event.value;
-      if (s_ypad <= 0) {
-         DEBUG_TOUCH  yLOG_note    ("lifted, i.e., coord went to zero");
+      x_real  = 'y';
+      if (x_event.value <= my.y_scale * 0.01) {
+         DEBUG_TOUCH  yLOG_note    ("lifted, i.e., coord went too low");
          s_touch = MODE_CURSOR;
+         x_real  = '-';
       }
-      x_yrel = (x_event.value / MAX_Y);
-      if (x_yrel >= 0.001 && x_yrel <= 0.999) {
-         s_yrel = x_yrel;
-         s_ypos = win.m_ymin + (s_yrel * win.m_yfull);
+      if (x_event.value >= my.y_scale * 0.99) {
+         DEBUG_TOUCH  yLOG_note    ("lifted, i.e., coord went too high");
+         s_touch = MODE_CURSOR;
+         x_real  = '-';
+      }
+      if (x_real == 'y') {
+         s_ypad = x_event.value;
+         s_yrel = s_ypad / (float) my.y_scale;
+         s_ypos = my.y_min + (s_yrel * my.y_tall);
       }
       break;
    default     :
@@ -346,7 +354,7 @@ TOUCH_read           (void)
    my.touch = s_touch;
    my.xpos  = s_xpos;
    my.ypos  = s_ypos;
-   if (s_touch == MODE_TOUCH  )  RAW_normal    (s_xpos, s_ypos);
+   if (s_touch == MODE_TOUCH  )  RAW_normal    (s_xpad, s_ypad);
    if (s_touch == MODE_SLIDER )  TOUCH_slider  (s_xpos, s_ypos);
    ++s_line;
    /*---(headers and line breaks)--------*/

@@ -294,7 +294,7 @@ dict_read          (void)            /* read the translation dictionary         
 {
    /*---(locals)---------------------------*/
    FILE     *f;
-   char      s[MAX_LINE] = "";         // current record
+   char      x_recd [MAX_LINE] = "";         // current record
    int       n = 0;                    // current record number in file
    char      x_eng   [MAX_LEN];        /* english word                        */
    char      x_gregg [MAX_LEN];        /* gregg translation                   */
@@ -320,10 +320,10 @@ dict_read          (void)            /* read the translation dictionary         
    DICT__append ("BOF", ">.");
    /*---(process)--------------------------*/
    while (1) {
-      fgets(s, MAX_LINE, f);
+      fgets(x_recd, MAX_LINE, f);
       if (feof(f))  break;
       //---(english)----------------------#
-      p = strtok_r (s, q, &r);
+      p = strtok_r (x_recd, q, &r);
       if (p == NULL)                                continue;
       strlcpy (x_eng, str_trim (p), MAX_LEN);
       if (x_eng[0] == '#' || x_eng[0] == '\0')  continue;
@@ -481,18 +481,18 @@ str_trim (                   /* trim spaces from front and back on string     */
    int i;
    /*---(locals)--------------------------------*/
    char *head = a_string;
-   int  l = strlen(a_string);
-   if (a_string[l - 1] == '\n') {
-      a_string[l - 1] = '\0';
-      --l;
+   int  x_len = strlen(a_string);
+   if (a_string[x_len - 1] == '\n') {
+      a_string[x_len - 1] = '\0';
+      --x_len;
    }
    /*---(deal with leading spaces)--------------*/
-   for (i = 0; i < l; ++i) {
+   for (i = 0; i < x_len; ++i) {
       if (a_string[i] != ' ') break;
       ++head;
    }
    /*---(deal with trailing spaces)-------------*/
-   for (i = l - 1; i > 0; --i) {
+   for (i = x_len - 1; i > 0; --i) {
       if (a_string[i] != ' ') break;
       a_string[i] = '\0';
    }
@@ -677,7 +677,7 @@ words_translate    (int a_word)
    /*---(locals)-------------------------*/
    char   *p = NULL;             // pointer to substring
    char   *q = ".";              // delimiters
-   char   l[5] = "";             // letter
+   char   x_ltr[5] = "";             // letter
    int    count =    0;          // letter count
    int    offset =   0;
    char   a_outstring[MAX_LEN];
@@ -712,11 +712,11 @@ words_translate    (int a_word)
          }
       }
       /*---(handle letter)---------------*/
-      strlcpy (l, p, 5);
-      for (i = 0; i < 5; ++i)  l[i] = tolower(l[i]);
-      DEBUG__WRITING  printf("   letter = <<%s>>\n", l);
+      strlcpy (x_ltr, p, 5);
+      for (i = 0; i < 5; ++i)  x_ltr[i] = tolower(x_ltr[i]);
+      DEBUG__WRITING  printf("   letter = <<%s>>\n", x_ltr);
       for (i = 0; i < MAX_LETTERS; ++i) {
-         if (strncmp(l, g_loc[i].n, 5) != 0) continue;
+         if (strncmp(x_ltr, g_loc[i].n, 5) != 0) continue;
          letters[count]  = i;
          break;
       }

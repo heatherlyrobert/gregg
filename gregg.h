@@ -206,8 +206,8 @@
 
 
 /* rapidly evolving version number to aid with visual change confirmation     */
-#define VER_NUM   "5.2e"
-#define VER_TXT   "uses yVIKEYS_view_color now for all background.  YES!"
+#define VER_NUM   "5.2f"
+#define VER_TXT   "move all calcs to greater resolution (wacom) coordinates"
 
 
 #define     LEN_HUGE     10000
@@ -225,18 +225,6 @@ typedef     const int           cint;
 
 /*---(window formatting)-------------------*/
 struct cWIN {
-   /*---(header)------------*/
-   char        w_format;                    /* format identifier              */
-   /*---(command sizes)-----*/
-   char        c_on;                        /* show command y/n               */
-   char        c_text      [LEN_DESC];      /* current text in command mode   */
-   /*---(main sizes)--------*/
-   int         m_ymax;                      /* from center to top             */
-   int         m_ymin;                      /* from center to bottom          */
-   int         m_yfull;                     /* full range of y-axis           */
-   int         m_xmax;                      /* from center to right           */
-   int         m_xmin;                      /* from center to left            */
-   int         m_xfull;                     /* full range of x-axis           */
    /*---(detail)------------*/
    int         d_xoff;                      /* left offset of text details    */
    int         d_yoff;                      /* top offset of text details     */
@@ -245,8 +233,6 @@ struct cWIN {
    int         d_bar;                       /* control bar height             */
    int         d_ansx;                      /* answer x offset                */
    int         d_ansy;                      /* answer y offset                */
-   /*---(ribbon sizes)------*/
-   int         r_wide;                      /* width  of ribbon/button bar    */
    /*---(fonts)-------------*/
    char        face_bg     [50];
    int         font_bg;
@@ -261,6 +247,7 @@ struct cWIN {
 
 #define     ICON_SET  "/usr/local/share/fonts/outline_icons.png"
 
+#define     GREGG_WACOM        64.0
 
 /*---(struct.re)--------+-----------+-*//*-+----------------------------------*/
 typedef     struct      cACCESSOR   tACCESSOR;
@@ -286,6 +273,17 @@ struct cACCESSOR {
    char        touch;
    int         xpos;
    int         ypos;
+   float       ratio;                       /* touch to display coord ratio   */
+   int         x_scale;
+   int         y_scale;
+   int         x_min;
+   int         x_max;
+   int         x_wide;
+   int         y_min;
+   int         y_max;
+   int         y_tall;
+   float       x_center;
+   float       y_center;
    /*---(stroke file)----------*/
    char        f_loc       [LEN_RECD];      /* specific file location         */
    char        f_name      [LEN_RECD];      /* base name                      */
@@ -316,63 +314,18 @@ extern char unit_answer  [LEN_STR];
 
 /*===[[ DEBUGGER : GENERIC ]]=================================================*/
 struct cDEBUG {
-   /*---(standards)----------------------*/
-   char      top;
-   char      prep;
-   char      cli;
-   char      input;
-   char      proc;
-   char      data;
-   char      output;
-   char      graph;
-   char      api;
-   char      event;
-   /*---(specific input)-----------------*/
-   char      raw;      /* processing stylus into to raw points     */
-   char      bas;      /* processing raw to basic points           */
-   char      key;      /* processing bas/avg points to key         */
    /*---(specific processing)------------*/
    char      sharps;   /* finding sharp corners                    */
-   char      circles;  /* finding circles                          */
-   char      lines;    /* straightening lines                      */
    char      matches;  /* matching logic                           */
    char      shapes;   /* shape formation in display lists         */
-   char      averages; /* shape formation in display lists         */
-   char      curves;   /* identifying curviness of lines           */
    char      writing;  /* process of creating outlines             */
-   char      dict;     /* reading and loading of the dictionary    */
-   char      dicte;    /* output of english word index             */
-   char      dictg;    /* output of gregg word index               */
-   /*---(summary)------------------------*/
-   char      summ;     /* just summary statistics                  */
-   char      lock;     /* finding my lockup                        */
 } debug_old;
-#define   DEBUG_T           if (debug_old.top       == 'y')
-#define   DEBUG_X           if (debug_old.prep      == 'y')
-#define   DEBUG_C           if (debug_old.cli       == 'y')
-#define   DEBUG_I           if (debug_old.input     == 'y')
-#define   DEBUG_P           if (debug_old.proc      == 'y')
-#define   DEBUG_O           if (debug_old.output    == 'y')
-#define   DEBUG_G           if (debug_old.graph     == 'y')
-#define   DEBUG_A           if (debug_old.api       == 'y')
-#define   DEBUG_E           if (debug_old.event     == 'y')
 
-#define   DEBUG__RAW        if (debug_old.raw      == 'y')
-#define   DEBUG__BAS        if (debug_old.bas      == 'y')
-#define   DEBUG__KEY        if (debug_old.key      == 'y')
 #define   DEBUG__SHARPS     if (debug_old.sharps   == 'y')
-#define   DEBUG__CIRCLES    if (debug_old.circles  == 'y')
-#define   DEBUG__LINES      if (debug_old.lines    == 'y')
 #define   DEBUG__MATCHES    if (debug_old.matches  == 'y')
 #define   DEBUG__SHAPES     if (debug_old.shapes   == 'y')
-#define   DEBUG__AVERAGES   if (debug_old.averages == 'y')
-#define   DEBUG__CURVES     if (debug_old.curves   == 'y')
 #define   DEBUG__WRITING    if (debug_old.writing  == 'y')
-#define   DEBUG__DICT       if (debug_old.dict     == 'y')
-#define   DEBUG__DICTE      if (debug_old.dicte    == 'y')
-#define   DEBUG__DICTG      if (debug_old.dictg    == 'y')
 
-#define   DEBUG__SUMM       if (debug_old.summ     == 'y')
 
 
 
@@ -391,7 +344,7 @@ struct cLOCATION
    int       ar;         /* arc length        */
    int       st;         /* steps on dotting  */
    char      gr[5];      /* letter group      */
-   int       ra;         /* range of letter   */
+   int       range;      /* range of letter   */
    int       sz;         /* size category     */
    char      fu;         /* function to draw  */
    /*---(calculated)--------*/
@@ -424,7 +377,7 @@ extern tRANGES ranges[MAX_RANGES];
 #define   MAX_GROUPS      200
 typedef struct cGROUPS tGROUPS;
 struct cGROUPS {
-   int     ra;           /* range of full letter           */
+   int     range;        /* range of full letter           */
    int     op;           /* open points                    */
    char    sh[5];        /* shape flow                     */
    char    fl[5];        /* quadrent flow                  */
@@ -497,6 +450,12 @@ typedef struct timespec  tTSPEC;
 #define     PART_MAIN      'o'
 #define     PART_CONTINUE  'c'
 
+#define     POINTS_RAW     'r'
+#define     POINTS_BAS     'b'
+#define     POINTS_AVG     'a'
+#define     POINTS_KEY     'k'
+#define     POINTS_TMP     't'
+
 #define     POINT_TYPES    "S>-F"
 #define     POINT_START    'S'
 #define     POINT_HEAD     '>'
@@ -513,25 +472,35 @@ typedef struct timespec  tTSPEC;
 typedef struct cPOINT tPOINT;
 struct cPOINT
 {
-   int         p_raw;                  // tie to raw point
-   int         p_bas;                  // tie to basic point
-   char        type;                   // type of key point (sharp or rounded)
-   int         xpos;                   // xpos
-   int         ypos;                   // ypos
+   /*---(links)-----------------*/
+   int         p_raw;                  /* tie to raw point                    */
+   int         p_bas;                  /* tie to basic point                  */
+   char        type;                   /* type of key point (sharp or rounded) */
+   /*---(touchpad)--------------*/
+   int         x_full;                 /* x-pos in touchpad coords            */
+   int         y_full;                 /* y-pos in touchpad coords            */
+   /*---(statistics)------------*/
    int         xd;                     // x-dist from last xpos
    int         yd;                     // y-dist from last ypos
-   int         l;                      // length between points
-   float       s;                      // slope from last point
-   int         b;                      // y-intercept of line from last point
-   float       r;                      // radians of line from last point
-   int         d;                      // degrees of line from last point
-   int         q;                      // quadrent of line from last point
-   int         ra;                     // range of point
-   float       c;                      // pixels of curvature at mid point
-   char        ca;                     // curve anomolies '-' = normal, 'x' = jittery
-   char        cc;                     // curve category : +1, 0, -1                    
+   int         len;                    // length between points
+   float       slope;                  // slope from last point
+   int         icept;                  // y-intercept of line from last point
+   float       rads;                   // radians of line from last point
+   int         degs;                   // degrees of line from last point
+   int         quad;                   // quadrent of line from last point
+   int         range;                  // range of point
+   float       cdepth;                 // pixels of curvature at mid point
+   char        cano;                   // curve anomolies '-' = normal, 'x' = jittery
+   char        ccat;                   // curve category : +1, 0, -1                    
    char        use         [5];        /* use of this point in outline        */
    char        fake;                   /* artificial point or not (y/n)       */
+   /*---(display)---------------*/
+   float       x_rel;                  /* input device relative x_coord       */
+   float       y_rel;                  /* input device relative y_coord       */
+   int         x_pos;                  /* screen x_coord                      */
+   int         y_pos;                  /* screen y_coord                      */
+   int         xy_len;                 /* screen length                       */
+   /*---(done)------------------*/
 };
 
 
@@ -540,37 +509,46 @@ typedef struct cOUTLINE tOUTLINE;
 struct cOUTLINE
 {
    /*---(index)--------------------------*/
-   int       total;                    /* total count of outlines             */
-   int       curr;                     /* current outline index in file       */
+   int         total;                    /* total count of outlines             */
+   int         curr;                     /* current outline index in file       */
    /*---(header)-------------------------*/
-   char      when   [50];              /* timestamp of creation/writing       */
-   char      expect [50];              /* expected result of interpretation   */
-   char      note   [50];              /* textual description                 */
-   char      saved;                    /* flag to indicate whether saved      */
-   int       complexity;               /* how complex is outline in general   */
-   int       messiness;                /* how messy is outline                */
-   char      points [LEN_RECD];        /* raw data points from file           */
+   char        when   [50];              /* timestamp of creation/writing       */
+   char        expect [50];              /* expected result of interpretation   */
+   char        note   [50];              /* textual description                 */
+   char        saved;                    /* flag to indicate whether saved      */
+   int         complexity;               /* how complex is outline in general   */
+   int         messiness;                /* how messy is outline                */
+   char        points [LEN_RECD];        /* raw data points from file           */
    /*---(match)--------------------------*/
-   char      letters[50];              /* detailed match result               */
-   char      actual [50];              /* actual match result                 */
-   char      grade  [50];              /* grading of match                    */
-   char      word   [50];              /* resulting dictionary word           */
-   /*---(points)-------------------------*/
-   int       nraw;                     /* number of raw points                */
-   int       craw;                     /* current average point               */
-   int       xadj;
-   int       yadj;
-   tPOINT    raw[MAX_POINTS];          /* raw points                          */
-   int       nbas;                     /* number of basic points              */
-   tPOINT    bas[MAX_POINTS];          /* basic points                        */
-   int       navg;                     /* number of average points            */
-   int       cavg;                     /* current average point               */
-   tPOINT    avg[MAX_POINTS];          /* average points                      */
-   tPOINT    tmp[5];                   /* calculation storage                 */
+   char        letters[50];              /* detailed match result               */
+   char        actual [50];              /* actual match result                 */
+   char        grade  [50];              /* grading of match                    */
+   char        word   [50];              /* resulting dictionary word           */
+   /*---(raw)----------------------------*/
+   int         nraw;                     /* number of raw points                */
+   int         craw;                     /* current average point               */
+   int         xadj;
+   int         yadj;
+   float       ratio;                  /* input to display conversion ratio   */
+   tPOINT      raw[MAX_POINTS];          /* raw points                          */
+   /*---(base)---------------------------*/
+   int         nbas;                     /* number of basic points              */
+   tPOINT      bas[MAX_POINTS];          /* basic points                        */
+   /*---(average)------------------------*/
+   int         navg;                     /* number of average points            */
+   int         cavg;                     /* current average point               */
+   tPOINT      avg[MAX_POINTS];          /* average points                      */
+   tPOINT      tmp[5];                   /* calculation storage                 */
    /*---(keys)---------------------------*/
-   int       nkey;                     /* number of key points                */
-   int       ckey;                     /* current key point                   */
-   tPOINT    key[MAX_POINTS];          /* key points                          */
+   int         nkey;                     /* number of key points                */
+   int         ckey;                     /* current key point                   */
+   tPOINT      key[MAX_POINTS];          /* key points                          */
+   /*---(bounding)-----------------------*/
+   int         x_min;
+   int         y_min;
+   int         x_max;
+   int         y_max;
+   /*---(done)---------------------------*/
 } o;
 
 
@@ -620,13 +598,16 @@ char       draw_oslider         (void);
 char       DRAW_slide_avg       (void);
 char       draw_kslider         (void);
 
-char       DRAW_raws            (void);
-char       DRAW_base            (void);
-char       DRAW_keys            (void);
-char       DRAW_curr            (void);
-char       draw_saved           (void);
-char       draw_horz            (void);
-char       DRAW_cursor          (void);
+char       LAYER_curr            (void);
+char       LAYER_raws            (void);
+char       LAYER_base            (void);
+char       LAYER_keys            (void);
+char       OVERLAY_data          (void);
+char       OVERLAY_samples       (void);
+
+/*> char       draw_saved           (void);                                           <*/
+/*> char       draw_horz            (void);                                           <*/
+/*> char       DRAW_cursor          (void);                                           <*/
 
 char       DRAW_info            (void);
 char       DRAW_info_counts     (void);
@@ -648,14 +629,13 @@ char       sample_init       (void);
 char       sample_etch       (void);
 char       sample_draw       (void);
 char       sample_free       (void);
-char       sample_show       (void);
 
 
-long       time_stamp        (void);
 
 char       dlist_init        (void);
 
 /*---(outline)--------------*/
+char       OUT_status         (char *a_list);
 char       OUT_init             (void);
 char       OUT_clear            (void);
 char       OUT__open            (char *a_mode);
@@ -664,22 +644,24 @@ char       OUT_count            (void);
 char       OUT_pick             (int a_num);
 char       OUT_append           (void);
 char       out_read             (int);
-char       POINT_calc           (tPOINT*, int);
-char       POINT_list           (tPOINT*, int);
-char       POINT_show           (tPOINT*, int);
+char       POINT_calc           (char a_type, tPOINT* a_curr, int a_span);
+char       POINT_list           (FILE *a_file, char a_style, tPOINT *a_series, int a_count);
+char       POINT_show           (FILE *a_file, char a_style, tPOINT *a_curr  , int a_num);
+char       POINT_clipboard      (char *a_cmd, char *a_opt);
 char       FILE_rename          (char *a_name);
 
 /*---(raw)------------------*/
-char       RAW__point           (int a_x, int a_y, char a_type);
-char       RAW_touch            (int a_x, int a_y);
-char       RAW_normal           (int a_x, int a_y);
-char       RAW_lift             (int a_x, int a_y);
+char       RAW__point           (int a_xpad, int a_ypad, char a_type);
+char       RAW_touch            (int a_xpad, int a_ypad);
+char       RAW_lift             (int a_xpad, int a_ypad);
+char       RAW_normal           (int a_xpad, int a_ypad);
+
 char       RAW_load             (char *a_points);
 char       RAW_equalize         (void);
 char*      RAW__unit            (char *a_question, int a_num);
 
 /*---(base)-----------------*/
-char       BASE_filter       (void);
+char       BASE_filter          (void);
 
 char       KEY_filter        (void);
 
@@ -729,6 +711,7 @@ char        TOUCH__check         (void);
 char        TOUCH_read           (void);
 
 
+char        MAP_mapper           (char  a_req);
 char        USER_words           (char *a_words);
 char        USER_guide           (char *a_guide);
 char        USER_init            (void);

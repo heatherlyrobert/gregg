@@ -37,15 +37,16 @@ PRIV char    stype     = '-';          /* p=prefix, o=outline, c=continue     */
 /*============================--------------------============================*/
 static void o___RAW_POINTS_____________o (void) {;}
 
+
 char     /*----: add a new raw point to outline -------------------------*/
-RAW__point         (int a_x, int a_y, char a_type)
+RAW__point         (int a_xpad, int a_ypad, char a_type)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
    /*---(header)-------------------------*/
    DEBUG_RAW    yLOG_senter  (__FUNCTION__);
-   DEBUG_RAW    yLOG_svalue  ("x"         , a_x);
-   DEBUG_RAW    yLOG_svalue  ("y"         , a_y);
+   DEBUG_RAW    yLOG_svalue  ("x"         , a_xpad);
+   DEBUG_RAW    yLOG_svalue  ("y"         , a_ypad);
    DEBUG_RAW    yLOG_schar   (a_type);
    /*---(defenses)-----------------------*/
    DEBUG_RAW    yLOG_svalue  ("#"         , o.nraw);
@@ -85,7 +86,7 @@ RAW__point         (int a_x, int a_y, char a_type)
       return rce;
    }
    /*---(finishes)-------------*/
-   --rce;  if (a_type == POINT_FINISH && (a_x != o.raw[o.nraw - 1].xpos || a_y != o.raw[o.nraw - 1].ypos)) {
+   --rce;  if (a_type == POINT_FINISH && (a_xpad != o.raw[o.nraw - 1].x_full || a_ypad != o.raw[o.nraw - 1].y_full)) {
       DEBUG_RAW    yLOG_snote   ("F must match last -");
       DEBUG_RAW    yLOG_sexitr  (__FUNCTION__, rce);
       return rce;
@@ -101,16 +102,21 @@ RAW__point         (int a_x, int a_y, char a_type)
       DEBUG_RAW    yLOG_sexitr  (__FUNCTION__, rce);
       return rce;
    }
-   --rce;  if (o.nraw > 0 && a_type == POINT_NORMAL && a_x == o.raw[o.nraw - 1].xpos && a_y == o.raw[o.nraw - 1].ypos) {
-      DEBUG_RAW    yLOG_snote   ("duplicate -");
+   --rce;  if (o.nraw > 0 && a_type == POINT_NORMAL && a_xpad == o.raw[o.nraw - 1].x_full) {
+      DEBUG_RAW    yLOG_snote   ("duplicate x-pos -");
+      DEBUG_RAW    yLOG_sexitr  (__FUNCTION__, rce);
+      return rce;
+   }
+   --rce;  if (o.nraw > 0 && a_type == POINT_NORMAL && a_ypad == o.raw[o.nraw - 1].y_full) {
+      DEBUG_RAW    yLOG_snote   ("duplicate y-pos -");
       DEBUG_RAW    yLOG_sexitr  (__FUNCTION__, rce);
       return rce;
    }
    /*---(save point)---------------------*/
    DEBUG_RAW    yLOG_snote   ("add point");
    o.raw[o.nraw].p_raw   = o.nraw;
-   o.raw[o.nraw].xpos    = a_x;
-   o.raw[o.nraw].ypos    = a_y;
+   o.raw[o.nraw].x_full  = a_xpad;
+   o.raw[o.nraw].y_full  = a_ypad;
    o.raw[o.nraw].type    = a_type;
    /*---(save point)---------------------*/
    DEBUG_RAW    yLOG_snote   ("assign type/calc");
@@ -120,17 +126,15 @@ RAW__point         (int a_x, int a_y, char a_type)
       break;
    case POINT_FINISH  :
       o.raw[o.nraw].fake = POINT_FAKE;
-      POINT_calc (o.raw + o.nraw, 'n');
       break;
    case POINT_HEAD    :
       o.raw[o.nraw].fake = POINT_NORMAL;
-      POINT_calc (o.raw + o.nraw, 'n');
       break;
    case POINT_NORMAL  :
       o.raw[o.nraw].fake = POINT_NORMAL;
-      POINT_calc (o.raw + o.nraw, 'n');
       break;
    }
+   POINT_calc (POINTS_RAW, o.raw + o.nraw, 'n');
    /*---(update counters)----------------*/
    ++o.nraw;
    DEBUG_RAW    yLOG_svalue  ("#"         , o.nraw);
@@ -140,67 +144,68 @@ RAW__point         (int a_x, int a_y, char a_type)
 }
 
 char
-RAW_touch            (int a_x, int a_y)
+RAW_touch            (int a_xpad, int a_ypad)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rc          =    0;
    int         r           =  0.0;
    /*---(calculate)----------------------*/
-   r  = sqrt((a_x * a_x) + (a_y * a_y));
+   r  = sqrt((a_xpad * a_xpad) + (a_ypad * a_ypad));
    /*---(assign type)--------------------*/
-   if (r < SIZE_MED_AVG) {
-      if (stype != 'p')  OUT_clear ();
-      stype   = PART_MAIN;
-      o.xadj  = a_x;
-      o.yadj  = a_y;
-   } else if (a_x < 0.0 && a_y > 0.0) {
-      OUT_clear ();
-      stype   = PART_PREFIX;
-   } else {
-      stype   = PART_CONTINUE;
-   }
+   OUT_clear ();
+   stype   = PART_MAIN;
+   o.xadj  = a_xpad;
+   o.yadj  = a_ypad;
+   o.ratio = my.ratio;
+   /*> if (r < SIZE_MED_AVG) {                                                        <* 
+    *>    if (stype != 'p')  OUT_clear ();                                            <* 
+    *>    stype   = PART_MAIN;                                                        <* 
+    *>    o.xadj  = a_xpad;                                                              <* 
+    *>    o.yadj  = a_ypad;                                                              <* 
+    *> } else if (a_xpad < 0.0 && a_ypad > 0.0) {                                           <* 
+    *>    OUT_clear ();                                                               <* 
+    *>    stype   = PART_PREFIX;                                                      <* 
+    *> } else {                                                                       <* 
+    *>    stype   = PART_CONTINUE;                                                    <* 
+    *> }                                                                              <*/
    /*---(save points)--------------------*/
-   if (rc == 0)  rc = RAW__point (a_x, a_y, POINT_START );
-   if (rc == 0)  rc = RAW__point (a_x, a_y, POINT_HEAD);
+   if (rc == 0)  rc = RAW__point (a_xpad, a_ypad, POINT_START );
+   if (rc == 0)  rc = RAW__point (a_xpad, a_ypad, POINT_HEAD);
    /*---(complete)-----------------------*/
    return rc;
 }
 
 char
-RAW_normal           (int a_x, int a_y)
+RAW_normal           (int a_xpad, int a_ypad)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rc          =    0;
    /*---(process)------------------------*/
-   if (rc == 0)  rc = RAW__point (a_x, a_y, POINT_NORMAL);
+   if (rc == 0)  rc = RAW__point (a_xpad, a_ypad, POINT_NORMAL);
    /*---(complete)-----------------------*/
    return rc;
 }
 
 char
-RAW_lift             (int a_x, int a_y)
+RAW_lift             (int a_xpad, int a_ypad)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rc          =    0;
    /*---(save points)--------------------*/
-   if (rc == 0)       RAW__point (a_x, a_y, POINT_NORMAL);
-   if (rc == 0)  rc = RAW__point (a_x, a_y, POINT_FINISH);
+   if (rc == 0)       RAW__point (a_xpad, a_ypad, POINT_NORMAL);
+   if (rc == 0)  rc = RAW__point (a_xpad, a_ypad, POINT_FINISH);
    if (rc <  0)  return rc;
    /*---(process)------------------------*/
-   if (rc == 0)  rc = RAW_equalize ();
+   if (rc == 0)  rc = RAW_equalize  ();
    if (rc == 0)  rc = BASE_filter  ();
    if (rc == 0)  rc = KEY_filter    ();
-   if (rc == 0)  rc = match_flatten ();
-   if (rc == 0)  rc = match_squeeze ();
-   if (rc == 0)  rc = circle_driver ();
-   if (rc == 0)  rc = match_sharps  ();
-   if (rc == 0)  rc = MATCH_driver  ();
+   /*> if (rc == 0)  rc = match_flatten ();                                           <* 
+    *> if (rc == 0)  rc = match_squeeze ();                                           <* 
+    *> if (rc == 0)  rc = circle_driver ();                                           <* 
+    *> if (rc == 0)  rc = match_sharps  ();                                           <* 
+    *> if (rc == 0)  rc = MATCH_driver  ();                                           <*/
    if (rc <  0)  return rc;
-   if (rc == 0)  rc = OUT_append    ();
-   /*---(reporting)----------------------*/
-   RPTG_RAW   POINT_list (o.raw, o.nraw);
-   RPTG_BASE  POINT_list (o.avg, o.navg);
-   RPTG_KEY   POINT_list (o.key, o.nkey);
+   /*> if (rc == 0)  rc = OUT_append    ();                                           <*/
    /*---(complete)-----------------------*/
    return 0;
 }
@@ -260,18 +265,20 @@ RAW_load           (char *a_points)
 }
 
 char          /*----: make raw xy relative to neutral origin -----------------*/
-RAW_equalize       (void)
+RAW_equalize        (void)
 {
    /*---(locals)-----------+-----+-----+-*/
    int         i           =    0;
-   DEBUG__RAW  printf("   adjust all by %dx, %dy\n", o.xadj, o.yadj);
-   for (i = 0; i < o.nraw; ++i) {
-      o.raw[i].xpos   -= o.xadj;
-      o.raw[i].ypos   -= o.yadj;
-   }
+   /*---(adjust)-------------------------*/
+   /*> for (i = 0; i < o.nraw; ++i) {                                                 <* 
+    *>    POINT_display (o.raw + i);                                                  <* 
+    *>    if (o.x_min > o.raw [i].x_pos)   o.x_min = o.raw [i].x_pos;                 <* 
+    *>    if (o.y_min > o.raw [i].y_pos)   o.y_min = o.raw [i].y_pos;                 <* 
+    *>    if (o.x_max < o.raw [i].x_pos)   o.x_max = o.raw [i].x_pos;                 <* 
+    *>    if (o.y_max < o.raw [i].y_pos)   o.y_max = o.raw [i].y_pos;                 <* 
+    *> }                                                                              <*/
    return 0;
 }
-
 
 char        unit_answer  [LEN_STR];
 
@@ -309,7 +316,7 @@ RAW__unit            (char *a_question, int a_num)
  *>       } else if (a_num >= o.nraw) {                                                                                                    <* 
  *>          snprintf(unit_answer, LEN_TEXT, "Raw Point (%4d) : out of range %3d to %3d", a_num, 0, o.nraw - 1);                           <* 
  *>       } else                                                                                                                           <* 
- *>          snprintf(unit_answer, LEN_TEXT, "Raw Point (%4d) : %4dx, %4dy, %4dc", a_num, o.raw[a_num].xpos, o.raw[a_num].ypos, o.nraw);   <* 
+ *>          snprintf(unit_answer, LEN_TEXT, "Raw Point (%4d) : %4dx, %4dy, %4dc", a_num, o.raw[a_num].x_full, o.raw[a_num].y_full, o.nraw);   <* 
  *>    } else if        (strcmp(a_question, "bas")         == 0) {                                                                         <* 
  *>       if (o.nbas == 0) {                                                                                                               <* 
  *>          snprintf(unit_answer, LEN_TEXT, "Bas Point (%4d) : there are no dots", a_num);                                                <* 
@@ -318,7 +325,7 @@ RAW__unit            (char *a_question, int a_num)
  *>       } else if (a_num >= o.nbas) {                                                                                                    <* 
  *>          snprintf(unit_answer, LEN_TEXT, "Bas Point (%4d) : out of range %3d to %3d", a_num, 0, o.nraw - 1);                           <* 
  *>       } else                                                                                                                           <* 
- *>          snprintf(unit_answer, LEN_TEXT, "Bas Point (%4d) : %4dx, %4dy, %4dc", a_num, o.raw[a_num].xpos, o.raw[a_num].ypos, o.nraw);   <* 
+ *>          snprintf(unit_answer, LEN_TEXT, "Bas Point (%4d) : %4dx, %4dy, %4dc", a_num, o.raw[a_num].x_full, o.raw[a_num].y_full, o.nraw);   <* 
  *>    } else if        (strcmp(a_question, "num_raw")     == 0) {                                                                         <* 
  *>       snprintf(unit_answer, LEN_TEXT, "Raw Count        : %4dc", o.nraw);                                                              <* 
  *>    } else if        (strcmp(a_question, "num_bas")     == 0) {                                                                         <* 

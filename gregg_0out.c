@@ -20,9 +20,7 @@ OUT_init             (void)
 {
    OUT_clear ();
    /*---(locals)---------------------------*/
-   char      s[MAX_LINE]   = "";
    int       i             = 0;
-   int       len           = 0;
    o.craw     = 0;
    o.cavg     = 0;
    o.ckey     = 0;
@@ -79,14 +77,21 @@ OUT_clear          (void)
       /*---(clear points)----------------*/
       for (x_pt = 0; x_pt < MAX_POINTS; ++x_pt) {
          p [x_pt].p_raw  = p [x_pt].p_bas  = 0;
-         p [x_pt].xpos = p [x_pt].ypos = p [x_pt].xd    = p [x_pt].yd = 0;
-         p [x_pt].l    = p [x_pt].b    = p [x_pt].d     = p [x_pt].q  = p [x_pt].cc = 0;
-         p [x_pt].s    = p [x_pt].r    = p [x_pt].ra    = p [x_pt].c  = 0.0;
-         p [x_pt].ca   = p [x_pt].type = p [x_pt].fake  = '-';
+         p [x_pt].x_full = p [x_pt].y_full = 0;
+         p [x_pt].xd     = p [x_pt].yd     = 0;
+         p [x_pt].len    = p [x_pt].icept  = p [x_pt].degs  = p [x_pt].quad   = p [x_pt].ccat = 0;
+         p [x_pt].slope  = p [x_pt].rads   = p [x_pt].range = p [x_pt].cdepth = 0.0;
+         p [x_pt].cano   = p [x_pt].type   = p [x_pt].fake  = '-';
          strlcpy (p [x_pt].use, "-", 5);
+         p [x_pt].x_rel  = p [x_pt].y_rel  = 0.0;
+         p [x_pt].x_pos  = p [x_pt].y_pos  = 0;
+         p [x_pt].xy_len = 0;
       }
       /*---(done)------------------------*/
    }
+   /*---(bounds)-------------------------*/
+   o.x_min = o.y_min =  1000;
+   o.x_max = o.y_max = -1000;
    /*---(complete)-----------------------*/
    DEBUG_DATA   yLOG_sexit    (__FUNCTION__);
    return 0;
@@ -99,78 +104,204 @@ OUT_clear          (void)
 /*============================--------------------============================*/
 void o___GENERIC________________o (void) {;}
 
+/*> char                                                                              <* 
+ *> POINT_display        (tPOINT *a_curr)                                             <* 
+ *> {                                                                                 <* 
+ *>    /+---(locals)-----------+-----+-----+-+/                                       <* 
+ *>    DEBUG_GRAF   yLOG_enter   (__FUNCTION__);                                      <* 
+ *>    /+---(x-pos)--------------+/                                                   <* 
+ *>    a_curr->x_rel = (a_curr->x_full - 0     ) / (float) my.x_scale;                <* 
+ *>    a_curr->x_pos = my.x_min + a_curr->x_full / my.ratio;                          <* 
+ *>    /+---(y-pos)--------------+/                                                   <* 
+ *>    a_curr->y_rel = (a_curr->y_full - 0     ) / (float) my.y_scale;                <* 
+ *>    a_curr->y_pos = my.y_min + a_curr->y_full / my.ratio;                          <* 
+ *>    /+---(done)---------------+/                                                   <* 
+ *>    DEBUG_GRAF   yLOG_exit    (__FUNCTION__);                                      <* 
+ *>    return 0;                                                                      <* 
+ *> }                                                                                 <*/
+
 char
-POINT_calc         (tPOINT *a_curr,  int a_span)
+POINT_calc         (char a_type, tPOINT *a_curr,  int a_span)
 {
-   /*---(set the ends)---------------------*/
-   tPOINT  *one  = a_curr - 1;
-   tPOINT  *two  = a_curr;
-   if (a_span == 'a')  two = a_curr + 1;
-   /*---(x and y diff)---------------------*/
-   a_curr->xd  = two->xpos - one->xpos;
-   a_curr->yd  = two->ypos - one->ypos;
-   /*---(length)---------------------------*/
-   a_curr->l   = (int) sqrt((a_curr->xd * a_curr->xd) + (a_curr->yd * a_curr->yd));
-   /*---(slope and intercept)--------------*/
-   if      (a_curr->xd != 0) a_curr->s = (float) a_curr->yd / a_curr->xd;
-   else if (a_curr->yd >  0) a_curr->s = +100000;
-   else                      a_curr->s = -100000;
-   a_curr->b   = (int) (a_curr->ypos - (a_curr->s * a_curr->xpos));
-   /*---(radians/degrees)------------------*/
-   a_curr->r   = atan2(a_curr->yd, a_curr->xd);
-   if (a_curr->r > FULL_CIRCLE) a_curr->r -= FULL_CIRCLE;
-   if (a_curr->r < 0)           a_curr->r += FULL_CIRCLE;
-   a_curr->d   = (int) (a_curr->r * 57.29577951308);
-   /*---(quadrant)-------------------------*/
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   tPOINT     *x_1st       = NULL;
+   tPOINT     *x_2nd       = NULL;
+   /*---(defense)------------------------*/
+   --rce;  if (a_curr == NULL)                        return rce;
+   --rce;  if (strchr ("na", a_span) == NULL)         return rce;
+   /*---(basics first)-------------------*/
+   a_curr->x_rel = (a_curr->x_full - 0     ) / (float) my.x_scale;
+   a_curr->x_pos = my.x_min + a_curr->x_full / my.ratio;
+   a_curr->y_rel = (a_curr->y_full - 0     ) / (float) my.y_scale;
+   a_curr->y_pos = my.y_min + a_curr->y_full / my.ratio;
+   /*---(update bounds)------------------*/
+   if (a_type == POINTS_RAW) {
+      if (o.x_min > a_curr->x_pos)   o.x_min = a_curr->x_pos;
+      if (o.y_min > a_curr->y_pos)   o.y_min = a_curr->y_pos;
+      if (o.x_max < a_curr->x_pos)   o.x_max = a_curr->x_pos;
+      if (o.y_max < a_curr->y_pos)   o.y_max = a_curr->y_pos;
+   }
+   /*---(defense)------------------------*/
+   if (a_curr->type == POINT_START)                   return 0;
+   if (a_curr->type == POINT_HEAD )                   return 0;
+   if (a_curr->type == POINT_FINISH)                  return 0;
+   /*---(set the ends)-------------------*/
+   x_1st  = a_curr - 1;
+   x_2nd  = a_curr;
+   /*---(screen x, y, and xy len)--------*/
+   a_curr->xd     = x_2nd->x_pos - x_1st->x_pos;
+   a_curr->yd     = x_2nd->y_pos - x_1st->y_pos;
+   a_curr->xy_len = (int) sqrt ((a_curr->xd * a_curr->xd) + (a_curr->yd * a_curr->yd));
+   /*---(update for average)-------------*/
+   if (a_span == 'a')  x_2nd = a_curr + 1;
+   /*---(full x, y, and xy len)----------*/
+   a_curr->xd     = x_2nd->x_full - x_1st->x_full;
+   a_curr->yd     = x_2nd->y_full - x_1st->y_full;
+   a_curr->len    = (int) sqrt((a_curr->xd * a_curr->xd) + (a_curr->yd * a_curr->yd));
+   /*---(slope and intercept)------------*/
+   if      (a_curr->xd != 0)  a_curr->slope = (float) a_curr->yd / a_curr->xd;
+   else if (a_curr->yd >  0)  a_curr->slope = +999.99;
+   else                       a_curr->slope = -999.99;
+   a_curr->icept   = (int) (a_curr->y_full - (a_curr->slope * a_curr->x_full));
+   if      (a_curr->icept >  99999)  a_curr->icept =  99999;
+   else if (a_curr->icept < -99999)  a_curr->icept = -99999;
+   /*---(radians/degrees)----------------*/
+   a_curr->rads  = atan2(a_curr->yd, a_curr->xd);
+   if (a_curr->rads > FULL_CIRCLE) a_curr->rads -= FULL_CIRCLE;
+   if (a_curr->rads < 0)           a_curr->rads += FULL_CIRCLE;
+   a_curr->degs  = (int) (a_curr->rads * 57.29577951308);
+   /*---(quadrant)-----------------------*/
    if (a_curr->xd >= 0) {
-      if (a_curr->yd >= 0) a_curr->q = 1;
-      else                 a_curr->q = 4;
+      if (a_curr->yd >= 0) a_curr->quad = 1;
+      else                 a_curr->quad = 4;
    } else {
-      if (a_curr->yd >= 0) a_curr->q = 2;
-      else                 a_curr->q = 3;
+      if (a_curr->yd >= 0) a_curr->quad = 2;
+      else                 a_curr->quad = 3;
    }
    /*---(correct the deg as required)------*/
-   /*> if (a_curr->q == 2) a_curr->d -= 180;                                          <* 
-    *> if (a_curr->q == 3) a_curr->d += 180;                                          <*/
+   /*> if (a_curr->quad == 2) a_curr->degs -= 180;                                          <* 
+    *> if (a_curr->quad == 3) a_curr->degs += 180;                                          <*/
+   /*---(fill-in beginning)--------------*/
+   if (x_1st->type == POINT_HEAD) {
+      /*---(head first)------------------*/
+      x_1st->slope = a_curr->slope;
+      x_1st->icept = a_curr->icept;
+      x_1st->rads  = a_curr->rads;
+      x_1st->degs  = a_curr->degs;
+      x_1st->quad  = a_curr->quad;
+      /*---(start too)-------------------*/
+      if (a_type != POINTS_KEY) {
+         x_1st     = x_1st - 1;
+         x_1st->slope = a_curr->slope;
+         x_1st->icept = a_curr->icept;
+         x_1st->rads  = a_curr->rads;
+         x_1st->degs  = a_curr->degs;
+         x_1st->quad  = a_curr->quad;
+      }
+      /*---(done)------------------------*/
+   }
+   /*---(fill-in end)--------------------*/
+   x_2nd = a_curr + 1;
+   if (a_type != POINTS_KEY && x_2nd->type == POINT_FINISH) {
+      x_2nd->slope = a_curr->slope;
+      x_2nd->icept = a_curr->icept;
+      x_2nd->rads  = a_curr->rads;
+      x_2nd->degs  = a_curr->degs;
+      x_2nd->quad  = a_curr->quad;
+   }
    /*---(complete)-------------------------*/
    return 0;
 }
 
-char          /*----: list all points of a particular type -------------------*/
-POINT_list         (tPOINT *a_curr, int a_count)
+char          /*----: display all information on an individual point ---------*/
+POINT_show         (FILE *a_file, char a_style, tPOINT *a_curr, int a_num)
 {
-   int i;
-   //---(display list)---------------------------#
-   printf("\n");
-   printf("point inventory----------------------------------------------------------------------\n");
-   printf("### bas raw a | -xx- -yy- xd- yd- | len -slope-- icept -rad- deg | q r curve cc c t u\n");
-   for (i = 0; i < a_count; ++i) {
-      POINT_show (a_curr + i, i);
+   /*> float x_slope  = a_curr->slope;                                                <* 
+    *> int   x_icept  = a_curr->icept;                                                <*/
+   char        q1          [LEN_LABEL] = "";
+   char        q2          [LEN_LABEL] = " |";
+   if (a_style == 'g') {
+      strlcpy (q1, " ", LEN_LABEL);
+      strlcpy (q2, " ", LEN_LABEL);
    }
-   printf("### bas raw a | -xx- -yy- xd- yd- | len -slope-- icept -rad- deg | q r curve cc c t u\n");
-   printf("-------------------------------------------------------------------------------------\n");
-   printf("\n");
-   //---(complete)-------------------------------#
+   /*> if (x_slope > 999) {                                                           <* 
+    *>    x_slope = 999.99;                                                           <* 
+    *>    x_icept = 999;                                                              <* 
+    *> }                                                                              <* 
+    *> if (x_slope < -999) {                                                          <* 
+    *>    x_slope = -999.99;                                                          <* 
+    *>    x_icept = -999;                                                             <* 
+    *> }                                                                              <*/
+   fprintf (a_file, "%3d%s %3d%s %3d%s %c%s "            , a_num         , q1, a_curr->p_bas , q1, a_curr->p_raw , q1, a_curr->fake, q2);
+   fprintf (a_file, "%6d%s %6d%s %4d%s %4d%s "           , a_curr->x_full, q1, a_curr->y_full, q1, a_curr->xd    , q1, a_curr->yd  , q2);
+   fprintf (a_file, "%4d%s %8.2f%s %6d%s %5.2f%s %3d%s " , a_curr->len   , q1, a_curr->slope , q1, a_curr->icept , q1, a_curr->rads, q1, a_curr->degs , q2);
+   fprintf (a_file, "%1d%s %1d%s %6.1f%s %2d%s "         , a_curr->quad  , q1, a_curr->range , q1, a_curr->cdepth, q1, a_curr->ccat, q1);
+   fprintf (a_file, "%c%s %c%s %s%s "                    , a_curr->cano  , q1, a_curr->type  , q1, a_curr->use   , q2);
+   fprintf (a_file, "%6.3f%s %6.3f%s "                   , a_curr->x_rel , q1, a_curr->y_rel , q1);
+   fprintf (a_file, "%6d%s %6d%s %6d%s\n"                , a_curr->x_pos , q1, a_curr->y_pos , q1, a_curr->xy_len, q1);
    return 0;
 }
 
-char          /*----: display all information on an individual point ---------*/
-POINT_show         (tPOINT *a_curr, int a_num)
+char          /*----: list all points of a particular type -------------------*/
+POINT_list         (FILE *a_file, char a_style, tPOINT *a_series, int a_count)
 {
-   float s  = a_curr->s;
-   int   b  = a_curr->b;
-   if (s > 999) {
-      s = 999.99;
-      b = 999;
+   int         i;
+   /*---(header)-------------------------*/
+   if (a_style == 'd') {
+      fprintf (a_file, "\n");
+      fprintf (a_file, "point inventory-------------------------------------------------------------------------------------------------------------------\n");
+      fprintf (a_file, "### bas raw a | --xx-- --yy-- -xd- -yd- | -len -slope-- b-cept -rad- deg | q r curve- cc c t u | -xrel- -yrel- -xpos- -ypos- xylen-\n");
+   } else if (a_style == 'g') {
+      fprintf (a_file, "###  bas  raw  a  --xx--  --yy--  -xd-  -yd-  -len  -slope--  b-cept  -rad-  deg  q  r  curve-  cc  c  t  u  --xrel  --yrel  --xpos  --ypos  xylen- \n");
    }
-   if (s < -999) {
-      s = -999.99;
-      b = -999;
+   /*---(points)-------------------------*/
+   for (i = 0; i < a_count; ++i) {
+      POINT_show (a_file, a_style, a_series + i, i);
    }
-   printf("%3d %3d %3d %c", a_num, a_curr->p_bas, a_curr->p_raw, a_curr->fake);
-   printf(" | %4d %4d %3d %3d", a_curr->xpos, a_curr->ypos, a_curr->xd, a_curr->yd);
-   printf(" | %3d %8.2f %5d %5.2f %3d", a_curr->l, s, b, a_curr->r, a_curr->d);
-   printf(" | %1d %1d %5.1f %2d %c %c %s\n", a_curr->q, a_curr->ra, a_curr->c, a_curr->cc, a_curr->ca, a_curr->type, a_curr->use);
+   /*---(footer)-------------------------*/
+   if (a_style == 'd') {
+      fprintf (a_file, "### bas raw a | --xx-- --yy-- -xd- -yd- | -len -slope-- b-cept -rad- deg | q r curve- cc c t u | -xrel- -yrel- -xpos- -ypos- xylen-\n");
+      fprintf (a_file, "point inventory-------------------------------------------------------------------------------------------------------------------\n");
+      fprintf (a_file, "\n");
+   }
+   /*---(complete)-----------------------*/
+   return 0;
+}
+
+char
+POINT_clipboard    (char *a_cmd, char *a_opt)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   FILE       *f           = NULL;
+   char        x_style     =  '-';
+   /*---(defense)------------------------*/
+   --rce;  if (a_cmd == NULL)  return rce;
+   --rce;  if (a_opt == NULL)  return rce;
+   /*---(open file)----------------------*/
+   --rce;  if (strcmp (a_cmd, "clip" ) == 0) {
+      f = fopen ("/root/z_gehye/vi_clip.txt", "w");
+      if (f == NULL)  return rce;
+      x_style = 'd';
+   } else if (strcmp (a_cmd, "gyges") == 0) {
+      f = fopen ("/root/z_gehye/vi_clip.txt", "w");
+      if (f == NULL)  return rce;
+      x_style = 'g';
+   } else {
+      f = stdout;
+      x_style = 'd';
+   }
+   /*---(dump points)--------------------*/
+   --rce;  if (strcmp (a_opt, "key") == 0)   POINT_list (f, x_style, o.key, o.nkey);
+   else if    (strcmp (a_opt, "avg") == 0)   POINT_list (f, x_style, o.avg, o.navg);
+   else if    (strcmp (a_opt, "bas") == 0)   POINT_list (f, x_style, o.bas, o.nbas);
+   else if    (strcmp (a_opt, "raw") == 0)   POINT_list (f, x_style, o.raw, o.nraw);
+   else       return rce;
+   /*---(close file)---------------------*/
+   if      (strcmp (a_cmd, "clip" ) == 0)  fclose (f);
+   else if (strcmp (a_cmd, "gyges") == 0)  fclose (f);
+   /*---(complete)-----------------------*/
    return 0;
 }
 
@@ -181,131 +312,20 @@ POINT_show         (tPOINT *a_curr, int a_num)
 /*============================--------------------============================*/
 void o___SAVED__________________o (void) {;}
 
-
-/*> char                                                                                              <* 
- *> out_pick (int a_y)                                                                                <* 
- *> {                                                                                                 <* 
- *>    if (o.total == 0) return 0;                                                                    <* 
- *>    float   x_top =  win.top    - (win.bar * 1.0) -  5;                                            <* 
- *>    float   x_bot = -win.bottom + (win.bar * 1.0) +  5;                                            <* 
- *>    float   x_ran = x_top - x_bot;                                                                 <* 
- *>    float   x_inc = (x_top - x_bot) / o.total;                                                     <* 
- *>    float   x_pos = x_ran - (a_y - x_bot);                                                         <* 
- *>    int     x_num = (x_pos / x_inc) + 1;                                                           <* 
- *>    if (a_y >= x_top) {                                                                            <* 
- *>       /+> printf("hit home/top side\n");                                              <+/         <* 
- *>       x_num = 1;                                                                                  <* 
- *>    }                                                                                              <* 
- *>    if (a_y <= x_bot) {                                                                            <* 
- *>       /+> printf("hit end/bottom side\n");                                            <+/         <* 
- *>       x_num = o.total;                                                                            <* 
- *>    }                                                                                              <* 
- *>    /+> printf("got %4dy with %4.0ft, %4.0fb, %4.0fr, %do, %4.0fi, %4.0fp, so go to %d\n",   <*    <* 
- *>     *>       a_y, x_top, x_bot, x_ran, o.total, x_inc,                                      <*    <* 
- *>     *>       x_pos, x_num);                                                                 <+/   <* 
- *>    if (x_num != o.curr) {                                                                         <* 
- *>       out_read(x_num);                                                                            <* 
- *>       /+> POINT_list (key, o.nkey);                                                     <+/          <* 
- *>    }                                                                                              <* 
- *>    return 0;                                                                                      <* 
- *> }                                                                                                 <*/
-
-/*> char                                                                                        <* 
- *> out_read (int a_num)                                                                        <* 
- *> {                                                                                           <* 
- *>    DEBUG_I  printf("OUTLINE READ (begin)\n");                                               <* 
- *>    DEBUG__RAW  printf("RAW POINTS (begin)\n");                                              <* 
- *>    OUT_wipe ();                                                                             <* 
- *>    /+---(locals)---------------------------+/                                               <* 
- *>    FILE     *f;                                                                             <* 
- *>    char      s[MAX_LINE] = "";         // current record                                    <* 
- *>    int       n = 0;                    // current record number in file                     <* 
- *>    int       len       = 0;                                                                 <* 
- *>    int i;                                                                                   <* 
- *>    /+---(open file)------------------------+/                                               <* 
- *>    f = fopen(fname, "r");                                                                   <* 
- *>    if (f == NULL) return -1;                                                                <* 
- *>    /+---(process)--------------------------+/                                               <* 
- *>    while (fgets(s, MAX_LINE, f)) {                                                          <* 
- *>       ++n;                                                                                  <* 
- *>       if (a_num != n)                            continue;                                  <* 
- *>       len = strlen(s);                                                                      <* 
- *>       /+> if (len > 1 && s[0] != '#' && s[0] != ' ') continue;                        <+/   <* 
- *>       /+> if (s[0] == '#' || s[0] == '\n')           return 0;                        <+/   <* 
- *>       char   *p = NULL;             // pointer to substring                                 <* 
- *>       char   *q1 = "|";             // delimiters                                           <* 
- *>       char   *q2 = "(),";           // delimiters                                           <* 
- *>       int     x_count = 0;          // count of raw points                                  <* 
- *>       int     x = 0;                // raw x-coord                                          <* 
- *>       int     y = 0;                // raw y-coord                                          <* 
- *>       char    x_info[100] = "";                                                             <* 
- *>       o.curr = a_num;                                                                       <* 
- *>       DEBUG_I  printf("   index    = %d\n", o.curr);                                        <* 
- *>       /+---(date)-------------------------+/                                                <* 
- *>       p = strtok(s, q1);                                                                    <* 
- *>       if (p == NULL)     return -1;                                                         <* 
- *>       /+> printf("date = <<%s>>\n", p);                                            <+/      <* 
- *>       strncpy(o.when,   str_trim(p), 50);                                                   <* 
- *>       DEBUG_I  printf("   date     = %s\n", o.when);                                        <* 
- *>       /+---(expected result)--------------+/                                                <* 
- *>       p = strtok(NULL, q1);                                                                 <* 
- *>       if (p == NULL)     return -1;                                                         <* 
- *>       /+> printf("name = <<%s>>\n", p);                                            <+/      <* 
- *>       strncpy(o.expect, str_trim(p), 50);                                                   <* 
- *>       DEBUG_I  printf("   expected = %s\n", o.expect);                                      <* 
- *>       /+---(note)-------------------------+/                                                <* 
- *>       p = strtok(NULL, q1);                                                                 <* 
- *>       if (p == NULL)     return -1;                                                         <* 
- *>       /+> printf("name = <<%s>>\n", p);                                            <+/      <* 
- *>       strncpy(o.note,   str_trim(p), 50);                                                   <* 
- *>       DEBUG_I  printf("   note     = %s\n", o.note);                                        <* 
- *>       /+---(count)------------------------+/                                                <* 
- *>       p = strtok(NULL, q1);                                                                 <* 
- *>       if (p == NULL)     return -1;                                                         <* 
- *>       x_count = atoi(p);                                                                    <* 
- *>       DEBUG_I  printf("   expecting %4d points\n", x_count);                                <* 
- *>       /+> printf("out_read(%d) has %d points\n", a_num, x_count);                  <+/      <* 
- *>       p = strtok(NULL, q2);                                                                 <* 
- *>       for (i = 0; i < x_count; ++i) {                                                       <* 
- *>          p = strtok(NULL, q2);                                                              <* 
- *>          if (p == NULL)  {                                                                  <* 
- *>             DEBUG_I  printf("(%04d) x=null\n", i);                                          <* 
- *>             break;                                                                          <* 
- *>          }                                                                                  <* 
- *>          x = atoi(p);                                                                       <* 
- *>          p = strtok(NULL, q2);                                                              <* 
- *>          if (p == NULL) {                                                                   <* 
- *>             DEBUG_I  printf("(%04d) x=%03d, y=null\n", i, x);                               <* 
- *>             break;                                                                          <* 
- *>          }                                                                                  <* 
- *>          y = atoi(p);                                                                       <* 
- *>          /+> printf("out_read %4dx, %4dy\n", x, y);                                <+/      <* 
- *>          if      (i == 0)               RAW_read  (x, y);                                   <* 
-*>          else if (i == x_count - 1)     RAW_end   (x, y);                                   <* 
-*>          else                           RAW_add   (x, y);                                   <* 
-*>          sprintf(x_info, "(%04d) x=%03d, y=%03d", i, x, y);                                 <* 
-*>       }                                                                                     <* 
-*>    }                                                                                        <* 
-*>    DEBUG_I  printf("   took in %4d points\n", o.nraw);                                      <* 
-*>    DEBUG_I  printf("OUTLINE READ (end)\n\n");                                               <* 
-*>    DEBUG__RAW  POINT_list (o.raw, o.nraw);                                                     <* 
-*>    DEBUG__RAW  printf("RAW POINTS (end)\n\n");                                              <* 
-*>    o.craw     = 1;                                                                          <* 
-*>    o.cavg     = 1;                                                                          <* 
-*>    o.ckey     = 1;                                                                          <* 
-*>    o.saved    = 'y';                                                                        <* 
-*>    fclose(f);                                                                               <* 
-*>    BASE_filter   ();                                                                        <* 
-*>    KEY_filter    ();                                                                        <* 
-*>    match_flatten ();                                                                        <* 
-*>    match_squeeze ();                                                                        <* 
-*>    circle_driver ();                                                                        <* 
-*>    match_sharps  ();                                                                        <* 
-*>    MATCH_driver  ();                                                                        <* 
-*>    /+> DEBUG__KEY  POINT_list (o.key, o.nkey);                                           <+/   <* 
-*>    return 0;                                                                                <* 
-*> }                                                                                           <*/
-
+char       /*----: file info for buffer line ---------------------------------*/
+OUT_status         (char *a_list)
+{
+   /*---(locals)-----------+-----------+-*/
+   char        rce         = -10;
+   int         i           =   0;
+   char        t           [10];
+   /*---(defenses)-----------------------*/
+   --rce;  if (a_list  == NULL)  return rce;
+   /*---(walk the list)------------------*/
+   sprintf (a_list, "%s (%d outlines)", my.f_full, o.total);
+   /*---(complete)-----------------------*/
+   return 0;
+}
 
 char
 OUT__open          (char *a_mode)
@@ -392,7 +412,8 @@ OUT__parse         (void)
    if (s_nfield >=  3)  o.complexity  = atoi (s_fields [2]);
    if (s_nfield >=  4)  o.messiness   = atoi (s_fields [3]);
    if (s_nfield >=  5)  strlcpy (o.note  , s_fields [4], LEN_DESC);
-   if (s_nfield >=  7)  strlcpy (o.points, s_fields [6], LEN_RECD);
+   if (s_nfield >=  7)  o.ratio       = atoi (s_fields [6]);
+   if (s_nfield >=  8)  strlcpy (o.points, s_fields [7], LEN_RECD);
    /*---(complete)-----------------------*/
    DEBUG_INPT   yLOG_sexit   (__FUNCTION__);
    return 0;
@@ -502,8 +523,8 @@ OUT_append         (void)
    DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
    /*---(check for saved)------------------*/
    if (o.saved == 'y') {
-      DEBUG_INPT   yLOG_note    ("already saved");
-      DEBUG_INPT   yLOG_exit    (__FUNCTION__);
+      DEBUG_OUTP   yLOG_note    ("already saved");
+      DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
       return 0;
    }
    /*---(open file)------------------------*/
@@ -529,19 +550,20 @@ OUT_append         (void)
    fprintf (s_file, "%-40.40s  ", " ");
    /*---(write count)----------------------*/
    fprintf (s_file, "%3d  ", o.nraw);
+   /*---(write conv)-----------------------*/
+   fprintf (s_file, "%5.2f  ", o.ratio);
    /*---(process)--------------------------*/
    for (i = 0; i < o.nraw; ++i) {
+      fprintf (s_file, ";");
       switch (o.raw [i].type) {
       case POINT_START   :
-         fprintf (s_file, ";TOUCH,%d,%d", o.raw[i].xpos + o.xadj, o.raw[i].ypos + o.yadj);
+         fprintf (s_file, ";TOUCH,");
          break;
       case POINT_FINISH  :
-         fprintf (s_file, ";LIFT,%d,%d", o.raw[i].xpos + o.xadj, o.raw[i].ypos + o.yadj);
-         break;
-      default :
-         fprintf (s_file, ";%d,%d", o.raw[i].xpos + o.xadj, o.raw[i].ypos + o.yadj);
+         fprintf (s_file, ";LIFT,");
          break;
       }
+      fprintf (s_file, "%d,%d", o.raw[i].x_full, o.raw[i].y_full);
    }
    /*---(finish off record)----------------*/
    fprintf (s_file, " \n");
