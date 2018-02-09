@@ -256,6 +256,7 @@ PROG__unitquiet     (void)
    yURG_urgs   (1, x_args);
    PROG_args   (1, x_args);
    PROG_begin  ();
+   PROG_final  ();
    return 0;
 }
 

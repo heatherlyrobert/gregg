@@ -39,14 +39,13 @@ char
 DRAW__sizes        (cint a_wide, cint a_tall)
 {
    /*---(locals)-----------+-----+-----+-*/
-   int         x_wide      =    0;
    /*---(header)----------------------*/
    DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
    /*---(main)---------------------------*/
    my.x_scale   = 31500;
    my.y_scale   = 19700;
-   my.x_min     = -125;
-   my.y_min     = 125 - 350;
+   /*> my.x_min     =  -125;                                                          <* 
+    *> my.y_min     = 125 - 350;                                                      <*/
    /*---(detailed text)------------------*/
    win.d_xoff   =   200;
    win.d_yoff   =   100;
@@ -56,10 +55,11 @@ DRAW__sizes        (cint a_wide, cint a_tall)
    win.d_ansx   =   200;
    win.d_ansy   =  -160;
    yVIKEYS_view_bounds   (YVIKEYS_MAIN  , &my.x_min, &my.x_max , &my.y_min, &my.y_max );
-   x_wide       = a_wide + 40;
-   my.x_center  = abs (my.x_min) / (float) x_wide;
+   yVIKEYS_view_coords   (YVIKEYS_MAIN  , NULL     , &my.x_wide, NULL     , &my.y_tall);
+   my.x_full    = my.x_wide + 40;
+   my.x_center  = abs (my.x_min) / (float) my.x_full;
    my.y_center  = abs (my.y_min) / (float) a_tall;
-   my.ratio     = my.x_scale  / (float) x_wide;
+   my.ratio     = my.x_scale  / (float) my.x_full;
    /*---(texture)------------------------*/
    win.tex_h    = a_tall * 2.0;
    win.tex_w    = a_wide * 2.0;
@@ -84,6 +84,7 @@ DRAW_init            (void)
    yVIKEYS_cmds_direct   (":palette 190 rcomp pale earthy");
    yVIKEYS_view_setup    (YVIKEYS_MAIN     , YVIKEYS_FLAT, YVIKEYS_TOPLEF, -125, 500, 125 - 350, 350, 0, 0, YCOLOR_BAS    , DRAW_primary);
    yVIKEYS_view_colors   (YCOLOR_POS, YCOLOR_BAS, YCOLOR_NEG, YCOLOR_POS);
+   yVIKEYS_cmds_direct   (":ribbon show");
    DRAW__sizes           (500, 350);
    yGLTEX_init     ();
    yVIKEYS_view_color_clear (YCOLOR_BAS_MED);
@@ -94,7 +95,6 @@ DRAW_init            (void)
    yVIKEYS_view_ribbon ("align"   , "layers"      );
    yVIKEYS_view_ribbon ("draw"    , "resolution"  );
    yVIKEYS_view_ribbon ("tools"   , "shower"      );
-   yVIKEYS_cmds_direct (":ribbon show");
    yGLTEX_new (&s_tex, &s_fbo, &s_depth, win.tex_w, win.tex_h);
    yVIKEYS_view_option (YVIKEYS_OVERLAY, "data"  , OVERLAY_data    , "current point statistics");
    yVIKEYS_view_option (YVIKEYS_OVERLAY, "sample", OVERLAY_samples , "letter samples");

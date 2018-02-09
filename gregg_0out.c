@@ -79,9 +79,9 @@ OUT_clear          (void)
          p [x_pt].p_raw  = p [x_pt].p_bas  = 0;
          p [x_pt].x_full = p [x_pt].y_full = 0;
          p [x_pt].xd     = p [x_pt].yd     = 0;
-         p [x_pt].len    = p [x_pt].icept  = p [x_pt].degs  = p [x_pt].quad   = p [x_pt].ccat = 0;
-         p [x_pt].slope  = p [x_pt].rads   = p [x_pt].range = p [x_pt].cdepth = 0.0;
-         p [x_pt].cano   = p [x_pt].type   = p [x_pt].fake  = '-';
+         p [x_pt].len    = p [x_pt].icept  = p [x_pt].degs   = p [x_pt].quad   = p [x_pt].ccat = 0;
+         p [x_pt].slope  = p [x_pt].rads   = p [x_pt].range  = p [x_pt].cdepth = 0.0;
+         p [x_pt].sharp  = p [x_pt].cano   = p [x_pt].type   = p [x_pt].fake  = '-';
          strlcpy (p [x_pt].use, "-", 5);
          p [x_pt].x_rel  = p [x_pt].y_rel  = 0.0;
          p [x_pt].x_pos  = p [x_pt].y_pos  = 0;
@@ -104,22 +104,6 @@ OUT_clear          (void)
 /*============================--------------------============================*/
 void o___GENERIC________________o (void) {;}
 
-/*> char                                                                              <* 
- *> POINT_display        (tPOINT *a_curr)                                             <* 
- *> {                                                                                 <* 
- *>    /+---(locals)-----------+-----+-----+-+/                                       <* 
- *>    DEBUG_GRAF   yLOG_enter   (__FUNCTION__);                                      <* 
- *>    /+---(x-pos)--------------+/                                                   <* 
- *>    a_curr->x_rel = (a_curr->x_full - 0     ) / (float) my.x_scale;                <* 
- *>    a_curr->x_pos = my.x_min + a_curr->x_full / my.ratio;                          <* 
- *>    /+---(y-pos)--------------+/                                                   <* 
- *>    a_curr->y_rel = (a_curr->y_full - 0     ) / (float) my.y_scale;                <* 
- *>    a_curr->y_pos = my.y_min + a_curr->y_full / my.ratio;                          <* 
- *>    /+---(done)---------------+/                                                   <* 
- *>    DEBUG_GRAF   yLOG_exit    (__FUNCTION__);                                      <* 
- *>    return 0;                                                                      <* 
- *> }                                                                                 <*/
-
 char
 POINT_calc         (char a_type, tPOINT *a_curr,  int a_span)
 {
@@ -129,12 +113,20 @@ POINT_calc         (char a_type, tPOINT *a_curr,  int a_span)
    tPOINT     *x_2nd       = NULL;
    /*---(defense)------------------------*/
    --rce;  if (a_curr == NULL)                        return rce;
-   --rce;  if (strchr ("na", a_span) == NULL)         return rce;
+   --rce;  if (a_type == 0)                           return rce;
+   --rce;  if (strchr (POINTS_ALL, a_type) == NULL)   return rce;
+   --rce;  if (a_span == 0)                           return rce;
+   --rce;  if (strchr (SPAN_ALL  , a_span) == NULL)   return rce;
+   --rce;  if (a_curr < o.raw                     )   return rce;
+   --rce;  if (a_curr >= o.key + MAX_POINTS       )   return rce;
+   --rce;  if (my.ratio   == 0)                       return rce;
+   --rce;  if (my.x_scale == 0)                       return rce;
+   --rce;  if (my.y_scale == 0)                       return rce;
    /*---(basics first)-------------------*/
    a_curr->x_rel = (a_curr->x_full - 0     ) / (float) my.x_scale;
-   a_curr->x_pos = my.x_min + a_curr->x_full / my.ratio;
+   a_curr->x_pos = my.x_min + (a_curr->x_rel * my.x_full);
    a_curr->y_rel = (a_curr->y_full - 0     ) / (float) my.y_scale;
-   a_curr->y_pos = my.y_min + a_curr->y_full / my.ratio;
+   a_curr->y_pos = my.y_min + (a_curr->y_rel * my.y_tall);
    /*---(update bounds)------------------*/
    if (a_type == POINTS_RAW) {
       if (o.x_min > a_curr->x_pos)   o.x_min = a_curr->x_pos;
@@ -143,9 +135,19 @@ POINT_calc         (char a_type, tPOINT *a_curr,  int a_span)
       if (o.y_max < a_curr->y_pos)   o.y_max = a_curr->y_pos;
    }
    /*---(defense)------------------------*/
-   if (a_curr->type == POINT_START)                   return 0;
-   if (a_curr->type == POINT_HEAD )                   return 0;
-   if (a_curr->type == POINT_FINISH)                  return 0;
+   if (a_span == SPAN_SPOT)           return 0;
+   if (a_curr->type == POINT_START)   return 0;
+   if (a_curr->type == POINT_HEAD )   return 0;
+   /*---(fill-in end)--------------------*/
+   x_2nd = a_curr - 1;
+   if (a_type != POINTS_KEY && a_curr->type == POINT_FINISH) {
+      a_curr->slope = x_2nd->slope;
+      a_curr->icept = x_2nd->icept;
+      a_curr->rads  = x_2nd->rads;
+      a_curr->degs  = x_2nd->degs;
+      a_curr->quad  = x_2nd->quad;
+   }
+   if (a_curr->type == POINT_FINISH)  return 0;
    /*---(set the ends)-------------------*/
    x_1st  = a_curr - 1;
    x_2nd  = a_curr;
@@ -154,7 +156,7 @@ POINT_calc         (char a_type, tPOINT *a_curr,  int a_span)
    a_curr->yd     = x_2nd->y_pos - x_1st->y_pos;
    a_curr->xy_len = (int) sqrt ((a_curr->xd * a_curr->xd) + (a_curr->yd * a_curr->yd));
    /*---(update for average)-------------*/
-   if (a_span == 'a')  x_2nd = a_curr + 1;
+   if (a_span == SPAN_AVG )  x_2nd = a_curr + 1;
    /*---(full x, y, and xy len)----------*/
    a_curr->xd     = x_2nd->x_full - x_1st->x_full;
    a_curr->yd     = x_2nd->y_full - x_1st->y_full;
@@ -201,15 +203,6 @@ POINT_calc         (char a_type, tPOINT *a_curr,  int a_span)
       }
       /*---(done)------------------------*/
    }
-   /*---(fill-in end)--------------------*/
-   x_2nd = a_curr + 1;
-   if (a_type != POINTS_KEY && x_2nd->type == POINT_FINISH) {
-      x_2nd->slope = a_curr->slope;
-      x_2nd->icept = a_curr->icept;
-      x_2nd->rads  = a_curr->rads;
-      x_2nd->degs  = a_curr->degs;
-      x_2nd->quad  = a_curr->quad;
-   }
    /*---(complete)-------------------------*/
    return 0;
 }
@@ -236,10 +229,10 @@ POINT_show         (FILE *a_file, char a_style, tPOINT *a_curr, int a_num)
    fprintf (a_file, "%3d%s %3d%s %3d%s %c%s "            , a_num         , q1, a_curr->p_bas , q1, a_curr->p_raw , q1, a_curr->fake, q2);
    fprintf (a_file, "%6d%s %6d%s %4d%s %4d%s "           , a_curr->x_full, q1, a_curr->y_full, q1, a_curr->xd    , q1, a_curr->yd  , q2);
    fprintf (a_file, "%4d%s %8.2f%s %6d%s %5.2f%s %3d%s " , a_curr->len   , q1, a_curr->slope , q1, a_curr->icept , q1, a_curr->rads, q1, a_curr->degs , q2);
-   fprintf (a_file, "%1d%s %1d%s %6.1f%s %2d%s "         , a_curr->quad  , q1, a_curr->range , q1, a_curr->cdepth, q1, a_curr->ccat, q1);
+   fprintf (a_file, "%1d%s %1d%s %5.1f%s %2d%s "         , a_curr->quad  , q1, a_curr->range , q1, a_curr->cdepth, q1, a_curr->ccat, q1);
    fprintf (a_file, "%c%s %c%s %s%s "                    , a_curr->cano  , q1, a_curr->type  , q1, a_curr->use   , q2);
    fprintf (a_file, "%6.3f%s %6.3f%s "                   , a_curr->x_rel , q1, a_curr->y_rel , q1);
-   fprintf (a_file, "%6d%s %6d%s %6d%s\n"                , a_curr->x_pos , q1, a_curr->y_pos , q1, a_curr->xy_len, q1);
+   fprintf (a_file, "%4d%s %4d%s %4d%s\n"                , a_curr->x_pos , q1, a_curr->y_pos , q1, a_curr->xy_len, q1);
    return 0;
 }
 
@@ -250,10 +243,10 @@ POINT_list         (FILE *a_file, char a_style, tPOINT *a_series, int a_count)
    /*---(header)-------------------------*/
    if (a_style == 'd') {
       fprintf (a_file, "\n");
-      fprintf (a_file, "point inventory-------------------------------------------------------------------------------------------------------------------\n");
-      fprintf (a_file, "### bas raw a | --xx-- --yy-- -xd- -yd- | -len -slope-- b-cept -rad- deg | q r curve- cc c t u | -xrel- -yrel- -xpos- -ypos- xylen-\n");
+      fprintf (a_file, "point inventory-------------------------------------------------------------------------------------------------------------\n");
+      fprintf (a_file, "### bas raw a | --xx-- --yy-- -xd- -yd- | -len -slope-- b-cept -rad- deg | q r curve cc c t u | -xrel- -yrel- xpos ypos xyln\n");
    } else if (a_style == 'g') {
-      fprintf (a_file, "###  bas  raw  a  --xx--  --yy--  -xd-  -yd-  -len  -slope--  b-cept  -rad-  deg  q  r  curve-  cc  c  t  u  --xrel  --yrel  --xpos  --ypos  xylen- \n");
+      fprintf (a_file, "###  bas  raw  a  --xx--  --yy--  -xd-  -yd-  -len  -slope--  b-cept  -rad-  deg  q  r  curve-  cc  c  t  u  --xrel  --yrel  xpos  ypos  xyln \n");
    }
    /*---(points)-------------------------*/
    for (i = 0; i < a_count; ++i) {
@@ -261,8 +254,8 @@ POINT_list         (FILE *a_file, char a_style, tPOINT *a_series, int a_count)
    }
    /*---(footer)-------------------------*/
    if (a_style == 'd') {
-      fprintf (a_file, "### bas raw a | --xx-- --yy-- -xd- -yd- | -len -slope-- b-cept -rad- deg | q r curve- cc c t u | -xrel- -yrel- -xpos- -ypos- xylen-\n");
-      fprintf (a_file, "point inventory-------------------------------------------------------------------------------------------------------------------\n");
+      fprintf (a_file, "### bas raw a | --xx-- --yy-- -xd- -yd- | -len -slope-- b-cept -rad- deg | q r curve cc c t u | -xrel- -yrel- xpos ypos xyln\n");
+      fprintf (a_file, "point inventory-------------------------------------------------------------------------------------------------------------\n");
       fprintf (a_file, "\n");
    }
    /*---(complete)-----------------------*/
@@ -636,6 +629,44 @@ FILE_rename          (char *a_name)
    /*---(complete)-----------------------*/
    DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
    return 0;
+}
+
+
+
+/*============================--------------------============================*/
+/*===----                          unit testing                        ----===*/
+/*============================--------------------============================*/
+void o___UNIT_TEST______________o (void) {;}
+
+char*        /*-> unit test accessor -----------------[ light  [us.D90.241.L0]*/ /*-[03.0000.00#.#]-*/ /*-[--.---.---.--]-*/
+OUT__unit            (char *a_question, tPOINT *a_curr)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   int         i           = 0;
+   char        t           [100] = "";
+   /*---(initialize)---------------------*/
+   strlcpy (unit_answer, "OUT unit         : unknown request", 100);
+   /*---(core data)----------------------*/
+   if        (strncmp (a_question, "globals"   , 20)  == 0) {
+      snprintf (unit_answer, LEN_STR, "OUT globals      : ratio %4.1f, x_scale %5d, y_scale %5d", my.ratio, my.x_scale, my.y_scale);
+   }
+   else if   (strncmp (a_question, "bounds"    , 20)  == 0) {
+      snprintf (unit_answer, LEN_STR, "OUT bounds       : x %4dm %4dx %4dw   y %4dm %4dx %4dh", my.x_min, my.x_max, my.x_wide, my.y_min, my.y_max, my.y_tall);
+   }
+   else if   (strncmp (a_question, "center"    , 20)  == 0) {
+      snprintf (unit_answer, LEN_STR, "OUT center       : x %5.3f   y %5.3f", my.x_center, my.y_center);
+   }
+   else if   (strncmp (a_question, "coord"     , 20)  == 0) {
+      snprintf (unit_answer, LEN_STR, "OUT coord        : %c   x %5d (%5.3f) %4d   y %5d (%5.3f) %4d", a_curr->type, a_curr->x_full, a_curr->x_rel, a_curr->x_pos, a_curr->y_full, a_curr->y_rel, a_curr->y_pos);
+   }
+   else if   (strncmp (a_question, "stats"     , 20)  == 0) {
+      snprintf (unit_answer, LEN_STR, "OUT stats        : %c   s %8.2f, b %6d, r %5.2f, d %3d, q %d", a_curr->type, a_curr->slope, a_curr->icept, a_curr->rads, a_curr->degs, a_curr->quad);
+   }
+   else if   (strncmp (a_question, "other"     , 20)  == 0) {
+      snprintf (unit_answer, LEN_STR, "OUT other        : %c   depth %5.1f, cat %2d, anom %c, sharp %c", a_curr->type, a_curr->cdepth, a_curr->ccat, a_curr->cano, a_curr->sharp);
+   }
+   /*---(complete)-----------------------*/
+   return unit_answer;
 }
 
 

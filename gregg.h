@@ -206,8 +206,8 @@
 
 
 /* rapidly evolving version number to aid with visual change confirmation     */
-#define VER_NUM   "5.2f"
-#define VER_TXT   "move all calcs to greater resolution (wacom) coordinates"
+#define VER_NUM   "5.2g"
+#define VER_TXT   "created gregg_0out unit test and caught many issues"
 
 
 #define     LEN_HUGE     10000
@@ -279,6 +279,7 @@ struct cACCESSOR {
    int         x_min;
    int         x_max;
    int         x_wide;
+   int         x_full;
    int         y_min;
    int         y_max;
    int         y_tall;
@@ -455,6 +456,13 @@ typedef struct timespec  tTSPEC;
 #define     POINTS_AVG     'a'
 #define     POINTS_KEY     'k'
 #define     POINTS_TMP     't'
+#define     POINTS_ALL     "rbakt"
+
+#define     SPAN_NORM      'n'
+#define     SPAN_AVG       'a'
+#define     SPAN_SPOT      '-'
+#define     SPAN_ALL       "na-"
+
 
 #define     POINT_TYPES    "S>-F"
 #define     POINT_START    'S'
@@ -492,6 +500,7 @@ struct cPOINT
    float       cdepth;                 // pixels of curvature at mid point
    char        cano;                   // curve anomolies '-' = normal, 'x' = jittery
    char        ccat;                   // curve category : +1, 0, -1                    
+   char        sharp;                  /* distinct break before-to-after      */        
    char        use         [5];        /* use of this point in outline        */
    char        fake;                   /* artificial point or not (y/n)       */
    /*---(display)---------------*/
@@ -530,19 +539,20 @@ struct cOUTLINE
    int         xadj;
    int         yadj;
    float       ratio;                  /* input to display conversion ratio   */
-   tPOINT      raw[MAX_POINTS];          /* raw points                          */
    /*---(base)---------------------------*/
    int         nbas;                     /* number of basic points              */
-   tPOINT      bas[MAX_POINTS];          /* basic points                        */
    /*---(average)------------------------*/
    int         navg;                     /* number of average points            */
    int         cavg;                     /* current average point               */
-   tPOINT      avg[MAX_POINTS];          /* average points                      */
-   tPOINT      tmp[5];                   /* calculation storage                 */
    /*---(keys)---------------------------*/
    int         nkey;                     /* number of key points                */
    int         ckey;                     /* current key point                   */
-   tPOINT      key[MAX_POINTS];          /* key points                          */
+   /*---(acutal points)------------------*/
+   tPOINT      raw         [MAX_POINTS]; /* raw points                          */
+   tPOINT      bas         [MAX_POINTS]; /* basic points                        */
+   tPOINT      avg         [MAX_POINTS]; /* average points                      */
+   tPOINT      tmp         [5];          /* calculation storage                 */
+   tPOINT      key         [MAX_POINTS]; /* key points                          */
    /*---(bounding)-----------------------*/
    int         x_min;
    int         y_min;
@@ -644,6 +654,9 @@ char       OUT_count            (void);
 char       OUT_pick             (int a_num);
 char       OUT_append           (void);
 char       out_read             (int);
+char*      OUT__unit            (char *a_question, tPOINT *a_curr);
+
+
 char       POINT_calc           (char a_type, tPOINT* a_curr, int a_span);
 char       POINT_list           (FILE *a_file, char a_style, tPOINT *a_series, int a_count);
 char       POINT_show           (FILE *a_file, char a_style, tPOINT *a_curr  , int a_num);
@@ -663,7 +676,6 @@ char*      RAW__unit            (char *a_question, int a_num);
 /*---(base)-----------------*/
 char       BASE_filter          (void);
 
-char       KEY_filter        (void);
 
 char       KEY_add           (int, char, char);
 char       KEY_calc          (char);
@@ -671,8 +683,11 @@ char       KEY_prep          (void);
 char       KEY_label         (int, int, char*);
 char       KEY_del           (int);
 int        KEY_find          (int);
+char       KEY_filter        (void);
+char       KEY_flatten       (void);
+char       KEY_squeeze       (void);
+char       KEY_sharps        (void);
 
-char       match_sharps      (void);
 
 char       MATCH_driver      (void);
 char       match_calc        (int, int);
@@ -680,9 +695,7 @@ char       match_calc        (int, int);
 int        match_size        (int);
 int        match_range       (int);
 
-char       circle_driver     (void);
-char       match_flatten     (void);
-char       match_squeeze     (void);
+char       CIRCLE_driver     (void);
 
 char       dict_read         (void);
 int        words_outstring   (char *);

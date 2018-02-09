@@ -199,11 +199,11 @@ RAW_lift             (int a_xpad, int a_ypad)
    if (rc == 0)  rc = RAW_equalize  ();
    if (rc == 0)  rc = BASE_filter  ();
    if (rc == 0)  rc = KEY_filter    ();
-   /*> if (rc == 0)  rc = match_flatten ();                                           <* 
-    *> if (rc == 0)  rc = match_squeeze ();                                           <* 
-    *> if (rc == 0)  rc = circle_driver ();                                           <* 
-    *> if (rc == 0)  rc = match_sharps  ();                                           <* 
-    *> if (rc == 0)  rc = MATCH_driver  ();                                           <*/
+   if (rc == 0)  rc = KEY_flatten ();
+   if (rc == 0)  rc = KEY_squeeze ();
+   if (rc == 0)  rc = KEY_sharps  ();
+   if (rc == 0)  rc = CIRCLE_driver ();
+   if (rc == 0)  rc = MATCH_driver  ();
    if (rc <  0)  return rc;
    /*> if (rc == 0)  rc = OUT_append    ();                                           <*/
    /*---(complete)-----------------------*/
