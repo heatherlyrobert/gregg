@@ -316,7 +316,7 @@ OUT_status         (char *a_list)
    /*---(defenses)-----------------------*/
    --rce;  if (a_list  == NULL)  return rce;
    /*---(walk the list)------------------*/
-   sprintf (a_list, "%s (%d of %d)", my.f_full, o.curr, o.total);
+   sprintf (a_list, "%s (%d of %d)", my.f_full, o.curr + 1, o.total);
    /*---(complete)-----------------------*/
    return 0;
 }
@@ -594,7 +594,7 @@ FILE_rename          (char *a_name)
       DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
       OUT_count ();
       DEBUG_OUTP   yLOG_value   ("o.total"   , o.total);
-      OUT_pick  (0);
+      OUT_pick  (o.total - 1);
       return 0;
    }
    DEBUG_OUTP   yLOG_info    ("a_name"    , a_name);
@@ -612,7 +612,7 @@ FILE_rename          (char *a_name)
       DEBUG_OUTP   yLOG_info    ("my.f_title", my.f_title);
       OUT_count ();
       DEBUG_OUTP   yLOG_value   ("o.total"   , o.total);
-      OUT_pick  (0);
+      OUT_pick  (o.total - 1);
       DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
       return 0;
    }
@@ -628,7 +628,7 @@ FILE_rename          (char *a_name)
    DEBUG_OUTP   yLOG_info    ("my.f_title", my.f_title);
    OUT_count ();
    DEBUG_OUTP   yLOG_value   ("o.total"   , o.total);
-   OUT_pick  (0);
+   OUT_pick  (o.total - 1);
    /*---(complete)-----------------------*/
    DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
    return 0;

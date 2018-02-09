@@ -59,9 +59,9 @@ MAP__ymajor           (void)
    g_ymap.avail = o.total;
    DEBUG_INPT   yLOG_sint    (g_ymap.gmax);
    /*---(screen)-------------------------*/
-   g_ymap.beg   = g_ymap.cur   = g_ymap.end   = g_ymap.len   = g_ymap.tend  = 0;
+   g_ymap.beg   = g_ymap.cur   = g_ymap.end   = g_ymap.len   = g_ymap.tend  = o.total - 1;
    /*---(units)--------------------------*/
-   g_ymap.gbeg  = g_ymap.gcur  = g_ymap.gend  = 0;
+   g_ymap.gbeg  = g_ymap.gcur  = g_ymap.gend  = o.total - 1;
    /*---(complete)-----------------------*/
    DEBUG_INPT   yLOG_sexit   (__FUNCTION__);
    return 0;
@@ -75,7 +75,6 @@ MAP__yminor           (void)
    DEBUG_INPT   yLOG_sint    (o.total);
    /*---(local movements)----------------*/
    g_ymap.lmin = g_ymap.prev = 0;
-   /*> g_ymap.lmax = g_ymap.next = o.total - 1;                                       <*/
    g_ymap.lmax = g_ymap.next = o.total;
    /*---(complete)-----------------------*/
    DEBUG_INPT   yLOG_sexit   (__FUNCTION__);
@@ -101,21 +100,24 @@ MAP_mapper           (char a_req)
       MAP__xminor ();
       o.curr  = g_ymap.cur;
       o.cavg  = g_xmap.cur;
+      OUT_pick (o.curr);
    }
    /*---(initialize)---------------------*/
    else {
       DEBUG_INPT   yLOG_note    ("normal run");
       if (o.curr != g_ymap.cur) {
-         OUT_pick (g_ymap.cur);
          MAP__yminor ();
          MAP__xmajor ();
          MAP__xminor ();
+         o.curr  = g_ymap.cur;
+         o.cavg  = g_xmap.cur;
+         OUT_pick (o.curr);
       }
       else if (o.cavg != g_xmap.cur) {
          MAP__xminor ();
+         o.curr  = g_ymap.cur;
+         o.cavg  = g_xmap.cur;
       }
-      o.curr  = g_ymap.cur;
-      o.cavg  = g_xmap.cur;
    }
    DEBUG_INPT   yLOG_value   ("o.curr"    , o.curr);
    DEBUG_INPT   yLOG_value   ("o.total"   , o.total);

@@ -206,8 +206,8 @@
 
 
 /* rapidly evolving version number to aid with visual change confirmation     */
-#define VER_NUM   "5.2h"
-#define VER_TXT   "fixed vertical movement getting to all outlines"
+#define VER_NUM   "5.2i"
+#define VER_TXT   "added dotted lines connecting start and finish points"
 
 
 #define     LEN_HUGE     10000

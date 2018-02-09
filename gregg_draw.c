@@ -489,8 +489,9 @@ LAYER_base          (void)
 {
    /*---(locals)-------------------------*/
    float   z     =    5.25;
-   int i;
+   int     i;
    for (i = 0; i < o.navg; ++i) {
+      /*---(draw the point)--------------*/
       if      (o.avg[i].cano  == 'x') glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
       else if (o.avg[i].type  == 'm') glColor4f(1.0f, 0.0f, 1.0f, 1.0f);
       else if (o.bas[i].fake  == 'y') glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
@@ -500,8 +501,32 @@ LAYER_base          (void)
       glBegin     (GL_POINTS); {
          glVertex3f( o.avg[i].x_pos, o.avg[i].y_pos, z);
       } glEnd();
+      /*---(draw the S extension)--------*/
+      if (o.avg [i].type == POINT_START) {
+         glEnable      (GL_LINE_STIPPLE);
+         glLineStipple (1, 0x3333);
+         glColor4f     (0.0f, 0.0f, 0.0f, 0.5f);
+         glLineWidth   (2.0);
+         glBegin (GL_LINES); {
+            glVertex3f (o.avg [i    ].x_pos, o.avg [i    ].y_pos, z - 1.50);
+            glVertex3f (o.avg [i + 1].x_pos, o.avg [i + 1].y_pos, z - 1.50);
+         } glEnd();
+         glDisable     (GL_LINE_STIPPLE);
+      }
+      /*---(draw the F extension)--------*/
+      if (o.avg [i].type == POINT_FINISH) {
+         glEnable      (GL_LINE_STIPPLE);
+         glLineStipple (1, 0x3333);
+         glColor4f     (0.0f, 0.0f, 0.0f, 0.5f);
+         glLineWidth   (2.0);
+         glBegin (GL_LINES); {
+            glVertex3f (o.avg [i    ].x_pos, o.avg [i    ].y_pos, z - 1.50);
+            glVertex3f (o.avg [i - 1].x_pos, o.avg [i - 1].y_pos, z - 1.50);
+         } glEnd();
+         glDisable     (GL_LINE_STIPPLE);
+      }
    }
-   glLineWidth(0.8);
+   glLineWidth (0.8);
    return 0;
 }
 
@@ -522,8 +547,8 @@ LAYER_keys          (void)
       glPushMatrix(); {
          glTranslatef( o.key[i].x_pos, o.key[i].y_pos,    0.0);
          glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
-         if (o.key[i].cano  == 'x') glColor4f(1.0f, 0.0f, 0.0f, 0.5f);
-         if (o.key[i].fake  == 'y') glColor4f(0.0f, 1.0f, 1.0f, 0.5f);
+         if (o.key[i].cano  == 'x') glColor4f (1.0f, 0.0f, 0.0f, 0.5f);
+         if (o.key[i].fake  == 'y') glColor4f (0.0f, 1.0f, 1.0f, 0.5f);
          glBegin(GL_POLYGON); {
             for (d = 0; d <= 360; d += 10) {
                rad = d * DEG2RAD;
@@ -552,30 +577,30 @@ LAYER_keys          (void)
          } glEnd();
       }
       /*---(draw the S extension)--------*/
-      if (o.key[i].type == '>') {
+      if (o.key[i].type == POINT_HEAD) {
          pt = o.key[i].p_bas - 1;
-         glEnable(GL_LINE_STIPPLE);
-         glLineStipple(1, 0x3333);
-         glColor4f(0.2f, 0.2f, 0.2f, 1.0f);
-         glLineWidth(2.0);
-         glBegin(GL_LINES); {
+         glEnable      (GL_LINE_STIPPLE);
+         glLineStipple (1, 0x3333);
+         glColor4f     (0.2f, 0.2f, 0.2f, 1.0f);
+         glLineWidth   (2.0);
+         glBegin (GL_LINES); {
             glVertex3f(o.bas[pt].x_pos    , o.bas[pt].y_pos  , z - 1.50);
             glVertex3f(o.key[i].x_pos     , o.key[i].y_pos   , z - 1.50);
          } glEnd();
-         glDisable(GL_LINE_STIPPLE);
+         glDisable     (GL_LINE_STIPPLE);
       }
       /*---(draw the F extension)--------*/
       if (o.key[i + 1].type == '>' || i + 1 == o.nkey) {
          pt = o.key[i].p_bas + 1;
-         glEnable(GL_LINE_STIPPLE);
-         glLineStipple(1, 0x3333);
-         glColor4f(0.2f, 0.2f, 0.2f, 1.0f);
-         glLineWidth(2.0);
-         glBegin(GL_LINES); {
+         glEnable      (GL_LINE_STIPPLE);
+         glLineStipple (1, 0x3333);
+         glColor4f     (0.2f, 0.2f, 0.2f, 1.0f);
+         glLineWidth   (2.0);
+         glBegin (GL_LINES); {
             glVertex3f(o.bas[pt].x_pos    , o.bas[pt].y_pos  , z - 1.50);
             glVertex3f(o.key[i].x_pos     , o.key[i].y_pos   , z - 1.50);
          } glEnd();
-         glDisable(GL_LINE_STIPPLE);
+         glDisable     (GL_LINE_STIPPLE);
       }
    }
    /*---(complete)-----------------------*/
