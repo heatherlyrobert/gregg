@@ -206,8 +206,8 @@
 
 
 /* rapidly evolving version number to aid with visual change confirmation     */
-#define VER_NUM   "5.2i"
-#define VER_TXT   "added dotted lines connecting start and finish points"
+#define VER_NUM   "5.2j"
+#define VER_TXT   "fixed point count updates on vertical mapping changes"
 
 
 #define     LEN_HUGE     10000

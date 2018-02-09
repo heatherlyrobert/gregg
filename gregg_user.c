@@ -94,24 +94,24 @@ MAP_mapper           (char a_req)
    /*> printf ("called mapper with %c\n", a_req);                                     <*/
    if (a_req == YVIKEYS_INIT) {
       DEBUG_INPT   yLOG_note    ("initial run");
+      o.curr  = o.total - 1;
+      OUT_pick (o.curr);
       MAP__ymajor ();
       MAP__yminor ();
       MAP__xmajor ();
       MAP__xminor ();
-      o.curr  = g_ymap.cur;
       o.cavg  = g_xmap.cur;
-      OUT_pick (o.curr);
    }
    /*---(initialize)---------------------*/
    else {
       DEBUG_INPT   yLOG_note    ("normal run");
       if (o.curr != g_ymap.cur) {
+         o.curr  = g_ymap.cur;
+         OUT_pick (o.curr);
          MAP__yminor ();
          MAP__xmajor ();
          MAP__xminor ();
-         o.curr  = g_ymap.cur;
          o.cavg  = g_xmap.cur;
-         OUT_pick (o.curr);
       }
       else if (o.cavg != g_xmap.cur) {
          MAP__xminor ();

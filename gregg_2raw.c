@@ -204,7 +204,10 @@ RAW_lift             (int a_xpad, int a_ypad)
    if (rc == 0)  rc = KEY_sharps  ();
    if (rc == 0)  rc = CIRCLE_driver ();
    if (rc == 0)  rc = MATCH_driver  ();
-   if (rc <  0)  return rc;
+   if (rc <  0) {
+      printf ("dropped out early\n");
+      return rc;
+   }
    /*> if (rc == 0)  rc = OUT_append    ();                                           <*/
    /*---(complete)-----------------------*/
    return 0;

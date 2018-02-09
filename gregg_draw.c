@@ -657,6 +657,8 @@ OVERLAY_data    (void)
       glTranslatef  (x_off, y_off, 30);
       snprintf      (t, 100, "%6d", o.nraw);
       FONT__label   ("raw#", t);
+      snprintf      (t, 100, "%6d", o.nbas);
+      FONT__label   ("bas#", t);
       snprintf      (t, 100, "%6d", o.navg);
       FONT__label   ("avg#", t);
       snprintf      (t, 100, "%6d", o.nkey);
