@@ -76,12 +76,13 @@ OUT_clear          (void)
       }
       /*---(clear points)----------------*/
       for (x_pt = 0; x_pt < MAX_POINTS; ++x_pt) {
+         p [x_pt].type   = POINT_NONE;
          p [x_pt].p_raw  = p [x_pt].p_bas  = 0;
          p [x_pt].x_full = p [x_pt].y_full = 0;
          p [x_pt].xd     = p [x_pt].yd     = 0;
          p [x_pt].len    = p [x_pt].icept  = p [x_pt].degs   = p [x_pt].quad   = p [x_pt].ccat = 0;
          p [x_pt].slope  = p [x_pt].rads   = p [x_pt].range  = p [x_pt].cdepth = 0.0;
-         p [x_pt].sharp  = p [x_pt].cano   = p [x_pt].type   = p [x_pt].fake  = '-';
+         p [x_pt].sharp  = p [x_pt].cano   = p [x_pt].fake   = '-';
          strlcpy (p [x_pt].use, "-", 5);
          p [x_pt].x_rel  = p [x_pt].y_rel  = 0.0;
          p [x_pt].x_pos  = p [x_pt].y_pos  = 0;
@@ -315,7 +316,7 @@ OUT_status         (char *a_list)
    /*---(defenses)-----------------------*/
    --rce;  if (a_list  == NULL)  return rce;
    /*---(walk the list)------------------*/
-   sprintf (a_list, "%s (%d outlines)", my.f_full, o.total);
+   sprintf (a_list, "%s (%d of %d)", my.f_full, o.curr, o.total);
    /*---(complete)-----------------------*/
    return 0;
 }
@@ -475,6 +476,7 @@ OUT_pick           (int a_num)
    int         x_num       =    0;
    /*---(header)-------------------------*/
    DEBUG_INPT   yLOG_enter   (__FUNCTION__);
+   DEBUG_INPT   yLOG_value   ("a_num"     , a_num);
    /*---(open file)------------------------*/
    rc = OUT__open ("r");
    DEBUG_INPT   yLOG_value   ("rc"        , rc);
@@ -485,6 +487,7 @@ OUT_pick           (int a_num)
    /*---(count records)--------------------*/
    while (1) {
       rc = OUT__read ();
+      /*> printf ("%s\n", s_recd);                                                    <*/
       if (rc <= 0)         break;
       if (x_num == a_num)  break;
       ++x_num;
@@ -550,10 +553,10 @@ OUT_append         (void)
       fprintf (s_file, ";");
       switch (o.raw [i].type) {
       case POINT_START   :
-         fprintf (s_file, ";TOUCH,");
+         fprintf (s_file, "TOUCH,");
          break;
       case POINT_FINISH  :
-         fprintf (s_file, ";LIFT,");
+         fprintf (s_file, "LIFT,");
          break;
       }
       fprintf (s_file, "%d,%d", o.raw[i].x_full, o.raw[i].y_full);

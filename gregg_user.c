@@ -45,28 +45,40 @@ MAP__ymajor           (void)
    /*---(locals)-----------+-----------+-*/
    int         i           =    0;
    /*---(update y)-----------------------*/
+   DEBUG_INPT   yLOG_senter  (__FUNCTION__);
+   DEBUG_INPT   yLOG_sint    (o.total);
    for (i = 0; i < o.total; ++i) {
+      DEBUG_INPT   yLOG_sint    (i);
       g_ymap.map [i] = i;
    }
    /*---(globals)------------------------*/
    g_ymap.gmin  = g_ymap.amin  = 0;
-   g_ymap.gmax  = g_ymap.amax  = o.total - 1;
-   g_ymap.avail = o.total - 1;
+   /*> g_ymap.gmax  = g_ymap.amax  = o.total - 1;                                     <* 
+    *> g_ymap.avail = o.total - 1;                                                    <*/
+   g_ymap.gmax  = g_ymap.amax  = o.total;
+   g_ymap.avail = o.total;
+   DEBUG_INPT   yLOG_sint    (g_ymap.gmax);
    /*---(screen)-------------------------*/
    g_ymap.beg   = g_ymap.cur   = g_ymap.end   = g_ymap.len   = g_ymap.tend  = 0;
    /*---(units)--------------------------*/
    g_ymap.gbeg  = g_ymap.gcur  = g_ymap.gend  = 0;
    /*---(complete)-----------------------*/
+   DEBUG_INPT   yLOG_sexit   (__FUNCTION__);
    return 0;
 }
 
 char         /*-> when moving between outlines -------[ ------ [fe.G67.55#.92]*/ /*-[01.0000.018.!]-*/ /*-[--.---.---.--]-*/
 MAP__yminor           (void)
 {
+   /*---(update y)-----------------------*/
+   DEBUG_INPT   yLOG_senter  (__FUNCTION__);
+   DEBUG_INPT   yLOG_sint    (o.total);
    /*---(local movements)----------------*/
    g_ymap.lmin = g_ymap.prev = 0;
-   g_ymap.lmax = g_ymap.next = o.total - 1;
+   /*> g_ymap.lmax = g_ymap.next = o.total - 1;                                       <*/
+   g_ymap.lmax = g_ymap.next = o.total;
    /*---(complete)-----------------------*/
+   DEBUG_INPT   yLOG_sexit   (__FUNCTION__);
    return 0;
 }
 
@@ -77,8 +89,12 @@ MAP_mapper           (char a_req)
    static int  x           = -1;
    static int  y           = -1;
    /*---(initialize)---------------------*/
+   DEBUG_INPT   yLOG_enter   (__FUNCTION__);
+   DEBUG_INPT   yLOG_value   ("ymap.cur"  , g_ymap.cur);
+   DEBUG_INPT   yLOG_value   ("xmap.cur"  , g_xmap.cur);
    /*> printf ("called mapper with %c\n", a_req);                                     <*/
    if (a_req == YVIKEYS_INIT) {
+      DEBUG_INPT   yLOG_note    ("initial run");
       MAP__ymajor ();
       MAP__yminor ();
       MAP__xmajor ();
@@ -88,8 +104,9 @@ MAP_mapper           (char a_req)
    }
    /*---(initialize)---------------------*/
    else {
+      DEBUG_INPT   yLOG_note    ("normal run");
       if (o.curr != g_ymap.cur) {
-         OUT_pick (o.curr);
+         OUT_pick (g_ymap.cur);
          MAP__yminor ();
          MAP__xmajor ();
          MAP__xminor ();
@@ -100,7 +117,10 @@ MAP_mapper           (char a_req)
       o.curr  = g_ymap.cur;
       o.cavg  = g_xmap.cur;
    }
+   DEBUG_INPT   yLOG_value   ("o.curr"    , o.curr);
+   DEBUG_INPT   yLOG_value   ("o.total"   , o.total);
    /*---(complete)-----------------------*/
+   DEBUG_INPT   yLOG_exit    (__FUNCTION__);
    return 0;
 }
 

@@ -206,8 +206,8 @@
 
 
 /* rapidly evolving version number to aid with visual change confirmation     */
-#define VER_NUM   "5.2g"
-#define VER_TXT   "created gregg_0out unit test and caught many issues"
+#define VER_NUM   "5.2h"
+#define VER_TXT   "fixed vertical movement getting to all outlines"
 
 
 #define     LEN_HUGE     10000
@@ -469,6 +469,7 @@ typedef struct timespec  tTSPEC;
 #define     POINT_HEAD     '>'
 #define     POINT_NORMAL   '-'
 #define     POINT_FINISH   'F'
+#define     POINT_NONE     '/'
 #define     POINT_FAKE     'y'
 
 #define     MODE_CURSOR    '-'
