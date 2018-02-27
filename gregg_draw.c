@@ -27,6 +27,8 @@ static uint s_depth     =     0;            /* depth buffer                   */
 
 
 char DRAW_cursor        (void);
+char DRAW_xaxis           (void);
+char DRAW_yaxis           (void);
 
 
 
@@ -50,7 +52,7 @@ DRAW__sizes        (cint a_wide, cint a_tall)
    win.d_xoff   =   200;
    win.d_yoff   =   100;
    win.d_zoff   =   100;
-   win.d_point  =    10;
+   win.d_point  =     8;
    win.d_bar    =    20;
    win.d_ansx   =   200;
    win.d_ansy   =  -160;
@@ -79,23 +81,32 @@ DRAW_init            (void)
    int         x_wide, x_tall;
    /*---(header)-------------------------*/
    DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
-   /*---(stuff)--------------------------*/
-   yVIKEYS_view_init     ("gregg shorthand interpreter", VER_NUM, 500, 350, 0);
-   yVIKEYS_cmds_direct   (":palette 190 rcomp pale earthy");
+   /*---(window)-------------------------*/
+   yVIKEYS_view_config   ("gregg shorthand interpreter", VER_NUM, YVIKEYS_OPENGL, 500, 350, 0);
+   yVIKEYS_view_defsize  (YVIKEYS_YAXIS    , 15, 0);
    yVIKEYS_view_setup    (YVIKEYS_MAIN     , YVIKEYS_FLAT, YVIKEYS_TOPLEF, -125, 500, 125 - 350, 350, 0, 0, YCOLOR_BAS    , DRAW_primary);
-   yVIKEYS_view_colors   (YCOLOR_POS, YCOLOR_BAS, YCOLOR_NEG, YCOLOR_POS);
-   yVIKEYS_cmds_direct   (":ribbon show");
+   yVIKEYS_view_simple   (YVIKEYS_XAXIS    , YCOLOR_BAS_DRK, DRAW_xaxis  );
+   yVIKEYS_view_simple   (YVIKEYS_YAXIS    , YCOLOR_BAS_DRK, DRAW_yaxis  );
+   yVIKEYS_cmds_direct (":xaxis show");
+   yVIKEYS_cmds_direct (":yaxis show");
    DRAW__sizes           (500, 350);
+   /*---(colors)-------------------------*/
+   yVIKEYS_cmds_direct   (":palette 190 rcomp pale earthy");
+   yVIKEYS_view_colors   (YCOLOR_POS, YCOLOR_BAS, YCOLOR_NEG, YCOLOR_POS);
+   /*---(custom drawing)-----------------*/
    yGLTEX_init     ();
-   yVIKEYS_view_color_clear (YCOLOR_BAS_MED);
    FONT__load      ();
-   dlist_init ();
+   dlist_init      ();
+   yGLTEX_new (&s_tex, &s_fbo, &s_depth, win.tex_w, win.tex_h);
+   DRAW_back       ();
+   /*---(ribbon)-------------------------*/
    yVIKEYS_view_ribbon ("play"    , "dj"          );
    yVIKEYS_view_ribbon ("talk"    , "video_cam"   );
    yVIKEYS_view_ribbon ("align"   , "layers"      );
    yVIKEYS_view_ribbon ("draw"    , "resolution"  );
    yVIKEYS_view_ribbon ("tools"   , "shower"      );
-   yGLTEX_new (&s_tex, &s_fbo, &s_depth, win.tex_w, win.tex_h);
+   yVIKEYS_cmds_direct (":ribbon show");
+   /*---(overlay/layers)-----------------*/
    yVIKEYS_view_option (YVIKEYS_OVERLAY, "data"  , OVERLAY_data    , "current point statistics");
    yVIKEYS_view_option (YVIKEYS_OVERLAY, "sample", OVERLAY_samples , "letter samples");
    yVIKEYS_layer_add   ("raw"     , LAYER_raws, "raw data points"     );
@@ -106,8 +117,6 @@ DRAW_init            (void)
    yVIKEYS_cmds_direct (":layer bas");
    yVIKEYS_cmds_direct (":layer cur");
    yVIKEYS_cmds_direct (":overlay data");
-   DRAW_back ();
-   yVIKEYS_map_config  (YVIKEYS_RIGHT, MAP_mapper);
    /*---(complete)-----------------------*/
    DEBUG_GRAF   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -124,7 +133,6 @@ DRAW_wrap            (void)
    /*---(stuff)--------------------------*/
    rc = yGLTEX_free (&s_tex, &s_fbo, &s_depth);
    rc = FONT__free       ();
-   rc = yVIKEYS_view_wrap ();
    /*---(complete)-----------------------*/
    DEBUG_GRAF   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -148,11 +156,11 @@ DRAW_primary         (float a_mag)
    yVIKEYS_view_bounds   (YVIKEYS_MAIN, &x_xmin, &x_xmax, &x_ymin, &x_ymax);
    /*> printf ("t %c %3d %3d %3d %3d %s\n", x_on, x_left, x_bott, x_wide, x_tall, x_text);   <*/
    /*---(setup view)---------------------*/
-   glViewport      (x_left, x_bott, x_wide, x_tall);
-   glMatrixMode    (GL_PROJECTION);
-   glLoadIdentity  ();
-   glOrtho         (x_xmin, x_xmax, x_ymin, x_ymax,  -500.0,   500.0);
-   glMatrixMode    (GL_MODELVIEW);
+   /*> glViewport      (x_left, x_bott, x_wide, x_tall);                              <* 
+    *> glMatrixMode    (GL_PROJECTION);                                               <* 
+    *> glLoadIdentity  ();                                                            <* 
+    *> glOrtho         (x_xmin, x_xmax, x_ymin, x_ymax,  -500.0,   500.0);            <* 
+    *> glMatrixMode    (GL_MODELVIEW);                                                <*/
    /*---(background)---------------------*/
    glPushMatrix    (); {
       glBindTexture(GL_TEXTURE_2D, s_tex);
@@ -177,14 +185,14 @@ DRAW_primary         (float a_mag)
       /*> glPushMatrix    (); {                                                       <* 
        *>    glColor4f    (0.20f, 0.20f, 0.20f, 1.0f);                                <* 
        *>    glTranslatef (x_xmax - 50.0, x_ymin + 75.0,    0.0f);            <* 
-       *>    yFONT_print  (win.font_bg,  12, YF_BOTRIG, my.f_full);                   <* 
+       *>    yFONT_print  (win.font_pretty,  12, YF_BOTRIG, my.f_full);                   <* 
        *> } glPopMatrix   ();                                                         <*/
       /*> glPushMatrix    (); {                                                       <* 
        *>    glColor4f    (0.00f, 0.00f, 0.00f, 1.0f);                                <* 
        *>    glTranslatef (x_xmin +  3.0, x_ymin + 23.0,    0.0f);            <* 
-       *>    yFONT_print  (win.font_bg,  12, YF_BOTLEF, o.actual);                    <* 
+       *>    yFONT_print  (win.font_pretty,  12, YF_BOTLEF, o.actual);                    <* 
        *>    glTranslatef (0.0              , -20.0            ,    0.0f);            <* 
-       *>    yFONT_print  (win.font_bg,  12, YF_BOTLEF, o.word);                      <* 
+       *>    yFONT_print  (win.font_pretty,  12, YF_BOTLEF, o.word);                      <* 
        *> } glPopMatrix   ();                                                         <*/
       /*> glPushMatrix    (); {                                                       <* 
        *>    glColor4f    (1.00f, 1.00f, 1.00f, 1.0f);                                <* 
@@ -213,7 +221,8 @@ DRAW_back            (void)
    /*---(header)-------------------------*/
    DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
    /*---(setup)--------------------------*/
-   yVIKEYS_view_bounds   (YVIKEYS_MAIN, &x_xmin, &x_xmax, &x_ymin, &x_ymax);
+   yVIKEYS_view_color_clear (YCOLOR_BAS_MED);
+   yVIKEYS_view_bounds      (YVIKEYS_MAIN, &x_xmin, &x_xmax, &x_ymin, &x_ymax);
    rc = yGLTEX_draw_start   (s_fbo, YGLTEX_GREGG, win.tex_w, win.tex_h, 2.0);
    /*---(draw)---------------------------*/
    glCallList (dl_back);
@@ -389,15 +398,81 @@ draw_bands         (void)
          }
          /*---(circle adjustment band)---*/
          glColor4f(0.0f, 0.0f, 1.0f, 0.3f);
-         glBegin(GL_POLYGON);
-         glVertex3f( minx,   200,  z);
-         glVertex3f( maxx,   200,  z);
-         glVertex3f( maxx,  miny,  z);
-         glVertex3f( minx,  miny,  z);
-         glEnd();
+         glBegin(GL_POLYGON); {
+            glVertex3f( minx,   200,  z);
+            glVertex3f( maxx,   200,  z);
+            glVertex3f( maxx,  miny,  z);
+            glVertex3f( minx,  miny,  z);
+         } glEnd();
       }
    }
    /*---(complete)-----------------------*/
+   return 0;
+}
+
+char
+DRAW_xaxis           (void)
+{
+   int         x_wide      =    0;
+   int         x_pnt       =    0;
+   int         x_deg       =    0;
+   float       x_radius    =  3.0;
+   float       x_spacing   = 14.0;
+   float rad;
+   float z     =  5.0;
+   float x, y;
+   int   right = 0;
+   int   left  = 0;
+   /*> DEBUG__SHAPES  if (g_loc[a_who].ri == 0) printf("   %-5s", g_loc[a_who].n);    <*/
+   yVIKEYS_view_size        (YVIKEYS_XAXIS, NULL, &x_wide, NULL, NULL, NULL);
+   x_spacing = (x_wide - 20.0) / (o.navg - 1);
+   glPushMatrix(); {
+      glTranslatef ( 10.0, 7.0,    0.0);
+      for (x_pnt = 0; x_pnt < o.navg; ++x_pnt) {
+         glLineWidth  (2.0);
+         switch (o.avg [x_pnt].type) {
+         case 'S' : yVIKEYS_view_color (YCOLOR_BAS_MIN, 0.4);  break;
+         case '>' : yVIKEYS_view_color (YCOLOR_BAS_MOR, 0.4);  break;
+         case '-' : yVIKEYS_view_color (YCOLOR_BAS_MOR, 0.4);  break;
+         case 'F' : yVIKEYS_view_color (YCOLOR_BAS_MIN, 0.4);  break;
+         }
+         if (x_pnt == o.cavg)   yVIKEYS_view_color (YCOLOR_BAS_MAX, 0.3);
+         glBegin(GL_LINE_STRIP);
+         for (x_deg = 0; x_deg <= 360; x_deg += 5) {
+            rad  = x_deg * DEG2RAD;
+            x = x_radius * sin(rad);
+            y = x_radius * cos(rad);
+            glVertex3f( x, y, z);
+         }
+         glEnd();
+         glTranslatef ( x_spacing, 0.0,    0.0);
+      }
+   } glPopMatrix();
+   return 0;
+}
+
+char
+DRAW_yaxis           (void)
+{
+   int         x_out       =    0;
+   int         x_tall      =    0;
+   float       x_radius    =    0;
+   yVIKEYS_view_size        (YVIKEYS_YAXIS, NULL, NULL, NULL, &x_tall, NULL);
+   x_radius  = (x_tall / (float) (o.total)) / 2.0;
+   glPushMatrix(); {
+      glTranslatef (  0.0, -x_radius,    0.0);
+      for (x_out = o.total - 1; x_out >= 0; --x_out) {
+         if (x_out == o.curr)   glColor4f    ( 1.0, 1.0, 1.0, 0.3); 
+         else                   glColor4f    ( 0.5, 0.5, 0.5, 0.3); 
+         glBegin(GL_POLYGON); {
+            glVertex3f ( 2.0,  x_radius - 2.0,  20);
+            glVertex3f (13.0,  x_radius - 2.0,  20);
+            glVertex3f (13.0, -x_radius + 2.0,  20);
+            glVertex3f ( 2.0, -x_radius + 2.0,  20);
+         } glEnd();
+         glTranslatef (  0.0, -x_radius * 2,    0.0);
+      }
+   } glPopMatrix();
    return 0;
 }
 
@@ -657,8 +732,6 @@ OVERLAY_data    (void)
       glTranslatef  (x_off, y_off, 30);
       snprintf      (t, 100, "%6d", o.nraw);
       FONT__label   ("raw#", t);
-      snprintf      (t, 100, "%6d", o.nbas);
-      FONT__label   ("bas#", t);
       snprintf      (t, 100, "%6d", o.navg);
       FONT__label   ("avg#", t);
       snprintf      (t, 100, "%6d", o.nkey);
@@ -741,7 +814,7 @@ DRAW_info (void)
       glPushMatrix();
       glTranslatef( -210.0, -150.0, win.d_zoff);
       snprintf(msg, 100, "%4d", o.curr);
-      yFONT_print(win.font_bg,  18, YF_BOTLEF, msg);
+      yFONT_print(win.font_pretty,  18, YF_BOTLEF, msg);
       glPopMatrix();
    }
    /*---(point counts)----------------------*/
@@ -866,22 +939,22 @@ static void      o___FONTS___________________o (void) {;}
 char
 FONT__load           (void)
 {
-   win.font_bg = yFONT_load (win.face_bg);
-   if (win.font_bg < 0) {
-      fprintf(stderr, "Problem loading %s\n", win.face_bg);
+   win.font_fixed = yFONT_load (win.face_fixed);
+   if (win.font_fixed < 0) {
+      fprintf(stderr, "Problem loading %s\n", win.face_fixed);
       exit(1);
    }
-   win.font_sm = yFONT_load (win.face_sm);
-   if (win.font_sm < 0) {
-      fprintf(stderr, "Problem loading %s\n", win.face_sm);
+   win.font_pretty = yFONT_load (win.face_pretty);
+   if (win.font_pretty < 0) {
+      fprintf(stderr, "Problem loading %s\n", win.face_pretty);
       exit(1);
    }
-   /*> win.icons  = yFONT_symload (ICON_SET, 20, 33, '-');                            <*/
    win.icons  = yFONT_iconload ();
    if (win.icons < 0) {
       fprintf(stderr, "Problem loading %s\n", ICON_SET);
       exit(1);
    }
+   yVIKEYS_view_font (win.font_fixed);
    return 0;
 }
 
@@ -889,11 +962,11 @@ char
 FONT__label          (char *a_label, char *a_content)
 {
    glPushMatrix(); {
-      yFONT_print  (win.font_sm,  win.d_point, YF_BOTLEF, a_label);
+      yFONT_print  (win.font_fixed,  win.d_point, YF_BOTLEF, a_label);
       glTranslatef (   45,  0,  0);
-      yFONT_print  (win.font_sm,  win.d_point, YF_BOTLEF, ":");
+      yFONT_print  (win.font_fixed,  win.d_point, YF_BOTLEF, ":");
       glTranslatef (   10,  0,  0);
-      yFONT_print  (win.font_sm,  win.d_point, YF_BOTLEF, a_content);
+      yFONT_print  (win.font_fixed,  win.d_point, YF_BOTLEF, a_content);
    } glPopMatrix ();
    glTranslatef(   0,          - (win.d_bar * 0.8),  0);
    return 0;
@@ -902,8 +975,8 @@ FONT__label          (char *a_label, char *a_content)
 char
 FONT__free           (void)
 {
-   yFONT_free (win.font_bg);
-   yFONT_free (win.font_sm);
+   yFONT_free (win.font_pretty);
+   yFONT_free (win.font_fixed);
    return 0;
 }
 
@@ -953,7 +1026,7 @@ OVERLAY_samples        (void)
    /*> glPushMatrix(); {                                                              <* 
     *>    glScalef              (1.0, 1.0, 1.0);                                      <* 
     *>    glTranslatef          (    0.0,   -5.0,    0.0);                            <* 
-    *>    yFONT_print           (win.font_sm,  5, YF_TOPLEF, "writing samples");      <* 
+    *>    yFONT_print           (win.font_fixed,  5, YF_TOPLEF, "writing samples");      <* 
     *> } glPopMatrix();                                                               <*/
    /*---(cycle samples)------------------*/
    glPushMatrix(); {
@@ -962,7 +1035,7 @@ OVERLAY_samples        (void)
       for (i = 1; i < MAX_LETTERS && strncmp(g_loc[i].n, "eof", 5) != 0; ++i) {
          glPushMatrix();
          glTranslatef(g_loc[i].tx, g_loc[i].ty,  0.0);
-         yFONT_print(win.font_sm,  5, YF_BOTRIG, g_loc[i].n);
+         yFONT_print(win.font_fixed,  5, YF_BOTRIG, g_loc[i].n);
          glCallList(dl_dotted + i);
          glPopMatrix();
       }
@@ -989,7 +1062,7 @@ OVERLAY_samples        (void)
  *>    glPushMatrix(); {                                                                        <* 
  *>       glScalef(2.0, 2.0, 2.0);                                                              <* 
  *>       glTranslatef          (    0.0,   -5.0,    0.0);                                      <* 
- *>       yFONT_print           (win.font_sm,  5, YF_TOPLEF, "writing samples");                <* 
+ *>       yFONT_print           (win.font_fixed,  5, YF_TOPLEF, "writing samples");                <* 
  *>    } glPopMatrix();                                                                         <* 
  *>    /+---(cycle samples)------------------+/                                                 <* 
  *>    glPushMatrix(); {                                                                        <* 
@@ -997,7 +1070,7 @@ OVERLAY_samples        (void)
  *>       for (i = 0; i < MAX_LETTERS && strncmp(g_loc[i].n, "eof", 5) != 0; ++i) {               <* 
  *>          glPushMatrix();                                                                    <* 
  *>          glTranslatef(g_loc[i].tx, g_loc[i].ty,  0.0);                                          <* 
- *>          yFONT_print(win.font_sm,  5, YF_BOTRIG, g_loc[i].n);                                 <* 
+ *>          yFONT_print(win.font_fixed,  5, YF_BOTRIG, g_loc[i].n);                                 <* 
  *>          glCallList(dl_dotted + i);                                                         <* 
  *>          glPopMatrix();                                                                     <* 
  *>       }                                                                                     <* 

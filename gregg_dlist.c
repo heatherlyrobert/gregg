@@ -592,7 +592,7 @@ BACK__rangefan     (void)
          snprintf(msg, 100, "%d", ranges[i].num);
          glPushMatrix(); {
             glTranslatef(  x,     y,    z);
-            yFONT_print (win.font_bg, 20, YF_MIDCEN, msg);
+            yFONT_print (win.font_pretty, 20, YF_MIDCEN, msg);
          } glPopMatrix();
       }
       /*---(target line)-------------------*/

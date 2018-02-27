@@ -206,8 +206,8 @@
 
 
 /* rapidly evolving version number to aid with visual change confirmation     */
-#define VER_NUM   "5.2j"
-#define VER_TXT   "fixed point count updates on vertical mapping changes"
+#define VER_NUM   "5.2k"
+#define VER_TXT   "formula and command line are fully working in opengl"
 
 
 #define     LEN_HUGE     10000
@@ -234,10 +234,10 @@ struct cWIN {
    int         d_ansx;                      /* answer x offset                */
    int         d_ansy;                      /* answer y offset                */
    /*---(fonts)-------------*/
-   char        face_bg     [50];
-   int         font_bg;
-   char        face_sm     [50];
-   int         font_sm;
+   char        face_pretty     [50];
+   int         font_pretty;
+   char        face_fixed      [50];
+   int         font_fixed;
    int         icons;
    /*---(texture)-----------*/
    int         tex_h;                  /* texture height                      */

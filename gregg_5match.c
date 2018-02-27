@@ -454,7 +454,7 @@ match_location     (int a_rule, int a_beg, int a_opens, int a_size)
    /*---(finish locations)----------------*/
    /*> if (trys_ltr == 0) printf("no LOCATION entry\n");                           <* 
     *> else               printf("\n");                                            <*/
-   printf("\n");
+   /*> printf("\n");                                                                  <*/
    /*---(complete)-----------------------*/
    return rc;
 }

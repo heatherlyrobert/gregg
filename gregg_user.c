@@ -22,9 +22,11 @@ MAP__xmajor           (void)
    g_xmap.gmax  = g_xmap.amax  = o.navg;
    g_xmap.avail = o.navg;
    /*---(screen)-------------------------*/
-   g_xmap.beg   = g_xmap.cur   = g_xmap.end   = g_xmap.len   = g_xmap.tend  = 0;
+   g_xmap.beg   = g_xmap.cur   = 0;
+   g_xmap.end   = g_xmap.len   = g_xmap.tend  = o.navg;
    /*---(units)--------------------------*/
-   g_xmap.gbeg  = g_xmap.gcur  = g_xmap.gend  = 0;
+   g_xmap.gbeg  = g_xmap.gcur  = 0;
+   g_xmap.gend  = o.navg;
    /*---(complete)-----------------------*/
    return 0;
 }
@@ -87,10 +89,13 @@ MAP_mapper           (char a_req)
    /*---(locals)-----------+-----------+-*/
    static int  x           = -1;
    static int  y           = -1;
+   char        x_label     [LEN_LABEL];
+   char        x_source    [LEN_RECD ];
    /*---(initialize)---------------------*/
    DEBUG_INPT   yLOG_enter   (__FUNCTION__);
-   DEBUG_INPT   yLOG_value   ("ymap.cur"  , g_ymap.cur);
-   DEBUG_INPT   yLOG_value   ("xmap.cur"  , g_xmap.cur);
+   DEBUG_INPT   yLOG_value   ("ymap.gcur" , g_ymap.gcur);
+   DEBUG_INPT   yLOG_value   ("xmap.gcur" , g_xmap.gcur);
+   /*> printf ("xmap.which %c, ymap.which %c\n", g_xmap.which, g_ymap.which);         <*/
    /*> printf ("called mapper with %c\n", a_req);                                     <*/
    if (a_req == YVIKEYS_INIT) {
       DEBUG_INPT   yLOG_note    ("initial run");
@@ -100,27 +105,30 @@ MAP_mapper           (char a_req)
       MAP__yminor ();
       MAP__xmajor ();
       MAP__xminor ();
-      o.cavg  = g_xmap.cur;
    }
    /*---(initialize)---------------------*/
    else {
-      DEBUG_INPT   yLOG_note    ("normal run");
-      if (o.curr != g_ymap.cur) {
-         o.curr  = g_ymap.cur;
+      if (o.curr != g_ymap.gcur) {
+         DEBUG_INPT   yLOG_note    ("change outline");
+         o.curr  = g_ymap.gcur;
          OUT_pick (o.curr);
          MAP__yminor ();
          MAP__xmajor ();
          MAP__xminor ();
-         o.cavg  = g_xmap.cur;
       }
-      else if (o.cavg != g_xmap.cur) {
+      else if (o.cavg != g_xmap.gcur) {
+         DEBUG_INPT   yLOG_note    ("change point");
          MAP__xminor ();
-         o.curr  = g_ymap.cur;
-         o.cavg  = g_xmap.cur;
+         o.curr  = g_ymap.gcur;
       }
    }
+   o.cavg  = g_xmap.gcur;
    DEBUG_INPT   yLOG_value   ("o.curr"    , o.curr);
    DEBUG_INPT   yLOG_value   ("o.total"   , o.total);
+   /*---(feed source values)-------------*/
+   sprintf (x_label , "%03d.%03d", o.curr, o.cavg);
+   sprintf (x_source, "%03dx, %03dy", o.avg [o.cavg].x_full, o.avg [o.cavg].y_full);
+   yVIKEYS_source (x_label, x_source);
    /*---(complete)-----------------------*/
    DEBUG_INPT   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -160,7 +168,7 @@ USER_init            (void)
    DEBUG_USER   yLOG_enter   (__FUNCTION__);
    DEBUG_USER   yLOG_note    ("basic init");
    /*---(modes)--------------------------*/
-   yVIKEYS_mode_change (MODE_MAP, ":9" , "horz=0HhlL$");
+   /*> yVIKEYS_mode_change (MODE_MAP, ":9" , "horz=0HhlL$");                          <*/
    /*---(file)---------------------------*/
    rc = yVIKEYS_cmds_add ('f', "file"        , "f"   , "s"    , FILE_rename          , "change the current spreadsheet file name"                    );
    rc = yVIKEYS_cmds_add ('f', "write"       , "w"   , ""     , OUT_append           , "write the current spreadsheet to file"                       );

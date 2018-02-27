@@ -45,10 +45,8 @@ PROG_init          (void)
    DEBUG_TOPS   yLOG_info     ("ySTR"    , ySTR_version    ());
    DEBUG_TOPS   yLOG_info     ("yGLTEX"  , yGLTEX_version  ());
    /*---(fonts)-----------------------*/
-   strcpy (win.face_bg, "comfortaa");
-   /*> strcpy (win.face_sm, "courier");                                               <*/
-   /*> strcpy (win.face_sm, "anonymous_pro");                                         <*/
-   strcpy (win.face_sm, "ubuntu");
+   strcpy (win.face_pretty, "comfortaa");
+   strcpy (win.face_fixed, "hack");
    /*---(reporting flags)-------------*/
    my.rptg_touch   = '-';
    my.rptg_raw     = '-';
@@ -145,16 +143,18 @@ PROG_final (void)
    DRAW_init  ();
    TOUCH_init ();
    yVIKEYS_view_option (YVIKEYS_BUFFER, "file" , OUT_status, "current file name and stats");
-   yVIKEYS_cmds_direct   (":buffer file");
-   yVIKEYS_cmds_direct   (":keys hide");
-   yVIKEYS_cmds_add      ('e', "dump"        , ""    , "Cs"   , POINT_clipboard      , "save point list to the clipboard");
-   yVIKEYS_cmds_add      ('e', "clip"        , ""    , "Cs"   , POINT_clipboard      , "save point list to the clipboard");
-   yVIKEYS_cmds_add      ('e', "gyges"       , ""    , "Cs"   , POINT_clipboard      , "save point list to the clipboard");
-   yVIKEYS_cmds_add      ('f', "write"       , ""    , ""     , OUT_append           , "save outline to stroke file");
+   yVIKEYS_cmds_direct (":buffer file");
+   yVIKEYS_cmds_direct (":keys hide");
+   yVIKEYS_cmds_add    ('e', "dump"        , ""    , "Cs"   , POINT_clipboard      , "save point list to the clipboard");
+   yVIKEYS_cmds_add    ('e', "clip"        , ""    , "Cs"   , POINT_clipboard      , "save point list to the clipboard");
+   yVIKEYS_cmds_add    ('e', "gyges"       , ""    , "Cs"   , POINT_clipboard      , "save point list to the clipboard");
+   yVIKEYS_cmds_add    ('f', "write"       , ""    , ""     , OUT_append           , "save outline to stroke file");
+   /*---(final program)------------------*/
    OUT_init      ();
    FILE_rename   ("");
    if (out_start > 0) o.curr = out_start;
-   MAP_mapper    (YVIKEYS_INIT);
+   /*---(key mapping)--------------------*/
+   yVIKEYS_map_config  (YVIKEYS_RIGHT, MAP_mapper);
    /*---(complete)-----------------------*/
    DEBUG_TOPS   yLOG_exit     (__FUNCTION__);
    return 0;
@@ -168,68 +168,66 @@ PROG_final (void)
 /*============================--------------------============================*/
 void o___EVENT__________________o (void) {;}
 
-char
-PROG_event()
-{
-   /*---(local variables)------------------*/
-   int   x, y;         /* x,y coordinate of pointer        */
-   int   x2, y2;       /* x,y coordinate adjusted for view */
-   int   r;            /* radius of point from origin      */
-   char  input_type = '-';
-   /*> out_read  (o.curr);                                                            <*/
-   int    i = o.curr;
-   int       j         = 0;
-   tTSPEC      x_dur;
-   /*---(for keypresses)-------------------*/
-   XKeyEvent *key_event;
-   char       the_key[5];
-   char       x_ch     = ' ';
-   uchar      x_key    = ' ';
-   int        the_bytes;
-   char       rc;
-   int        x_loop  = 0;
-   /*---(for timer)------------------------*/
-   /*> struct     timespec timer, remain;                                             <*/
-   x_dur.tv_sec    = 0;
-   x_dur.tv_nsec   = 0.5 * 1000000;
-   /*---(header)-------------------------*/
-   DEBUG_TOPS   yLOG_enter    (__FUNCTION__);
-   while (1) {
-      x_key = 0;
-      if (XPending(DISP)) {
-         XNextEvent(DISP, &EVNT);
-         ++j;
-         switch(EVNT.type) {
-         case KeyPress:
-            DEBUG_LOOP  printf("event (%5d) keypress\n", j);
-            i = o.curr;
-            /*---(get the key)---------------------*/
-            key_event  = (XKeyEvent *) &EVNT;
-            the_bytes = XLookupString((XKeyEvent *) &EVNT, the_key, 5, NULL, NULL);
-            if (the_bytes < 1) break;
-            x_key = the_key [0];
-            break;
-         }
-      }
-      x_key = yVIKEYS_main_input  (RUN_USER, x_key);
-      yVIKEYS_main_handle (x_key);
-      if (yVIKEYS_quit ())  break;
-      ++x_loop;
-      TOUCH_read ();
-      if ((x_loop % 20) == 0)  yVIKEYS_view_all (0.0);
-      /*---(sleeping)--------------------*/
-      nanosleep    (&x_dur, NULL);
-   }
-   /*---(complete)------------------------------*/
-   DEBUG_TOPS   yLOG_exit     (__FUNCTION__);
-   return 1;
-}
+/*> char                                                                                        <* 
+ *> PROG_event()                                                                                <* 
+ *> {                                                                                           <* 
+ *>    /+---(local variables)------------------+/                                               <* 
+ *>    char  input_type = '-';                                                                  <* 
+ *>    /+> out_read  (o.curr);                                                            <+/   <* 
+ *>    int    i = o.curr;                                                                       <* 
+ *>    int       j         = 0;                                                                 <* 
+ *>    tTSPEC      x_dur;                                                                       <* 
+ *>    /+---(for keypresses)-------------------+/                                               <* 
+ *>    XKeyEvent *key_event;                                                                    <* 
+ *>    char       the_key[5];                                                                   <* 
+ *>    char       x_ch     = ' ';                                                               <* 
+ *>    uchar      x_key    = ' ';                                                               <* 
+ *>    int        the_bytes;                                                                    <* 
+ *>    char       rc;                                                                           <* 
+ *>    int        x_loop  = 0;                                                                  <* 
+ *>    /+---(for timer)------------------------+/                                               <* 
+ *>    /+> struct     timespec timer, remain;                                             <+/   <* 
+ *>    x_dur.tv_sec    = 0;                                                                     <* 
+ *>    x_dur.tv_nsec   = 0.5 * 1000000;                                                         <* 
+ *>    /+---(header)-------------------------+/                                                 <* 
+ *>    DEBUG_TOPS   yLOG_enter    (__FUNCTION__);                                               <* 
+ *>    while (1) {                                                                              <* 
+ *>       x_key = 0;                                                                            <* 
+ *>       if (XPending(DISP)) {                                                                 <* 
+ *>          XNextEvent(DISP, &EVNT);                                                           <* 
+ *>          ++j;                                                                               <* 
+ *>          switch(EVNT.type) {                                                                <* 
+ *>          case KeyPress:                                                                     <* 
+ *>             DEBUG_LOOP  printf("event (%5d) keypress\n", j);                                <* 
+ *>             i = o.curr;                                                                     <* 
+ *>             /+---(get the key)---------------------+/                                       <* 
+ *>             key_event  = (XKeyEvent *) &EVNT;                                               <* 
+ *>             the_bytes = XLookupString((XKeyEvent *) &EVNT, the_key, 5, NULL, NULL);         <* 
+ *>             if (the_bytes < 1) break;                                                       <* 
+ *>             x_key = the_key [0];                                                            <* 
+ *>             break;                                                                          <* 
+ *>          }                                                                                  <* 
+ *>       }                                                                                     <* 
+ *>       x_key = yVIKEYS_main_input  (RUN_USER, x_key);                                        <* 
+ *>       yVIKEYS_main_handle (x_key);                                                          <* 
+ *>       if (yVIKEYS_quit ())  break;                                                          <* 
+ *>       ++x_loop;                                                                             <* 
+ *>       TOUCH_read ();                                                                        <* 
+ *>       if ((x_loop % 20) == 0)  yVIKEYS_view_all (0.0);                                      <* 
+ *>       /+---(sleeping)--------------------+/                                                 <* 
+ *>       nanosleep    (&x_dur, NULL);                                                          <* 
+ *>    }                                                                                        <* 
+ *>    /+---(complete)------------------------------+/                                          <* 
+ *>    DEBUG_TOPS   yLOG_exit     (__FUNCTION__);                                               <* 
+ *>    return 1;                                                                                <* 
+ *> }                                                                                           <*/
 
 char
 PROG_finish          (void)
 {
-   TOUCH_wrap ();
-   DRAW_wrap  ();
+   TOUCH_wrap   ();
+   DRAW_wrap    ();
+   yVIKEYS_wrap ();
    DEBUG_TOPS    printf("\npetal writing v03 ----------------------------------end---\n\n");
    return 0;
 }
