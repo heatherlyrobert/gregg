@@ -8,7 +8,7 @@ main               (int argc, char *argv[])
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rc          =    0;
-   tTSPEC      x_dur;
+   /*> tTSPEC      x_dur;                                                             <*/
    XKeyEvent  *key_event;
    char        the_key     [5];
    int         the_bytes;
@@ -26,33 +26,34 @@ main               (int argc, char *argv[])
       return -1;
    }
    /*---(for timer)------------------------*/
-   x_dur.tv_sec    = 0;
-   x_dur.tv_nsec   = 0.5 * 1000000;
+   /*> x_dur.tv_sec    = 0;                                                           <* 
+    *> x_dur.tv_nsec   = 0.5 * 1000000;                                               <*/
    /*---(header)-------------------------*/
    DEBUG_TOPS   yLOG_enter    (__FUNCTION__);
-   while (1) {
-      x_key = 0;
-      if (XPending(DISP)) {
-         XNextEvent(DISP, &EVNT);
-         switch(EVNT.type) {
-         case KeyPress:
-            /*---(get the key)---------------------*/
-            key_event  = (XKeyEvent *) &EVNT;
-            the_bytes = XLookupString((XKeyEvent *) &EVNT, the_key, 5, NULL, NULL);
-            if (the_bytes < 1) break;
-            x_key = the_key [0];
-            break;
-         }
-      }
-      x_key = yVIKEYS_main_input  (RUN_USER, x_key);
-      yVIKEYS_main_handle (x_key);
-      if (yVIKEYS_quit ())  break;
-      ++x_loop;
-      TOUCH_read ();
-      if ((x_loop % 20) == 0)  yVIKEYS_view_all (0.0);
-      /*---(sleeping)--------------------*/
-      nanosleep    (&x_dur, NULL);
-   }
+   rc = yVIKEYS_main ("500us", "10ms", TOUCH_read ());
+   /*> while (1) {                                                                        <* 
+    *>    x_key = 0;                                                                      <* 
+    *>    if (XPending(DISP)) {                                                           <* 
+    *>       XNextEvent(DISP, &EVNT);                                                     <* 
+    *>       switch(EVNT.type) {                                                          <* 
+    *>       case KeyPress:                                                               <* 
+    *>          /+---(get the key)---------------------+/                                 <* 
+    *>          key_event  = (XKeyEvent *) &EVNT;                                         <* 
+    *>          the_bytes = XLookupString((XKeyEvent *) &EVNT, the_key, 5, NULL, NULL);   <* 
+    *>          if (the_bytes < 1) break;                                                 <* 
+    *>          x_key = the_key [0];                                                      <* 
+    *>          break;                                                                    <* 
+    *>       }                                                                            <* 
+    *>    }                                                                               <* 
+    *>    x_key = yVIKEYS_main_input  (RUN_USER, x_key);                                  <* 
+    *>    yVIKEYS_main_handle (x_key);                                                    <* 
+    *>    if (yVIKEYS_quit ())  break;                                                    <* 
+    *>    ++x_loop;                                                                       <* 
+    *>    TOUCH_read ();                                                                  <* 
+    *>    if ((x_loop % 20) == 0)  yVIKEYS_view_all (0.0);                                <* 
+    *>    /+---(sleeping)--------------------+/                                           <* 
+    *>    nanosleep    (&x_dur, NULL);                                                    <* 
+    *> }                                                                                  <*/
    DEBUG_TOPS   yLOG_exit     (__FUNCTION__);
    /*---(wrapup)-------------------------*/
    rc = PROG_finish ();

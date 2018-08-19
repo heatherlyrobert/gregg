@@ -206,8 +206,8 @@
 
 
 /* rapidly evolving version number to aid with visual change confirmation     */
-#define VER_NUM   "5.2k"
-#define VER_TXT   "formula and command line are fully working in opengl"
+#define VER_NUM   "5.2l"
+#define VER_TXT   "works with lastest changes to yVIKEYS, still need to test"
 
 
 #define     LEN_HUGE     10000
@@ -726,6 +726,8 @@ char        TOUCH_read           (void);
 
 
 char        MAP_mapper           (char  a_req);
+char        MAP_locator          (char *a_label, int *a_x, int *a_y, int *a_z);
+char        MAP_addresser        (char *a_label, int a_x, int a_y, int a_z);
 char        USER_words           (char *a_words);
 char        USER_guide           (char *a_guide);
 char        USER_init            (void);

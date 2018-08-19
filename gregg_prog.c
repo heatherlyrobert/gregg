@@ -154,7 +154,7 @@ PROG_final (void)
    FILE_rename   ("");
    if (out_start > 0) o.curr = out_start;
    /*---(key mapping)--------------------*/
-   yVIKEYS_map_config  (YVIKEYS_RIGHT, MAP_mapper);
+   yVIKEYS_map_config  (YVIKEYS_RIGHT, MAP_mapper, MAP_locator, MAP_addresser);
    /*---(complete)-----------------------*/
    DEBUG_TOPS   yLOG_exit     (__FUNCTION__);
    return 0;
