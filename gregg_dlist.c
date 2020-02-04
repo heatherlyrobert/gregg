@@ -9,8 +9,6 @@
 PRIV char  dlist_letters    (void);
 PRIV char  DLIST_back       (void);
 
-PRIV char  draw_line        (int, char);
-
 char
 dlist_init         (void)
 {
@@ -42,24 +40,24 @@ DLIST__show          (int a_who, char a_dotted)
    if (a_dotted != 'n')   return 0;
    RPTG_LETTER {
       if (s_count >= 5)  DLIST__title ("    ---");
-      printf ("    %03d   %-5s  %d %d %c  %4d %4d %4d %4d %4d    %5.1f %5.1f %3d %3d    %3d %3d    %-3s\n",
+      printf ("    %03d   %-5s  %d %d %c  %4d %4d %4d %4d %4d    %5.1f %5.1f %3d %3d    %3d %3d    %c\n",
             a_who,
-            g_loc [a_who].n,
+            g_loc [a_who].label,
             g_loc [a_who].range,
-            g_loc [a_who].sz,
-            g_loc [a_who].fu,
-            g_loc [a_who].sx,
-            g_loc [a_who].sy,
-            g_loc [a_who].ro,
-            g_loc [a_who].be,
-            g_loc [a_who].ar,
-            g_loc [a_who].ex,
-            g_loc [a_who].ey,
-            g_loc [a_who].ln,
-            g_loc [a_who].de,
-            g_loc [a_who].le,
-            g_loc [a_who].ri,
-            g_loc [a_who].gr);
+            g_loc [a_who].size,
+            g_loc [a_who].type,
+            g_loc [a_who].x_ellipse,
+            g_loc [a_who].y_ellipse,
+            g_loc [a_who].r_ellipse,
+            g_loc [a_who].b_arc,
+            g_loc [a_who].l_arc,
+            g_loc [a_who].x_end,
+            g_loc [a_who].y_end,
+            g_loc [a_who].xy_len,
+            g_loc [a_who].deg,
+            g_loc [a_who].x_lef,
+            g_loc [a_who].x_rig,
+            g_loc [a_who].lcat);
       ++s_count;
    }
    return 0;
@@ -69,132 +67,106 @@ char
 dlist_letters(void)
 {
    /*---(locals)-----------+-----+-----+-*/
-   int         i           = 0;
-   DEBUG_PROG  printf("   - displist_k1() . . . . . . . . . . . . ");
+   int         x_len       =    0;
+   int         x_type      =    0;
+   int         i           =    0;
    /*---(begin)-----------------------------*/
    dl_dotted = glGenLists(MAX_LETTERS);
    dl_solid  = glGenLists(MAX_LETTERS);
-   RPTG_LETTER  printf("LETTER DEFINITION ========beg===\n");
-   /*---(draw lines)-----------------------*/
-   DLIST__title ("lines");
-   for (i = 0; i < MAX_LETTERS; ++i) {
-      if (strncmp(g_loc[i].n, "eof", 5) == 0) break;
-      if (g_loc[i].fu != 'l')                 continue;
-      glNewList (dl_solid  + i,  GL_COMPILE);   draw_line   (i, 'n');   glEndList();
-      glNewList (dl_dotted + i,  GL_COMPILE);   draw_line   (i, 'y');   glEndList();
+   x_len = strlen (SHAPES_ALL);
+   for (x_type = 0; x_type < x_len; ++x_type) {
+      for (i = 0; i < MAX_LETTERS; ++i) {
+         if (strcmp (g_loc [i].label, "end") == 0)   break;
+         if (g_loc [i].type != SHAPES_ALL [x_type])  continue;
+         glNewList (dl_solid  + i,  GL_COMPILE);  REVERSE_make_letter (g_loc [i].label, SHAPE_SAMPLE, 1);   glEndList();
+         glNewList (dl_dotted + i,  GL_COMPILE);  REVERSE_make_letter (g_loc [i].label, SHAPE_SAMPLE, 1);   glEndList();
+      }
    }
-   /*---(draw ellipses)--------------------*/
-   DLIST__title ("ellipses");
-   for (i = 0; i < MAX_LETTERS; ++i) {
-      if (strncmp(g_loc[i].n, "eof", 5) == 0) break;
-      if (g_loc[i].fu != 'e')                 continue;
-      glNewList (dl_solid  + i,  GL_COMPILE);   draw_ellipse (i, 'n');   glEndList();
-      glNewList (dl_dotted + i,  GL_COMPILE);   draw_ellipse (i, 'y');   glEndList();
-   }
-   /*---(draw circles)---------------------*/
-   DLIST__title ("circles");
-   for (i = 0; i < MAX_LETTERS; ++i) {
-      if (strncmp(g_loc[i].n, "eof", 5) == 0) break;
-      if (g_loc[i].fu != 'c')                 continue;
-      glNewList(dl_solid  + i,  GL_COMPILE);   draw_ellipse(i, 'n');   glEndList();
-      glNewList(dl_dotted + i,  GL_COMPILE);   draw_ellipse(i, 'y');   glEndList();
-   }
-   /*---(draw pie wedges)------------------*/
-   DLIST__title ("wedges");
-   for (i = 0; i < MAX_LETTERS; ++i) {
-      if (strncmp(g_loc[i].n, "eof", 5) == 0) break;
-      if (g_loc[i].fu != 'p')                 continue;
-      glNewList(dl_solid  + i,  GL_COMPILE);   draw_pie(i);   glEndList();
-      glNewList(dl_dotted + i,  GL_COMPILE);   draw_pie(i);   glEndList();
-   }
-   /*---(draw dots)------------------------*/
-   DLIST__title ("dots");
-   for (i = 0; i < MAX_LETTERS; ++i) {
-      if (strncmp(g_loc[i].n, "eof", 5) == 0) break;
-      if (g_loc[i].fu != 'd')                 continue;
-      glNewList(dl_solid  + i,  GL_COMPILE);   draw_dot(i);   glEndList();
-      glNewList(dl_dotted + i,  GL_COMPILE);   draw_dot(i);   glEndList();
-   }
-   /*---(draw whitespace)------------------*/
-   DLIST__title ("spaces");
-   for (i = 0; i < MAX_LETTERS; ++i) {
-      if (strncmp(g_loc[i].n, "eof", 5) == 0) break;
-      if (g_loc[i].fu != 'w')                 continue;
-      glNewList(dl_solid  + i,  GL_COMPILE);   draw_whitespace(i);   glEndList();
-      glNewList(dl_dotted + i,  GL_COMPILE);   draw_whitespace(i);   glEndList();
-   }
-   /*---(draw accents)---------------------*/
-   DLIST__title ("accents");
-   for (i = 0; i < MAX_LETTERS; ++i) {
-      if (strncmp(g_loc[i].n, "eof", 5) == 0) break;
-      if (g_loc[i].fu != 'a')                 continue;
-      glNewList(dl_solid  + i,  GL_COMPILE);   draw_whitespace(i);   glEndList();
-      glNewList(dl_dotted + i,  GL_COMPILE);   draw_whitespace(i);   glEndList();
-   }
-   /*---(complete)--------------------------*/
-   RPTG_LETTER  printf("==========================end===\n");
-   DEBUG_PROG  printf("success\n");
-   return 0;
-}
 
-PRIV char     /*----: create a line for a letter -----------------------------*/
-draw_line (int a_who, char a_dotted)
-{
-   /*---(tables)--------------------------------*/
-   int a_ro   = g_loc[a_who].ro;
-   int a_ar   = g_loc[a_who].ar;
-   /*---(locals)--------------------------------*/
-   float z     =  5.0;
-   float rad;
-   float x, y;
-   rad    = a_ro * DEG2RAD;
-   int   right = 0;
-   int   left  = 0;
-   /*> printf("specs at %3d, %3d\n", a_ro, a_ar);                                     <*/
-   /*---(draw shape)----------------------------*/
-   x = a_ar * sin(rad);
-   y = a_ar * cos(rad);
-   if (x > right) right = x;
-   if (x < left)  left  = x;
-   glLineWidth(2.0);
-   glBegin(GL_LINE_STRIP); {
-      glVertex3f( 0, 0, z);
-      glVertex3f( x, y, z);
-   } glEnd();
-   glLineWidth(0.8);
-   /*---(get overall calcs)---------------------*/
-   o.tmp[0].p_bas   = 0;
-   o.tmp[0].x_full    = 0;
-   o.tmp[0].y_full    = 0;
-   o.tmp[1].p_bas   = 1;
-   o.tmp[1].x_full    = x;
-   o.tmp[1].y_full    = y;
-   POINT_calc (POINTS_TMP, o.tmp + 1, 'n');
-   /*---(set size values)-----------------------*/
-   g_loc[a_who].ex  = x;
-   g_loc[a_who].ey  = y;
-   g_loc[a_who].ln  = o.tmp[1].len;
-   g_loc[a_who].de  = o.tmp[1].degs;
-   g_loc[a_who].ri  = right;
-   g_loc[a_who].le  = left;
-   /*---(report out)----------------------------*/
-   DLIST__show  (a_who, a_dotted);
-   /*---(complete)------------------------------*/
+   /*---(draw lines)-----------------------*/
+   /*> DLIST__title ("lines");                                                                                              <* 
+    *> for (i = 0; i < MAX_LETTERS; ++i) {                                                                                  <* 
+    *>    if (strncmp(g_loc[i].label, "eof", 5) == 0) break;                                                                <* 
+    *>    if (g_loc[i].type != SHAPE_LINE)                 continue;                                                        <* 
+    *>    glNewList (dl_solid  + i,  GL_COMPILE);  REVERSE_make_letter (g_loc [i].label, SHAPE_SAMPLE, 1);   glEndList();   <* 
+    *>    glNewList (dl_dotted + i,  GL_COMPILE);  REVERSE_make_letter (g_loc [i].label, SHAPE_SAMPLE, 1);   glEndList();   <* 
+    *> }                                                                                                                    <*/
+   /*---(draw circles)---------------------*/
+   /*> DLIST__title ("circles");                                                                           <* 
+    *> for (i = 0; i < MAX_LETTERS; ++i) {                                                                 <* 
+    *>    if (strncmp(g_loc[i].label, "eof", 5) == 0) break;                                               <* 
+    *>    if (g_loc[i].type != SHAPE_CIRCLE)                 continue;                                     <* 
+    *>    glNewList (dl_solid  + i,  GL_COMPILE);  REVERSE_circle   (i, SHAPE_SAMPLE, 1);   glEndList();   <* 
+    *>    glNewList (dl_dotted + i,  GL_COMPILE);  REVERSE_circle   (i, SHAPE_SAMPLE, 1);   glEndList();   <* 
+    *> }                                                                                                   <*/
+   /*---(draw ellipses)--------------------*/
+   /*> DLIST__title ("ellipses");                                                                          <* 
+    *> for (i = 0; i < MAX_LETTERS; ++i) {                                                                 <* 
+    *>    if (strncmp(g_loc[i].label, "eof", 5) == 0) break;                                               <* 
+    *>    if (g_loc[i].type != SHAPE_ELLIPSE)                 continue;                                    <* 
+    *>    glNewList (dl_solid  + i,  GL_COMPILE);  REVERSE_ellipse  (i, SHAPE_SAMPLE, 1);   glEndList();   <* 
+    *>    glNewList (dl_dotted + i,  GL_COMPILE);  REVERSE_ellipse  (i, SHAPE_SAMPLE, 1);   glEndList();   <* 
+    *> }                                                                                                   <*/
+   /*---(draw pie wedges)------------------*/
+   /*> DLIST__title ("roundish");                                                                          <* 
+    *> for (i = 0; i < MAX_LETTERS; ++i) {                                                                 <* 
+    *>    if (strncmp(g_loc[i].label, "eof", 5) == 0) break;                                               <* 
+    *>    if (g_loc[i].type != SHAPE_ROUNDISH)                continue;                                    <* 
+    *>    glNewList (dl_solid  + i,  GL_COMPILE);  REVERSE_roundish (i, SHAPE_SAMPLE, 1);   glEndList();   <* 
+    *>    glNewList (dl_dotted + i,  GL_COMPILE);  REVERSE_roundish (i, SHAPE_SAMPLE, 1);   glEndList();   <* 
+    *> }                                                                                                   <*/
+   /*---(draw pie wedges)------------------*/
+   /*> DLIST__title ("wedges");                                                                            <* 
+    *> for (i = 0; i < MAX_LETTERS; ++i) {                                                                 <* 
+    *>    if (strncmp(g_loc[i].label, "eof", 5) == 0) break;                                               <* 
+    *>    if (g_loc[i].type != SHAPE_TEARDROP)                continue;                                    <* 
+    *>    glNewList (dl_solid  + i,  GL_COMPILE);  REVERSE_teardrop (i, SHAPE_SAMPLE, 1);   glEndList();   <* 
+    *>    glNewList (dl_dotted + i,  GL_COMPILE);  REVERSE_teardrop (i, SHAPE_SAMPLE, 1);   glEndList();   <* 
+    *> }                                                                                                   <*/
+   /*---(draw dots)------------------------*/
+   /*> DLIST__title ("dots");                                                                                             <* 
+    *> for (i = 0; i < MAX_LETTERS; ++i) {                                                                                <* 
+    *>    if (strncmp(g_loc[i].label, "eof", 5) == 0) break;                                                              <* 
+    *>    if (g_loc[i].type != SHAPE_DOT)                 continue;                                                       <* 
+    *>    glNewList (dl_solid  + i,  GL_COMPILE);  REVERSE_dot      (i, SHAPE_SAMPLE, 1);   draw_dot(i);   glEndList();   <* 
+    *>    glNewList (dl_dotted + i,  GL_COMPILE);  REVERSE_dot      (i, SHAPE_SAMPLE, 1);   draw_dot(i);   glEndList();   <* 
+    *> }                                                                                                                  <*/
+   /*---(draw whitespace)------------------*/
+   /*> DLIST__title ("spaces");                                                                            <* 
+    *> for (i = 0; i < MAX_LETTERS; ++i) {                                                                 <* 
+    *>    if (strncmp(g_loc[i].label, "eof", 5) == 0) break;                                               <* 
+    *>    if (g_loc[i].type != SHAPE_SPACE)         continue;                                              <* 
+    *>    glNewList (dl_solid  + i,  GL_COMPILE);  REVERSE_space    (i, SHAPE_SAMPLE, 1);   glEndList();   <* 
+    *>    glNewList (dl_dotted + i,  GL_COMPILE);  REVERSE_space    (i, SHAPE_SAMPLE, 1);   glEndList();   <* 
+    *> }                                                                                                   <*/
+   /*---(draw accents)---------------------*/
+   /*> DLIST__title ("accents");                                                        <* 
+    *> for (i = 0; i < MAX_LETTERS; ++i) {                                              <* 
+    *>    if (strncmp(g_loc[i].label, "eof", 5) == 0) break;                            <* 
+    *>    if (g_loc[i].type != 'a')                 continue;                           <* 
+    *>    glNewList(dl_solid  + i,  GL_COMPILE);   draw_whitespace(i);   glEndList();   <* 
+    *>    glNewList(dl_dotted + i,  GL_COMPILE);   draw_whitespace(i);   glEndList();   <* 
+    *> }                                                                                <*/
+   /*---(complete)--------------------------*/
    return 0;
 }
 
 char
 draw_ellipse (int a_who, char a_dotted)
 {
+   /*> REVERSE_ellipse (a_who, SHAPE_SAMPLE, 1);                                      <*/
+   return 0;
+
    /*---(locals)-----------+-----+-----+-*/
    int         i           = 0;
    /*---(tables)--------------------------------*/
-   int a_sx   = g_loc[a_who].sx;
-   int a_sy   = g_loc[a_who].sy;
-   int a_ro   = g_loc[a_who].ro;
-   int a_be   = g_loc[a_who].be;
-   int a_ar   = g_loc[a_who].ar;
-   int a_st   = g_loc[a_who].st;
+   int a_sx   = g_loc[a_who].x_ellipse;
+   int a_sy   = g_loc[a_who].y_ellipse;
+   int a_ro   = g_loc[a_who].r_ellipse;
+   int a_be   = g_loc[a_who].b_arc;
+   int a_ar   = g_loc[a_who].l_arc;
+   /*> int a_st   = g_loc[a_who].dots;                                                <*/
+   int a_st   = 10;
    if (a_st <= 0) a_st = 10;
    /*---(locals)--------------------------------*/
    float beta  = a_ro * DEG2RAD;
@@ -260,52 +232,52 @@ draw_ellipse (int a_who, char a_dotted)
    glEnd();
    /*---(get overall calcs)---------------------*/
    o.tmp[0].p_bas   = 0;
-   o.tmp[0].x_full   = 0;
-   o.tmp[0].y_full   = 0;
+   o.tmp[0].x_raw   = 0;
+   o.tmp[0].y_raw   = 0;
    o.tmp[1].p_bas   = 1;
-   o.tmp[1].x_full   = x;
-   o.tmp[1].y_full   = y;
+   o.tmp[1].x_raw   = x;
+   o.tmp[1].y_raw   = y;
    POINT_calc (POINTS_TMP, o.tmp + 1, 'n');
    /*---(set size values)-----------------------*/
-   g_loc[a_who].ex = x;
-   g_loc[a_who].ey = y;
-   g_loc[a_who].ln = o.tmp[1].len;
-   g_loc[a_who].de = o.tmp[1].degs;
-   g_loc[a_who].ri = right;
-   g_loc[a_who].le = left;
+   g_loc[a_who].x_end = x;
+   g_loc[a_who].y_end = y;
+   g_loc[a_who].xy_len = o.tmp[1].len;
+   g_loc[a_who].deg = o.tmp[1].degs;
+   g_loc[a_who].x_rig = right;
+   g_loc[a_who].x_lef = left;
    /*---(check for i, ai, ae)-------------------*/
-   if (  strncmp(g_loc[a_who].gr, "i" , 5) == 0 ||
-         strncmp(g_loc[a_who].gr, "ai", 5) == 0 ||
-         strncmp(g_loc[a_who].gr, "ae", 5) == 0) {
-      alpha  = (a_be + 0.5 * a_ar) * DEG2RAD;
-      salpha = sin(alpha);
-      calpha = cos(alpha);
-      a_sx  *= 0.0;
-      a_sy  *= 0.0;
-      x      = (a_sx * calpha * cbeta) - (a_sy * salpha * sbeta) - ax;
-      y      = (a_sx * calpha * sbeta) + (a_sy * salpha * cbeta) - ay;
-      if        (strncmp(g_loc[a_who].gr, "i" , 5) == 0)  {
-         glBegin(GL_LINE_STRIP);
-         glVertex3f( x - 12, y -  4 , z);
-         glVertex3f( x     , y     , z);
-         glEnd();
-      } else if (strncmp(g_loc[a_who].gr, "ae", 5) == 0) {
-         glBegin(GL_LINE_STRIP);
-         glVertex3f( x -  4, y + 12 , z);
-         glVertex3f( x     , y     , z);
-         glEnd();
-      } else if (strncmp(g_loc[a_who].gr, "ai", 5) == 0) {
-         float xx2, yy2;
-         glBegin(GL_LINE_STRIP);
-         for (i = 0; i <= 360; i += 30) {
-            alpha  = i * DEG2RAD;
-            xx2 = 2.0 * sin(alpha);
-            yy2 = 2.0 * cos(alpha);
-            glVertex3f( x + xx2, y + yy2, z);
-         }
-         glEnd();
-      }
-   }
+   /*> if (  strncmp(g_loc[a_who].cat, "i" , 5) == 0 ||                               <* 
+    *>       strncmp(g_loc[a_who].cat, "ai", 5) == 0 ||                               <* 
+    *>       strncmp(g_loc[a_who].cat, "ae", 5) == 0) {                               <* 
+    *>    alpha  = (a_be + 0.5 * a_ar) * DEG2RAD;                                     <* 
+    *>    salpha = sin(alpha);                                                        <* 
+    *>    calpha = cos(alpha);                                                        <* 
+    *>    a_sx  *= 0.0;                                                               <* 
+    *>    a_sy  *= 0.0;                                                               <* 
+    *>    x      = (a_sx * calpha * cbeta) - (a_sy * salpha * sbeta) - ax;            <* 
+    *>    y      = (a_sx * calpha * sbeta) + (a_sy * salpha * cbeta) - ay;            <* 
+    *>    if        (strncmp(g_loc[a_who].cat, "i" , 5) == 0)  {                      <* 
+    *>       glBegin(GL_LINE_STRIP);                                                  <* 
+    *>       glVertex3f( x - 12, y -  4 , z);                                         <* 
+    *>       glVertex3f( x     , y     , z);                                          <* 
+    *>       glEnd();                                                                 <* 
+    *>    } else if (strncmp(g_loc[a_who].cat, "ae", 5) == 0) {                       <* 
+    *>       glBegin(GL_LINE_STRIP);                                                  <* 
+    *>       glVertex3f( x -  4, y + 12 , z);                                         <* 
+    *>       glVertex3f( x     , y     , z);                                          <* 
+    *>       glEnd();                                                                 <* 
+    *>    } else if (strncmp(g_loc[a_who].cat, "ai", 5) == 0) {                       <* 
+    *>       float xx2, yy2;                                                          <* 
+    *>       glBegin(GL_LINE_STRIP);                                                  <* 
+    *>       for (i = 0; i <= 360; i += 30) {                                         <* 
+    *>          alpha  = i * DEG2RAD;                                                 <* 
+    *>          xx2 = 2.0 * sin(alpha);                                               <* 
+    *>          yy2 = 2.0 * cos(alpha);                                               <* 
+    *>          glVertex3f( x + xx2, y + yy2, z);                                     <* 
+    *>       }                                                                        <* 
+    *>       glEnd();                                                                 <* 
+    *>    }                                                                           <* 
+    *> }                                                                              <*/
    /*---(complete)------------------------------*/
    glLineWidth(0.8);
    glPointSize(0.8);
@@ -353,12 +325,15 @@ draw_arc (float a_beg, float a_end, int a_color, int a_z)
 char
 draw_pie (int a_who)
 {
+   /*> REVERSE_teardrop (a_who, SHAPE_SAMPLE, 1);                                     <*/
+   return 0;
+
    /*---(locals)-----------+-----+-----+-*/
    int         i           = 0;
    /*---(tables)--------------------------------*/
-   int a_be   = g_loc[a_who].be;      /* rotation */
-   int a_sx   = g_loc[a_who].sx * 1.7;  /* radius   */
-   /*> DEBUG__SHAPES  if (g_loc[a_who].ri == 0 && g_loc[a_who].le == 0) printf("   %-5s", g_loc[a_who].n);   <*/
+   int a_be   = g_loc[a_who].b_arc;      /* rotation */
+   int a_sx   = g_loc[a_who].x_ellipse * 1.7;  /* radius   */
+   /*> DEBUG__SHAPES  if (g_loc[a_who].x_rig == 0 && g_loc[a_who].x_lef == 0) printf("   %-5s", g_loc[a_who].label);   <*/
    /*---(tables)--------------------------------*/
    float rad;
    float z     =  5.0;
@@ -386,50 +361,50 @@ draw_pie (int a_who)
    }
    glVertex3f( 0, 0, z);
    glEnd();
-   /*> DEBUG__SHAPES  if (g_loc[a_who].ri == 0 && g_loc[a_who].le == 0) printf(" %3.0f %3.0f %3d %3d %3d %3d  %-3s\n", x, y, o.tmp[1].len, o.tmp[1].degs, left, right, g_loc[a_who].gr);   <*/
+   /*> DEBUG__SHAPES  if (g_loc[a_who].x_rig == 0 && g_loc[a_who].x_lef == 0) printf(" %3.0f %3.0f %3d %3d %3d %3d  %-3s\n", x, y, o.tmp[1].len, o.tmp[1].degs, left, right, g_loc[a_who].cat);   <*/
    /*---(set size values)-----------------------*/
-   g_loc[a_who].ex = 0;
-   g_loc[a_who].ey = 0;
-   g_loc[a_who].ln = 0;
-   g_loc[a_who].de = 0;
-   g_loc[a_who].ri = right;
-   g_loc[a_who].le = left;
-   /*> g_loc[a_who].ex = 0;                                                             <* 
-    *> g_loc[a_who].ey = 0;                                                             <* 
-    *> g_loc[a_who].ln = 0;                                                             <* 
-    *> g_loc[a_who].de = 0;                                                             <* 
-    *> g_loc[a_who].ri = 0;                                                             <* 
-    *> g_loc[a_who].le = 0;                                                             <*/
+   g_loc[a_who].x_end = 0;
+   g_loc[a_who].y_end = 0;
+   g_loc[a_who].xy_len = 0;
+   g_loc[a_who].deg = 0;
+   g_loc[a_who].x_rig = right;
+   g_loc[a_who].x_lef = left;
+   /*> g_loc[a_who].x_end = 0;                                                             <* 
+    *> g_loc[a_who].y_end = 0;                                                             <* 
+    *> g_loc[a_who].xy_len = 0;                                                             <* 
+    *> g_loc[a_who].deg = 0;                                                             <* 
+    *> g_loc[a_who].x_rig = 0;                                                             <* 
+    *> g_loc[a_who].x_lef = 0;                                                             <*/
    /*---(check for i, ai, ae)-------------------*/
-   if (  strncmp(g_loc[a_who].gr, "i" , 5) == 0 ||
-         strncmp(g_loc[a_who].gr, "ai", 5) == 0 ||
-         strncmp(g_loc[a_who].gr, "ae", 5) == 0) {
-      rad  = (a_be + 22.5) * DEG2RAD;
-      mult = a_sx * 0.80;
-      x = mult * cos(rad);
-      y = mult * sin(rad);
-      if        (strncmp(g_loc[a_who].gr, "i" , 5) == 0)  {
-         glBegin(GL_LINE_STRIP);
-         glVertex3f( x - 12, y -  4 , z);
-         glVertex3f( x     , y     , z);
-         glEnd();
-      } else if (strncmp(g_loc[a_who].gr, "ae", 5) == 0) {
-         glBegin(GL_LINE_STRIP);
-         glVertex3f( x -  4, y + 12 , z);
-         glVertex3f( x     , y     , z);
-         glEnd();
-      } else {
-         float xx2, yy2;
-         glBegin(GL_LINE_STRIP);
-         for (i = 0; i <= 360; i += 30) {
-            rad  = i * DEG2RAD;
-            xx2 = 2.0 * sin(rad);
-            yy2 = 2.0 * cos(rad);
-            glVertex3f( x + xx2, y + yy2, z);
-         }
-         glEnd();
-      }
-   }
+   /*> if (  strncmp(g_loc[a_who].cat, "i" , 5) == 0 ||                               <* 
+    *>       strncmp(g_loc[a_who].cat, "ai", 5) == 0 ||                               <* 
+    *>       strncmp(g_loc[a_who].cat, "ae", 5) == 0) {                               <* 
+    *>    rad  = (a_be + 22.5) * DEG2RAD;                                             <* 
+    *>    mult = a_sx * 0.80;                                                         <* 
+    *>    x = mult * cos(rad);                                                        <* 
+    *>    y = mult * sin(rad);                                                        <* 
+    *>    if        (strncmp(g_loc[a_who].cat, "i" , 5) == 0)  {                      <* 
+    *>       glBegin(GL_LINE_STRIP);                                                  <* 
+    *>       glVertex3f( x - 12, y -  4 , z);                                         <* 
+    *>       glVertex3f( x     , y     , z);                                          <* 
+    *>       glEnd();                                                                 <* 
+    *>    } else if (strncmp(g_loc[a_who].cat, "ae", 5) == 0) {                       <* 
+    *>       glBegin(GL_LINE_STRIP);                                                  <* 
+    *>       glVertex3f( x -  4, y + 12 , z);                                         <* 
+    *>       glVertex3f( x     , y     , z);                                          <* 
+    *>       glEnd();                                                                 <* 
+    *>    } else {                                                                    <* 
+    *>       float xx2, yy2;                                                          <* 
+    *>       glBegin(GL_LINE_STRIP);                                                  <* 
+    *>       for (i = 0; i <= 360; i += 30) {                                         <* 
+    *>          rad  = i * DEG2RAD;                                                   <* 
+    *>          xx2 = 2.0 * sin(rad);                                                 <* 
+    *>          yy2 = 2.0 * cos(rad);                                                 <* 
+    *>          glVertex3f( x + xx2, y + yy2, z);                                     <* 
+    *>       }                                                                        <* 
+    *>       glEnd();                                                                 <* 
+    *>    }                                                                           <* 
+    *> }                                                                              <*/
    /*---(report out)----------------------------*/
    DLIST__show  (a_who, 'n');
    /*---(complete)------------------------------*/
@@ -440,20 +415,24 @@ draw_pie (int a_who)
 char
 draw_dot (int a_who)
 {
+   /*> REVERSE_dot      (a_who, SHAPE_SAMPLE, 1);                                     <*/
+   return 0;
+
    /*---(locals)-----------+-----+-----+-*/
    int         i           = 0;
    /*---(tables)--------------------------------*/
-   int a_size  = g_loc[a_who].sx;
-   int a_steps = g_loc[a_who].st;
-   int a_offx  = g_loc[a_who].ro;
-   int a_offy  = g_loc[a_who].be;
+   int a_size  = g_loc[a_who].x_ellipse;
+   /*> int a_steps = g_loc[a_who].dots;                                               <*/
+   int a_steps = 10;
+   int a_offx  = g_loc[a_who].r_ellipse;
+   int a_offy  = g_loc[a_who].b_arc;
    if (a_steps <= 0) a_steps = 10;
    float rad;
    float z     =  5.0;
    float x, y;
    int   right = 0;
    int   left  = 0;
-   /*> DEBUG__SHAPES  if (g_loc[a_who].ri == 0) printf("   %-5s", g_loc[a_who].n);    <*/
+   /*> DEBUG__SHAPES  if (g_loc[a_who].x_rig == 0) printf("   %-5s", g_loc[a_who].label);    <*/
    glLineWidth(2.0);
    glBegin(GL_LINE_STRIP);
    for (i = 0; i <= 360; i += a_steps) {
@@ -466,14 +445,14 @@ draw_dot (int a_who)
    }
    glEnd();
    glLineWidth(0.8);
-   /*> DEBUG__SHAPES  if (g_loc[a_who].ri == 0) printf(" %3.0f %3.0f %3d %3d %3d %3d  %-3s\n", x, y, o.tmp[1].len, o.tmp[1].degs, left, right, g_loc[a_who].gr);   <*/
+   /*> DEBUG__SHAPES  if (g_loc[a_who].x_rig == 0) printf(" %3.0f %3.0f %3d %3d %3d %3d  %-3s\n", x, y, o.tmp[1].len, o.tmp[1].degs, left, right, g_loc[a_who].cat);   <*/
    /*---(set size values)-----------------------*/
-   g_loc[a_who].ex = 0;
-   g_loc[a_who].ey = 0;
-   g_loc[a_who].ln = 0;
-   g_loc[a_who].de = 0;
-   g_loc[a_who].ri = right;
-   g_loc[a_who].le = left;
+   g_loc[a_who].x_end = 0;
+   g_loc[a_who].y_end = 0;
+   g_loc[a_who].xy_len = 0;
+   g_loc[a_who].deg = 0;
+   g_loc[a_who].x_rig = right;
+   g_loc[a_who].x_lef = left;
    /*---(report out)----------------------------*/
    DLIST__show  (a_who, 'n');
    /*---(complete)------------------------------*/
@@ -483,20 +462,23 @@ draw_dot (int a_who)
 char
 draw_whitespace (int a_who)
 {
-   int a_offx  = g_loc[a_who].ro;
-   int a_offy  = g_loc[a_who].be;
+   /*> REVERSE_space    (a_who, SHAPE_SAMPLE, 1);                                     <*/
+   return 0;
+
+   int a_offx  = g_loc[a_who].r_ellipse;
+   int a_offy  = g_loc[a_who].b_arc;
    int left    = 0;
    int right   = 0;
-   /*> DEBUG__SHAPES  if (g_loc[a_who].ex == 0) printf("   %-5s", g_loc[a_who].n);    <*/
+   /*> DEBUG__SHAPES  if (g_loc[a_who].x_end == 0) printf("   %-5s", g_loc[a_who].label);    <*/
    if (a_offx > 0) right = a_offx;
    if (a_offx < 0) left  = a_offx;
-   /*> DEBUG__SHAPES  if (g_loc[a_who].ex != 0) printf(" %3d %3d %3d %3d %3d %3d  %-3s\n", a_offx, a_offy, 0, 0, left, right, g_loc[a_who].gr);   <*/
-   g_loc[a_who].ex = a_offx;
-   g_loc[a_who].ey = a_offy;
-   g_loc[a_who].ln = 0;
-   g_loc[a_who].de = 0;
-   g_loc[a_who].ri = right;
-   g_loc[a_who].le = left;
+   /*> DEBUG__SHAPES  if (g_loc[a_who].x_end != 0) printf(" %3d %3d %3d %3d %3d %3d  %-3s\n", a_offx, a_offy, 0, 0, left, right, g_loc[a_who].cat);   <*/
+   g_loc[a_who].x_end = a_offx;
+   g_loc[a_who].y_end = a_offy;
+   g_loc[a_who].xy_len = 0;
+   g_loc[a_who].deg = 0;
+   g_loc[a_who].x_rig = right;
+   g_loc[a_who].x_lef = left;
    /*---(report out)----------------------------*/
    DLIST__show  (a_who, 'n');
    /*---(complete)------------------------------*/
@@ -720,7 +702,7 @@ BACK__guidelines   (void)
    float     z;                        /* cartesian coordinates               */
    int       x_max;
    /*---(guides)----------------------------*/
-   yVIKEYS_view_bounds (YVIKEYS_MAIN, NULL, &x_max, NULL, NULL);
+   yVIKEYS_view_bounds (YVIKEYS_MAIN, NULL, &x_max, NULL, NULL, NULL, NULL);
    glLineWidth(0.8);
    z =  -10.0;
    yVIKEYS_view_color (YCOLOR_BAS_MAX, 0.65);

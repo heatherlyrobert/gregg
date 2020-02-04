@@ -2,55 +2,103 @@
 #include "gregg.h"
 
 
+/*
+ *  bas/avg points are the same, but calculations are different.  they are
+ *  used to smooth the naturally jagged contures out of the source drawing.
+ *
+ *  start, head, tail, and finish should all be the same, then the points
+ *  inbetween are sampled.
+ *
+ *
+ */
 
-PRIV int      /*----: locate a basic point based on its raw point ------------*/
-BASE__find            (int a_raw)
+
+/*============================--------------------============================*/
+/*===----                        small support                         ----===*/
+/*============================--------------------============================*/
+static void o___SUPPORT________________o (void) {;}
+
+int           /*----: check distance to potential point ----------------------*/
+BASE__distance     (int n, int a_off)
 {
-   int i = 0;
-   for (i = 0; i < o.nbas; ++i) {
-      if (o.bas[i].p_bas == a_raw) return i;
-   }
-   return -1;
+   float     xd, yd;
+   xd   = fabs (o.raw [n].x_pos - o.bas [o.nbas - a_off].x_pos);
+   yd   = fabs (o.raw [n].y_pos - o.bas [o.nbas - a_off].y_pos);
+   return sqrt ((xd * xd) + (yd * yd));
 }
 
-PRIV char     /*----: add an additional basic point from a raw point ---------*/
-BASE__add            (int a_raw)
+
+
+/*============================--------------------============================*/
+/*===----                      adding raw points                       ----===*/
+/*============================--------------------============================*/
+static void o___NEW____________________o (void) {;}
+
+char          /*----: add an additional basic point from a raw point ---------*/
+BASE__point          (int n)
 {
-   int       rc        = 0;
-   DEBUG_AVG   printf("   %3d : ", a_raw);
-   if ((rc = BASE__find (a_raw)) >= 0) {
-      DEBUG_AVG   printf("REJECTED, already exists as %4d\n", rc);
-      return -1;
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =    0;
+   int         x_dup       =    0;
+   float       d           =  0.0;
+   /*---(header)-------------------------*/
+   DEBUG_RAW    yLOG_senter  (__FUNCTION__);
+   DEBUG_RAW    yLOG_sint    (n);
+   /*---(filter duplicates)--------------*/
+   DEBUG_RAW    yLOG_sint    (o.bas [o.nbas - 1].p_raw);
+   if (o.nbas > 0 && n == o.bas [o.nbas - 1].p_raw) {
+      DEBUG_RAW    yLOG_sexitr  (__FUNCTION__, rce);
+      return rce;
    }
-   DEBUG_AVG   printf("added as %4d at %4dx, %4dy\n", o.nbas, o.raw[a_raw].x_full, o.raw[a_raw].y_full);
-   o.bas [o.nbas].p_raw  = o.avg [o.navg].p_raw  = a_raw;
-   o.bas [o.nbas].p_bas  = o.avg [o.navg].p_bas  = o.nbas;
-   o.bas [o.nbas].x_full = o.avg [o.navg].x_full = o.raw [a_raw].x_full;
-   o.bas [o.nbas].x_pos  = o.avg [o.navg].x_pos  = o.raw [a_raw].x_pos;
-   o.bas [o.nbas].y_full = o.avg [o.navg].y_full = o.raw [a_raw].y_full;
-   o.bas [o.nbas].y_pos  = o.avg [o.navg].y_pos  = o.raw [a_raw].y_pos;
-   o.bas [o.nbas].type   = o.avg [o.navg].type   = o.raw [a_raw].type;
-   strncpy (o.bas [o.nbas].use, "-", 5);
-   strncpy (o.avg [o.nbas].use, "-", 5);
+   /*---(filter too close)---------------*/
+   DEBUG_RAW    yLOG_schar   (o.raw [n].type);
+   --rce;  if (strchr ("S><F", o.raw [n].type) == NULL) {
+      d = BASE__distance (n, -1);
+      DEBUG_RAW    yLOG_sdouble (d);
+      if (d <= 3.0) {
+         DEBUG_RAW    yLOG_sexitr  (__FUNCTION__, rce);
+         return rce;
+      }
+   }
+   /*---(add)----------------------------*/
+   DEBUG_RAW    yLOG_sint    (o.nbas);
+   DEBUG_RAW    yLOG_sint    (o.raw [n].x_raw);
+   DEBUG_RAW    yLOG_sint    (o.raw [n].y_raw);
+   /*---(head)----------------------------*/
+   o.bas [o.nbas].series  = POINTS_BAS;
+   o.avg [o.navg].series  = POINTS_AVG;
+   o.bas [o.nbas].seq     = o.avg [o.navg].seq     = o.nbas;
+   o.bas [o.nbas].p_raw   = o.avg [o.navg].p_raw   = n;
+   o.bas [o.nbas].p_bas   = o.avg [o.navg].p_bas   = o.nbas;
+   o.bas [o.nbas].fake    = o.avg [o.navg].fake    = o.raw [n].fake;
+   o.bas [o.nbas].type    = o.avg [o.navg].type    = o.raw [n].type;
+   /*---(touchpad)------------------------*/
+   o.bas [o.nbas].x_touch = o.avg [o.navg].x_touch = o.raw [n].x_touch;
+   o.bas [o.nbas].x_raw   = o.avg [o.navg].x_raw   = o.raw [n].x_raw;
+   o.bas [o.nbas].y_touch = o.avg [o.navg].y_touch = o.raw [n].y_touch;
+   o.bas [o.nbas].y_raw   = o.avg [o.navg].y_raw   = o.raw [n].y_raw;
+   /*---(display)-------------------------*/
+   o.bas [o.nbas].x_pos   = o.avg [o.navg].x_pos   = o.raw [n].x_pos;
+   o.bas [o.nbas].x_rel   = o.avg [o.navg].x_rel   = o.raw [n].x_rel;
+   o.bas [o.nbas].y_pos   = o.avg [o.navg].y_pos   = o.raw [n].y_pos;
+   o.bas [o.nbas].y_rel   = o.avg [o.navg].y_rel   = o.raw [n].y_rel;
+   /*---(counters)-----------------------*/
    ++o.nbas;
    ++o.navg;
+   DEBUG_RAW    yLOG_sint    (o.nbas);
+   /*---(complete)-----------------------*/
+   DEBUG_RAW    yLOG_sexit   (__FUNCTION__);
    return 0;
 }
 
-PRIV char     /*----: calculate additional information on basic points -------*/
+char          /*----: calculate additional information on basic points -------*/
 BASE__calc           (void)
 {
+   /*---(locals)-----------+-----+-----+-*/
    int i;
    /*---(calc real points)---------------*/
-   for (i = 0; i < o.nbas; ++i) {
-      /*> POINT_display (o.bas + i);                                                  <*/
-      /*> POINT_display (o.avg + i);                                                  <*/
-      if (o.bas[i].type     == POINT_START ) continue;
-      if (o.bas[i - 1].type == POINT_START ) continue;
-      if (o.bas[i].type     == POINT_FINISH) continue;
-      POINT_calc (POINTS_BAS, o.bas + i, 'n');
-      POINT_calc (POINTS_AVG, o.avg + i, 'a');
-   }
+   for (i = 0; i < o.nbas; ++i)     POINT_calc (POINTS_BAS, o.bas + i, 'n');
+   for (i = 0; i < o.navg; ++i)     POINT_calc (POINTS_AVG, o.avg + i, 'a');
    /*---(fill in bas data)---------------*/
    /*> o.bas [0].slope = o.bas [1].slope = o.bas [2].slope;                           <* 
     *> o.bas [0].icept = o.bas [1].icept = o.bas [2].icept;                           <* 
@@ -77,37 +125,59 @@ BASE__calc           (void)
    return 0;
 }
 
-PRIV char     /*----: move the beg/end points out to test circles ------------*/
+char          /*----: move the beg/end points out to test circles ------------*/
 BASE__extend         (void)
 {
    /*---(locals)-------------------------*/
    float     x_rads    = 0.0;          /* radians                             */
    int       i         = 0;            /* loop iterator -- bas points         */
+   int       x, y;
+   /*---(header)-------------------------*/
+   DEBUG_AVG    yLOG_enter   (__FUNCTION__);
    /*---(beginning)----------------------*/
    for (i = 0; i < o.nbas; ++i) {
       if (o.avg [i].type == POINT_START) {
+         /*---(rads from normal)--------*/
          x_rads = o.avg [i + 2].rads;
-         o.bas [i].x_full  = o.avg [i].x_full  = o.bas [i + 1].x_full - (20 * o.ratio * cos (x_rads)) ;
-         o.bas [i].y_full  = o.avg [i].y_full  = o.bas [i + 1].y_full - (20 * o.ratio * sin (x_rads)) ;
-         DEBUG_AVG   printf("   extended beg %4d to %4dx, %4dy for circle detection\n", 0, o.bas[i].x_full, o.bas[i].y_full);
-         POINT_calc (POINTS_BAS, o.bas + i, 'n');
-         POINT_calc (POINTS_AVG, o.avg + i, 'a');
+         /*---(save head)---------------*/
+         x = o.bas [i + 1].x_raw;
+         y = o.bas [i + 1].y_raw;
+         /*---(extend start)------------*/
+         o.bas [i].x_raw  = o.avg [i].x_raw  = o.bas [i + 1].x_raw - (10 * my.ratio * cos (x_rads)) ;
+         o.bas [i].y_raw  = o.avg [i].y_raw  = o.bas [i + 1].y_raw - (10 * my.ratio * sin (x_rads)) ;
+         DEBUG_AVG   yLOG_complex ("new beg"   , "%8.3f, from %4dx %4dy, to %4dx %4dy", x_rads, x, y, o.bas [i].x_raw, o.bas [i].y_raw);
+         /*---(recalc)------------------*/
+         POINT_position (o.bas + i);
+         POINT_calc     (POINTS_BAS, o.bas + i, 'n');
+         POINT_position (o.avg + i);
+         POINT_calc     (POINTS_AVG, o.avg + i, 'a');
+         /*---(done)--------------------*/
       }
       /*---(ending)-------------------------*/
       if (o.avg [i].type == POINT_FINISH) {
+         /*---(rads from tail)----------*/
          x_rads = o.bas [i - 1].rads;
-         o.bas [i].x_full  = o.avg [i].x_full  = o.bas [i - 1].x_full + (20 * o.ratio * cos (x_rads)) ;
-         o.bas [i].y_full  = o.avg [i].y_full  = o.bas [i - 1].y_full + (20 * o.ratio * sin (x_rads)) ;
-         DEBUG_AVG   printf("   extended end %4d to %4dx, %4dy for circle detection\n", o.nbas - 1, o.bas[i].x_full, o.bas[i].y_full);
-         POINT_calc (POINTS_BAS, o.bas + i, 'n');
-         POINT_calc (POINTS_AVG, o.avg + i, 'a');
+         /*---(save tail)---------------*/
+         x = o.bas [i - 1].x_raw;
+         y = o.bas [i - 1].y_raw;
+         /*---(extend start)------------*/
+         o.bas [i].x_raw  = o.avg [i].x_raw  = o.bas [i - 1].x_raw + (10 * my.ratio * cos (x_rads)) ;
+         o.bas [i].y_raw  = o.avg [i].y_raw  = o.bas [i - 1].y_raw + (10 * my.ratio * sin (x_rads)) ;
+         DEBUG_AVG   yLOG_complex ("new end"   , "%8.3f, from %4dx %4dy, to %4dx %4dy", x_rads, x, y, o.bas [i].x_raw, o.bas [i].y_raw);
+         /*---(recalc)------------------*/
+         POINT_position (o.bas + i);
+         POINT_calc     (POINTS_BAS, o.bas + i, 'n');
+         POINT_position (o.avg + i);
+         POINT_calc     (POINTS_AVG, o.avg + i, 'a');
+         /*---(done)--------------------*/
       }
    }
    /*---(complete)-----------------------*/
+   DEBUG_AVG    yLOG_exit    (__FUNCTION__);
    return 0;
 }
 
-PRIV char     /*----: push bas points as far as possible into sharp corners --*/
+char          /*----: push bas points as far as possible into sharp corners --*/
 BASE__sharpen        (void)
 {
    /*---(locals)-------------------------*/
@@ -140,70 +210,37 @@ BASE__sharpen        (void)
    return 0;
 }
 
-int           /*----: check distance to potential point ----------------------*/
-BASE__distance     (int a)
-{
-   float     xd, yd;
-   xd   = fabs (o.raw[a].x_pos - o.bas[o.nbas - 1].x_pos);
-   yd   = fabs (o.raw[a].y_pos - o.bas[o.nbas - 1].y_pos);
-   return sqrt ((xd * xd) + (yd * yd));
-}
-
 char          /*----: filter raw points into basic points --------------------*/
 BASE_filter        (void)
 {
-   DEBUG_AVG   printf("BAS POINTS (begin)\n");
-   /*---(locals)-------------------------*/
-   /*> float     xd, yd;                                                              <*/
-   float     dist      = 0.0;
-   int       i;
+   /*---(locals)-----------+-----+-----+-*/
+   int         i           =    0;
+   char        x_prev      =  '-';
+   float       d           =  0.0;
+   /*---(header)-------------------------*/
+   DEBUG_AVG    yLOG_enter   (__FUNCTION__);
    /*---(beg points)---------------------*/
    o.nbas = o.navg = 0;
    /*---(find additional points)---------*/
    for (i = 0; i < o.nraw; ++i) {
-      DEBUG_AVG   printf("%3d [%c] ", i, o.raw[i].type);
-      /*---(handle starts)---------------*/
-      if (o.raw[i].type == POINT_START) {
-         DEBUG_AVG   printf("S/>                    ACCEPT\n");
-         BASE__add (i);
-         o.bas[o.nbas - 1].fake = 'y';
-         BASE__add (i + 1);
-         o.bas[o.nbas - 1].type = POINT_HEAD;
-         o.avg[o.nbas - 1].type = POINT_HEAD;
-         ++i;
-         continue;
-      }
-      /*---(handle finsishes)------------*/
-      if (o.raw[i].type == POINT_FINISH) {
-         DEBUG_AVG   printf("F                      ACCEPT\n");
-         /*> xd   = fabs(o.raw[i].x_full - o.bas[o.nbas - 1].x_full);                 <* 
-          *> yd   = fabs(o.raw[i].y_full - o.bas[o.nbas - 1].y_full);                 <* 
-          *> dist = sqrt ((xd * xd) + (yd * yd));                                     <*/
-         dist = BASE__distance (i);
-         if (dist <=  3.0 && o.bas[o.nbas - 1].type!= POINT_HEAD) {
-            DEBUG_AVG   printf("too close to F         reject, i=%c, i-1=%c\n", o.raw[i].type, o.raw[i - 1].type);
+      /*---(prepare)------------------------*/
+      if (o.nbas > 0)  x_prev  = o.bas [o.nbas - 1].type;
+      /*---(check collapse)--------------*/
+      if (o.raw [i].type == POINT_TAIL && x_prev == POINT_NORMAL) {
+         d  = BASE__distance (i, -2);
+         DEBUG_AVG    yLOG_double  ("to tail"   , d);
+         if (d <= 4.5) {
+            DEBUG_AVG    yLOG_note    ("collapsing last normal before tail");
             --o.nbas;
             --o.navg;
          }
-         BASE__add (i - 1);
-         BASE__add (i);
-         o.bas[o.nbas - 1].fake = 'y';
-         continue;
       }
-      /*---(handle normal)---------------*/
-      /*> xd   = abs (o.raw[i].x_full - o.bas[o.nbas - 1].x_full);                    <* 
-       *> yd   = abs (o.raw[i].y_full - o.bas[o.nbas - 1].y_full);                    <* 
-       *> dist = sqrt ((xd * xd) + (yd * yd));                                        <*/
-      dist = BASE__distance (i);
-      if (dist >  3.0) {
-         DEBUG_AVG   printf("good distance  %6.2f  ACCEPT\n", dist);
-         BASE__add (i);
-      } else {
-         DEBUG_AVG   printf("too close with %6.2f\n", dist);
-      }
+      /*---(normal)----------------------*/
+      BASE__point  (i);
+      /*---(done)------------------------*/
    }
    /*---(end points)---------------------*/
-   DEBUG_AVG   printf("   added %4d total bas points\n\n", o.nbas);
+   DEBUG_AVG    yLOG_value   ("o.nbas"    , o.nbas);
    /*---(run calculations)---------------*/
    BASE__calc    ();
    BASE__extend  ();
@@ -215,7 +252,7 @@ BASE_filter        (void)
     *>    POINT_display (o.avg + i);                                                  <* 
     *> }                                                                              <*/
    /*---(complete)-----------------------*/
-   DEBUG_AVG   printf("BAS POINTS (end)\n\n");
+   DEBUG_AVG    yLOG_exit    (__FUNCTION__);
    return 0;
 }
 

@@ -53,21 +53,21 @@ match_calc (int a_start, int a_count)
    int p3         = o.key[a_start + a_count - 1].p_bas;
    int p4         = o.key[a_start + a_count    ].p_bas;
    /*---(get coordinates)-----------------------*/
-   int yy1        = o.avg[p1].y_full;
-   int yy2        = o.avg[p2].y_full;
-   int yy3        = o.avg[p3].y_full;
-   int yy4        = o.avg[p4].y_full;
-   int xx1        = o.avg[p1].x_full;
-   int xx2        = o.avg[p2].x_full;
-   int xx3        = o.avg[p3].x_full;
-   int xx4        = o.avg[p4].x_full;
+   int yy1        = o.avg[p1].y_raw;
+   int yy2        = o.avg[p2].y_raw;
+   int yy3        = o.avg[p3].y_raw;
+   int yy4        = o.avg[p4].y_raw;
+   int xx1        = o.avg[p1].x_raw;
+   int xx2        = o.avg[p2].x_raw;
+   int xx3        = o.avg[p3].x_raw;
+   int xx4        = o.avg[p4].x_raw;
    /*---(get overall calcs)---------------------*/
    o.tmp[0].p_bas   = a_start;
-   o.tmp[0].x_full   = xx1;
-   o.tmp[0].y_full   = yy1;
+   o.tmp[0].x_raw   = xx1;
+   o.tmp[0].y_raw   = yy1;
    o.tmp[1].p_bas   = a_start + a_count;
-   o.tmp[1].x_full   = xx4;
-   o.tmp[1].y_full   = yy4;
+   o.tmp[1].x_raw   = xx4;
+   o.tmp[1].y_raw   = yy4;
    POINT_calc (POINTS_TMP, o.tmp + 1, 'n');
    /*---(more variables)------------------------*/
    opens.xd   = o.tmp[1].xd;
@@ -101,15 +101,15 @@ match_calc (int a_start, int a_count)
    for (i = p1 + 1; i < p4; ++i) {
       /*---(start with calc'd point)------------*/
       if (opens.slope == 0.0) opens.slope = 0.001;
-      liney   = (opens.slope * o.bas[i].x_full) + opens.icept;
-      linex   = (o.bas[i].y_full - opens.icept) / opens.slope;
+      liney   = (opens.slope * o.bas[i].x_raw) + opens.icept;
+      linex   = (o.bas[i].y_raw - opens.icept) / opens.slope;
       if (linex >  999) linex =  999;
       if (linex < -999) linex = -999;
       if (liney >  999) liney =  999;
       if (liney < -999) liney = -999;
       /*---(calc differences)-------------------*/
-      diffx   = (o.bas[i].x_full    - linex);
-      diffy   = (o.bas[i].y_full    - liney);
+      diffx   = (o.bas[i].x_raw    - linex);
+      diffy   = (o.bas[i].y_raw    - liney);
       if (diffx >  999) diffx =  999;
       if (diffx < -999) diffx = -999;
       if (diffy >  999) diffy =  999;
@@ -130,7 +130,7 @@ match_calc (int a_start, int a_count)
       case 8:  if (diffx < 0.0) opens.cdepth *= -1;  break;
       }
       /*> printf("   %3d %4d %4d %6.1f %6.1f %6.1f %6.1f %5.2f %4d %5.1f\n",                      <* 
-       *>       i, o.bas[i].x_full, o.bas[i].y_full, linex, liney, diffx, diffy, theta, thetad, opens.cdepth);   <*/
+       *>       i, o.bas[i].x_raw, o.bas[i].y_raw, linex, liney, diffx, diffy, theta, thetad, opens.cdepth);   <*/
       if (opens.cdepth > lcurve) lcurve = opens.cdepth;
       if (opens.cdepth < rcurve) rcurve = opens.cdepth;
       if (fabs(opens.cdepth) > fabs(opens.cm)) opens.cm = opens.cdepth;
@@ -430,17 +430,17 @@ match_location     (int a_rule, int a_beg, int a_opens, int a_size)
    trys_ltr = 0;
    for (j = 0; j < MAX_LETTERS; ++j) {
       /*---(primary filtering)---------------*/
-      if (strncmp (g_loc[j].n, "eof", 5)              == 0) break;
-      if (strncmp (groups[a_rule].gr, g_loc[j].gr, 5) != 0) continue;
+      if (strncmp (g_loc[j].label, "eof", 5)              == 0) break;
+      /*> if (strncmp (groups[a_rule].cat, g_loc[j].cat, 5) != 0) continue;           <*/
       /*---(screen letters)------------------*/
       ++trys_ltr;
       if (trys_ltr <= 3) {
-         DEBUG__MATCHES  printf("%1d:%-2.2s ", g_loc[j].sz, g_loc[j].n);
+         DEBUG__MATCHES  printf("%1d:%-2.2s ", g_loc[j].size, g_loc[j].label);
       }
-      if (g_loc[j].sz != a_size                          ) continue;
+      if (g_loc[j].size != a_size                          ) continue;
       /*---(give results)-----------------*/
       rc = 1;
-      strncpy (match, g_loc[j].n, 5);
+      strncpy (match, g_loc[j].label, 5);
    }
    for (j = trys_ltr; j < 3; ++j) {
       DEBUG__MATCHES  printf(".:.. ");
@@ -486,7 +486,7 @@ match_group        (int a_beg, int a_opens, char *a_group)
          strncpy(gname, "n/a", 5);
       } else {
          strncpy(gname, a_group, 5);
-         if (strncmp(groups[i].gr, a_group, 5) != 0) continue;
+         if (strncmp(groups[i].cat, a_group, 5) != 0) continue;
       }
       /*---(start report out)----------------*/
       /*> printf("      #%02d [%-3.3s] f=%2d o=%1d, r=%1d, c=%2d : ",                 <* 
@@ -614,18 +614,18 @@ combo_flaty        (int a_beg, int a_count, int a_offset)
    p4        = o.key[a_beg + 3].p_bas;
    /*---(get target y)-------------------*/
    if (a_offset == 0) {
-      y1        = o.avg[p1].y_full;
-      y2        = o.avg[p4].y_full;
+      y1        = o.avg[p1].y_raw;
+      y2        = o.avg[p4].y_raw;
    } else {
-      y1        = o.avg[p2].y_full;
-      y2        = o.avg[p3].y_full;
+      y1        = o.avg[p2].y_raw;
+      y2        = o.avg[p3].y_raw;
    }
    yt        = y1;
    DEBUG__MATCHES  printf("y1=%4d, y2=%4d, yt=%5.1f, ", y1, y2, yt);
    /*---(find midpoint)------------------*/
    for (i = p2 + 1; i < p3; ++i) {
-      dist = fabs(o.avg[i].y_full - yt);
-      /*> DEBUG__MATCHES  printf("%2d at %3d is %6.2f\n", i, o.avg[i].y_full, dist);       <*/
+      dist = fabs(o.avg[i].y_raw - yt);
+      /*> DEBUG__MATCHES  printf("%2d at %3d is %6.2f\n", i, o.avg[i].y_raw, dist);       <*/
       if (dist <= min) {
          min = dist;
          mid = i;
@@ -661,18 +661,18 @@ combo_midy         (int a_beg, int a_count, int a_offset)
    p4        = o.key[a_beg + 3].p_bas;
    /*---(get target y)-------------------*/
    if (a_offset == 0) {
-      y1        = o.avg[p1].y_full;
-      y2        = o.avg[p4].y_full;
+      y1        = o.avg[p1].y_raw;
+      y2        = o.avg[p4].y_raw;
    } else {
-      y1        = o.avg[p2].y_full;
-      y2        = o.avg[p3].y_full;
+      y1        = o.avg[p2].y_raw;
+      y2        = o.avg[p3].y_raw;
    }
    yt        = y1 + ((y2 - y1) / 2.0);
    DEBUG__MATCHES  printf("y1=%4d, y2=%4d, yt=%5.1f, ", y1, y2, yt);
    /*---(find midpoint)------------------*/
    for (i = p2 + 1; i < p3; ++i) {
-      dist = fabs(o.avg[i].y_full - yt);
-      /*> DEBUG__MATCHES  printf("%2d at %3d is %6.2f\n", i, o.avg[i].y_full, dist);       <*/
+      dist = fabs(o.avg[i].y_raw - yt);
+      /*> DEBUG__MATCHES  printf("%2d at %3d is %6.2f\n", i, o.avg[i].y_raw, dist);       <*/
       if (dist <= min) {
          min = dist;
          mid = i;
@@ -704,18 +704,18 @@ combo_flatx        (int a_beg, int a_count, int a_offset)
    p4        = o.key[a_beg + 3].p_bas;
    /*---(get target y)-------------------*/
    if (a_offset == 0) {
-      x1        = o.avg[p1].x_full;
-      x2        = o.avg[p4].x_full;
+      x1        = o.avg[p1].x_raw;
+      x2        = o.avg[p4].x_raw;
    } else {
-      x1        = o.avg[p2].x_full;
-      x2        = o.avg[p3].x_full;
+      x1        = o.avg[p2].x_raw;
+      x2        = o.avg[p3].x_raw;
    }
    xt        = x1;
    DEBUG__MATCHES  printf("x1=%4d, x2=%4d, xt=%5.1f, ", x1, x2, xt);
    /*---(find midpoint)------------------*/
    for (i = p2 + 1; i < p3; ++i) {
-      dist = fabs(o.avg[i].x_full - xt);
-      /*> DEBUG__MATCHES  printf("%2d at %3d is %6.2f\n", i, o.avg[i].x_full, dist);       <*/
+      dist = fabs(o.avg[i].x_raw - xt);
+      /*> DEBUG__MATCHES  printf("%2d at %3d is %6.2f\n", i, o.avg[i].x_raw, dist);       <*/
       if (dist <= min) {
          min = dist;
          mid = i;
@@ -747,18 +747,18 @@ combo_midx         (int a_beg, int a_count, int a_offset)
    p4        = o.key[a_beg + 3].p_bas;
    /*---(get target y)-------------------*/
    if (a_offset == 0) {
-      x1        = o.avg[p1].x_full;
-      x2        = o.avg[p4].x_full;
+      x1        = o.avg[p1].x_raw;
+      x2        = o.avg[p4].x_raw;
    } else {
-      x1        = o.avg[p2].x_full;
-      x2        = o.avg[p3].x_full;
+      x1        = o.avg[p2].x_raw;
+      x2        = o.avg[p3].x_raw;
    }
    xt        = x1 + ((x2 - x1) / 2.0);
    DEBUG__MATCHES  printf("x1=%4d, x2=%4d, xt=%5.1f, ", x1, x2, xt);
    /*---(find midpoint)------------------*/
    for (i = p2 + 1; i < p3; ++i) {
-      dist = fabs(o.avg[i].x_full - xt);
-      /*> DEBUG__MATCHES  printf("%2d at %3d is %6.2f\n", i, o.avg[i].x_full, dist);       <*/
+      dist = fabs(o.avg[i].x_raw - xt);
+      /*> DEBUG__MATCHES  printf("%2d at %3d is %6.2f\n", i, o.avg[i].x_raw, dist);       <*/
       if (dist <= min) {
          min = dist;
          mid = i;

@@ -25,8 +25,8 @@ KEY__swap          (int a_i, int a_j)
    /*---(save 1st)-----------------------*/
    or = o.key [a_i].p_raw;
    p  = o.key [a_i].p_bas;
-   xf = o.key [a_i].x_full;
-   yf = o.key [a_i].y_full;
+   xf = o.key [a_i].x_raw;
+   yf = o.key [a_i].y_raw;
    x  = o.key [a_i].x_pos;
    y  = o.key [a_i].y_pos;
    a  = o.key [a_i].fake;
@@ -35,8 +35,8 @@ KEY__swap          (int a_i, int a_j)
    /*---(copy 2nd to 1st)----------------*/
    o.key [a_i].p_raw  = o.key [a_j].p_raw;
    o.key [a_i].p_bas  = o.key [a_j].p_bas;
-   o.key [a_i].x_full = o.key [a_j].x_full;
-   o.key [a_i].y_full = o.key [a_j].y_full;
+   o.key [a_i].x_raw = o.key [a_j].x_raw;
+   o.key [a_i].y_raw = o.key [a_j].y_raw;
    o.key [a_i].x_pos  = o.key [a_j].x_pos;
    o.key [a_i].y_pos  = o.key [a_j].y_pos;
    o.key [a_i].fake   = o.key [a_j].fake;
@@ -45,8 +45,8 @@ KEY__swap          (int a_i, int a_j)
    /*---(put saved into 2nd)-------------*/
    o.key [a_j].p_raw  = or;
    o.key [a_j].p_bas  = p;
-   o.key [a_j].x_full = xf;
-   o.key [a_j].y_full = yf;
+   o.key [a_j].x_raw = xf;
+   o.key [a_j].y_raw = yf;
    o.key [a_j].x_pos  = x;
    o.key [a_j].y_pos  = y;
    o.key [a_j].fake   = a;
@@ -97,10 +97,10 @@ KEY_curve          (int a_pt)
        *> printf("key 2 = %2d at bas = %2d x=%4d, y=%4d\n", a_start + a_count, p4, xx4, yy4);   <* 
        *> printf("so  slope = %8.3f and intercept = %4d\n", x_slope, x_icept);                          <*/
    for (i = p1 + 1; i < p4; ++i) {
-      liney   = (x_slope * o.bas[i].x_full) + x_icept;
-      linex   = (o.bas[i].y_full - x_icept) / x_slope;
-      diffx   = (o.bas[i].x_full - linex);
-      diffy   = (o.bas[i].y_full - liney);
+      liney   = (x_slope * o.bas[i].x_raw) + x_icept;
+      linex   = (o.bas[i].y_raw - x_icept) / x_slope;
+      diffx   = (o.bas[i].x_raw - linex);
+      diffy   = (o.bas[i].y_raw - liney);
       theta   = atan(diffy/diffx);
       thetad  = theta * RAD2DEG;
       curve   = fabs(diffx * sin(theta));
@@ -183,8 +183,8 @@ KEY_add            (int a_pt, char a_fake, char a_type)
    /*---(add new key)--------------------*/
    o.key [o.nkey].p_raw  = o.avg [a_pt].p_raw;
    o.key [o.nkey].p_bas  = o.avg [a_pt].p_bas;
-   o.key [o.nkey].x_full = o.avg [a_pt].x_full;
-   o.key [o.nkey].y_full = o.avg [a_pt].y_full;
+   o.key [o.nkey].x_raw = o.avg [a_pt].x_raw;
+   o.key [o.nkey].y_raw = o.avg [a_pt].y_raw;
    o.key [o.nkey].x_pos  = o.avg [a_pt].x_pos;
    o.key [o.nkey].y_pos  = o.avg [a_pt].y_pos;
    strncpy (o.key [o.nkey].use, "-", 5);
@@ -210,8 +210,8 @@ KEY_del            (int a_pt)
    for (i = a_pt + 1 ; i < o.nkey; ++i) {
       o.key[i - 1].p_raw  = o.key[i].p_raw;
       o.key[i - 1].p_bas  = o.key[i].p_bas;
-      o.key[i - 1].x_full = o.key[i].x_full;
-      o.key[i - 1].y_full = o.key[i].y_full;
+      o.key[i - 1].x_raw = o.key[i].x_raw;
+      o.key[i - 1].y_raw = o.key[i].y_raw;
       o.key[i - 1].x_pos  = o.key[i].x_pos;
       o.key[i - 1].y_pos  = o.key[i].y_pos;
       o.key[i - 1].fake   = o.key[i].fake;
@@ -269,17 +269,17 @@ KEY__extend        (void)
       if (o.key[i    ].type == POINT_HEAD) {
          pt  = o.key[i    ].p_bas - 1;
          rad = o.key[i + 1].rads;
-         o.bas[pt].x_full  = o.avg[pt].x_full  = o.key[i].x_full - (20 * o.ratio * cos (rad)) ;
-         o.bas[pt].y_full  = o.avg[pt].y_full  = o.key[i].y_full - (20 * o.ratio * sin (rad)) ;
-         DEBUG_CRIT  printf("   extended beg %4d to %4dx, %4dy for circle detection\n", pt, o.bas[pt].x_full, o.bas[pt].y_full);
+         o.bas[pt].x_raw  = o.avg[pt].x_raw  = o.key[i].x_raw - (20 * my.ratio * cos (rad)) ;
+         o.bas[pt].y_raw  = o.avg[pt].y_raw  = o.key[i].y_raw - (20 * my.ratio * sin (rad)) ;
+         DEBUG_CRIT  printf("   extended beg %4d to %4dx, %4dy for circle detection\n", pt, o.bas[pt].x_raw, o.bas[pt].y_raw);
       }
       /*---(ending)-------------------------*/
       if (o.key[i + 1].type == POINT_HEAD || i + 1 == o.nkey) {
          pt  = o.key[i    ].p_bas + 1;
          rad = o.key[i    ].rads;
-         o.bas[pt].x_full  = o.avg[pt].x_full  = o.key[i].x_full + (20 * o.ratio * cos (rad)) ;
-         o.bas[pt].y_full  = o.avg[pt].y_full  = o.key[i].y_full + (20 * o.ratio * sin (rad)) ;
-         DEBUG_RAW   printf("   extended end %4d to %4dx, %4dy for circle detection\n", pt, o.bas[pt].x_full, o.bas[pt].y_full);
+         o.bas[pt].x_raw  = o.avg[pt].x_raw  = o.key[i].x_raw + (20 * my.ratio * cos (rad)) ;
+         o.bas[pt].y_raw  = o.avg[pt].y_raw  = o.key[i].y_raw + (20 * my.ratio * sin (rad)) ;
+         DEBUG_RAW   printf("   extended end %4d to %4dx, %4dy for circle detection\n", pt, o.bas[pt].x_raw, o.bas[pt].y_raw);
       }
    }
    /*---(complete)-----------------------*/
@@ -431,15 +431,15 @@ KEY_stretch        (void)
       new  = o.key[i].p_bas;
       /*---(bigger y)--------------------*/
       if ((q1 == 1 && q2 == 4) || (q1 == 2 && q2 == 3)) {
-         base = max  = o.key[i].y_full;
+         base = max  = o.key[i].y_raw;
          DEBUG_CRIT  printf("      #01 [BIGGER Y] (%3d) %3d is %1d and %1d : base = %3d --------------------\n", i, o.key[i].p_bas, q1, q2, base);
          for (j = o.key[i - 1].p_bas; j < o.key[i + 1].p_bas; ++j) {
-            DEBUG_CRIT  printf("         %3d is %3d : ", j, o.avg[j].y_full);
+            DEBUG_CRIT  printf("         %3d is %3d : ", j, o.avg[j].y_raw);
             if        (o.avg[j].p_bas == o.key[i].p_bas) {
                DEBUG_CRIT  printf("existing\n");
-            } else if (o.avg[j].y_full >  base) {
+            } else if (o.avg[j].y_raw >  base) {
                DEBUG_CRIT  printf("NEW MAX\n");
-               max = o.avg[j].y_full;
+               max = o.avg[j].y_raw;
                new = o.avg[j].p_bas;
             } else {
                DEBUG_CRIT  printf("-\n");
@@ -455,15 +455,15 @@ KEY_stretch        (void)
       }
       /*---(lesser y)--------------------*/
       else if ((q1 == 4 && q2 == 1) || (q1 == 3 && q2 == 2)) {
-         base = max  = o.key[i].y_full;
+         base = max  = o.key[i].y_raw;
          DEBUG_CRIT  printf("      #02 [LESSER Y] (%3d) %3d is %1d and %1d : base = %3d --------------------\n", i, o.key[i].p_bas, q1, q2, base);
          for (j = o.key[i - 1].p_bas; j < o.key[i + 1].p_bas; ++j) {
-            DEBUG_CRIT  printf("         %3d is %3d : ", j, o.avg[j].y_full);
+            DEBUG_CRIT  printf("         %3d is %3d : ", j, o.avg[j].y_raw);
             if        (o.avg[j].p_bas == o.key[i].p_bas) {
                DEBUG_CRIT  printf("existing\n");
-            } else if (o.avg[j].y_full <  base) {
+            } else if (o.avg[j].y_raw <  base) {
                DEBUG_CRIT  printf("NEW MAX\n");
-               max = o.avg[j].y_full;
+               max = o.avg[j].y_raw;
                new = o.avg[j].p_bas;
             } else {
                DEBUG_CRIT  printf("-\n");
@@ -479,15 +479,15 @@ KEY_stretch        (void)
       }
       /*---(bigger x)--------------------*/
       else if ((q1 == 1 && q2 == 2) || (q1 == 4 && q2 == 3)) {
-         base = max  = o.key[i].x_full;
+         base = max  = o.key[i].x_raw;
          DEBUG_CRIT  printf("      #03 [BIGGER X] (%3d) %3d is %1d and %1d : base = %3d --------------------\n", i, o.key[i].p_bas, q1, q2, base);
          for (j = o.key[i - 1].p_bas; j < o.key[i + 1].p_bas; ++j) {
-            DEBUG_CRIT  printf("         %3d is %3d : ", j, o.avg[j].x_full);
+            DEBUG_CRIT  printf("         %3d is %3d : ", j, o.avg[j].x_raw);
             if        (o.avg[j].p_bas == o.key[i].p_bas) {
                DEBUG_CRIT  printf("existing\n");
-            } else if (o.avg[j].x_full >  base) {
+            } else if (o.avg[j].x_raw >  base) {
                DEBUG_CRIT  printf("NEW MAX\n");
-               max = o.avg[j].x_full;
+               max = o.avg[j].x_raw;
                new = o.avg[j].p_bas;
             } else {
                DEBUG_CRIT  printf("-\n");
@@ -503,15 +503,15 @@ KEY_stretch        (void)
       }
       /*---(lesser x)--------------------*/
       else if ((q1 == 2 && q2 == 1) || (q1 == 3 && q2 == 4)) {
-         base = max  = o.key[i].x_full;
+         base = max  = o.key[i].x_raw;
          DEBUG_CRIT  printf("      #04 [LESSER X] (%3d) %3d is %1d and %1d : base = %3d --------------------\n", i, o.key[i].p_bas, q1, q2, base);
          for (j = o.key[i - 1].p_bas; j < o.key[i + 1].p_bas; ++j) {
-            DEBUG_CRIT  printf("         %3d is %3d : ", j, o.avg[j].x_full);
+            DEBUG_CRIT  printf("         %3d is %3d : ", j, o.avg[j].x_raw);
             if        (o.avg[j].p_bas == o.key[i].p_bas) {
                DEBUG_CRIT  printf("existing\n");
-            } else if (o.avg[j].x_full <  base) {
+            } else if (o.avg[j].x_raw <  base) {
                DEBUG_CRIT  printf("NEW MAX\n");
-               max = o.avg[j].x_full;
+               max = o.avg[j].x_raw;
                new = o.avg[j].p_bas;
             } else {
                DEBUG_CRIT  printf("-\n");

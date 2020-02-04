@@ -10,7 +10,7 @@ PREP          v21  include the prototype headers                              
 SCRP          v21  (RAW   ) check quad one lines                                RAW_load                                                                ((01.---))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
 
    COND       v21  initialize the testing environment                           - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((01.001))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
-     exec     v21  start testing                        PROG__unitquiet                                                                               i_equal     0                                                                                                    
+     exec     v21  start testing                        PROG__unit_quiet                                                                              i_equal     0                                                                                                    
      code     v21  create a pointer to one cell         - - - - - - - - - -   char x_raw  [9000] = "";                                                                                                                                                                     
 
    GROUP      v21  check defense on stroke starts                               - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   - - - - -   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
@@ -23,4 +23,4 @@ SCRP          v21  (RAW   ) check quad one lines                              
    GROUP      v21  wrap up                                                      - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   - - - - -   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
 
    COND       v21  complete testing                                             - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((01.011))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
-     exec     v21  stop testing                         PROG__unitend                                                                                 i_equal     0                                                                                                    
+     exec     v21  stop testing                         PROG__unit_end                                                                                i_equal     0                                                                                                    

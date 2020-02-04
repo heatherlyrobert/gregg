@@ -1,0 +1,41 @@
+#!/usr/local/bin/koios
+#   koios-polos (north star) -- customized c unit testing meta-program and mini-language
+#   program under test  : gregg_2raw
+#   auto-generated script file converted from a previous script version
+
+
+
+#23456789-12  123456789-123456789-123456789-12345  123456789-123456789-123456  123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-  123456789-  123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-  -  123456789-123456789- 
+#==(verb)===  ===========(description)===========  =====(function)===========  ========================(arguments)=================================================================  ==(test)==  ==========================(results)=================================================================  t  ========(var)======= 
+PREP          include the prototype headers                                      - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   - - - - -   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+   incl       include public header                gregg.h                     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   - - - - -   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+
+
+
+#23456789-12  123456789-123456789-123456789-12345  123456789-123456789-123456  123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-  123456789-  123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-  -  123456789-123456789- 
+#==(verb)===  ===========(description)===========  =====(function)===========  ========================(arguments)=================================================================  ==(test)==  ==========================(results)=================================================================  t  ========(var)======= 
+SCRP          (BAS) verify defenses on point sequencing                          RAW__point                                                                                            ((01.---))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+
+   COND       initialize the testing environment                                 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((01.001))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+     exec     start testing                        PROG__unit_quiet                                                                                                                  i_equal     0                                                                                                    
+     code     create working/return variables      - - - - - - - - - - - - -   char x_raw  [LEN_RECD] = "";                                                                                                                                                                                               
+
+   COND       add a tiny input                                                   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((03.002))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+     code     move data to holder                  - - - - - - - - - - - - -   strlcpy (x_raw , ";TOUCH,0,0;LIFT,1,1", LEN_RECD);                                                                                                                                                                         
+     exec     call mass load                       RAW_load                    x_raw                                                                                                 i_equal     0                                                                                                    
+     get      ... review bas points                POINT__unit                 "types"        , POINTS_BAS  , 0                                                                      s_equal     BAS by type      :  4 [S><F]                                                                         
+     get      ... review detail                    POINT__unit                 "pos"          , POINTS_BAS  , 0                                                                      s_equal     BAS pos     ( 0) : S   -70x  -70y  -132x -232y    0xd   0yd   0l     0.000s      0i  0.000r    0d 0q 
+     get      ... review detail                    POINT__unit                 "pos"          , POINTS_BAS  , 1                                                                      s_equal     BAS pos     ( 1) : >     0x    0y  -125x -225y   70xd  70yd  99l     1.000s      0i  0.785r   45d 1q 
+     get      ... review detail                    POINT__unit                 "pos"          , POINTS_BAS  , 2                                                                      s_equal     BAS pos     ( 2) : <     1x    1y  -125x -225y    1xd   1yd   1l     1.000s      0i  0.785r   45d 1q 
+     get      ... review detail                    POINT__unit                 "pos"          , POINTS_BAS  , 3                                                                      s_equal     BAS pos     ( 3) : F    71x   71y  -118x -218y   70xd  70yd  99l     1.000s      0i  0.785r   45d 1q 
+     get      ... review detail                    POINT__unit                 "pos"          , POINTS_BAS  , 4                                                                      s_equal     BAS pos     ( 4) : /     0x    0y     0x    0y    0xd   0yd   0l     0.000s      0i  0.000r    0d 0q 
+
+
+
+
+   COND       complete testing                                                   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((01.017))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+     exec     stop testing                         PROG__unit_end                                                                                                                    i_equal     0                                                                                                    
+
+
+
+

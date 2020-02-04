@@ -28,7 +28,7 @@ PROG_version         (void)
 #else
    strncpy (t, "[unknown    ]", 15);
 #endif
-   snprintf (verstring, 100, "%s   %s : %s", t, VER_NUM, VER_TXT);
+   snprintf (verstring, 100, "%s   %s : %s", t, P_VERNUM, P_VERTXT);
    return verstring;
 }
 
@@ -40,7 +40,7 @@ PROG_init          (void)
    /*---(log header)---------------------*/
    DEBUG_TOPS   yLOG_info     ("purpose" , "hyper-efficient, effective pen-based english input");
    DEBUG_TOPS   yLOG_info     ("gregg"   , PROG_version    ());
-   DEBUG_TOPS   yLOG_info     ("yLOG"    , yLOG_version    ());
+   DEBUG_TOPS   yLOG_info     ("yLOG"    , yLOGS_version   ());
    DEBUG_TOPS   yLOG_info     ("yURG"    , yURG_version    ());
    DEBUG_TOPS   yLOG_info     ("ySTR"    , ySTR_version    ());
    DEBUG_TOPS   yLOG_info     ("yGLTEX"  , yGLTEX_version  ());
@@ -48,6 +48,7 @@ PROG_init          (void)
    strcpy (win.face_pretty, "comfortaa");
    strcpy (win.face_fixed, "hack");
    /*---(reporting flags)-------------*/
+   my.dict         = 'y';
    my.rptg_touch   = '-';
    my.rptg_raw     = '-';
    my.rptg_base    = '-';
@@ -58,12 +59,13 @@ PROG_init          (void)
    my.show_sample  = '-';
    my.show_player  = '-';
    my.quit         = '-';
-   my.ratio        = GREGG_WACOM;
+   /*> my.ratio        = GREGG_WACOM;                                                 <*/
+   my.ratio        = 10;
    /*---(other)-----------------------*/
    strlcpy (my.words, "", LEN_RECD);
    strlcpy (my.guide, "", LEN_RECD);
    /*---(setup vikeys)----------------*/
-   yVIKEYS_init  ();
+   yVIKEYS_init  (MODE_MAP);
    USER_init     ();
    /*---(complete)--------------------*/
    DEBUG_TOPS   yLOG_exit     (__FUNCTION__);
@@ -128,7 +130,6 @@ PROG_begin(void)
 {
    /*---(header)-------------------------*/
    DEBUG_TOPS   yLOG_enter    (__FUNCTION__);
-   dict_read();
    /*---(complete)-----------------------*/
    DEBUG_TOPS   yLOG_exit     (__FUNCTION__);
    return 0;
@@ -140,6 +141,8 @@ PROG_final (void)
 {
    /*---(header)-------------------------*/
    DEBUG_TOPS   yLOG_enter    (__FUNCTION__);
+   WORDS_table_ae ();
+   if (my.dict   == 'y')  WORDS_import ();
    DRAW_init  ();
    TOUCH_init ();
    yVIKEYS_view_option (YVIKEYS_BUFFER, "file" , OUT_status, "current file name and stats");
@@ -155,6 +158,8 @@ PROG_final (void)
    if (out_start > 0) o.curr = out_start;
    /*---(key mapping)--------------------*/
    yVIKEYS_map_config  (YVIKEYS_RIGHT, MAP_mapper, MAP_locator, MAP_addresser);
+   REVERSE_report ();
+   /*> WORDS_dict_list ();                                                            <*/
    /*---(complete)-----------------------*/
    DEBUG_TOPS   yLOG_exit     (__FUNCTION__);
    return 0;
@@ -228,14 +233,13 @@ PROG_finish          (void)
    TOUCH_wrap   ();
    DRAW_wrap    ();
    yVIKEYS_wrap ();
-   DEBUG_TOPS    printf("\npetal writing v03 ----------------------------------end---\n\n");
    return 0;
 }
 
 char
 PROG_end             (void)
 {
-   DEBUG_TOPS    printf("\npetal writing v03 ----------------------------------end---\n\n");
+   yLOGS_end ();
    return 0;
 }
 
@@ -246,7 +250,7 @@ PROG_end             (void)
 void o___UNITTEST_______________o (void) {;}
 
 char         /*-> set up programgents/debugging ------[ light  [uz.320.011.05]*/ /*-[00.0000.00#.#]-*/ /*-[--.---.---.--]-*/
-PROG__unitquiet     (void)
+PROG__unit_quiet    (void)
 {
    char       *x_args [1]  = { "gregg" };
    yURG_logger (1, x_args);
@@ -254,24 +258,30 @@ PROG__unitquiet     (void)
    yURG_urgs   (1, x_args);
    PROG_args   (1, x_args);
    PROG_begin  ();
+   my.dict = '-';
    PROG_final  ();
    return 0;
 }
 
 char         /*-> set up programgents/debugging ------[ light  [uz.320.011.05]*/ /*-[00.0000.00#.!]-*/ /*-[--.---.---.--]-*/
-PROG__unitloud      (void)
+PROG__unit_loud     (void)
 {
    char       *x_args [2]  = { "gregg_unit", "@@kitchen"    };
    yURG_logger (2, x_args);
    PROG_init   ();
    yURG_urgs   (2, x_args);
+   yURG_name  ("raw"          , YURG_ON);
+   yURG_name  ("avg"          , YURG_ON);
+   yURG_name  ("calc"         , YURG_ON);
    PROG_args   (2, x_args);
    PROG_begin  ();
+   my.dict = '-';
+   PROG_final  ();
    return 0;
 }
 
 char         /*-> set up program urgents/debugging ---[ light  [uz.210.001.01]*/ /*-[00.0000.00#.!]-*/ /*-[--.---.---.--]-*/
-PROG__unitend       (void)
+PROG__unit_end      (void)
 {
    PROG_end       ();
    return 0;

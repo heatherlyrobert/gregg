@@ -84,7 +84,7 @@ TOUCH__open          (void)
    s_file = fopen (s_event, "r");
    DEBUG_TOUCH  yLOG_point   ("*file"     , s_file);
    --rce;  if (s_file == NULL) {
-      DEBUG_TOUCH  yLOG_fatal   ("device"    , "event file can not be openned");
+      /*> DEBUG_TOUCH  yLOG_fatal   ("device"    , "event file can not be openned");   <*/
       DEBUG_TOUCH  yLOG_exit    (__FUNCTION__);
       return rce;
    }
@@ -182,7 +182,7 @@ TOUCH_player         (int a_x, int a_y)
    /*---(defense)------------------------*/
    if (s_touch != MODE_PLAYER)    return 0;
    yVIKEYS_view_size     (YVIKEYS_MAIN, NULL   , NULL   , &x_wide, NULL   , NULL);
-   yVIKEYS_view_coords   (YVIKEYS_MAIN, &x_xmin, &x_xlen, &x_ymin, &x_ylen);
+   yVIKEYS_view_bounds   (YVIKEYS_MAIN, &x_xmin, NULL, &x_xlen, &x_ymin, NULL, &x_ylen);
    x_xmax = x_xmin + x_xlen;
    x_ymax = x_ymin + x_ylen;
    x_inc = x_wide / 35.0;
@@ -225,7 +225,7 @@ TOUCH_slider         (int a_x, int a_y)
    if (s_touch != MODE_SLIDER)    return 0;
    if (o.navg  <=    0)           return 0;
    /*---(process)------------------------*/
-   yVIKEYS_view_coords   (YVIKEYS_MAIN, &x_xmin, &x_xfull, NULL, NULL);
+   yVIKEYS_view_bounds   (YVIKEYS_MAIN, &x_xmin, NULL, &x_xfull, NULL, NULL, NULL);
    x_xpos = a_x - x_xmin;
    /*> printf ("a_x    %4d, x_xpos %4d\n", a_x, x_xpos);                              <*/
    x_xinc = x_xfull / (o.navg - 2);
@@ -270,9 +270,9 @@ TOUCH_read           (void)
    /*---(header)-------------------------*/
    DEBUG_TOUCH  yLOG_enter   (__FUNCTION__);
    /*---(prepare)------------------------*/
-   yVIKEYS_view_bounds   (YVIKEYS_MAIN  , &my.x_min, &my.x_max , &my.y_min, &my.y_max );
-   yVIKEYS_view_coords   (YVIKEYS_MAIN  , NULL     , &x_mwide  , NULL     , &my.y_tall);
-   yVIKEYS_view_coords   (YVIKEYS_RIBBON, NULL     , &x_rwide  , NULL     , &my.y_tall);
+   yVIKEYS_view_bounds   (YVIKEYS_MAIN  , &(my.x_min), &(my.x_max ), NULL, &(my.y_min), &(my.y_max ), NULL);
+   yVIKEYS_view_bounds   (YVIKEYS_MAIN  , NULL     , NULL      , &x_mwide  , NULL     , NULL      , &(my.y_tall));
+   yVIKEYS_view_bounds   (YVIKEYS_RIBBON, NULL     , NULL      , &x_rwide  , NULL     , NULL      , &(my.y_tall));
    my.x_wide = x_mwide + x_rwide;
    my.ratio  = my.x_scale / my.x_wide;
    /*---(read)---------------------------*/

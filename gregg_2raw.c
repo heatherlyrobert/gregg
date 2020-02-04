@@ -13,17 +13,26 @@ PRIV char    stype     = '-';          /* p=prefix, o=outline, c=continue     */
  *   raw points before recording them can eliminate later clues.  i feel it is
  *   better to over-collect and clean in a later stage.
  *
+ *   BUT, i need some consistency between collection methods so its not crazy.
+ *   therefore, my perfect drawing space is 3.5" by 5.0".  i will size raw to
+ *   10x this space since i will NOT use any whole drawing tablet.  remember
+ *   gregg is fast because the writing is not large and flows.
+ *
+ *   my end raw will match by screen design.  x = left -125 to right 375,
+ *   and y = top 125 to bottom -225.  raw points will center on zero.  so, raw
+ *   will be x = -1,250 to 3,750 and y = 1,250 to -2,250.  10 to 1.
+ *
  *   START and FINISH points are duplicates.  they are created to enable later
  *   checking for circles.  the START and FINISH points can be "extended" to
  *   look for reasonable intersections.  while this could be done temporarily
  *   later, i found it programatically useful to do it early.
  *
- *   when i store outlines in databases, i will either store the raw data points
- *   or final answer, likely both.  the reason is that later algorithms may
- *   find additional alternatives or different answers provided the same points.
- *   why not allow for reinterpretation.
+ *   when storing outlines, i will store only raw points and the final answer.
+ *   the reason is that later algorithms may find additional alternatives or
+ *   different answers provided the same points.  why not allow for
+ *   reinterpretation.
  *
- *   the only "modification" to the raw source data i will currently allow is
+ *   the second "modification" to the raw source data i will currently allow is
  *   baselining the start point to zero.  this is incredibly useful in crazy
  *   pen/touch based applications and allows easier cross outline comparisions.
  *
@@ -33,9 +42,27 @@ PRIV char    stype     = '-';          /* p=prefix, o=outline, c=continue     */
 
 
 /*============================--------------------============================*/
-/*===----                          raw points                          ----===*/
+/*===----                       program level                          ----===*/
 /*============================--------------------============================*/
-static void o___RAW_POINTS_____________o (void) {;}
+static void o___PROGRAM________________o (void) {;}
+
+char
+RAW_init             (void)
+{
+   o.nraw     = 0;
+   o.craw     = 0;
+   o.xadj     = 0;
+   o.yadj     = 0;
+   POINT_clear_series (POINTS_RAW);
+   return 0;
+}
+
+
+
+/*============================--------------------============================*/
+/*===----                      adding raw points                       ----===*/
+/*============================--------------------============================*/
+static void o___NEW____________________o (void) {;}
 
 
 char     /*----: add a new raw point to outline -------------------------*/
@@ -43,14 +70,16 @@ RAW__point         (int a_xpad, int a_ypad, char a_type)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
+   char        x_dup       =    0;
+   char        x_last      =  '-';
    /*---(header)-------------------------*/
    DEBUG_RAW    yLOG_senter  (__FUNCTION__);
-   DEBUG_RAW    yLOG_svalue  ("x"         , a_xpad);
-   DEBUG_RAW    yLOG_svalue  ("y"         , a_ypad);
+   DEBUG_RAW    yLOG_sint    (a_xpad);
+   DEBUG_RAW    yLOG_sint    (a_ypad);
    DEBUG_RAW    yLOG_schar   (a_type);
    /*---(defenses)-----------------------*/
-   DEBUG_RAW    yLOG_svalue  ("#"         , o.nraw);
-   DEBUG_RAW    yLOG_svalue  ("m"         , MAX_POINTS);
+   DEBUG_RAW    yLOG_sint    (o.nraw);
+   DEBUG_RAW    yLOG_sint    (MAX_POINTS);
    /*---(max)------------------*/
    --rce;  if (o.nraw >= MAX_POINTS) {
       DEBUG_RAW    yLOG_snote   ("maxed out");
@@ -64,84 +93,73 @@ RAW__point         (int a_xpad, int a_ypad, char a_type)
       return rce;
    }
    /*---(starts)---------------*/
-   --rce;  if (o.nraw == 0 && a_type != POINT_START) {
-      DEBUG_RAW    yLOG_snote   ("zero must be S");
-      DEBUG_RAW    yLOG_sexitr  (__FUNCTION__, rce);
-      return rce;
-   }
-   --rce;  if (o.nraw > 0 && a_type == POINT_START && o.raw [o.nraw - 1].type != POINT_FINISH) {
-      DEBUG_RAW    yLOG_snote   ("S must follow F");
+   --rce;  if (POINT_seq_start  (a_type, &(o.raw), o.nraw) < 0) {
       DEBUG_RAW    yLOG_sexitr  (__FUNCTION__, rce);
       return rce;
    }
    /*---(heads)----------------*/
-   --rce;  if (o.nraw > 0 && o.raw[o.nraw - 1].type == POINT_START && a_type != POINT_HEAD) {
-      DEBUG_RAW    yLOG_snote   ("> must follow S");
+   --rce;  if (POINT_seq_head   (a_type, &(o.raw), o.nraw, a_xpad, a_ypad) < 0) {
       DEBUG_RAW    yLOG_sexitr  (__FUNCTION__, rce);
       return rce;
    }
-   --rce;  if (a_type == POINT_HEAD && o.raw [o.nraw - 1].type != POINT_START) {
-      DEBUG_RAW    yLOG_snote   ("S must preceed >");
+   /*---(tails)----------------*/
+   --rce;  if (POINT_seq_tail   (a_type, &(o.raw), o.nraw, a_xpad, a_ypad) < 0) {
       DEBUG_RAW    yLOG_sexitr  (__FUNCTION__, rce);
       return rce;
    }
    /*---(finishes)-------------*/
-   --rce;  if (a_type == POINT_FINISH && (a_xpad != o.raw[o.nraw - 1].x_full || a_ypad != o.raw[o.nraw - 1].y_full)) {
-      DEBUG_RAW    yLOG_snote   ("F must match last -");
-      DEBUG_RAW    yLOG_sexitr  (__FUNCTION__, rce);
-      return rce;
-   }
-   --rce;  if (a_type == POINT_FINISH && o.raw [o.nraw - 1].type != POINT_NORMAL) {
-      DEBUG_RAW    yLOG_snote   ("F must folllow -");
+   --rce;  if (POINT_seq_finish (a_type, &(o.raw), o.nraw, a_xpad, a_ypad) < 0) {
       DEBUG_RAW    yLOG_sexitr  (__FUNCTION__, rce);
       return rce;
    }
    /*---(normals)--------------*/
-   --rce;  if (a_type == POINT_NORMAL && (o.raw [o.nraw - 1].type != POINT_HEAD && o.raw [o.nraw - 1].type != POINT_NORMAL)) {
-      DEBUG_RAW    yLOG_snote   ("- must follow > or -");
-      DEBUG_RAW    yLOG_sexitr  (__FUNCTION__, rce);
-      return rce;
-   }
-   --rce;  if (o.nraw > 0 && a_type == POINT_NORMAL && a_xpad == o.raw[o.nraw - 1].x_full) {
-      DEBUG_RAW    yLOG_snote   ("duplicate x-pos -");
-      DEBUG_RAW    yLOG_sexitr  (__FUNCTION__, rce);
-      return rce;
-   }
-   --rce;  if (o.nraw > 0 && a_type == POINT_NORMAL && a_ypad == o.raw[o.nraw - 1].y_full) {
-      DEBUG_RAW    yLOG_snote   ("duplicate y-pos -");
+   --rce;  if (POINT_seq_normal (a_type, &(o.raw), o.nraw, a_xpad, a_ypad) < 0) {
       DEBUG_RAW    yLOG_sexitr  (__FUNCTION__, rce);
       return rce;
    }
    /*---(save point)---------------------*/
    DEBUG_RAW    yLOG_snote   ("add point");
-   o.raw[o.nraw].p_raw   = o.nraw;
-   o.raw[o.nraw].x_full  = a_xpad;
-   o.raw[o.nraw].y_full  = a_ypad;
-   o.raw[o.nraw].type    = a_type;
+   o.raw [o.nraw].series  = POINTS_RAW;
+   o.raw [o.nraw].seq     = o.nraw;
+   o.raw [o.nraw].p_raw   = o.nraw;
+   o.raw [o.nraw].x_touch = o.raw [o.nraw].x_raw = a_xpad;
+   o.raw [o.nraw].y_touch = o.raw [o.nraw].y_raw = a_ypad;
+   o.raw [o.nraw].type    = a_type;
    /*---(save point)---------------------*/
    DEBUG_RAW    yLOG_snote   ("assign type/calc");
    switch (a_type) {
    case POINT_START   :
-      o.raw[o.nraw].fake = POINT_FAKE;
-      break;
-   case POINT_FINISH  :
-      o.raw[o.nraw].fake = POINT_FAKE;
+      o.raw [o.nraw].fake = POINT_FAKE;
       break;
    case POINT_HEAD    :
-      o.raw[o.nraw].fake = POINT_NORMAL;
+      o.raw [o.nraw].fake = POINT_NORMAL;
       break;
    case POINT_NORMAL  :
-      o.raw[o.nraw].fake = POINT_NORMAL;
+      o.raw [o.nraw].fake = POINT_NORMAL;
+      break;
+   case POINT_TAIL    :
+      o.raw [o.nraw].fake = POINT_NORMAL;
+      break;
+   case POINT_FINISH  :
+      o.raw [o.nraw].fake = POINT_FAKE;
       break;
    }
-   POINT_calc (POINTS_RAW, o.raw + o.nraw, 'n');
+   /*---(calculate)----------------------*/
+   POINT_position (o.raw + o.nraw);
    /*---(update counters)----------------*/
    ++o.nraw;
-   DEBUG_RAW    yLOG_svalue  ("#"         , o.nraw);
+   DEBUG_RAW    yLOG_sint    (o.nraw);
    /*---(complete)-----------------------*/
    DEBUG_RAW    yLOG_sexit   (__FUNCTION__);
    return 0;
 }
+
+
+
+/*============================--------------------============================*/
+/*===----                        public functions                      ----===*/
+/*============================--------------------============================*/
+static void o___PUBLIC_________________o (void) {;}
 
 char
 RAW_touch            (int a_xpad, int a_ypad)
@@ -152,24 +170,23 @@ RAW_touch            (int a_xpad, int a_ypad)
    /*---(calculate)----------------------*/
    r  = sqrt((a_xpad * a_xpad) + (a_ypad * a_ypad));
    /*---(assign type)--------------------*/
-   OUT_clear ();
-   stype   = PART_MAIN;
-   o.xadj  = a_xpad;
-   o.yadj  = a_ypad;
-   o.ratio = my.ratio;
-   /*> if (r < SIZE_MED_AVG) {                                                        <* 
-    *>    if (stype != 'p')  OUT_clear ();                                            <* 
-    *>    stype   = PART_MAIN;                                                        <* 
-    *>    o.xadj  = a_xpad;                                                              <* 
-    *>    o.yadj  = a_ypad;                                                              <* 
-    *> } else if (a_xpad < 0.0 && a_ypad > 0.0) {                                           <* 
-    *>    OUT_clear ();                                                               <* 
-    *>    stype   = PART_PREFIX;                                                      <* 
-    *> } else {                                                                       <* 
-    *>    stype   = PART_CONTINUE;                                                    <* 
-    *> }                                                                              <*/
+   /*> OUT_clear ();                                                                  <* 
+    *> stype   = PART_MAIN;                                                           <* 
+    *> o.xadj  = a_xpad;                                                              <* 
+    *> o.yadj  = a_ypad;                                                              <*/
+   if (r < SIZE_MED_AVG) {
+      if (stype != 'p')  OUT_clear ();
+      stype   = PART_MAIN;
+      o.xadj  = a_xpad;
+      o.yadj  = a_ypad;
+   } else if (a_xpad < 0.0 && a_ypad > 0.0) {
+      OUT_clear ();
+      stype   = PART_PREFIX;
+   } else {
+      stype   = PART_CONTINUE;
+   }
    /*---(save points)--------------------*/
-   if (rc == 0)  rc = RAW__point (a_xpad, a_ypad, POINT_START );
+   if (rc == 0)  rc = RAW__point (a_xpad, a_ypad, POINT_START);
    if (rc == 0)  rc = RAW__point (a_xpad, a_ypad, POINT_HEAD);
    /*---(complete)-----------------------*/
    return rc;
@@ -191,27 +208,40 @@ RAW_lift             (int a_xpad, int a_ypad)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rc          =    0;
+   /*---(header)-------------------------*/
+   DEBUG_RAW    yLOG_enter   (__FUNCTION__);
    /*---(save points)--------------------*/
-   if (rc == 0)       RAW__point (a_xpad, a_ypad, POINT_NORMAL);
+   if (rc == 0)       RAW__point (a_xpad, a_ypad, POINT_TAIL);
    if (rc == 0)  rc = RAW__point (a_xpad, a_ypad, POINT_FINISH);
-   if (rc <  0)  return rc;
+   if (rc <  0)  {
+      DEBUG_RAW    yLOG_exitr   (__FUNCTION__, rc);
+      return rc;
+   }
    /*---(process)------------------------*/
    if (rc == 0)  rc = RAW_equalize  ();
    if (rc == 0)  rc = BASE_filter  ();
-   if (rc == 0)  rc = KEY_filter    ();
-   if (rc == 0)  rc = KEY_flatten ();
-   if (rc == 0)  rc = KEY_squeeze ();
-   if (rc == 0)  rc = KEY_sharps  ();
-   if (rc == 0)  rc = CIRCLE_driver ();
-   if (rc == 0)  rc = MATCH_driver  ();
+   /*> if (rc == 0)  rc = KEY_filter    ();                                           <* 
+    *> if (rc == 0)  rc = KEY_flatten ();                                             <* 
+    *> if (rc == 0)  rc = KEY_squeeze ();                                             <* 
+    *> if (rc == 0)  rc = KEY_sharps  ();                                             <* 
+    *> if (rc == 0)  rc = CIRCLE_driver ();                                           <* 
+    *> if (rc == 0)  rc = MATCH_driver  ();                                           <*/
    if (rc <  0) {
       printf ("dropped out early\n");
       return rc;
    }
    /*> if (rc == 0)  rc = OUT_append    ();                                           <*/
    /*---(complete)-----------------------*/
+   DEBUG_RAW    yLOG_exit    (__FUNCTION__);
    return 0;
 }
+
+
+
+/*============================--------------------============================*/
+/*===----                          mass data load                      ----===*/
+/*============================--------------------============================*/
+static void o___MASS______________________o (void) {;}
 
 char
 RAW_load           (char *a_points)
@@ -223,6 +253,8 @@ RAW_load           (char *a_points)
    int       x         =    0;
    int       y         =    0;
    char      x_type    =  '-';
+   /*---(header)-------------------------*/
+   DEBUG_RAW    yLOG_enter   (__FUNCTION__);
    /*---(read head)----------------------*/
    p = strtok_r (a_points, q, &r);
    /*---(get point pairs)----------------*/
@@ -230,11 +262,13 @@ RAW_load           (char *a_points)
       /*> printf ("[%s]\n", p);                                                       <*/
       switch (p[0]) {
       case 'T' :
+         DEBUG_RAW    yLOG_note    ("TOUCH");
          /*> printf ("   touch type\n");                                              <*/
          x_type = 'T';
          p = strtok_r (NULL, q, &r);
          break;
       case 'L' :
+         DEBUG_RAW    yLOG_note    ("LIFT");
          /*> printf ("   lift type\n");                                               <*/
          x_type = 'L';
          p = strtok_r (NULL, q, &r);
@@ -246,9 +280,11 @@ RAW_load           (char *a_points)
       }
       if (p == NULL)  break;
       x = atoi (p);
+      DEBUG_RAW    yLOG_complex ("x-pos"     , "%s, %dy", p, x);
       p = strtok_r (NULL, q, &r);
       if (p == NULL)  break;
       y = atoi (p);
+      DEBUG_RAW    yLOG_complex ("y-pos"     , "%s, %dy", p, y);
       switch (x_type) {
       case 'T' :
          RAW_touch  (x, y);
@@ -264,6 +300,8 @@ RAW_load           (char *a_points)
       p = strtok_r (NULL, q, &r);
       if (p == NULL)  break;
    }
+   /*---(complete)-----------------------*/
+   DEBUG_RAW    yLOG_exit    (__FUNCTION__);
    return 0;
 }
 
@@ -272,16 +310,42 @@ RAW_equalize        (void)
 {
    /*---(locals)-----------+-----+-----+-*/
    int         i           =    0;
+   /*---(header)-------------------------*/
+   DEBUG_RAW    yLOG_enter   (__FUNCTION__);
+   /*---(prepare)------------------------*/
+   o.xmin = +20000;
+   o.xmax = -20000;
+   o.ymin = +20000;
+   o.ymax = -20000;
+   DEBUG_RAW    yLOG_complex ("adj"       , "%dx, %dy", o.xadj, o.yadj);
    /*---(adjust)-------------------------*/
-   /*> for (i = 0; i < o.nraw; ++i) {                                                 <* 
-    *>    POINT_display (o.raw + i);                                                  <* 
-    *>    if (o.x_min > o.raw [i].x_pos)   o.x_min = o.raw [i].x_pos;                 <* 
-    *>    if (o.y_min > o.raw [i].y_pos)   o.y_min = o.raw [i].y_pos;                 <* 
-    *>    if (o.x_max < o.raw [i].x_pos)   o.x_max = o.raw [i].x_pos;                 <* 
-    *>    if (o.y_max < o.raw [i].y_pos)   o.y_max = o.raw [i].y_pos;                 <* 
-    *> }                                                                              <*/
+   for (i = 0; i < o.nraw; ++i) {
+      /*> POINT_display (o.raw + i);                                                  <*/
+      DEBUG_RAW    yLOG_complex ("before"    , "%3d, %4dx, %4dy", i, o.raw [i].x_touch, o.raw [i].y_touch);
+      /*---(adjust pos)------------------*/
+      o.raw [i].x_raw = o.raw [i].x_touch - o.xadj;
+      o.raw [i].y_raw = o.raw [i].y_touch - o.yadj;
+      DEBUG_RAW    yLOG_complex ("after"     , "%3d, %4dx, %4dy", i, o.raw [i].x_raw, o.raw [i].y_raw);
+      /*---(find min/max)----------------*/
+      if (o.xmin > o.raw [i].x_raw)   o.xmin = o.raw [i].x_raw;
+      if (o.ymin > o.raw [i].y_raw)   o.ymin = o.raw [i].y_raw;
+      if (o.xmax < o.raw [i].x_raw)   o.xmax = o.raw [i].x_raw;
+      if (o.ymax < o.raw [i].y_raw)   o.ymax = o.raw [i].y_raw;
+      /*---(done)------------------------*/
+   }
+   DEBUG_RAW    yLOG_complex ("min"       , "%dx, %dy", o.xmin, o.ymin);
+   DEBUG_RAW    yLOG_complex ("max"       , "%dx, %dy", o.xmax, o.ymax);
+   /*---(complete)-----------------------*/
+   DEBUG_RAW    yLOG_exit    (__FUNCTION__);
    return 0;
 }
+
+
+
+/*============================--------------------============================*/
+/*===----                         unit testing                         ----===*/
+/*============================--------------------============================*/
+static void o___UNIT_TEST_________________o (void) {;}
 
 char        unit_answer  [LEN_STR];
 
@@ -291,8 +355,11 @@ RAW__unit            (char *a_question, int a_num)
    /*---(locals)-----------+-----+-----+-*/
    int         i           = 0;
    char        t           [100] = "";
+   char        s           [100] = "";
+   int         x_end       = 0;
+   int         y_end       = 0;
    /*---(initialize)---------------------*/
-   strlcpy (unit_answer, "RAW__unit, unknown request", 100);
+   strlcpy (unit_answer, "RAW unit         : unknownn request", 100);
    /*---(core data)----------------------*/
    if        (strncmp (a_question, "count"     , 20)  == 0) {
       snprintf (unit_answer, LEN_STR, "RAW count        : %d", o.nraw);
@@ -302,46 +369,28 @@ RAW__unit            (char *a_question, int a_num)
          t [i]     = o.raw [i].type;
          t [i + 1] = 0;
       }
-      snprintf (unit_answer, LEN_STR, "RAW types        : %2d [%-45.45s]", o.nraw, t);
+      if (o.nraw > 45)  sprintf (s, "[%s>", t);
+      else              sprintf (s, "[%s]", t);
+      snprintf (unit_answer, LEN_STR, "RAW by type      : %2d %s", o.nraw, s);
+   }
+   else if   (strncmp (a_question, "point"     , 20)  == 0) {
+      snprintf (unit_answer, LEN_STR, "RAW point   (%2d) : %c  %4dx %4dy  %4dx %4dy", a_num, o.raw [a_num].type, o.raw [a_num].x_touch, o.raw [a_num].y_touch, o.raw [a_num].x_raw, o.raw [a_num].y_raw);
+   }
+   else if   (strncmp (a_question, "adjust"    , 20)  == 0) {
+      snprintf (unit_answer, LEN_STR, "RAW adjust       : %4dx %4dy", o.xadj, o.yadj);
+   }
+   else if   (strncmp (a_question, "bounds"    , 20)  == 0) {
+      if (o.nraw < 1)  { x_end = o.raw [0].x_raw; y_end = o.raw [0].y_raw; }
+      else             { x_end = o.raw [o.nraw - 1].x_raw; y_end = o.raw [o.nraw - 1].y_raw; }
+      snprintf (unit_answer, LEN_STR, "RAW bounds       : beg %4dx %4dy   end %4dx %4dy   min %4.0fx %4.0fy   max %4.0fx %4.0fy",
+            o.raw[0].x_raw, o.raw[0].y_raw,
+            x_end         , y_end,
+            o.xmin        , o.ymin,
+            o.xmax        , o.ymax);
    }
    /*---(complete)-----------------------*/
    return unit_answer;
 }
-
-/*> char*                                                                                                                                  <* 
- *> unit_accessor(char *a_question, int a_num)                                                                                             <* 
- *> {                                                                                                                                      <* 
- *>    if        (strcmp(a_question, "raw")         == 0) {                                                                                <* 
- *>       if (o.nraw == 0) {                                                                                                               <* 
- *>          snprintf(unit_answer, LEN_TEXT, "Raw Point (%4d) : there are no dots", a_num);                                                <* 
- *>       } else if (a_num < 0) {                                                                                                          <* 
- *>          snprintf(unit_answer, LEN_TEXT, "Raw Point (%4d) : can not be negative", a_num);                                              <* 
- *>       } else if (a_num >= o.nraw) {                                                                                                    <* 
- *>          snprintf(unit_answer, LEN_TEXT, "Raw Point (%4d) : out of range %3d to %3d", a_num, 0, o.nraw - 1);                           <* 
- *>       } else                                                                                                                           <* 
- *>          snprintf(unit_answer, LEN_TEXT, "Raw Point (%4d) : %4dx, %4dy, %4dc", a_num, o.raw[a_num].x_full, o.raw[a_num].y_full, o.nraw);   <* 
- *>    } else if        (strcmp(a_question, "bas")         == 0) {                                                                         <* 
- *>       if (o.nbas == 0) {                                                                                                               <* 
- *>          snprintf(unit_answer, LEN_TEXT, "Bas Point (%4d) : there are no dots", a_num);                                                <* 
- *>       } else if (a_num < 0) {                                                                                                          <* 
- *>          snprintf(unit_answer, LEN_TEXT, "Bas Point (%4d) : can not be negative", a_num);                                              <* 
- *>       } else if (a_num >= o.nbas) {                                                                                                    <* 
- *>          snprintf(unit_answer, LEN_TEXT, "Bas Point (%4d) : out of range %3d to %3d", a_num, 0, o.nraw - 1);                           <* 
- *>       } else                                                                                                                           <* 
- *>          snprintf(unit_answer, LEN_TEXT, "Bas Point (%4d) : %4dx, %4dy, %4dc", a_num, o.raw[a_num].x_full, o.raw[a_num].y_full, o.nraw);   <* 
- *>    } else if        (strcmp(a_question, "num_raw")     == 0) {                                                                         <* 
- *>       snprintf(unit_answer, LEN_TEXT, "Raw Count        : %4dc", o.nraw);                                                              <* 
- *>    } else if        (strcmp(a_question, "num_bas")     == 0) {                                                                         <* 
- *>       snprintf(unit_answer, LEN_TEXT, "Bas Count        : %4dc", o.nbas);                                                              <* 
- *>    } else if        (strcmp(a_question, "num_avg")     == 0) {                                                                         <* 
- *>       snprintf(unit_answer, LEN_TEXT, "Avg Count        : %4dc", o.navg);                                                              <* 
- *>    } else if        (strcmp(a_question, "num_key")     == 0) {                                                                         <* 
- *>       snprintf(unit_answer, LEN_TEXT, "Key Count        : %4dc", o.nkey);                                                              <* 
- *>    } else if        (strcmp(a_question, "prepared")    == 0) {                                                                         <* 
- *>       snprintf(unit_answer, LEN_TEXT, "Prepared  (%4d) : %s", o.curr, o.grade);                                                        <* 
- *>    }                                                                                                                                   <* 
- *>    return unit_answer;                                                                                                                 <* 
- *> }                                                                                                                                      <*/
 
 
 

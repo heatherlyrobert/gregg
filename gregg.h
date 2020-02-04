@@ -1,10 +1,47 @@
 /*============================---(source-start)---============================*/
 
+
+
+/*===[[ BEG_HEADER ]]=========================================================*/
+/*345678901-12345678901-12345678901-12345678901-12345678901-12345678901-12345678901-12345678901-*/
+
+/*===[[ ONE_LINERS ]]=========================================================*/
+
+#define     P_FOCUS     "AI (alternate input)"
+#define     P_NICHE     "pe (pen-based)"
+#define     P_PURPOSE   "efficient, versatle, and standard keyboard mini-language"
+
+#define     P_NAMESAKE  "xenophon, greek general of the ten-thousand"
+#define     P_HERITAGE  "xenophon was a ancient greek general, mercenary, philosopher, and historian"
+#define     P_IMAGERY   "brilliant, hardened, and practical military man who found fame as a historian"
+#define     P_PATRONAGE "xenephon invented the earliest known western shorthand system"
+
+#define     P_SYSTEM    "gnu/linux   (powerful, ubiquitous, technical, and hackable)"
+#define     P_LANGUAGE  "ansi-c      (wicked, limitless, universal, and everlasting)"
+#define     P_CODESIZE  "moderate    (appoximately 5,000 slocl)"
+
+#define     P_AUTHOR    "heatherlyrobert"
+#define     P_CREATED   "2008-07"
+#define     P_DEPENDS   "none"
+
+#define     P_VERMAJOR  "5.--= generalization for broader use"
+#define     P_VERMINOR  "5.3 = update for use as coding example"
+#define     P_VERNUM    "5.3a"
+#define     P_VERTXT    "first round of updates to start this version"
+
+#define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
+#define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
+#define     P_REMINDER  "there are many better options, but i *own* every byte of this one"
+
+/*===[[ END_HEADER ]]=========================================================*/
+
+
+
 /*===[[ HEADER ]]=============================================================*
 
  *   focus         : (AI) alternative input
  *   niche         : (pe) pen-based writing
- *   application   : gregg
+ *   heritage      : xenophon (ancient greek historian, originator of shorthand)
  *   purpose       : provide hyper-efficient, effective pen-based english input
  *
  *   base_system   : gnu/linux  (because it's powerful, universal, and hackable)
@@ -205,11 +242,6 @@
 
 
 
-/* rapidly evolving version number to aid with visual change confirmation     */
-#define VER_NUM   "5.2l"
-#define VER_TXT   "works with lastest changes to yVIKEYS, still need to test"
-
-
 #define     LEN_HUGE     10000
 #define     LEN_RECD      2000
 #define     LEN_STR        200
@@ -270,6 +302,7 @@ struct cACCESSOR {
    char        words       [LEN_RECD];
    char        guide       [LEN_RECD];
    /*---(globals)--------------*/
+   char        dict;
    char        touch;
    int         xpos;
    int         ypos;
@@ -334,30 +367,40 @@ struct cDEBUG {
 typedef struct cLOCATION tLOCATION;
 struct cLOCATION
 {
-   /*---(constant)----------*/
-   char      n[5];       /* name              */
-   int       tx;         /* teaching x        */
-   int       ty;         /* teaching y        */
-   int       sx;         /* ellipse x-radius  */
-   int       sy;         /* ellipse y-radius  */
-   int       ro;         /* ellipse rotation  */
-   int       be;         /* arc begin         */
-   int       ar;         /* arc length        */
-   int       st;         /* steps on dotting  */
-   char      gr[5];      /* letter group      */
-   int       range;      /* range of letter   */
-   int       sz;         /* size category     */
-   char      fu;         /* function to draw  */
-   /*---(calculated)--------*/
-   float     ex;         /* ending x          */
-   float     ey;         /* ending y          */
-   int       le;         /* leftmost          */
-   int       ri;         /* rightmost         */
-   int       ln;         /* full length       */
-   int       de;         /* degrees of slope  */
+   /*---(header)------------*/
+   char      label         [LEN_TERSE];          /* name                      */
+   /*---(creation)----------*/
+   char      type;                               /* function type to draw     */
+   short     x_ellipse;                          /* ellipse x-radius  */
+   short     y_ellipse;                          /* ellipse y-radius  */
+   short     r_ellipse;                          /* ellipse rotation  */
+   short     b_arc;                              /* arc begin         */
+   short     l_arc;                              /* arc length        */
+   /*---(grouping)----------*/
+   uchar     lcat;                               /* letter group              */
+   char      range;                              /* range of letter           */
+   char      size;                               /* size category             */
+   /*---(display)-----------*/
+   short     x_show;                             /* teaching x        */
+   short     y_show                        ;     /* teaching y        */
+   char      align;                              /* alignment for text label  */
+   /*---(trend)-------------*/
+   float     x_end;                              /* ending x          */
+   float     y_end;                              /* ending y          */
+   float     deg;                                /* degrees of slope  */
+   float     xy_len;                             /* full length       */
+   /*---(bounds)------------*/
+   float     x_lef;                              /* leftmost          */
+   float     x_rig;                              /* rightmost         */
+   float     y_top;                              /* topmost           */
+   float     y_bot;                              /* bottommost        */
    /*---(done)--------------*/
 };
 extern tLOCATION   g_loc [MAX_LETTERS];
+
+#define     LTRS_NORM      '-'
+#define     LTRS_ALL       'a'
+
 
 
 #define   MAX_RANGES      15
@@ -383,7 +426,7 @@ struct cGROUPS {
    char    sh[5];        /* shape flow                     */
    char    fl[5];        /* quadrent flow                  */
    char    ca[10];       /* valid curvatures               */
-   char    gr[5];        /* letter group                   */
+   char        cat         [LEN_TERSE];          /* letter group              */
    int     gr_num;       /* letter group number            */
    int     ac;           /* active? (y/n)                  */
 };
@@ -407,6 +450,47 @@ struct cCOMBOS {
    int     ac;           /* active? (y/n)                  */
 };
 extern tCOMBOS combos[MAX_COMBOS];
+
+
+#define    CAT_NONE    0
+
+#define    CAT_D       1
+#define    CAT_UTH     2
+#define    CAT_OTH     3
+#define    CAT_DF      4
+
+#define    CAT_M       5
+#define    CAT_K       6
+#define    CAT_R       7
+#define    CAT_RD      8
+#define    CAT_OR      9
+
+#define    CAT_NG     10
+
+#define    CAT_CH     11
+#define    CAT_F      12
+#define    CAT_P      13
+#define    CAT_PT     14
+
+#define    CAT_A      20
+#define    CAT_E      21
+#define    CAT_O      22
+#define    CAT_U      23
+
+#define    CAT_ALL    "xdTHDmkrRONjfpP"
+
+
+typedef struct cCATS tCATS;
+struct cCATS {
+   uchar       lcat;
+   uchar       label       [LEN_TERSE];
+   uchar       range;
+   uchar       sub;
+   uchar       abbr;
+};
+
+
+
 
 
 extern int   vowels[16][16];
@@ -464,10 +548,11 @@ typedef struct timespec  tTSPEC;
 #define     SPAN_ALL       "na-"
 
 
-#define     POINT_TYPES    "S>-F"
+#define     POINT_TYPES    "S>-<F"
 #define     POINT_START    'S'
 #define     POINT_HEAD     '>'
 #define     POINT_NORMAL   '-'
+#define     POINT_TAIL     '<'
 #define     POINT_FINISH   'F'
 #define     POINT_NONE     '/'
 #define     POINT_FAKE     'y'
@@ -478,38 +563,59 @@ typedef struct timespec  tTSPEC;
 #define     MODE_SLIDER    's'
 #define     MODE_PLAYER    'p'
 
+
+#define     SHAPE_NONE     '-'
+#define     SHAPE_LINE     'l'
+#define     SHAPE_CIRCLE   'c'
+#define     SHAPE_ELLIPSE  'e'
+#define     SHAPE_ROUNDISH 'r'
+#define     SHAPE_TEARDROP 't'
+#define     SHAPE_DOT      'd'
+#define     SHAPE_SPACE    'w'
+#define     SHAPE_ACCENT   'a'
+#define     SHAPES_ALL     "lcertdwa"
+
+
+#define     SHAPE_LOAD     'L'
+#define     SHAPE_DRAW     'D'
+#define     SHAPE_SAMPLE   'S'
+
+
 typedef struct cPOINT tPOINT;
 struct cPOINT
 {
-   /*---(links)-----------------*/
-   int         p_raw;                  /* tie to raw point                    */
-   int         p_bas;                  /* tie to basic point                  */
-   char        type;                   /* type of key point (sharp or rounded) */
+   /*---(header)----------------*/
+   char        series;                 /* which point type                    */
+   short       seq;                    /* sequencal numbering within series   */
+   short       p_raw;                  /* tie to raw point                    */
+   short       p_bas;                  /* tie to basic point                  */
+   char        fake;                   /* artificial point or not (y/n)       */
    /*---(touchpad)--------------*/
-   int         x_full;                 /* x-pos in touchpad coords            */
-   int         y_full;                 /* y-pos in touchpad coords            */
+   short       x_touch;                /* x-pos in touchpad coords (captured) */
+   short       y_touch;                /* y-pos in touchpad coords (captured) */
+   short       x_raw;                  /* x-pos in touchpad coords (adjusted) */
+   short       y_raw;                  /* y-pos in touchpad coords (adjusted) */
    /*---(statistics)------------*/
-   int         xd;                     // x-dist from last xpos
-   int         yd;                     // y-dist from last ypos
-   int         len;                    // length between points
+   float       xd;                     // x-dist from last xpos
+   float       yd;                     // y-dist from last ypos
+   float       len;                    // length between points
    float       slope;                  // slope from last point
-   int         icept;                  // y-intercept of line from last point
+   float       icept;                  // y-intercept of line from last point
    float       rads;                   // radians of line from last point
-   int         degs;                   // degrees of line from last point
-   int         quad;                   // quadrent of line from last point
-   int         range;                  // range of point
+   float       degs;                   // degrees of line from last point
+   char        quad;                   // quadrent of line from last point
+   char        range;                  // range of point
    float       cdepth;                 // pixels of curvature at mid point
    char        cano;                   // curve anomolies '-' = normal, 'x' = jittery
    char        ccat;                   // curve category : +1, 0, -1                    
    char        sharp;                  /* distinct break before-to-after      */        
-   char        use         [5];        /* use of this point in outline        */
-   char        fake;                   /* artificial point or not (y/n)       */
+   char        use         [LEN_TERSE];/* use of this point in outline        */
+   char        type;                   /* type of key point (sharp/rounded)   */
    /*---(display)---------------*/
    float       x_rel;                  /* input device relative x_coord       */
    float       y_rel;                  /* input device relative y_coord       */
-   int         x_pos;                  /* screen x_coord                      */
-   int         y_pos;                  /* screen y_coord                      */
-   int         xy_len;                 /* screen length                       */
+   float       x_pos;                  /* screen x_coord                      */
+   float       y_pos;                  /* screen y_coord                      */
    /*---(done)------------------*/
 };
 
@@ -535,30 +641,30 @@ struct cOUTLINE
    char        grade  [50];              /* grading of match                    */
    char        word   [50];              /* resulting dictionary word           */
    /*---(raw)----------------------------*/
-   int         nraw;                     /* number of raw points                */
-   int         craw;                     /* current average point               */
-   int         xadj;
-   int         yadj;
+   short       nraw;                     /* number of raw points                */
+   short       craw;                     /* current average point               */
+   short       xadj;
+   short       yadj;
    float       ratio;                  /* input to display conversion ratio   */
    /*---(base)---------------------------*/
-   int         nbas;                     /* number of basic points              */
+   short       nbas;                     /* number of basic points              */
    /*---(average)------------------------*/
-   int         navg;                     /* number of average points            */
-   int         cavg;                     /* current average point               */
+   short       navg;                     /* number of average points            */
+   short       cavg;                     /* current average point               */
    /*---(keys)---------------------------*/
-   int         nkey;                     /* number of key points                */
-   int         ckey;                     /* current key point                   */
+   short       nkey;                     /* number of key points                */
+   short       ckey;                     /* current key point                   */
    /*---(acutal points)------------------*/
    tPOINT      raw         [MAX_POINTS]; /* raw points                          */
    tPOINT      bas         [MAX_POINTS]; /* basic points                        */
    tPOINT      avg         [MAX_POINTS]; /* average points                      */
-   tPOINT      tmp         [5];          /* calculation storage                 */
+   tPOINT      tmp         [LEN_TERSE];  /* calculation storage                 */
    tPOINT      key         [MAX_POINTS]; /* key points                          */
    /*---(bounding)-----------------------*/
-   int         x_min;
-   int         y_min;
-   int         x_max;
-   int         y_max;
+   float       xmin;
+   float       ymin;
+   float       xmax;
+   float       ymax;
    /*---(done)---------------------------*/
 } o;
 
@@ -578,6 +684,65 @@ struct cOUTLINE
 #define     COLOR_WARN          'W'
 
 
+
+
+/*---(words structure)--------------------------*/
+#define  MAX_WORDS      5000
+#define  MAX_LEN          30
+typedef struct cWORDS  tWORDS;
+struct cWORDS {
+   /*---(header)---------------*/
+   char       *english;                     /* english word                   */
+   char        e_len;
+   llong       e_key;
+   uchar      *gregg;                       /* gregg translation              */
+   char        g_len;
+   llong       g_key;
+   short       drawn       [LEN_LABEL];     /* gregg as drawn                 */
+   /*---(source)---------------*/
+   uchar       ver;
+   uchar       book;
+   short       page;
+   uchar       type;
+   /*---(difficulty)-----------*/
+   uchar       diff;
+   uchar       simp;
+   uchar       x3rd;
+   uchar       x4th;
+   uchar       top;
+   /*---(other)----------------*/
+   int         num;
+   char        version;                     /* version of gregg shorthand     */
+   char        source;                      /* type of source text            */
+   tWORDS     *nextg;
+   tWORDS     *nexte;
+   int         count;
+   /*---(btree)----------------*/
+   tWORDS     *e_prev;
+   tWORDS     *e_next;
+   tWORDS     *e_left;
+   tWORDS     *e_right;
+   /*---(btree)----------------*/
+   tWORDS     *g_prev;
+   tWORDS     *g_next;
+   tWORDS     *g_left;
+   tWORDS     *g_right;
+   /*---(done)-----------------*/
+};
+
+extern tWORDS *e_hword;
+extern tWORDS *e_tword;
+extern tWORDS *e_cword;
+extern int     e_nword;
+extern int     e_iword;
+
+extern tWORDS *g_hword;
+extern tWORDS *g_tword;
+extern tWORDS *g_cword;
+extern int     g_nword;
+extern int     g_iword;
+
+
 /*============================--------------------============================*/
 /*===----                           prototypes                         ----===*/
 /*============================--------------------============================*/
@@ -594,6 +759,10 @@ char       PROG_final           (void);
 char       PROG_event           (void);
 char       PROG_finish          (void);
 char       PROG_end             (void);
+/*345678901-12345678901-12345678901-12345678901-12345678901-12345678901-123456*/
+char        PROG__unit_quiet        (void);
+char        PROG__unit_loud         (void);
+char        PROG__unit_end          (void);
 
 char       DRAW_init            (void);
 /*> char       DRAW__resize         (cchar a_format, cchar *a_title, cint a_wide, cint a_tall);   <*/
@@ -658,21 +827,44 @@ char       out_read             (int);
 char*      OUT__unit            (char *a_question, tPOINT *a_curr);
 
 
-char       POINT_calc           (char a_type, tPOINT* a_curr, int a_span);
-char       POINT_list           (FILE *a_file, char a_style, tPOINT *a_series, int a_count);
-char       POINT_show           (FILE *a_file, char a_style, tPOINT *a_curr  , int a_num);
-char       POINT_clipboard      (char *a_cmd, char *a_opt);
-char       FILE_rename          (char *a_name);
 
+/*345678901-12345678901-12345678901-12345678901-12345678901-12345678901-123456*/
+/*---(clearing)-------------*/
+char        POINT_clear             (tPOINT *a_point, char a_type);
+char        POINT_clear_series      (char a_type);
+char        POINT_clear_all         (void);
+/*---(sequencing)-----------*/
+char        POINT_seq_start         (char a_type, tPOINT *p, int c);
+char        POINT_seq_head          (char a_type, tPOINT *p, int c, int a_xpad, int a_ypad);
+char        POINT_seq_normal        (char a_type, tPOINT *p, int c, int a_xpad, int a_ypad);
+char        POINT_seq_tail          (char a_type, tPOINT *p, int c, int a_xpad, int a_ypad);
+char        POINT_seq_finish        (char a_type, tPOINT *p, int c, int a_xpad, int a_ypad);
+/*---(statistics)-----------*/
+char        POINT_position          (tPOINT *a_curr);
+char        POINT_calc              (char a_type, tPOINT* a_curr, int a_span);
+/*---(reporting)------------*/
+char        POINT_list              (FILE *a_file, char a_style, tPOINT *a_series, int a_count);
+char        POINT_show              (FILE *a_file, char a_style, tPOINT *a_curr  , int a_num);
+char        POINT_clipboard         (char *a_cmd, char *a_opt);
+/*---(unit_test)------------*/
+char*       POINT__unit             (char *a_question, char a_type, int a_num);
+/*---(done)-----------------*/
+
+
+
+char        FILE_rename             (char *a_name);
+
+/*345678901-12345678901-12345678901-12345678901-12345678901-12345678901-123456*/
 /*---(raw)------------------*/
-char       RAW__point           (int a_xpad, int a_ypad, char a_type);
-char       RAW_touch            (int a_xpad, int a_ypad);
-char       RAW_lift             (int a_xpad, int a_ypad);
-char       RAW_normal           (int a_xpad, int a_ypad);
+char        RAW_init                (void);
+char        RAW__point              (int a_xpad, int a_ypad, char a_type);
+char        RAW_touch               (int a_xpad, int a_ypad);
+char        RAW_lift                (int a_xpad, int a_ypad);
+char        RAW_normal              (int a_xpad, int a_ypad);
 
-char       RAW_load             (char *a_points);
-char       RAW_equalize         (void);
-char*      RAW__unit            (char *a_question, int a_num);
+char        RAW_load                (char *a_points);
+char        RAW_equalize            (void);
+char*       RAW__unit               (char *a_question, int a_num);
 
 /*---(base)-----------------*/
 char       BASE_filter          (void);
@@ -698,20 +890,28 @@ int        match_range       (int);
 
 char       CIRCLE_driver     (void);
 
-char       dict_read         (void);
-int        words_outstring   (char *);
+/*345678901-12345678901-12345678901-12345678901-12345678901-12345678901-123456*/
+char        WORDS__new              (tWORDS **a_word, char *a_english, char *a_gregg);
+char        WORDS_dict_source       (tWORDS *a_new, uchar *a_source);
+char        WORDS_dict_notes        (tWORDS *a_new, uchar *a_notes);
+char        WORDS_dict_parse        (uchar *a_recd);
+char        WORDS_import            (void);
+char        WORDS_dict_list         (void);
+char        WORDS_table_ae          (void);
+char        WORDS_drawn_show        (short a_drawn [], uchar *a_out);
+char        WORDS_drawn_fix         (uchar *a_index, short a_drawn []);
+int         words_outstring         (char *);
 
-int        WORDS_find            (char* a_word);
-char       WORDS_start           (void);
-char       WORDS_outline         (int   a_index, char a_base);
-char       WORDS_display         (char* a_words, char a_base);
+int         WORDS_find             (char* a_word);
+char        WORDS_start            (void);
+char        WORDS_outline          (int   a_index, char a_base);
+char        WORDS_display          (char* a_words, char a_base);
 
-int        words_translate   (int);
-int        words_vowel       (int, int);
-int        words_consonant   (int, int);
-char       WORDS_result      (void);
-
-char      *str_trim          (char *);
+int         words_translate        (int);
+/*> int        words_vowel       (int, int);                                          <*/
+/*> int        words_consonant   (int, int);                                          <*/
+char        WORDS_result          (void);
+char*       WORDS__unit           (char *a_question, int a_num);
 
 char*      unit_accessor     (char *a_question, int a_num);
 
@@ -735,6 +935,58 @@ char        USER_quit            (void);
 char        USER_writequit       (void);
 char        USER_map_mode        (char a_major, char a_minor);
 /*> char        USER_cmds_mode       (char a_major, char a_minor);                    <*/
+
+/*345678901-12345678901-12345678901-12345678901-12345678901-12345678901-123456*/
+/*---(create)---------------*/
+ushort      REVERSE_find_letter     (char *a_ltr, char a_scope);
+char        REVERSE_begin           (int x, int y);
+char        REVERSE_end             (void);
+/*---(loading)--------------*/
+char        REVERSE_out_start       (void);
+char        REVERSE_out_touch       (int x, int y);
+char        REVERSE_out_append      (int x, int y);
+char        REVERSE_out_lift        (int x, int y);
+char        REVERSE_out_done        (void);
+/*---(shapes)---------------*/
+char        REVERSE_line            (char a_type, char a_skip);
+char        REVERSE_circle          (char a_type, char a_skip);
+char        REVERSE_ellipse         (char a_type, char a_skip);
+char        REVERSE_roundish        (char a_type, char a_skip);
+char        REVERSE_teardrop        (char a_type, char a_skip);
+char        REVERSE_dot             (char a_type, char a_skip);
+char        REVERSE_space           (char a_type, char a_skip);
+char        REVERSE_draw_exit       (float x_beg, float y_beg, float x_end, float y_end, char a_type, char a_skip);
+/*---(outlines)-------------*/
+char        REVERSE_outline         (uchar *a_outline, char a_type, char a_skip);
+char        REVERSE_text            (uchar *a_text, char a_type, char a_skip, char a_reset);
+char        REVERSE_page            (uchar *a_text, char a_type, char a_skip, char a_reset);
+/*---(by_english)-----------*/
+char        REVERSE_english_word    (uchar *a_word, char a_type, char a_skip);
+char        REVERSE_english_text    (uchar *a_text, char a_type, char a_skip, char a_reset);
+char        REVERSE_english_page    (uchar *a_text, char a_type, char a_skip, char a_reset);
+/*---(reporting)------------*/
+char        REVERSE_report          (void);
+/*---(unit_test)------------*/
+char*       REVERSE__unit           (char *a_question, int a_num);
+/*---(done)-----------------*/
+
+
+
+/*---(generate keys)--------*/
+llong       BTREE_english2key       (uchar *a_word);
+llong       BTREE_gregg2key         (uchar *a_word, uchar *a_index);
+/*---(sort)-----------------*/
+char        BTREE_dgnome            (char a_type);
+/*---(build)----------------*/
+char        BTREE_build             (char a_type);
+char        BTREE_list              (char a_type);
+/*---(search)---------------*/
+char        BTREE_by_english        (tWORDS **a_found, char *a_word);
+char        BTREE_by_gregg          (tWORDS **a_found, char *a_word);
+/*---(unit_test)------------*/
+char*       BTREE__unit             (char *a_question, int n);
+/*---(done)-----------------*/
+
 
 #endif
 /*============================----(source-end)----============================*/

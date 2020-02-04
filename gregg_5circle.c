@@ -36,15 +36,15 @@ CIRCLE__intersect    (int a_p1, int a_p3)
    int       _max    = 0;              /* axis minimum point                  */
    int       _min    = 0;              /* axis maximum point                  */
    /*---(solve segment one)--------------*/
-   A1 = o.key[p2].y_full - o.key[p1].y_full;
-   B1 = o.key[p1].x_full - o.key[p2].x_full;
-   C1 = (A1 * o.key[p1].x_full) + (B1 * o.key[p1].y_full);
-   DEBUG_CIRCLE  printf("   1st seg :: %4d,%4d to %4d,%4d :: s=%8.3f, b=%4d :: A=%4.0f, B=%4.0f, C=%4.0f\n", o.key[p1].x_full, o.key[p1].y_full, o.key[p2].x_full, o.key[p2].y_full, o.key[p2].slope, o.key[p2].icept, A1, B1, C1);
+   A1 = o.key[p2].y_raw - o.key[p1].y_raw;
+   B1 = o.key[p1].x_raw - o.key[p2].x_raw;
+   C1 = (A1 * o.key[p1].x_raw) + (B1 * o.key[p1].y_raw);
+   DEBUG_CIRCLE  printf("   1st seg :: %4d,%4d to %4d,%4d :: s=%8.3f, b=%4d :: A=%4.0f, B=%4.0f, C=%4.0f\n", o.key[p1].x_raw, o.key[p1].y_raw, o.key[p2].x_raw, o.key[p2].y_raw, o.key[p2].slope, o.key[p2].icept, A1, B1, C1);
    /*---(solve segment two)--------------*/
-   A2 = o.key[p4].y_full - o.key[p3].y_full;
-   B2 = o.key[p3].x_full - o.key[p4].x_full;
-   C2 = (A2 * o.key[p3].x_full) + (B2 * o.key[p3].y_full);
-   DEBUG_CIRCLE  printf("   2nd seg :: %4d,%4d to %4d,%4d :: s=%8.3f, b=%4d :: A=%4.0f, B=%4.0f, C=%4.0f\n", o.key[p3].x_full, o.key[p3].y_full, o.key[p4].x_full, o.key[p4].y_full, o.key[p4].slope, o.key[p4].icept, A2, B2, C2);
+   A2 = o.key[p4].y_raw - o.key[p3].y_raw;
+   B2 = o.key[p3].x_raw - o.key[p4].x_raw;
+   C2 = (A2 * o.key[p3].x_raw) + (B2 * o.key[p3].y_raw);
+   DEBUG_CIRCLE  printf("   2nd seg :: %4d,%4d to %4d,%4d :: s=%8.3f, b=%4d :: A=%4.0f, B=%4.0f, C=%4.0f\n", o.key[p3].x_raw, o.key[p3].y_raw, o.key[p4].x_raw, o.key[p4].y_raw, o.key[p4].slope, o.key[p4].icept, A2, B2, C2);
    /*---(hypothetical intersection)------*/
    det = (A1 * B2) - (A2 * B1);
    if (det == 0) {
@@ -55,16 +55,16 @@ CIRCLE__intersect    (int a_p1, int a_p3)
    y  = (int) ((A1 * C2) - (A2 * C1)) / det;
    DEBUG_CIRCLE  printf("   hypothetical intersection at %4d, %4d\n", x, y);
    /*---(check 1st segment)--------------*/
-   _min   = (int) fmin(o.key[p1].x_full, o.key[p2].x_full);
-   _max   = (int) fmax(o.key[p1].x_full, o.key[p2].x_full);
+   _min   = (int) fmin(o.key[p1].x_raw, o.key[p2].x_raw);
+   _max   = (int) fmax(o.key[p1].x_raw, o.key[p2].x_raw);
    DEBUG_CIRCLE  printf("   test x on 1st :: %4d < %4d < %4d : ", _min, x, _max);
    if (_min > x || _max < x)  {
       DEBUG_CIRCLE  printf("FAILED, failing out\n");
       return -1;
    }
    DEBUG_CIRCLE  printf("accepted\n");
-   _min   = (int) fmin(o.key[p1].y_full, o.key[p2].y_full);
-   _max   = (int) fmax(o.key[p1].y_full, o.key[p2].y_full);
+   _min   = (int) fmin(o.key[p1].y_raw, o.key[p2].y_raw);
+   _max   = (int) fmax(o.key[p1].y_raw, o.key[p2].y_raw);
    DEBUG_CIRCLE  printf("   test y on 1st :: %4d < %4d < %4d : ", _min, y, _max);
    if (_min > y || _max < y) {
       DEBUG_CIRCLE  printf("FAILED, failing out\n");
@@ -72,16 +72,16 @@ CIRCLE__intersect    (int a_p1, int a_p3)
    }
    DEBUG_CIRCLE  printf("accepted\n");
    /*---(check 2nd segment)--------------*/
-   _min   = (int) fmin(o.key[p3].x_full, o.key[p4].x_full);
-   _max   = (int) fmax(o.key[p3].x_full, o.key[p4].x_full);
+   _min   = (int) fmin(o.key[p3].x_raw, o.key[p4].x_raw);
+   _max   = (int) fmax(o.key[p3].x_raw, o.key[p4].x_raw);
    DEBUG_CIRCLE  printf("   test x on 2nd :: %4d < %4d < %4d : ", _min, x, _max);
    if (_min > x || _max < x) {
       DEBUG_CIRCLE  printf("FAILED, failing out\n");
       return -1;
    }
    DEBUG_CIRCLE  printf("accepted\n");
-   _min   = (int) fmin(o.key[p3].y_full, o.key[p4].y_full);
-   _max   = (int) fmax(o.key[p3].y_full, o.key[p4].y_full);
+   _min   = (int) fmin(o.key[p3].y_raw, o.key[p4].y_raw);
+   _max   = (int) fmax(o.key[p3].y_raw, o.key[p4].y_raw);
    DEBUG_CIRCLE  printf("   test y on 2nd :: %4d < %4d < %4d : ", _min, y, _max);
    if (_min > y || _max < y) {
       DEBUG_CIRCLE  printf("FAILED, failing out\n");
@@ -116,15 +116,15 @@ CIRCLE__minpoint     (int a_p1, int a_p3)
          continue;
       }
       /*> DEBUG_CIRCLE  printf("   %03d\n", i);                                     <*/
-      my_x = o.bas[i].x_full;
-      my_y = o.bas[i].y_full;
+      my_x = o.bas[i].x_raw;
+      my_y = o.bas[i].y_raw;
       for (j = o.key[p3].p_bas; j <= o.key[p4].p_bas; ++j) {
          if (j == o.nbas - 1) {
             /*> DEBUG_CIRCLE  printf("   %03d (fake/end) can not be used in connection distance calcs\n", i);   <*/
             continue;
          }
-         ci_x = abs(o.bas[j].x_full - my_x);
-         ci_y = abs(o.bas[j].y_full - my_y);
+         ci_x = abs(o.bas[j].x_raw - my_x);
+         ci_y = abs(o.bas[j].y_raw - my_y);
          my_dist = sqrt((ci_x * ci_x) + (ci_y * ci_y));
          if (my_dist < my_min) {
             my_min = my_dist;
@@ -167,15 +167,15 @@ CIRCLE__size        (int a_one, int a_two)
    mid2     = half + space;
    DEBUG_CIRCLE  printf("   _min1 =%3d, _min2 =%3d, space=%3d, half =%3d, mid1 =%3d, mid2 =%3d\n", a_one, a_two, space, half, mid1, mid2);
    /*---(calc midsection)----------------*/
-   _distx   = abs(o.bas[mid2].x_full - o.bas[mid1].x_full);
-   _disty   = abs(o.bas[mid2].y_full - o.bas[mid1].y_full);
+   _distx   = abs(o.bas[mid2].x_raw - o.bas[mid1].x_raw);
+   _disty   = abs(o.bas[mid2].y_raw - o.bas[mid1].y_raw);
    _dist1   = (int) sqrt((_distx * _distx) + (_disty * _disty));
    DEBUG_CIRCLE  printf("   midpoints  : _distx=%3d, _disty=%3d, _dist1=%3d\n", _distx, _disty, _dist1);
    o.avg[mid1].type = 'm';
    o.avg[mid2].type = 'm';
    /*---(get half mark)------------------*/
-   _distx   = abs(o.bas[half].x_full - o.bas[a_one].x_full);
-   _disty   = abs(o.bas[half].y_full - o.bas[a_one].y_full);
+   _distx   = abs(o.bas[half].x_raw - o.bas[a_one].x_raw);
+   _disty   = abs(o.bas[half].y_raw - o.bas[a_one].y_raw);
    _dist2   = (int) sqrt((_distx * _distx) + (_disty * _disty));
    DEBUG_CIRCLE  printf("   halfpoints : _distx=%3d, _disty=%3d, _dist2=%3d\n", _distx, _disty, _dist2);
    o.avg[half].type = 'm';
@@ -207,8 +207,8 @@ CIRCLE__backward    (void)
    if (one == 0) return 0;
    for (i = o.key[one - 1].p_bas; i < o.key[one].p_bas; ++i) {
       for (j = o.key[one + 2].p_bas; j <= o.key[two].p_bas; ++j) {
-         xd   = abs(o.bas[j].x_full - o.bas[i].x_full);
-         yd   = abs(o.bas[j].y_full - o.bas[i].y_full);
+         xd   = abs(o.bas[j].x_raw - o.bas[i].x_raw);
+         yd   = abs(o.bas[j].y_raw - o.bas[i].y_raw);
          dist = (int) sqrt((xd * xd) + (yd * yd));
          /*> DEBUG_CIRCLE  printf("      checking i=%3d, j=%3d, dist=%6.2f\n", i, j, dist);   <*/
          if (dist <= 3.0) {
@@ -259,8 +259,8 @@ CIRCLE__forward     (void)
    if (two == o.nkey - 1) return 0;
    for (j = o.key[two + 1].p_bas; j > o.key[two].p_bas; --j) {
       for (i = o.key[two - 2].p_bas; i > o.key[one].p_bas; --i) {
-         xd   = abs(o.bas[j].x_full - o.bas[i].x_full);
-         yd   = abs(o.bas[j].y_full - o.bas[i].y_full);
+         xd   = abs(o.bas[j].x_raw - o.bas[i].x_raw);
+         yd   = abs(o.bas[j].y_raw - o.bas[i].y_raw);
          dist = (int) sqrt((xd * xd) + (yd * yd));
          /*> DEBUG_CIRCLE  printf("      checking i=%3d, j=%3d, dist=%6.2f\n", i, j, dist);   <*/
          if (dist <= 3.0) {

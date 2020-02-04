@@ -13,20 +13,20 @@ MAP__xmajor           (void)
 {
    /*---(locals)-----------+-----------+-*/
    int         i           =    0;
-   /*---(update x)-----------------------*/
-   for (i = 0; i < o.navg; ++i) {
-      g_xmap.map [i] = i;
-   }
-   /*---(globals)------------------------*/
-   g_xmap.gmin  = g_xmap.gamin  = 0;
-   g_xmap.gmax  = g_xmap.gamax  = o.navg;
-   g_xmap.avail = o.navg;
-   /*---(screen)-------------------------*/
-   g_xmap.beg   = g_xmap.cur   = 0;
-   g_xmap.end   = g_xmap.len   = g_xmap.tend  = o.navg;
-   /*---(units)--------------------------*/
-   g_xmap.gbeg  = g_xmap.gcur  = 0;
-   g_xmap.gend  = o.navg;
+   /*> /+---(update x)-----------------------+/                                       <* 
+    *> for (i = 0; i < o.navg; ++i) {                                                 <* 
+    *>    g_xmap.map [i] = i;                                                         <* 
+    *> }                                                                              <* 
+    *> /+---(globals)------------------------+/                                       <* 
+    *> g_xmap.gmin  = g_xmap.gamin  = 0;                                              <* 
+    *> g_xmap.gmax  = g_xmap.gamax  = o.navg;                                         <* 
+    *> g_xmap.avail = o.navg;                                                         <* 
+    *> /+---(screen)-------------------------+/                                       <* 
+    *> g_xmap.beg   = g_xmap.cur   = 0;                                               <* 
+    *> g_xmap.end   = g_xmap.len   = g_xmap.tend  = o.navg;                           <* 
+    *> /+---(units)--------------------------+/                                       <* 
+    *> g_xmap.gbeg  = g_xmap.gcur  = 0;                                               <* 
+    *> g_xmap.gend  = o.navg;                                                         <*/
    /*---(complete)-----------------------*/
    return 0;
 }
@@ -35,8 +35,8 @@ char         /*-> when moving between points ---------[ ------ [fe.G67.55#.92]*/
 MAP__xminor           (void)
 {
    /*---(local movements)----------------*/
-   g_xmap.glmin = g_xmap.gprev = 0;
-   g_xmap.glmax = g_xmap.gnext = o.navg;
+   /*> g_xmap.glmin = g_xmap.gprev = 0;                                               <* 
+    *> g_xmap.glmax = g_xmap.gnext = o.navg;                                          <*/
    /*---(screen)-------------------------*/
    return 0;
 }
@@ -45,93 +45,93 @@ char         /*-> when changing files ----------------[ ------ [fe.G67.55#.92]*/
 MAP__ymajor           (void)
 {
    /*---(locals)-----------+-----------+-*/
-   int         i           =    0;
-   /*---(update y)-----------------------*/
-   DEBUG_INPT   yLOG_senter  (__FUNCTION__);
-   DEBUG_INPT   yLOG_sint    (o.total);
-   for (i = 0; i < o.total; ++i) {
-      DEBUG_INPT   yLOG_sint    (i);
-      g_ymap.map [i] = i;
-   }
-   /*---(globals)------------------------*/
-   g_ymap.gmin  = g_ymap.gamin  = 0;
-   /*> g_ymap.gmax  = g_ymap.gamax  = o.total - 1;                                     <* 
-    *> g_ymap.avail = o.total - 1;                                                    <*/
-   g_ymap.gmax  = g_ymap.gamax  = o.total;
-   g_ymap.avail = o.total;
-   DEBUG_INPT   yLOG_sint    (g_ymap.gmax);
-   /*---(screen)-------------------------*/
-   g_ymap.beg   = g_ymap.cur   = g_ymap.end   = g_ymap.len   = g_ymap.tend  = o.total - 1;
-   /*---(units)--------------------------*/
-   g_ymap.gbeg  = g_ymap.gcur  = g_ymap.gend  = o.total - 1;
-   /*---(complete)-----------------------*/
-   DEBUG_INPT   yLOG_sexit   (__FUNCTION__);
-   return 0;
+   /*> int         i           =    0;                                                           <* 
+    *> /+---(update y)-----------------------+/                                                  <* 
+    *> DEBUG_INPT   yLOG_senter  (__FUNCTION__);                                                 <* 
+    *> DEBUG_INPT   yLOG_sint    (o.total);                                                      <* 
+    *> for (i = 0; i < o.total; ++i) {                                                           <* 
+    *>    DEBUG_INPT   yLOG_sint    (i);                                                         <* 
+    *>    g_ymap.map [i] = i;                                                                    <* 
+    *> }                                                                                         <* 
+    *> /+---(globals)------------------------+/                                                  <* 
+    *> g_ymap.gmin  = g_ymap.gamin  = 0;                                                         <* 
+    *> /+> g_ymap.gmax  = g_ymap.gamax  = o.total - 1;                                     <*    <* 
+    *>  *> g_ymap.avail = o.total - 1;                                                    <+/    <* 
+    *> g_ymap.gmax  = g_ymap.gamax  = o.total;                                                   <* 
+    *> g_ymap.avail = o.total;                                                                   <* 
+    *> DEBUG_INPT   yLOG_sint    (g_ymap.gmax);                                                  <* 
+    *> /+---(screen)-------------------------+/                                                  <* 
+    *> g_ymap.beg   = g_ymap.cur   = g_ymap.end   = g_ymap.len   = g_ymap.tend  = o.total - 1;   <* 
+    *> /+---(units)--------------------------+/                                                  <* 
+    *> g_ymap.gbeg  = g_ymap.gcur  = g_ymap.gend  = o.total - 1;                                 <* 
+    *> /+---(complete)-----------------------+/                                                  <* 
+    *> DEBUG_INPT   yLOG_sexit   (__FUNCTION__);                                                 <* 
+    *> return 0;                                                                                 <*/
 }
 
 char         /*-> when moving between outlines -------[ ------ [fe.G67.55#.92]*/ /*-[01.0000.018.!]-*/ /*-[--.---.---.--]-*/
 MAP__yminor           (void)
 {
-   /*---(update y)-----------------------*/
-   DEBUG_INPT   yLOG_senter  (__FUNCTION__);
-   DEBUG_INPT   yLOG_sint    (o.total);
-   /*---(local movements)----------------*/
-   g_ymap.glmin = g_ymap.gprev = 0;
-   g_ymap.glmax = g_ymap.gnext = o.total;
-   /*---(complete)-----------------------*/
-   DEBUG_INPT   yLOG_sexit   (__FUNCTION__);
-   return 0;
+   /*> /+---(update y)-----------------------+/                                       <* 
+    *> DEBUG_INPT   yLOG_senter  (__FUNCTION__);                                      <* 
+    *> DEBUG_INPT   yLOG_sint    (o.total);                                           <* 
+    *> /+---(local movements)----------------+/                                       <* 
+    *> g_ymap.glmin = g_ymap.gprev = 0;                                               <* 
+    *> g_ymap.glmax = g_ymap.gnext = o.total;                                         <* 
+    *> /+---(complete)-----------------------+/                                       <* 
+    *> DEBUG_INPT   yLOG_sexit   (__FUNCTION__);                                      <* 
+    *> return 0;                                                                      <*/
 }
 
 char         /*-> mapping coordinator ----------------[ ------ [fe.G67.55#.92]*/ /*-[01.0000.018.!]-*/ /*-[--.---.---.--]-*/
 MAP_mapper           (char a_req)
 {
-   /*---(locals)-----------+-----------+-*/
-   static int  x           = -1;
-   static int  y           = -1;
-   char        x_label     [LEN_LABEL];
-   char        x_source    [LEN_RECD ];
-   /*---(initialize)---------------------*/
-   DEBUG_INPT   yLOG_enter   (__FUNCTION__);
-   DEBUG_INPT   yLOG_value   ("ymap.gcur" , g_ymap.gcur);
-   DEBUG_INPT   yLOG_value   ("xmap.gcur" , g_xmap.gcur);
-   /*> printf ("xmap.which %c, ymap.which %c\n", g_xmap.which, g_ymap.which);         <*/
-   /*> printf ("called mapper with %c\n", a_req);                                     <*/
-   if (a_req == YVIKEYS_INIT) {
-      DEBUG_INPT   yLOG_note    ("initial run");
-      o.curr  = o.total - 1;
-      OUT_pick (o.curr);
-      MAP__ymajor ();
-      MAP__yminor ();
-      MAP__xmajor ();
-      MAP__xminor ();
-   }
-   /*---(initialize)---------------------*/
-   else {
-      if (o.curr != g_ymap.gcur) {
-         DEBUG_INPT   yLOG_note    ("change outline");
-         o.curr  = g_ymap.gcur;
-         OUT_pick (o.curr);
-         MAP__yminor ();
-         MAP__xmajor ();
-         MAP__xminor ();
-      }
-      else if (o.cavg != g_xmap.gcur) {
-         DEBUG_INPT   yLOG_note    ("change point");
-         MAP__xminor ();
-         o.curr  = g_ymap.gcur;
-      }
-   }
-   o.cavg  = g_xmap.gcur;
-   DEBUG_INPT   yLOG_value   ("o.curr"    , o.curr);
-   DEBUG_INPT   yLOG_value   ("o.total"   , o.total);
-   /*---(feed source values)-------------*/
-   sprintf (x_label , "%03d.%03d", o.curr, o.cavg);
-   sprintf (x_source, "%03dx, %03dy", o.avg [o.cavg].x_full, o.avg [o.cavg].y_full);
-   yVIKEYS_source (x_label, x_source);
-   /*---(complete)-----------------------*/
-   DEBUG_INPT   yLOG_exit    (__FUNCTION__);
-   return 0;
+   /*> /+---(locals)-----------+-----------+-+/                                                 <* 
+    *> static int  x           = -1;                                                            <* 
+    *> static int  y           = -1;                                                            <* 
+    *> char        x_label     [LEN_LABEL];                                                     <* 
+    *> char        x_source    [LEN_RECD ];                                                     <* 
+    *> /+---(initialize)---------------------+/                                                 <* 
+    *> DEBUG_INPT   yLOG_enter   (__FUNCTION__);                                                <* 
+    *> DEBUG_INPT   yLOG_value   ("ymap.gcur" , g_ymap.gcur);                                   <* 
+    *> DEBUG_INPT   yLOG_value   ("xmap.gcur" , g_xmap.gcur);                                   <* 
+    *> /+> printf ("xmap.which %c, ymap.which %c\n", g_xmap.which, g_ymap.which);         <+/   <* 
+    *> /+> printf ("called mapper with %c\n", a_req);                                     <+/   <* 
+    *> if (a_req == YVIKEYS_INIT) {                                                             <* 
+    *>    DEBUG_INPT   yLOG_note    ("initial run");                                            <* 
+    *>    o.curr  = o.total - 1;                                                                <* 
+    *>    OUT_pick (o.curr);                                                                    <* 
+    *>    MAP__ymajor ();                                                                       <* 
+    *>    MAP__yminor ();                                                                       <* 
+    *>    MAP__xmajor ();                                                                       <* 
+    *>    MAP__xminor ();                                                                       <* 
+    *> }                                                                                        <* 
+    *> /+---(initialize)---------------------+/                                                 <* 
+    *> else {                                                                                   <* 
+    *>    if (o.curr != g_ymap.gcur) {                                                          <* 
+    *>       DEBUG_INPT   yLOG_note    ("change outline");                                      <* 
+    *>       o.curr  = g_ymap.gcur;                                                             <* 
+    *>       OUT_pick (o.curr);                                                                 <* 
+    *>       MAP__yminor ();                                                                    <* 
+    *>       MAP__xmajor ();                                                                    <* 
+    *>       MAP__xminor ();                                                                    <* 
+    *>    }                                                                                     <* 
+    *>    else if (o.cavg != g_xmap.gcur) {                                                     <* 
+    *>       DEBUG_INPT   yLOG_note    ("change point");                                        <* 
+    *>       MAP__xminor ();                                                                    <* 
+    *>       o.curr  = g_ymap.gcur;                                                             <* 
+    *>    }                                                                                     <* 
+    *> }                                                                                        <* 
+    *> o.cavg  = g_xmap.gcur;                                                                   <* 
+    *> DEBUG_INPT   yLOG_value   ("o.curr"    , o.curr);                                        <* 
+    *> DEBUG_INPT   yLOG_value   ("o.total"   , o.total);                                       <* 
+    *> /+---(feed source values)-------------+/                                                 <* 
+    *> sprintf (x_label , "%03d.%03d", o.curr, o.cavg);                                         <* 
+    *> sprintf (x_source, "%03dx, %03dy", o.avg [o.cavg].x_raw, o.avg [o.cavg].y_raw);        <* 
+    *> yVIKEYS_source (x_label, x_source);                                                      <* 
+    *> /+---(complete)-----------------------+/                                                 <* 
+    *> DEBUG_INPT   yLOG_exit    (__FUNCTION__);                                                <* 
+    *> return 0;                                                                                <*/
 }
 
 char         /*-> return coordinates for address -----[ ------ [gc.722.112.13]*/ /*-[01.0000.304.#]-*/ /*-[--.---.---.--]-*/
@@ -140,14 +140,14 @@ MAP_locator        (char *a_label, int *a_x, int *a_y, int *a_z)
    if (a_x != NULL)  *a_x = 0;
    if (a_y != NULL)  *a_y = 0;
    if (a_z != NULL)  *a_z = 0;
-   return 0;
+   return -1;
 }
 
 char         /*-> return address for coordinates -----[ ------ [gc.722.112.13]*/ /*-[01.0000.304.#]-*/ /*-[--.---.---.--]-*/
 MAP_addresser      (char *a_label, int a_x, int a_y, int a_z)
 {
    if (a_label != NULL)  strlcpy (a_label, "", LEN_LABEL);
-   return 0;
+   return -1;
 }
 
 
