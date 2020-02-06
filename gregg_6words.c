@@ -59,6 +59,8 @@ WORDS__new         (tWORDS **a_word, char *a_english, char *a_gregg)
    uchar       x_index     [LEN_LABEL] = "";
    /*---(begin)--------------------------*/
    DEBUG_CONF   yLOG_enter   (__FUNCTION__);
+   /*---(default)------------------------*/
+   if (a_word != NULL)  *a_word == NULL;
    /*---(defense)------------------------*/
    DEBUG_CONF   yLOG_point   ("a_english" , a_english);
    --rce;  if (a_english == NULL) {
@@ -141,16 +143,18 @@ WORDS__new         (tWORDS **a_word, char *a_english, char *a_gregg)
    /*---(drawn)-------------------------*/
    WORDS_drawn_fix (x_index, x_new->drawn);
    /*---(source)------------------------*/
-   x_new->ver       =  '·';
-   x_new->book      =  '·';
-   x_new->page      =  '0';
-   x_new->type      =  '·';
+   /*> x_new->ver       =  '·';                                                       <* 
+    *> x_new->book      =  '·';                                                       <* 
+    *> x_new->page      =  '0';                                                       <* 
+    *> x_new->type      =  '·';                                                       <*/
    /*---(complexity)--------------------*/
-   x_new->diff      =  '·';
-   x_new->simp      =  '·';
-   x_new->x3rd      =  '·';
-   x_new->x4th      =  '·';
-   x_new->top       =  '·';
+   /*> x_new->diff      =  '·';                                                       <* 
+    *> x_new->simp      =  '·';                                                       <* 
+    *> x_new->x3rd      =  '·';                                                       <* 
+    *> x_new->x4th      =  '·';                                                       <* 
+    *> x_new->top       =  '·';                                                       <*/
+   /*---(save word)----------------------*/
+   if (a_word != NULL)  *a_word = x_new;
    /*---(complete)-----------------------*/
    DEBUG_CONF   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -305,128 +309,180 @@ WORDS_dict_close   (void)
    return 0;
 }
 
-char
-WORDS_dict_source       (tWORDS *a_new, uchar *a_source)
-{
-   /*---(locals)-----------+-----+-----+-*/
-   char        rce         =  -10;
-   uchar       t           [LEN_LABEL] = "";
-   uchar       s           [LEN_LABEL] = "";
-   int         x_len       =    0;
-   uchar      *x_valid     = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789·";
-   /*---(header)-------------------------*/
-   DEBUG_CONF   yLOG_enter   (__FUNCTION__);
-   /*---(prepare)------------------------*/
-   s_ver  = s_book = s_type = '·';
-   s_page = 0;
-   /*---(defense)------------------------*/
-   DEBUG_CONF   yLOG_point   ("a_source"  , a_source);
-   --rce;  if (a_source == NULL) {
-      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   /*---(working copy)-------------------*/
-   DEBUG_CONF   yLOG_info    ("a_source"  , a_source);
-   strlcpy  (t, a_source , LEN_LABEL);
-   strltrim (t, ySTR_BOTH, LEN_LABEL);
-   x_len = strlen (t);
-   DEBUG_CONF   yLOG_point   ("x_len"     , x_len);
-   --rce;  if (x_len != 9) {
-      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   /*---(version)------------------------*/
-   s_ver  = t [0];
-   DEBUG_CONF   yLOG_char    ("s_ver"     , s_ver);
-   --rce;  if (s_ver  == 0 || strchr ("ospad·", s_ver ) == NULL) {
-      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   if (a_new != NULL)  a_new->ver = s_ver;
-   /*---(book)---------------------------*/
-   s_book = t [2];
-   DEBUG_CONF   yLOG_char    ("s_book"    , s_book);
-   --rce;  if (s_book == 0 || strchr (x_valid, s_book) == NULL) {
-      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   if (a_new != NULL)  a_new->book = s_book;
-   /*---(page)---------------------------*/
-   strlcpy (s, t + 4, 4);
-   s_page = atoi (s);
-   DEBUG_CONF   yLOG_value   ("s_page"    , s_page);
-   --rce;  if (s_page < 0) {
-      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   if (a_new != NULL)  a_new->page = s_page;
-   /*---(type)---------------------------*/
-   s_type = t [8];
-   DEBUG_CONF   yLOG_char    ("s_type"    , s_type);
-   --rce;  if (s_type == 0 || strchr ("bwp·", s_type) == NULL) {
-      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   if (a_new != NULL)  a_new->type = s_type;
-   /*---(complete)-----------------------*/
-   DEBUG_CONF   yLOG_exit    (__FUNCTION__);
-   return 0;
-}
+/*> char                                                                                              <* 
+ *> WORDS_dict_source       (tWORDS *a_new, uchar *a_source)                                          <* 
+ *> {                                                                                                 <* 
+ *>    /+---(locals)-----------+-----+-----+-+/                                                       <* 
+ *>    char        rce         =  -10;                                                                <* 
+ *>    uchar       t           [LEN_LABEL] = "";                                                      <* 
+ *>    uchar       s           [LEN_LABEL] = "";                                                      <* 
+ *>    int         x_len       =    0;                                                                <* 
+ *>    uchar      *x_valid     = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789·";   <* 
+ *>    /+---(header)-------------------------+/                                                       <* 
+ *>    DEBUG_CONF   yLOG_enter   (__FUNCTION__);                                                      <* 
+ *>    /+---(prepare)------------------------+/                                                       <* 
+ *>    s_ver  = s_book = s_type = '·';                                                                <* 
+ *>    s_page = 0;                                                                                    <* 
+ *>    /+---(defense)------------------------+/                                                       <* 
+ *>    DEBUG_CONF   yLOG_point   ("a_source"  , a_source);                                            <* 
+ *>    --rce;  if (a_source == NULL) {                                                                <* 
+ *>       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);                                              <* 
+ *>       return rce;                                                                                 <* 
+ *>    }                                                                                              <* 
+ *>    /+---(working copy)-------------------+/                                                       <* 
+ *>    DEBUG_CONF   yLOG_info    ("a_source"  , a_source);                                            <* 
+ *>    strlcpy  (t, a_source , LEN_LABEL);                                                            <* 
+ *>    strltrim (t, ySTR_BOTH, LEN_LABEL);                                                            <* 
+ *>    x_len = strlen (t);                                                                            <* 
+ *>    DEBUG_CONF   yLOG_point   ("x_len"     , x_len);                                               <* 
+ *>    --rce;  if (x_len != 9) {                                                                      <* 
+ *>       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);                                              <* 
+ *>       return rce;                                                                                 <* 
+ *>    }                                                                                              <* 
+ *>    /+---(version)------------------------+/                                                       <* 
+ *>    s_ver  = t [0];                                                                                <* 
+ *>    DEBUG_CONF   yLOG_char    ("s_ver"     , s_ver);                                               <* 
+ *>    --rce;  if (s_ver  == 0 || strchr ("ospad·", s_ver ) == NULL) {                                <* 
+ *>       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);                                              <* 
+ *>       return rce;                                                                                 <* 
+ *>    }                                                                                              <* 
+ *>    if (a_new != NULL)  a_new->ver = s_ver;                                                        <* 
+ *>    /+---(book)---------------------------+/                                                       <* 
+ *>    s_book = t [2];                                                                                <* 
+ *>    DEBUG_CONF   yLOG_char    ("s_book"    , s_book);                                              <* 
+ *>    --rce;  if (s_book == 0 || strchr (x_valid, s_book) == NULL) {                                 <* 
+ *>       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);                                              <* 
+ *>       return rce;                                                                                 <* 
+ *>    }                                                                                              <* 
+ *>    if (a_new != NULL)  a_new->book = s_book;                                                      <* 
+ *>    /+---(page)---------------------------+/                                                       <* 
+ *>    strlcpy (s, t + 4, 4);                                                                         <* 
+ *>    s_page = atoi (s);                                                                             <* 
+ *>    DEBUG_CONF   yLOG_value   ("s_page"    , s_page);                                              <* 
+ *>    --rce;  if (s_page < 0) {                                                                      <* 
+ *>       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);                                              <* 
+ *>       return rce;                                                                                 <* 
+ *>    }                                                                                              <* 
+ *>    if (a_new != NULL)  a_new->page = s_page;                                                      <* 
+ *>    /+---(type)---------------------------+/                                                       <* 
+ *>    s_type = t [8];                                                                                <* 
+ *>    DEBUG_CONF   yLOG_char    ("s_type"    , s_type);                                              <* 
+ *>    --rce;  if (s_type == 0 || strchr ("bwp·", s_type) == NULL) {                                  <* 
+ *>       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);                                              <* 
+ *>       return rce;                                                                                 <* 
+ *>    }                                                                                              <* 
+ *>    if (a_new != NULL)  a_new->type = s_type;                                                      <* 
+ *>    /+---(complete)-----------------------+/                                                       <* 
+ *>    DEBUG_CONF   yLOG_exit    (__FUNCTION__);                                                      <* 
+ *>    return 0;                                                                                      <* 
+ *> }                                                                                                 <*/
+
+/*> char                                                                              <* 
+ *> WORDS_dict_notes   (tWORDS *a_new, uchar *a_notes)                                <* 
+ *> {                                                                                 <* 
+ *>    /+---(locals)-----------+-----+-----+-+/                                       <* 
+ *>    char        rce         =  -10;                                                <* 
+ *>    uchar       t           [LEN_LABEL] = "";                                      <* 
+ *>    uchar       s           [LEN_LABEL] = "";                                      <* 
+ *>    int         x_len       =    0;                                                <* 
+ *>    /+---(header)-------------------------+/                                       <* 
+ *>    DEBUG_CONF   yLOG_enter   (__FUNCTION__);                                      <* 
+ *>    /+---(prepare)------------------------+/                                       <* 
+ *>    s_diff = s_simp = s_3rd  = s_4th  = s_top  = '·';                              <* 
+ *>    /+---(defense)------------------------+/                                       <* 
+ *>    DEBUG_CONF   yLOG_point   ("a_notes"   , a_notes);                             <* 
+ *>    --rce;  if (a_notes == NULL) {                                                 <* 
+ *>       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);                              <* 
+ *>       return rce;                                                                 <* 
+ *>    }                                                                              <* 
+ *>    /+---(working copy)-------------------+/                                       <* 
+ *>    DEBUG_CONF   yLOG_info    ("a_notes"   , a_notes);                             <* 
+ *>    strlcpy  (t, a_notes , LEN_LABEL);                                             <* 
+ *>    strltrim (t, ySTR_BOTH, LEN_LABEL);                                            <* 
+ *>    x_len = strlen (t);                                                            <* 
+ *>    DEBUG_CONF   yLOG_point   ("x_len"     , x_len);                               <* 
+ *>    --rce;  if (x_len != 9) {                                                      <* 
+ *>       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);                              <* 
+ *>       return rce;                                                                 <* 
+ *>    }                                                                              <* 
+ *>    /+---(difficulty)---------------------+/                                       <* 
+ *>    s_diff = t [0];                                                                <* 
+ *>    DEBUG_CONF   yLOG_char    ("s_diff"    , s_diff);                              <* 
+ *>    --rce;  if (s_diff  == 0 || strchr ("smhv·", s_diff ) == NULL) {               <* 
+ *>       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);                              <* 
+ *>       return rce;                                                                 <* 
+ *>    }                                                                              <* 
+ *>    if (a_new != NULL)  a_new->diff = s_diff;                                      <* 
+ *>    /+---(simplified)---------------------+/                                       <* 
+ *>    s_simp = t [2];                                                                <* 
+ *>    DEBUG_CONF   yLOG_char    ("s_simp"    , s_simp);                              <* 
+ *>    --rce;  if (s_simp  == 0 || strchr ("*+·-/" , s_simp ) == NULL) {              <* 
+ *>       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);                              <* 
+ *>       return rce;                                                                 <* 
+ *>    }                                                                              <* 
+ *>    if (a_new != NULL)  a_new->simp = s_simp;                                      <* 
+ *>    /+---(simplified)---------------------+/                                       <* 
+ *>    s_3rd  = t [4];                                                                <* 
+ *>    if (a_new != NULL)  a_new->x3rd  = s_3rd;                                      <* 
+ *>    DEBUG_CONF   yLOG_char    ("s_3rd"     , s_3rd);                               <* 
+ *>    s_4th  = t [6];                                                                <* 
+ *>    if (a_new != NULL)  a_new->x4th  = s_4th;                                      <* 
+ *>    DEBUG_CONF   yLOG_char    ("s_4th"     , s_4th);                               <* 
+ *>    s_top  = t [8];                                                                <* 
+ *>    if (a_new != NULL)  a_new->top  = s_top;                                       <* 
+ *>    DEBUG_CONF   yLOG_char    ("s_top"     , s_top);                               <* 
+ *>    /+---(complete)-----------------------+/                                       <* 
+ *>    DEBUG_CONF   yLOG_exit    (__FUNCTION__);                                      <* 
+ *>    return 0;                                                                      <* 
+ *> }                                                                                 <*/
 
 char
-WORDS_dict_notes   (tWORDS *a_new, uchar *a_notes)
+WORDS_dict_vary   (tWORDS *a_new, uchar *a_type, uchar *a_vary)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
-   uchar       t           [LEN_LABEL] = "";
-   uchar       s           [LEN_LABEL] = "";
-   int         x_len       =    0;
-   /*---(header)-------------------------*/
-   DEBUG_CONF   yLOG_enter   (__FUNCTION__);
-   /*---(prepare)------------------------*/
-   s_diff = s_simp = s_3rd  = s_4th  = s_top  = '·';
-   /*---(defense)------------------------*/
-   DEBUG_CONF   yLOG_point   ("a_notes"   , a_notes);
-   --rce;  if (a_notes == NULL) {
+   char        rc          =    0;
+   uchar       t           [LEN_HUND]  = "";
+   uchar       x_gregg     [LEN_HUND]  = "";
+   tWORDS     *x_other     = NULL;
+   uchar       x_check     [LEN_LABEL] = "";
+   uchar      *x_valids    = " ´ e a t d dd th tn tm ts df n m mm u k g o r l nk ng sh ch j z p b s f v pt bd ";
+   /*---(defenses)-----------------------*/
+   DEBUG_CONF   yLOG_point   ("a_new"     , a_new);
+   --rce;  if (a_new == NULL) {
       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   /*---(working copy)-------------------*/
-   DEBUG_CONF   yLOG_info    ("a_notes"   , a_notes);
-   strlcpy  (t, a_notes , LEN_LABEL);
+   DEBUG_CONF   yLOG_point   ("a_type"    , a_type);
+   --rce;  if (a_type == NULL) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_CONF   yLOG_info    ("a_type"    , a_type);
+   strlcpy  (t, a_type, LEN_LABEL);
    strltrim (t, ySTR_BOTH, LEN_LABEL);
-   x_len = strlen (t);
-   DEBUG_CONF   yLOG_point   ("x_len"     , x_len);
-   --rce;  if (x_len != 9) {
+   sprintf (x_check, " %s ", t);
+   --rce;  if (strstr (x_valids, x_check) == NULL) {
       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   /*---(difficulty)---------------------*/
-   s_diff = t [0];
-   DEBUG_CONF   yLOG_char    ("s_diff"    , s_diff);
-   --rce;  if (s_diff  == 0 || strchr ("smhv·", s_diff ) == NULL) {
+   DEBUG_CONF   yLOG_point   ("a_vary"    , a_vary);
+   --rce;  if (a_vary == NULL) {
       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   if (a_new != NULL)  a_new->diff = s_diff;
-   /*---(simplified)---------------------*/
-   s_simp = t [2];
-   DEBUG_CONF   yLOG_char    ("s_simp"    , s_simp);
-   --rce;  if (s_simp  == 0 || strchr ("*+·-/" , s_simp ) == NULL) {
+   DEBUG_CONF   yLOG_info    ("a_vary"    , a_vary);
+   /*---(build gregg)--------------------*/
+   sprintf (x_gregg, "%s·>·%s", a_new->gregg, t);
+   /*---(add word)-----------------------*/
+   strlcpy  (t, a_vary, LEN_LABEL);
+   strltrim (t, ySTR_BOTH, LEN_LABEL);
+   rc = WORDS__new (&x_other, t, x_gregg);
+   DEBUG_CONF   yLOG_value   ("new"       , rc);
+   --rce;  if (rc < 0) {
       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   if (a_new != NULL)  a_new->simp = s_simp;
-   /*---(simplified)---------------------*/
-   s_3rd  = t [4];
-   if (a_new != NULL)  a_new->x3rd  = s_3rd;
-   DEBUG_CONF   yLOG_char    ("s_3rd"     , s_3rd);
-   s_4th  = t [6];
-   if (a_new != NULL)  a_new->x4th  = s_4th;
-   DEBUG_CONF   yLOG_char    ("s_4th"     , s_4th);
-   s_top  = t [8];
-   if (a_new != NULL)  a_new->top  = s_top;
-   DEBUG_CONF   yLOG_char    ("s_top"     , s_top);
    /*---(complete)-----------------------*/
    DEBUG_CONF   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -441,9 +497,11 @@ WORDS_dict_parse   (uchar *a_recd)
    uchar       x_recd      [LEN_RECD]  = "";
    uchar      *x_english   = NULL;
    uchar      *x_gregg     = NULL;
-   uchar      *x_source    = NULL;
-   uchar      *x_notes     = NULL;
-   char       *q           = "";
+   /*> uchar      *x_source    = NULL;                                                <*/
+   /*> uchar      *x_notes     = NULL;                                                <*/
+   uchar      *x_type      = NULL;
+   uchar      *x_vary      = NULL;
+   char       *q           = ")";
    char       *r           = NULL;
    tWORDS     *x_new       = NULL;
    /*---(header)-------------------------*/
@@ -451,8 +509,8 @@ WORDS_dict_parse   (uchar *a_recd)
    /*---(prepare)------------------------*/
    strlcpy  (s_english, "", LEN_HUND);
    strlcpy  (s_gregg  , "", LEN_HUND);
-   WORDS_dict_source  (NULL, NULL);
-   WORDS_dict_notes   (NULL, NULL);
+   /*> WORDS_dict_source  (NULL, NULL);                                               <*/
+   /*> WORDS_dict_notes   (NULL, NULL);                                               <*/
    /*---(defense)------------------------*/
    DEBUG_CONF   yLOG_point   ("a_recd"    , a_recd);
    --rce;  if (a_recd == NULL) {
@@ -494,19 +552,33 @@ WORDS_dict_parse   (uchar *a_recd)
       return rce;
    }
    /*---(source)-------------------------*/
-   x_source  = strtok_r (NULL  , q, &r);
-   --rce;  if (x_source  == NULL) {
-      DEBUG_CONF   yLOG_exit    (__FUNCTION__);
-      return 0;
-   }
-   WORDS_dict_source (x_new, x_source);
+   /*> x_source  = strtok_r (NULL  , q, &r);                                          <* 
+    *> --rce;  if (x_source  == NULL) {                                               <* 
+    *>    DEBUG_CONF   yLOG_exit    (__FUNCTION__);                                   <* 
+    *>    return 0;                                                                   <* 
+    *> }                                                                              <* 
+    *> WORDS_dict_source (x_new, x_source);                                           <*/
    /*---(notes)--------------------------*/
-   x_notes   = strtok_r (NULL  , q, &r);
-   --rce;  if (x_notes   == NULL) {
-      DEBUG_CONF   yLOG_exit    (__FUNCTION__);
-      return 0;
+   /*> x_notes   = strtok_r (NULL  , q, &r);                                          <* 
+    *> --rce;  if (x_notes   == NULL) {                                               <* 
+    *>    DEBUG_CONF   yLOG_exit    (__FUNCTION__);                                   <* 
+    *>    return 0;                                                                   <* 
+    *> }                                                                              <* 
+    *> WORDS_dict_notes  (x_new, x_notes);                                            <*/
+   /*---(variations)---------------------*/
+   x_type  = strtok_r (NULL  , q, &r);
+   DEBUG_CONF   yLOG_point   ("x_type"    , x_type);
+   while (x_type != NULL) {
+      x_vary  = strtok_r (NULL  , q, &r);
+      DEBUG_CONF   yLOG_point   ("x_vary"    , x_vary);
+      if (x_vary == NULL) {
+         DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+         return rce;
+      }
+      WORDS_dict_vary    (x_new, x_type, x_vary);
+      x_type  = strtok_r (NULL  , q, &r);
+      DEBUG_CONF   yLOG_point   ("x_type"    , x_type);
    }
-   WORDS_dict_notes  (x_new, x_notes);
    /*---(complete)-----------------------*/
    DEBUG_CONF   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -639,7 +711,7 @@ WORDS_dict_list    (void)
    x_curr = e_hword;
    while (x_curr != NULL) {
       WORDS_drawn_show (x_curr->drawn, x_show);
-      printf ("%-4d %2d:%-20.20s %2d:%-20.20s %-20.20s\n", c, x_curr->e_len, x_curr->english, x_curr->g_len, x_curr->gregg, x_show);
+      printf ("%-4d %2d:%-25.25s %2d:%-25.25s %s\n", c, x_curr->e_len, x_curr->english, x_curr->g_len, x_curr->gregg, x_show);
       x_curr = x_curr->e_next;
       ++c;
    }
@@ -681,7 +753,7 @@ uchar  s_ae  [16] [16] [LEN_TERSE] = {
    /*   k  */ {"a"  ,"a"  ,"a"  ,"a"  ,"a"  ,"akm","a"  ,"ar" ,"a"  ,"-"  ,"a"  ,"a"  ,"a"  ,"a"  ,"-"   },
    /*   r  */ {"a"  ,"a"  ,"a"  ,"a"  ,"a"  ,"arm","a"  ,"a"  ,"a"  ,"-"  ,"a"  ,"a"  ,"a"  ,"a"  ,"-"   },
    /*  rd  */ {"a"  ,"a"  ,"a"  ,"a"  ,"a"  ,"aRm","a"  ,"a"  ,"a"  ,"-"  ,"a"  ,"a"  ,"a"  ,"a"  ,"-"   },
-   /*  or  */ {"a"  ,"a"  ,"a"  ,"a"  ,"a"  ,"arm","a"  ,"a"  ,"a"  ,"-"  ,"a"  ,"a"  ,"a"  ,"a"  ,"-"   },
+   /*> /+  or  +/ {"a"  ,"a"  ,"a"  ,"a"  ,"a"  ,"arm","a"  ,"a"  ,"a"  ,"-"  ,"a"  ,"a"  ,"a"  ,"a"  ,"-"   },   <*/
    /*           ----, d---, uth-, oth-, -df-, -m--, -k--, -r--, -rd-, -or-, -ng-, -ch-, -f--, -p--, -pt- */
    /*  ng  */ {"a"  ,"a"  ,"a"  ,"a"  ,"a"  ,"aNm","a"  ,"a"  ,"a"  ,"-"  ,"a"  ,"a"  ,"a"  ,"a"  ,"-"   },
    /*           ----, d---, uth-, oth-, -df-, -m--, -k--, -r--, -rd-, -or-, -ng-, -ch-, -f--, -p--, -pt- */
@@ -690,6 +762,24 @@ uchar  s_ae  [16] [16] [LEN_TERSE] = {
    /*   p  */ {"a"  ,"a"  ,"a"  ,"a"  ,"a"  ,"apm","a"  ,"a"  ,"a"  ,"-"  ,"a"  ,"a"  ,"a"  ,"a"  ,"-"   },
    /*  pt  */ {"-"  ,"-"  ,"-"  ,"-"  ,"-"  ,"-"  ,"-"  ,"-"  ,"-"  ,"-"  ,"-"  ,"-"  ,"-"  ,"-"  ,"-"   },
    /*           ----, d---, uth-, oth-, -df-, -m--, -k--, -r--, -rd-, -or-, -ng-, -ch-, -f--, -p--, -pt- */
+};
+
+uchar  s_ou   [16] [LEN_LABEL] = {
+   /*         xdTHDmkrRNjfpP"   */
+   /* -   */ "·798·983····8·",
+   /* d   */ "······8·······",
+   /* oth */ "··············",
+   /* uth */ "··············",
+   /* df  */ "··············",
+   /* m   */ "·····8········",
+   /* k   */ "··············",
+   /* r   */ "············8·",
+   /* rd  */ "··············",
+   /* ng  */ "··············",
+   /* ch  */ "··············",
+   /* f   */ "··············",
+   /* p   */ "·4·····4······",
+   /* pt  */ "··············",
 };
 
 char
@@ -724,6 +814,30 @@ WORDS_table_ae          (void)
    /*---(complete)-----------------------*/
    DEBUG_CONF   yLOG_exit    (__FUNCTION__);
 }
+
+
+/*> #define    CAT_D       1                                                          <* 
+ *> #define    CAT_UTH     2                                                          <* 
+ *> #define    CAT_OTH     3                                                          <* 
+ *> #define    CAT_DF      4                                                          <* 
+ *>                                                                                   <* 
+ *> #define    CAT_M       5                                                          <* 
+ *> #define    CAT_K       6                                                          <* 
+ *> #define    CAT_R       7                                                          <* 
+ *> #define    CAT_RD      8                                                          <* 
+ *> #define    CAT_OR      9                                                          <* 
+ *>                                                                                   <* 
+ *> #define    CAT_NG     10                                                          <* 
+ *>                                                                                   <* 
+ *> #define    CAT_CH     11                                                          <* 
+ *> #define    CAT_F      12                                                          <* 
+ *> #define    CAT_P      13                                                          <* 
+ *> #define    CAT_PT     14                                                          <* 
+ *>                                                                                   <* 
+ *> #define    CAT_A      20                                                          <* 
+ *> #define    CAT_E      21                                                          <* 
+ *> #define    CAT_O      22                                                          <* 
+ *> #define    CAT_U      23                                                          <*/
 
 char
 WORDS_drawn_fix         (uchar *a_index, short a_drawn [])
@@ -763,10 +877,10 @@ WORDS_drawn_fix         (uchar *a_index, short a_drawn [])
       DEBUG_CONF   yLOG_complex ("LOOP"      , "#%2d, prev %3d, curr %3d, next %3d", i, x_prev, x_curr, x_next);
       if (x_curr == 0)   break;
       /*---(adjust)----------------------*/
+      x_pcat   = g_loc [x_prev].lcat;
+      x_ncat   = g_loc [x_next].lcat;
       if (g_loc [x_curr].lcat == CAT_A || g_loc [x_curr].lcat == CAT_E) {
          DEBUG_CONF   yLOG_note    ("adjusting a/e vowels");
-         x_pcat   = g_loc [x_prev].lcat;
-         x_ncat   = g_loc [x_next].lcat;
          strlcpy (x_name, s_ae [x_pcat][x_ncat], LEN_TERSE);
          DEBUG_CONF   yLOG_complex ("table"     , "prev %2d, next %2d, %s", x_pcat, x_ncat, x_name);
          DEBUG_CONF   yLOG_complex ("p-less"    , "prev %2d, next %2d, %s", x_pcat-1, x_ncat, s_ae [x_pcat-1][x_ncat]);
@@ -777,6 +891,15 @@ WORDS_drawn_fix         (uchar *a_index, short a_drawn [])
          a_drawn [i] = n;
          if (g_loc [x_curr].lcat == CAT_E)   a_drawn [i] = -n;
          DEBUG_CONF   yLOG_complex ("update"    , "%-5.5s %4d %4d", x_name, n, a_drawn [i]);
+      } else if (g_loc [x_curr].lcat == CAT_O || g_loc [x_curr].lcat == CAT_U) {
+         sprintf (x_name, "o%c", s_ou [x_pcat][x_ncat]);
+         if (g_loc [x_curr].lcat == CAT_U)  x_name [0] = 'u';
+         n = REVERSE_find_letter (x_name, LTRS_ALL);
+         if (n <= 0) {
+            x_name [1] = '\0';
+            n = REVERSE_find_letter (x_name, LTRS_ALL);
+         }
+         a_drawn [i] = n;
       } else {
          DEBUG_CONF   yLOG_value   ("copy"      , a_index [i]);
          a_drawn [i] = a_index [i];

@@ -26,14 +26,31 @@
 
 #define     P_VERMAJOR  "5.--= generalization for broader use"
 #define     P_VERMINOR  "5.3 = update for use as coding example"
-#define     P_VERNUM    "5.3a"
-#define     P_VERTXT    "first round of updates to start this version"
+#define     P_VERNUM    "5.3b"
+#define     P_VERTXT    "dictionary words loading and basic point mapping/display working"
 
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
 #define     P_REMINDER  "there are many better options, but i *own* every byte of this one"
 
 /*===[[ END_HEADER ]]=========================================================*/
+
+
+
+/*
+ *  some simplifications to back away from perfect transcription...
+ *     both 'i', 'ae' can be mostly replaced with just 'a' with few overlaps
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ */
 
 
 
@@ -281,9 +298,24 @@ struct cWIN {
 
 #define     GREGG_WACOM        64.0
 
+#define     RUN_NORMAL     'n'
+#define     RUN_ENGLISH    'e'
+#define     RUN_GREGG      'g'
+#define     RUN_CONVERT    'c'
+#define     RUN_EXACT      'x'
+#define     RUN_REVERSE    'r'
+#define     RUN_WORDS      'w'
+
+#define     RUN_ALL        "negcxrw"
+#define     RUN_WRITING    "eg"
+
+
+
 /*---(struct.re)--------+-----------+-*//*-+----------------------------------*/
 typedef     struct      cACCESSOR   tACCESSOR;
 struct cACCESSOR {
+   /*---(mode)-----------------*/
+   char        run_mode;
    /*---(reporting)------------*/
    char        rptg_touch;
    char        rptg_raw;
@@ -463,21 +495,20 @@ extern tCOMBOS combos[MAX_COMBOS];
 #define    CAT_K       6
 #define    CAT_R       7
 #define    CAT_RD      8
-#define    CAT_OR      9
 
-#define    CAT_NG     10
+#define    CAT_NG      9
 
-#define    CAT_CH     11
-#define    CAT_F      12
-#define    CAT_P      13
-#define    CAT_PT     14
+#define    CAT_CH     10
+#define    CAT_F      11
+#define    CAT_P      12
+#define    CAT_PT     13
 
 #define    CAT_A      20
 #define    CAT_E      21
 #define    CAT_O      22
 #define    CAT_U      23
 
-#define    CAT_ALL    "xdTHDmkrRONjfpP"
+#define    CAT_ALL    "xdTHDmkrRNjfpP"
 
 
 typedef struct cCATS tCATS;
@@ -700,23 +731,23 @@ struct cWORDS {
    llong       g_key;
    short       drawn       [LEN_LABEL];     /* gregg as drawn                 */
    /*---(source)---------------*/
-   uchar       ver;
-   uchar       book;
-   short       page;
-   uchar       type;
+   /*> uchar       ver;                                                               <* 
+    *> uchar       book;                                                              <* 
+    *> short       page;                                                              <* 
+    *> uchar       type;                                                              <*/
    /*---(difficulty)-----------*/
-   uchar       diff;
-   uchar       simp;
-   uchar       x3rd;
-   uchar       x4th;
-   uchar       top;
+   /*> uchar       diff;                                                              <* 
+    *> uchar       simp;                                                              <* 
+    *> uchar       x3rd;                                                              <* 
+    *> uchar       x4th;                                                              <* 
+    *> uchar       top;                                                               <*/
    /*---(other)----------------*/
-   int         num;
-   char        version;                     /* version of gregg shorthand     */
-   char        source;                      /* type of source text            */
-   tWORDS     *nextg;
-   tWORDS     *nexte;
-   int         count;
+   /*> int         num;                                                                <* 
+    *> char        version;                     /+ version of gregg shorthand     +/   <* 
+    *> char        source;                      /+ type of source text            +/   <* 
+    *> tWORDS     *nextg;                                                              <* 
+    *> tWORDS     *nexte;                                                              <* 
+    *> int         count;                                                              <*/
    /*---(btree)----------------*/
    tWORDS     *e_prev;
    tWORDS     *e_next;
@@ -867,7 +898,8 @@ char        RAW_equalize            (void);
 char*       RAW__unit               (char *a_question, int a_num);
 
 /*---(base)-----------------*/
-char       BASE_filter          (void);
+char       BASE_filter             (void);
+char       BAS_map_update          (tMAPPED *a_map, int a_ycur, int a_ynew);
 
 
 char       KEY_add           (int, char, char);
@@ -892,8 +924,8 @@ char       CIRCLE_driver     (void);
 
 /*345678901-12345678901-12345678901-12345678901-12345678901-12345678901-123456*/
 char        WORDS__new              (tWORDS **a_word, char *a_english, char *a_gregg);
-char        WORDS_dict_source       (tWORDS *a_new, uchar *a_source);
-char        WORDS_dict_notes        (tWORDS *a_new, uchar *a_notes);
+/*> char        WORDS_dict_source       (tWORDS *a_new, uchar *a_source);             <*/
+/*> char        WORDS_dict_notes        (tWORDS *a_new, uchar *a_notes);              <*/
 char        WORDS_dict_parse        (uchar *a_recd);
 char        WORDS_import            (void);
 char        WORDS_dict_list         (void);
@@ -929,6 +961,7 @@ char        MAP_mapper           (char  a_req);
 char        MAP_locator          (char *a_label, int *a_x, int *a_y, int *a_z);
 char        MAP_addresser        (char *a_label, int a_x, int a_y, int a_z);
 char        USER_words           (char *a_words);
+char        USER_load            (char *a_words);
 char        USER_guide           (char *a_guide);
 char        USER_init            (void);
 char        USER_quit            (void);
@@ -947,6 +980,7 @@ char        REVERSE_out_touch       (int x, int y);
 char        REVERSE_out_append      (int x, int y);
 char        REVERSE_out_lift        (int x, int y);
 char        REVERSE_out_done        (void);
+char        REVERSE_out_load        (void);
 /*---(shapes)---------------*/
 char        REVERSE_line            (char a_type, char a_skip);
 char        REVERSE_circle          (char a_type, char a_skip);
@@ -956,14 +990,15 @@ char        REVERSE_teardrop        (char a_type, char a_skip);
 char        REVERSE_dot             (char a_type, char a_skip);
 char        REVERSE_space           (char a_type, char a_skip);
 char        REVERSE_draw_exit       (float x_beg, float y_beg, float x_end, float y_end, char a_type, char a_skip);
-/*---(outlines)-------------*/
-char        REVERSE_outline         (uchar *a_outline, char a_type, char a_skip);
-char        REVERSE_text            (uchar *a_text, char a_type, char a_skip, char a_reset);
-char        REVERSE_page            (uchar *a_text, char a_type, char a_skip, char a_reset);
+/*---(by_gregg)-------------*/
+char        REVERSE_gregg_word      (uchar *a_outline, char a_type, char a_skip);
+char        REVERSE_gregg_text      (uchar *a_text, char a_type, char a_skip, char a_reset);
 /*---(by_english)-----------*/
 char        REVERSE_english_word    (uchar *a_word, char a_type, char a_skip);
 char        REVERSE_english_text    (uchar *a_text, char a_type, char a_skip, char a_reset);
-char        REVERSE_english_page    (uchar *a_text, char a_type, char a_skip, char a_reset);
+/*---(output)---------------*/
+char        REVERSE_page_beg        (void);
+char        REVERSE_page_end        (void);
 /*---(reporting)------------*/
 char        REVERSE_report          (void);
 /*---(unit_test)------------*/
@@ -987,6 +1022,11 @@ char        BTREE_by_gregg          (tWORDS **a_found, char *a_word);
 char*       BTREE__unit             (char *a_question, int n);
 /*---(done)-----------------*/
 
+char        STDIN_handler           (void);
+
+
+
+char        YVIKEYS_map_update      (char a_req);
 
 #endif
 /*============================----(source-end)----============================*/

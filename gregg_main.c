@@ -26,8 +26,37 @@ main               (int argc, char *argv[])
       PROG_end ();
       return -1;
    }
-   REVERSE_english_page ("the initiate ", SHAPE_DRAW, 1, 'y');
+   /*---(header)-------------------------*/
+   DEBUG_TOPS   yLOG_enter    (__FUNCTION__);
+   switch (my.run_mode) {
+   case RUN_NORMAL  :
+      rc = yVIKEYS_main ("500us", "10ms", TOUCH_read ());
+      break;
+   case RUN_CONVERT : case RUN_EXACT   : case RUN_REVERSE :
+   case RUN_ENGLISH : case RUN_GREGG   :
+      rc = STDIN_handler ();
+      break;
+   case RUN_WORDS   :
+      WORDS_dict_list ();
+      break;
+   }
+   DEBUG_TOPS   yLOG_exit     (__FUNCTION__);
+   /*---(wrapup)-------------------------*/
+   rc = PROG_finish ();
+   rc = PROG_end    ();
+   /*---(complete)-----------------------*/
+   return rc;
 
+
+   /*> REVERSE_english_page ("the initiate ", SHAPE_DRAW, 1, 'y');                    <*/
+
+   /*> strlcpy  (t, ""                                      , LEN_HUGE);              <* 
+    *> strlcat  (t, "o ox·r ok·g k·o·k r·ok·k "             , LEN_HUGE);              <* 
+    *> strlcat  (t, "od·d t·o t·od·d "                      , LEN_HUGE);              <* 
+    *> strlcat  (t, "ok·k r·ok·g m·ok·k "                   , LEN_HUGE);              <* 
+    *> strlcat  (t, "k·om·m m·ok·m r·ok·b "                 , LEN_HUGE);              <* 
+    *> strlcat  (t, "ok·tn oh·nt tn·ox nt·ox "              , LEN_HUGE);              <* 
+    *> REVERSE_page    (t, SHAPE_DRAW, 1, 'y');                                       <*/
    /*---(m)------------------------------*/
    /*> strlcpy  (t, ""                                      , LEN_HUGE);              <* 
     *> strlcat  (t, "l·g·l r·k·r "                          , LEN_HUGE);              <* 
@@ -109,9 +138,6 @@ main               (int argc, char *argv[])
    /*---(for timer)------------------------*/
    /*> x_dur.tv_sec    = 0;                                                           <* 
     *> x_dur.tv_nsec   = 0.5 * 1000000;                                               <*/
-   /*---(header)-------------------------*/
-   DEBUG_TOPS   yLOG_enter    (__FUNCTION__);
-   rc = yVIKEYS_main ("500us", "10ms", TOUCH_read ());
    /*> while (1) {                                                                        <* 
     *>    x_key = 0;                                                                      <* 
     *>    if (XPending(DISP)) {                                                           <* 
@@ -135,7 +161,6 @@ main               (int argc, char *argv[])
     *>    /+---(sleeping)--------------------+/                                           <* 
     *>    nanosleep    (&x_dur, NULL);                                                    <* 
     *> }                                                                                  <*/
-   DEBUG_TOPS   yLOG_exit     (__FUNCTION__);
    /*---(wrapup)-------------------------*/
    rc = PROG_finish ();
    rc = PROG_end    ();

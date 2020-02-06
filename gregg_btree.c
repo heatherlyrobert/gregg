@@ -109,7 +109,7 @@ BTREE_gregg2key         (uchar *a_word, uchar *a_index)
    uchar      *q           = "·";
    char       *r           = NULL;
    int         x_len       =    0;
-   uchar      *x_valid     = "abcdefghijklmnopqrstuvwxyz>";
+   uchar      *x_valid     = "abcdefghijklmnopqrstuvwxyz>´";
    int         i           =    0;
    int         n           =   -1;
    char        c           =    0;

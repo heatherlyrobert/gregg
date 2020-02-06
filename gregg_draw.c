@@ -197,7 +197,9 @@ DRAW_primary         (float a_mag)
    /*> REVERSE_outline ("ap·b·r"                 , SHAPE_DRAW, 1);                    <*/
    /*> REVERSE_outline ("ar·l·g·lg"                , SHAPE_DRAW, 1);                 <*/
    /*> REVERSE_text    ("m·emd·d·edm·m m·amj·sh·ajm·n"    , SHAPE_DRAW, 1, 'y');      <*/
-   REVERSE_text    ("r·o2·b sh·t·nd"                        , SHAPE_DRAW, 1, 'y');
+   /*> REVERSE_text    ("r·o2·b sh·t·nd"                        , SHAPE_DRAW, 1, 'y');   <*/
+   /*> REVERSE_english_text ("rob shorthand"     , SHAPE_DRAW, 1, 'y');               <*/
+   REVERSE_english_text (my.words, SHAPE_DRAW, 1, 'y');
    if (my.touch != 'y') {
       /*> DRAW_info_counts ();                                                        <*/
       /*> DRAW_info_base   ();                                                        <*/
@@ -220,6 +222,8 @@ DRAW_primary         (float a_mag)
        *>    WORDS_result ();                                                         <* 
        *> } glPopMatrix   ();                                                         <*/
    }
+   LAYER_base ();
+   LAYER_curr ();
    /*---(complete)-----------------------*/
    return;
 }
@@ -595,6 +599,7 @@ LAYER_base          (void)
       else                            glPointSize (2.0);
       glBegin     (GL_POINTS); {
          glVertex3f( o.avg[i].x_pos, o.avg[i].y_pos, z);
+         /*> glVertex3f( o.avg [i].x_pos + 125, o.avg [i].y_pos + 225, z);            <*/
       } glEnd();
       /*---(draw the S extension)--------*/
       if (o.avg [i].type == POINT_START) {

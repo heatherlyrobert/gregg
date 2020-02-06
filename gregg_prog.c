@@ -48,6 +48,7 @@ PROG_init          (void)
    strcpy (win.face_pretty, "comfortaa");
    strcpy (win.face_fixed, "hack");
    /*---(reporting flags)-------------*/
+   my.run_mode     = RUN_NORMAL;
    my.dict         = 'y';
    my.rptg_touch   = '-';
    my.rptg_raw     = '-';
@@ -66,7 +67,6 @@ PROG_init          (void)
    strlcpy (my.guide, "", LEN_RECD);
    /*---(setup vikeys)----------------*/
    yVIKEYS_init  (MODE_MAP);
-   USER_init     ();
    /*---(complete)--------------------*/
    DEBUG_TOPS   yLOG_exit     (__FUNCTION__);
    return 0;
@@ -83,15 +83,21 @@ PROG_args          (int argc, char *argv[])
       a = argv[i];
       if (a[0] == '@')  continue;
       DEBUG_ARGS  yLOG_info    ("cli arg", a);
-      if      (strncmp(a, "--rptg-touch"        , 20) == 0)   my.rptg_touch   = 'y';
-      else if (strncmp(a, "--rptg-raw"          , 20) == 0)   my.rptg_raw     = 'y';
-      else if (strncmp(a, "--rptg-base"         , 20) == 0)   my.rptg_base    = 'y';
-      else if (strncmp(a, "--rptg-key"          , 20) == 0)   my.rptg_key     = 'y';
-      else if (strncmp(a, "--rptg-dict"         , 20) == 0)   my.rptg_dict    = 'y';
-      else if (strncmp(a, "--rptg-letter"       , 20) == 0)   my.rptg_letter  = 'y';
-      else if (strncmp(a, "--show-control"      , 20) == 0)   my.show_control = 'y';
-      else if (strncmp(a, "--show-player"       , 20) == 0)   my.show_player  = 'y';
-      else if (strncmp(a, "--show-sample"       , 20) == 0)   my.show_sample  = 'y';
+      if      (strcmp (a, "--rptg-touch"        ) == 0)   my.rptg_touch   = 'y';
+      else if (strcmp (a, "--rptg-raw"          ) == 0)   my.rptg_raw     = 'y';
+      else if (strcmp (a, "--rptg-base"         ) == 0)   my.rptg_base    = 'y';
+      else if (strcmp (a, "--rptg-key"          ) == 0)   my.rptg_key     = 'y';
+      else if (strcmp (a, "--rptg-dict"         ) == 0)   my.rptg_dict    = 'y';
+      else if (strcmp (a, "--rptg-letter"       ) == 0)   my.rptg_letter  = 'y';
+      else if (strcmp (a, "--show-control"      ) == 0)   my.show_control = 'y';
+      else if (strcmp (a, "--show-player"       ) == 0)   my.show_player  = 'y';
+      else if (strcmp (a, "--show-sample"       ) == 0)   my.show_sample  = 'y';
+      else if (strcmp (a, "--english"           ) == 0)   my.run_mode     = RUN_ENGLISH;
+      else if (strcmp (a, "--gregg"             ) == 0)   my.run_mode     = RUN_GREGG;
+      else if (strcmp (a, "--convert"           ) == 0)   my.run_mode     = RUN_CONVERT;
+      else if (strcmp (a, "--exact"             ) == 0)   my.run_mode     = RUN_EXACT;
+      else if (strcmp (a, "--reverse"           ) == 0)   my.run_mode     = RUN_REVERSE;
+      else if (strcmp (a, "--words"             ) == 0)   my.run_mode     = RUN_WORDS;
       /*> else if (strncmp(a, "@x", 5) == 0)  debug.top = debug.prep        = 'y';    <* 
        *> else if (strncmp(a, "@i", 5) == 0)  debug.top = debug.input       = 'y';    <* 
        *> else if (strncmp(a, "@o", 5) == 0)  debug.top = debug.output      = 'y';    <* 
@@ -152,14 +158,14 @@ PROG_final (void)
    yVIKEYS_cmds_add    ('e', "clip"        , ""    , "Cs"   , POINT_clipboard      , "save point list to the clipboard");
    yVIKEYS_cmds_add    ('e', "gyges"       , ""    , "Cs"   , POINT_clipboard      , "save point list to the clipboard");
    yVIKEYS_cmds_add    ('f', "write"       , ""    , ""     , OUT_append           , "save outline to stroke file");
+   USER_init     ();
    /*---(final program)------------------*/
    OUT_init      ();
-   FILE_rename   ("");
+   /*> FILE_rename   ("");                                                            <*/
    if (out_start > 0) o.curr = out_start;
    /*---(key mapping)--------------------*/
-   yVIKEYS_map_config  (YVIKEYS_RIGHT, MAP_mapper, MAP_locator, MAP_addresser);
+   yVIKEYS_map_config  (YVIKEYS_RIGHT, YVIKEYS_map_update, MAP_locator, MAP_addresser);
    REVERSE_report ();
-   /*> WORDS_dict_list ();                                                            <*/
    /*---(complete)-----------------------*/
    DEBUG_TOPS   yLOG_exit     (__FUNCTION__);
    return 0;

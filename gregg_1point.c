@@ -178,8 +178,8 @@ POINT_seq_head     (char a_type, tPOINT *p, int c, int a_xpad, int a_ypad)
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
    char        x_prev      =  '-';
-   char        x_xpad      =    0;
-   char        x_ypad      =    0;
+   short       x_xpad      =    0;
+   short       x_ypad      =    0;
    /*---(quick defense)------------------*/
    if (c == 0)   return 0;
    /*---(prepare)------------------------*/
@@ -209,8 +209,8 @@ POINT_seq_normal   (char a_type, tPOINT *p, int c, int a_xpad, int a_ypad)
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
    char        x_prev      =  '-';
-   char        x_xpad      =    0;
-   char        x_ypad      =    0;
+   short       x_xpad      =    0;
+   short       x_ypad      =    0;
    char        x_dup       =    0;
    /*---(quick defense)------------------*/
    if (c == 0)   return 0;
@@ -243,8 +243,8 @@ POINT_seq_tail     (char a_type, tPOINT *p, int c, int a_xpad, int a_ypad)
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
    char        x_prev      =  '-';
-   char        x_xpad      =    0;
-   char        x_ypad      =    0;
+   short       x_xpad      =    0;
+   short       x_ypad      =    0;
    /*---(quick defense)------------------*/
    if (c == 0)   return 0;
    /*---(prepare)------------------------*/
@@ -271,8 +271,8 @@ POINT_seq_finish   (char a_type, tPOINT *p, int c, int a_xpad, int a_ypad)
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
    char        x_prev      =  '-';
-   char        x_xpad      =    0;
-   char        x_ypad      =    0;
+   short       x_xpad      =    0;
+   short       x_ypad      =    0;
    /*---(quick defense)------------------*/
    if (c == 0)   return 0;
    /*---(prepare)------------------------*/
@@ -322,12 +322,14 @@ POINT_position     (tPOINT *a_curr)
       return rce;
    }
    /*---(xpos)-----------------------------*/
-   a_curr->x_rel = a_curr->x_raw / (float) my.x_scale;
-   a_curr->x_pos = my.x_min + (a_curr->x_rel * my.x_wide);
+   /*> a_curr->x_rel = a_curr->x_raw / (float) my.x_scale;                            <* 
+    *> a_curr->x_pos = my.x_min + (a_curr->x_rel * my.x_wide);                        <*/
+   a_curr->x_pos = a_curr->x_raw / my.ratio;
    DEBUG_CALC   yLOG_sint    (a_curr->x_pos);
    /*---(ypos)-----------------------------*/
-   a_curr->y_rel = a_curr->y_raw / (float) my.y_scale;
-   a_curr->y_pos = my.y_min + (a_curr->y_rel * my.y_tall);
+   /*> a_curr->y_rel = a_curr->y_raw / (float) my.y_scale;                            <* 
+    *> a_curr->y_pos = my.y_min + (a_curr->y_rel * my.y_tall);                        <*/
+   a_curr->y_pos = a_curr->y_raw / my.ratio;
    DEBUG_CALC   yLOG_sint    (a_curr->y_pos);
    /*---(complete)-------------------------*/
    DEBUG_CALC   yLOG_sexit   (__FUNCTION__);

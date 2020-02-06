@@ -6,14 +6,77 @@
 /*====================------------------------------------====================*/
 /*===----                     mapping for map mode                     ----===*/
 /*====================------------------------------------====================*/
+static void  o___MAPPING_________o () { return; }
+
+char         /*-> clear current position -------------[ ------ [fe.G67.55#.92]*/
+YVIKEYS_map_init        (tMAPPED *a_map)
+{
+   /*---(clear)--------------------------*/
+   a_map->ubeg = a_map->ucur = a_map->uend  = a_map->ulen  = a_map->utend = 0;
+   a_map->gbeg = a_map->gcur = a_map->gend = 0;
+   /*---(complete)-----------------------*/
+   return 0;
+}
+
+char         /*-> clear map entries ------------------[ ------ [fe.G67.55#.92]*/
+YVIKEYS_map_clear       (tMAPPED *a_map)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   int         i           =    0;
+   /*---(map table)----------------------*/
+   for (i = 0; i <  LEN_HUGE; ++i)  a_map->map  [i] =  YVIKEYS_EMPTY;
+   /*---(grid values)--------------------*/
+   a_map->gmin = a_map->gamin = a_map->glmin = a_map->gprev = -1;
+   a_map->gmax = a_map->gamax = a_map->glmax = a_map->gnext = -1;
+   /*---(used table)---------------------*/
+   for (i = 0; i <  LEN_HUGE; ++i)  a_map->used [i] = '\0';
+   /*---(complete)-----------------------*/
+   return 0;
+}
+
+char         /*-> handle map updates -----------------[ ------ [fe.G67.55#.92]*/
+YVIKEYS_map_update      (char a_req)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rc          =    0;
+   /*---(header)-------------------------*/
+   DEBUG_MAP    yLOG_enter   (__FUNCTION__);
+   /*---(initialize)---------------------*/
+   if (a_req == YVIKEYS_INIT) {
+      YVIKEYS_map_init (&g_bmap);  YVIKEYS_map_clear (&g_bmap);
+      YVIKEYS_map_init (&g_xmap);
+      YVIKEYS_map_init (&g_ymap);
+      YVIKEYS_map_init (&g_zmap);  YVIKEYS_map_clear (&g_zmap);
+   }
+   /*---(update points/x)----------------*/
+   if (rc == 0)  rc = YVIKEYS_map_clear (&g_xmap);
+   if (rc == 0)  rc = BAS_map_update    (&g_xmap, o.curr, g_ymap.gcur);
+   /*> if (rc == 0)  rc = NODE_map_used     ( x_map, x_node,  x_max,  x_curr, a_type);   <*/
+   /*> if (rc == 0)  rc = NODE_map_absolute ( x_map,  x_tab,  x_max, a_type);         <*/
+   /*> if (rc == 0)  rc = NODE_map_local    ( x_map,  x_max, x_curr, x_node, a_type);   <*/
+   /*> if (rc == 0)  rc = NODE_map_ends     ( x_map->used, x_curr, &(x_map->gprev), &(x_map->gnext));   <*/
+   /*---(update outlines/y)--------------*/
+   if (rc == 0)  rc = YVIKEYS_map_clear (&g_ymap);
+   /*---(complete)-----------------------*/
+   DEBUG_MAP    yLOG_exit    (__FUNCTION__);
+   return rc;
+}
+
+
+
+
+/*====================------------------------------------====================*/
+/*===----                     mapping for map mode                     ----===*/
+/*====================------------------------------------====================*/
 static void  o___MAPPER__________o () { return; }
 
 char         /*-> when changing outline --------------[ ------ [fe.G67.55#.92]*/ /*-[01.0000.018.!]-*/ /*-[--.---.---.--]-*/
 MAP__xmajor           (void)
 {
-   /*---(locals)-----------+-----------+-*/
-   int         i           =    0;
-   /*> /+---(update x)-----------------------+/                                       <* 
+   /*> /+---(locals)-----------+-----------+-+/                                       <* 
+    *> int         i           =    0;                                                <* 
+    *> /+---(update x)-----------------------+/                                       <* 
     *> for (i = 0; i < o.navg; ++i) {                                                 <* 
     *>    g_xmap.map [i] = i;                                                         <* 
     *> }                                                                              <* 
@@ -26,9 +89,9 @@ MAP__xmajor           (void)
     *> g_xmap.end   = g_xmap.len   = g_xmap.tend  = o.navg;                           <* 
     *> /+---(units)--------------------------+/                                       <* 
     *> g_xmap.gbeg  = g_xmap.gcur  = 0;                                               <* 
-    *> g_xmap.gend  = o.navg;                                                         <*/
-   /*---(complete)-----------------------*/
-   return 0;
+    *> g_xmap.gend  = o.navg;                                                         <* 
+    *> /+---(complete)-----------------------+/                                       <* 
+    *> return 0;                                                                      <*/
 }
 
 char         /*-> when moving between points ---------[ ------ [fe.G67.55#.92]*/ /*-[01.0000.018.!]-*/ /*-[--.---.---.--]-*/
@@ -162,7 +225,16 @@ char
 USER_words           (char *a_words)
 {
    strlcpy (my.words, a_words, LEN_DESC);
-   DRAW_back ();
+   return 0;
+}
+
+char
+USER_load            (char *a_words)
+{
+   DEBUG_USER   yLOG_enter   (__FUNCTION__);
+   REVERSE_english_text (a_words, SHAPE_LOAD, 1, 'y');
+   REVERSE_out_load     ();
+   DEBUG_USER   yLOG_exit    (__FUNCTION__);
    return 0;
 }
 
@@ -192,8 +264,9 @@ USER_init            (void)
    rc = yVIKEYS_cmds_add ('f', "quitall"     , "qa"  , ""     , USER_quit            , "quit all files (if no changes), and exit"                    );
    rc = yVIKEYS_cmds_add ('f', "writequit"   , "wq"  , ""     , USER_writequit       , ""                                                            );
    rc = yVIKEYS_cmds_add ('f', "writequitall", "wqa" , ""     , USER_writequit       , ""                                                            );
-   rc = yVIKEYS_cmds_add ('f', "word"        , ""    , "s"    , USER_words           , ""                                                            );
+   rc = yVIKEYS_cmds_add ('f', "word"        , ""    , "a"    , USER_words           , ""                                                            );
    rc = yVIKEYS_cmds_add ('f', "guide"       , ""    , "s"    , USER_guide           , ""                                                            );
+   rc = yVIKEYS_cmds_add ('f', "load"        , ""    , "a"    , USER_load            , ""                                                            );
    /*---(complete)-----------------------*/
    DEBUG_USER   yLOG_exit    (__FUNCTION__);
    return 0;

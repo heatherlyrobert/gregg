@@ -269,16 +269,16 @@ KEY__extend        (void)
       if (o.key[i    ].type == POINT_HEAD) {
          pt  = o.key[i    ].p_bas - 1;
          rad = o.key[i + 1].rads;
-         o.bas[pt].x_raw  = o.avg[pt].x_raw  = o.key[i].x_raw - (20 * my.ratio * cos (rad)) ;
-         o.bas[pt].y_raw  = o.avg[pt].y_raw  = o.key[i].y_raw - (20 * my.ratio * sin (rad)) ;
+         o.bas[pt].x_raw  = o.avg[pt].x_raw  = o.key[i].x_raw - (15 * my.ratio * cos (rad)) ;
+         o.bas[pt].y_raw  = o.avg[pt].y_raw  = o.key[i].y_raw - (15 * my.ratio * sin (rad)) ;
          DEBUG_CRIT  printf("   extended beg %4d to %4dx, %4dy for circle detection\n", pt, o.bas[pt].x_raw, o.bas[pt].y_raw);
       }
       /*---(ending)-------------------------*/
       if (o.key[i + 1].type == POINT_HEAD || i + 1 == o.nkey) {
          pt  = o.key[i    ].p_bas + 1;
          rad = o.key[i    ].rads;
-         o.bas[pt].x_raw  = o.avg[pt].x_raw  = o.key[i].x_raw + (20 * my.ratio * cos (rad)) ;
-         o.bas[pt].y_raw  = o.avg[pt].y_raw  = o.key[i].y_raw + (20 * my.ratio * sin (rad)) ;
+         o.bas[pt].x_raw  = o.avg[pt].x_raw  = o.key[i].x_raw + (15 * my.ratio * cos (rad)) ;
+         o.bas[pt].y_raw  = o.avg[pt].y_raw  = o.key[i].y_raw + (15 * my.ratio * sin (rad)) ;
          DEBUG_RAW   printf("   extended end %4d to %4dx, %4dy for circle detection\n", pt, o.bas[pt].x_raw, o.bas[pt].y_raw);
       }
    }

@@ -22,8 +22,8 @@ int           /*----: check distance to potential point ----------------------*/
 BASE__distance     (int n, int a_off)
 {
    float     xd, yd;
-   xd   = fabs (o.raw [n].x_pos - o.bas [o.nbas - a_off].x_pos);
-   yd   = fabs (o.raw [n].y_pos - o.bas [o.nbas - a_off].y_pos);
+   xd   = fabs (o.raw [n].x_pos - o.bas [o.nbas + a_off].x_pos);
+   yd   = fabs (o.raw [n].y_pos - o.bas [o.nbas + a_off].y_pos);
    return sqrt ((xd * xd) + (yd * yd));
 }
 
@@ -56,6 +56,7 @@ BASE__point          (int n)
       d = BASE__distance (n, -1);
       DEBUG_RAW    yLOG_sdouble (d);
       if (d <= 3.0) {
+         DEBUG_RAW    yLOG_snote   ("too close to last point");
          DEBUG_RAW    yLOG_sexitr  (__FUNCTION__, rce);
          return rce;
       }
@@ -64,6 +65,8 @@ BASE__point          (int n)
    DEBUG_RAW    yLOG_sint    (o.nbas);
    DEBUG_RAW    yLOG_sint    (o.raw [n].x_raw);
    DEBUG_RAW    yLOG_sint    (o.raw [n].y_raw);
+   DEBUG_RAW    yLOG_sint    (o.raw [n].x_pos);
+   DEBUG_RAW    yLOG_sint    (o.raw [n].y_pos);
    /*---(head)----------------------------*/
    o.bas [o.nbas].series  = POINTS_BAS;
    o.avg [o.navg].series  = POINTS_AVG;
@@ -143,8 +146,8 @@ BASE__extend         (void)
          x = o.bas [i + 1].x_raw;
          y = o.bas [i + 1].y_raw;
          /*---(extend start)------------*/
-         o.bas [i].x_raw  = o.avg [i].x_raw  = o.bas [i + 1].x_raw - (10 * my.ratio * cos (x_rads)) ;
-         o.bas [i].y_raw  = o.avg [i].y_raw  = o.bas [i + 1].y_raw - (10 * my.ratio * sin (x_rads)) ;
+         o.bas [i].x_raw  = o.avg [i].x_raw  = o.bas [i + 1].x_raw - (15 * my.ratio * cos (x_rads)) ;
+         o.bas [i].y_raw  = o.avg [i].y_raw  = o.bas [i + 1].y_raw - (15 * my.ratio * sin (x_rads)) ;
          DEBUG_AVG   yLOG_complex ("new beg"   , "%8.3f, from %4dx %4dy, to %4dx %4dy", x_rads, x, y, o.bas [i].x_raw, o.bas [i].y_raw);
          /*---(recalc)------------------*/
          POINT_position (o.bas + i);
@@ -161,8 +164,8 @@ BASE__extend         (void)
          x = o.bas [i - 1].x_raw;
          y = o.bas [i - 1].y_raw;
          /*---(extend start)------------*/
-         o.bas [i].x_raw  = o.avg [i].x_raw  = o.bas [i - 1].x_raw + (10 * my.ratio * cos (x_rads)) ;
-         o.bas [i].y_raw  = o.avg [i].y_raw  = o.bas [i - 1].y_raw + (10 * my.ratio * sin (x_rads)) ;
+         o.bas [i].x_raw  = o.avg [i].x_raw  = o.bas [i - 1].x_raw + (15 * my.ratio * cos (x_rads)) ;
+         o.bas [i].y_raw  = o.avg [i].y_raw  = o.bas [i - 1].y_raw + (15 * my.ratio * sin (x_rads)) ;
          DEBUG_AVG   yLOG_complex ("new end"   , "%8.3f, from %4dx %4dy, to %4dx %4dy", x_rads, x, y, o.bas [i].x_raw, o.bas [i].y_raw);
          /*---(recalc)------------------*/
          POINT_position (o.bas + i);
@@ -256,6 +259,38 @@ BASE_filter        (void)
    return 0;
 }
 
+char
+BAS_map_update          (tMAPPED *a_map, int a_ycur, int a_ynew)
+{
+   /*---(locals)-----------+-----------+-*/
+   int         i           =    0;
+   /*---(header)-------------------------*/
+   DEBUG_MAP    yLOG_enter   (__FUNCTION__);
+   /*---(update map)---------------------*/
+   for (i = 0; i < o.navg; ++i) {
+      a_map->map [i] = i;
+   }
+   /*---(globals)------------------------*/
+   a_map->gmin   = a_map->gamin  = 0;
+   a_map->gmax   = a_map->gamax  = o.navg - 1;
+   a_map->uavail = o.navg;
+   /*---(screen)-------------------------*/
+   a_map->umin   = a_map->ubeg   = 0;
+   a_map->umax   = a_map->uend   = a_map->ulen   = a_map->utend  = o.navg - 1;
+   /*---(units)--------------------------*/
+   a_map->gbeg   = 0;
+   a_map->gend   = o.navg - 1;
+   /*---(update current)-----------------*/
+   if (a_ycur == a_ynew) {
+      o.cavg       = a_map->gcur;
+   } else {
+      a_map->ucur  = 0;
+      a_map->gcur  = 0;
+   }
+   /*---(complete)-----------------------*/
+   DEBUG_MAP    yLOG_exit    (__FUNCTION__);
+   return 0;
+}
 
 
 
