@@ -23,8 +23,9 @@
  */
 
 #define    SCR2RAW     10
+#define    LEN_OUT     100000
 
-static char   s_load       [LEN_HUGE] = "";
+static char   s_load       [LEN_OUT] = "";
 static short  s_count      = 0;
 static float  s_xpos       = 0;
 static float  s_ypos       = 0;
@@ -57,7 +58,7 @@ static void o___OUTPUT_________________o (void) {;}
 char
 REVERSE_out_start       (void)
 {
-   strlcpy (s_load, ""         , LEN_HUGE);
+   strlcpy (s_load, ""         , LEN_OUT);
    s_count = 0;
    s_xpos = 0;
    s_ypos = 0;
@@ -70,7 +71,7 @@ REVERSE_out_touch       (int x, int y)
 {
    char        t           [LEN_LABEL] = "";
    sprintf (t, ";TOUCH,%d,%d", x, y);
-   strlcat (s_load, t, LEN_HUGE);
+   strlcat (s_load, t, LEN_OUT);
    s_xpos = x;
    s_ypos = y;
    ++s_count;
@@ -82,7 +83,7 @@ REVERSE_out_append      (int x, int y)
 {
    char        t           [LEN_LABEL] = "";
    sprintf (t, ";%d,%d", x, y);
-   strlcat (s_load, t, LEN_HUGE);
+   strlcat (s_load, t, LEN_OUT);
    ++s_count;
    return 0;
 }
@@ -92,7 +93,7 @@ REVERSE_out_lift        (int x, int y)
 {
    char        t           [LEN_LABEL] = "";
    sprintf (t, ";LIFT,%d,%d", x, y);
-   strlcat (s_load, t, LEN_HUGE);
+   strlcat (s_load, t, LEN_OUT);
    ++s_count;
    return 0;
 }
@@ -101,7 +102,7 @@ char
 REVERSE_out_done        (void)
 {
    REVERSE_out_lift (s_xpos, s_ypos);
-   strlcat (s_load, ";"        , LEN_HUGE);
+   strlcat (s_load, ";"        , LEN_OUT);
    return 0;
 }
 
@@ -368,6 +369,7 @@ REVERSE_line            (char a_type, char a_skip)
    x_sin = sin (r);
    x_cos = cos (r);
    /*---(rationalize)--------------------*/
+   a_skip *= 2;
    if (a_skip <=  0)          a_skip = 1;
    if (a_skip >= 25)          a_skip = 25;
    DEBUG_OUTP   yLOG_complex ("basics"    , "%2d# %-5.5s  %6.1fd, %8.3fr, %4.1fl, %2ds", s_index, s_label, d, r, l, a_skip);
@@ -417,6 +419,7 @@ REVERSE_circle          (char a_type, char a_skip)
    x_adj  = l * cos (x_rot);
    y_adj  = l * sin (x_rot);
    /*---(rationalize)--------------------*/
+   if (s_xradius < 6) a_skip *= 2;
    if (a_skip <=  0)  a_skip = 1;
    if (a_skip >= 25)  a_skip = 25;
    DEBUG_OUTP   yLOG_complex ("basics"    , "%2d# %-5.5s  %5.1fl %5.1fr %5.1fxa %5.1fya %2ds", s_index, s_label, l, x_rot, x_adj, y_adj, a_skip);
@@ -467,6 +470,7 @@ REVERSE_ellipse         (char a_type, char a_skip)
    x_arc  = s_arc;
    x_dots = 10;
    /*---(rationalize)--------------------*/
+   if (s_xradius < 6) a_skip *= 4;
    if (a_skip <=  0)  a_skip = 1;
    if (a_skip >= 25)  a_skip = 25;
    DEBUG_OUTP   yLOG_complex ("basics"    , "%2d# %-5.5s  %5.1fxl %5.1dfl %5.1fb %5.1fa  %2ds", s_index, s_label, x_len, y_len, x_beg, x_arc, a_skip);
@@ -532,157 +536,6 @@ REVERSE_ellipse         (char a_type, char a_skip)
 }
 
 char
-REVERSE_roundish        (char a_type, char a_skip)
-{
-   /*---(locals)-----------+-----+-----+-*/
-   char        rce         =  -10;
-   int         i           =    0;
-   float       r, l;
-   float       x_rot, x_beg, x_arc;
-   float       x_sin, x_cos;
-   float       x, y;
-   float       x_adj, y_adj;
-   int         x_sizer     =    1;
-   float       x_1st, y_1st;
-   /*---(defense)------------------------*/
-   --rce;  if (s_type != SHAPE_ROUNDISH)   return rce;
-   /*---(header)-------------------------*/
-   DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
-   /*---(tables)-------------------------*/
-   if (a_type == SHAPE_LOAD)  x_sizer = SCR2RAW;
-   l        = s_xradius * x_sizer;
-   x_rot    = s_rot;
-   x_beg    = x_rot + s_beg;
-   x_arc    = s_arc;
-   /*---(determine adjustment)-----------*/
-   x_adj  = l * cos (x_rot * DEG2RAD);
-   y_adj  = l * sin (x_rot * DEG2RAD);
-   /*---(rationalize)--------------------*/
-   if (a_skip <=  0)  a_skip = 1;
-   if (a_skip >= 25)  a_skip = 25;
-   DEBUG_OUTP   yLOG_complex ("basics"    , "%2d# %-5.5s  %5.1fl %5.1fr %5.1fa %5.1fxa %5.1fya %2ds", s_index, s_label, l, x_rot, x_arc, x_adj, y_adj, a_skip);
-   /*---(start)--------------------------*/
-   if (a_type == SHAPE_SAMPLE)   REVERSE_draw_reset ();
-   if (a_type != SHAPE_LOAD)     REVERSE_draw_begin ();
-   /*---(create points)------------------*/
-   if (x_arc >= 0) {
-      for (i = 0; i <= x_arc; i += a_skip) {
-         r     = (i + x_beg) * DEG2RAD;
-         x     = s_xpos + (l * cos (r)) - x_adj;
-         y     = s_ypos + (l * sin (r)) - y_adj;
-         /*> DEBUG_OUTP   yLOG_complex ("point"     , "%3#, %4.1fx, %4.1fy", i, x, y);   <*/
-         if (a_type != SHAPE_LOAD)     REVERSE_draw_point (x, y);
-         else                          REVERSE_out_append (x, y);
-         if (i == 0) {  x_1st = x; y_1st = y; }
-      }
-   } else {
-      for (i = 0; i >= x_arc; i -= a_skip) {
-         r     = (i + x_beg) * DEG2RAD;
-         x     = s_xpos + (l * cos (r)) - x_adj;
-         y     = s_ypos + (l * sin (r)) - y_adj;
-         /*> DEBUG_OUTP   yLOG_complex ("point"     , "%3#, %4.1fx, %4.1fy", i, x, y);   <*/
-         if (a_type != SHAPE_LOAD)     REVERSE_draw_point (x, y);
-         else                          REVERSE_out_append (x, y);
-         if (i == 0) {  x_1st = x; y_1st = y; }
-      }
-   }
-   if (a_type != SHAPE_LOAD)     REVERSE_draw_point (s_xpos, s_ypos);
-   else                          REVERSE_out_append (s_xpos, s_ypos);
-   /*---(save)---------------------------*/
-   if (a_type != SHAPE_LOAD)     REVERSE_draw_end   (s_xpos, s_ypos);
-   if (a_type == SHAPE_SAMPLE)   REVERSE_draw_wrap  (s_xpos, s_ypos);
-   /*---(complete)-----------------------*/
-   DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
-   return 0;
-}
-
-char
-REVERSE_teardrop_OLD    (char a_type, char a_skip)
-{
-   /*---(locals)-----------+-----+-----+-*/
-   char        rce         =  -10;
-   int         i           =    0;
-   float       r;
-   float       l;
-   float       xd, yd, xyd;
-   float       sx, sy;
-   float       x, y;
-   float       x_beg;
-   float       x_arc;
-   short       x_base;
-   int         x_sizer     =    1;
-   /*---(defense)------------------------*/
-   --rce;  if (s_type != SHAPE_TEARDROP)   return rce;
-   /*---(header)-------------------------*/
-   DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
-   /*---(tables)-------------------------*/
-   if (a_type == SHAPE_LOAD)  x_sizer = SCR2RAW;
-   x_beg    = s_beg;
-   x_arc    = s_arc;
-   x_base   = s_xradius * 1.7 * x_sizer;
-   /*---(draw)---------------------------*/
-   if (a_type == SHAPE_SAMPLE)   REVERSE_draw_reset ();
-   if (a_type != SHAPE_LOAD)     REVERSE_draw_begin ();
-   /*---(entry)--------------------------*/
-   /*> xd   = x_end - x_beg;                                                          <* 
-    *> yd   = y_end - y_beg;                                                          <* 
-    *> if (xd == 0)  xd = 0.0000001;                                                  <* 
-    *> xyd  = sqrt ((xd * xd) + (yd * yd));                                           <* 
-    *> sx   = xd / xyd;                                                               <* 
-    *> sy   = yd / xyd;                                                               <* 
-    *> for (i = 0; i <= xyd; i += a_skip) {                                           <* 
-    *>    x = x_beg + (i * sx);                                                       <* 
-    *>    y = y_beg + (i * sy);                                                       <* 
-    *>    if (a_type != SHAPE_LOAD)     REVERSE_draw_point (x, y);                    <* 
-    *>    else                          REVERSE_out_append (x, y);                    <* 
-    *> }                                                                              <*/
-
-
-
-   if (a_type != SHAPE_LOAD)     REVERSE_draw_point (s_xpos, s_ypos);
-   else                          REVERSE_out_append (s_xpos, s_ypos);
-   /*---(create points)------------------*/
-   if (x_arc >= 0) {
-      for (i = x_beg; i <= x_beg + x_arc; i += a_skip) {
-         r  = i * DEG2RAD;
-         if      (i == x_beg      || i == x_beg + 65) l = x_base * 0.70;
-         else if (i == x_beg +  5 || i == x_beg + 60) l = x_base * 0.95;
-         else if (i == x_beg + 10 || i == x_beg + 55) l = x_base * 1.10;
-         else if (i == x_beg + 15 || i == x_beg + 50) l = x_base * 1.20;
-         else if (i == x_beg + 20 || i == x_beg + 45) l = x_base * 1.25;
-         else if (i == x_beg + 25 || i == x_beg + 40) l = x_base * 1.30;
-         else if (i == x_beg + 30 || i == x_beg + 35) l = x_base * 1.33;
-         x = s_xpos + l * cos (r);
-         y = s_ypos + l * sin (r);
-         if (a_type != SHAPE_LOAD)     REVERSE_draw_point (x, y);
-         else                          REVERSE_out_append (x, y);
-      }
-   } else {
-      for (i = x_beg; i >= x_beg + x_arc; i -= a_skip) {
-         r  = i * DEG2RAD;
-         if      (i == x_beg      || i == x_beg - 65) l = x_base * 0.70;
-         else if (i == x_beg -  5 || i == x_beg - 60) l = x_base * 0.95;
-         else if (i == x_beg - 10 || i == x_beg - 55) l = x_base * 1.10;
-         else if (i == x_beg - 15 || i == x_beg - 50) l = x_base * 1.20;
-         else if (i == x_beg - 20 || i == x_beg - 45) l = x_base * 1.25;
-         else if (i == x_beg - 25 || i == x_beg - 40) l = x_base * 1.30;
-         else if (i == x_beg - 30 || i == x_beg - 35) l = x_base * 1.33;
-         x = s_xpos + l * cos (r);
-         y = s_ypos + l * sin (r);
-         if (a_type != SHAPE_LOAD)     REVERSE_draw_point (x, y);
-         else                          REVERSE_out_append (x, y);
-      }
-   }
-   if (a_type != SHAPE_LOAD)     REVERSE_draw_point (s_xpos, s_ypos);
-   else                          REVERSE_out_append (s_xpos, s_ypos);
-   if (a_type != SHAPE_LOAD)     REVERSE_draw_end   (s_xpos, s_ypos);
-   if (a_type == SHAPE_SAMPLE)   REVERSE_draw_wrap  (s_xpos, s_ypos);
-   /*---(complete)-----------------------*/
-   DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
-   return 0;
-}
-
-char
 REVERSE_teardrop        (char a_type, char a_skip)
 { /* uses the syntractrix of poleni, also called the convict's curve */
    /*---(locals)-----------+-----+-----+-*/
@@ -695,6 +548,7 @@ REVERSE_teardrop        (char a_type, char a_skip)
    float       x, y;
    int         x_sizer     =    1;
    float       x_rot       =  0.0;
+   float       x_arc       =  0.0;
    /*---(header)-------------------------*/
    DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
    /*---(defense)------------------------*/
@@ -707,10 +561,12 @@ REVERSE_teardrop        (char a_type, char a_skip)
    x_len  = s_xradius * x_sizer * 1.8;
    y_len  = s_yradius * x_sizer * 1.8;
    x_rot  = s_rot;
+   x_arc  = s_arc;
    /*---(determine adjustment)-----------*/
    /*> x_adj  = l * cos (x_rot * DEG2RAD);                                            <* 
     *> y_adj  = l * sin (x_rot * DEG2RAD);                                            <*/
    /*---(rationalize)--------------------*/
+   if (s_xradius < 6) a_skip *= 2;
    if (a_skip <=  0)  a_skip = 1;
    if (a_skip >= 25)  a_skip = 25;
    DEBUG_OUTP   yLOG_complex ("basics"    , "%2d# %-5.5s  %5.1fxl  %5.1fyl %5.1fr", s_index, s_label, x_len, y_len, x_rot);
@@ -720,14 +576,26 @@ REVERSE_teardrop        (char a_type, char a_skip)
    if (a_type != SHAPE_LOAD)     REVERSE_draw_point (s_xpos, s_ypos);
    else                          REVERSE_out_append (s_xpos, s_ypos);
    /*---(draw points)--------------------*/
-   for (s = -1.915;  s <= 1.915; s += 0.1) {
-      a    = x_len * ((2.0 / cosh (s)) - 0.577);
-      b    = y_len * (s - 2.0 * tanh (s));
-      x    = s_xpos + a * cos (x_rot * DEG2RAD) + b * sin (x_rot * DEG2RAD);
-      y    = s_ypos - a * sin (x_rot * DEG2RAD) + b * cos (x_rot * DEG2RAD);
-      if (a_type != SHAPE_LOAD)     REVERSE_draw_point (x, y);
-      else                          REVERSE_out_append (x, y);
-      DEBUG_OUTP_M yLOG_complex ("point"     , "%5.1fs, %5.1fa, %5.1fb, %5.1fx, %5.1fy", s, a, b, x, y);
+   if (x_arc >= 0) {
+      for (s = -1.915;  s <= 1.915; s += 0.01) {
+         a    = x_len * ((2.0 / cosh (s)) - 0.577);
+         b    = y_len * (s - 2.0 * tanh (s));
+         x    = s_xpos + a * cos (x_rot * DEG2RAD) + b * sin (x_rot * DEG2RAD);
+         y    = s_ypos - a * sin (x_rot * DEG2RAD) + b * cos (x_rot * DEG2RAD);
+         if (a_type != SHAPE_LOAD)     REVERSE_draw_point (x, y);
+         else                          REVERSE_out_append (x, y);
+         DEBUG_OUTP_M yLOG_complex ("point"     , "%5.1fs, %5.1fa, %5.1fb, %5.1fx, %5.1fy", s, a, b, x, y);
+      }
+   } else {
+      for (s = 1.915;  s >= -1.915; s -= 0.01) {
+         a    = x_len * ((2.0 / cosh (s)) - 0.577);
+         b    = y_len * (s - 2.0 * tanh (s));
+         x    = s_xpos + a * cos (x_rot * DEG2RAD) + b * sin (x_rot * DEG2RAD);
+         y    = s_ypos - a * sin (x_rot * DEG2RAD) + b * cos (x_rot * DEG2RAD);
+         if (a_type != SHAPE_LOAD)     REVERSE_draw_point (x, y);
+         else                          REVERSE_out_append (x, y);
+         DEBUG_OUTP_M yLOG_complex ("point"     , "%5.1fs, %5.1fa, %5.1fb, %5.1fx, %5.1fy", s, a, b, x, y);
+      }
    }
    /*---(end drawing)--------------------*/
    if (a_type != SHAPE_LOAD)     REVERSE_draw_point (s_xpos, s_ypos);
@@ -854,7 +722,6 @@ REVERSE_make_letter     (uchar *a_ltr, char a_type, char a_skip)
    case SHAPE_LINE     :  REVERSE_line     (a_type, a_skip);  break;
    case SHAPE_ELLIPSE  :  REVERSE_ellipse  (a_type, a_skip);  break;
    case SHAPE_CIRCLE   :  REVERSE_circle   (a_type, a_skip);  break;
-   case SHAPE_ROUNDISH :  REVERSE_roundish (a_type, a_skip);  break;
    case SHAPE_TEARDROP :  REVERSE_teardrop (a_type, a_skip);  break;
    case SHAPE_DOT      :  REVERSE_dot      (a_type, a_skip);  break;
    case SHAPE_SPACE    :  REVERSE_space    (a_type, a_skip);  break;
@@ -876,6 +743,7 @@ REVERSE_gregg_word      (uchar *a_outline, char a_type, char a_skip)
    char       *r           = NULL;
    int         n           =    0;
    uchar      *x_last      = NULL;
+   int         x_sizer     =    1;
    /*---(header)-------------------------*/
    DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
    /*---(defense)------------------------*/
@@ -894,6 +762,7 @@ REVERSE_gregg_word      (uchar *a_outline, char a_type, char a_skip)
       DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
+   if (a_type == SHAPE_LOAD)  x_sizer = SCR2RAW;
    /*---(start parsing)------------------*/
    DEBUG_OUTP   yLOG_complex ("big_pos "  , "%5.1fsx, %5.1fsy", s_xpos, s_ypos);
    strlcpy  (t, a_outline, LEN_HUND);
@@ -908,13 +777,13 @@ REVERSE_gregg_word      (uchar *a_outline, char a_type, char a_skip)
       if (strcmp (">", p) == 0) {
          if      (a_type == SHAPE_LOAD) {
             REVERSE_out_lift   (s_xpos, s_ypos);
-            s_xpos += 20.0;
-            s_ypos -= 20.0;
+            s_xpos +=  0.0 * x_sizer;
+            s_ypos -= 10.0 * x_sizer;
             REVERSE_out_touch  (s_xpos, s_ypos);
             /*> REVERSE_make_letter  (">", a_type, a_skip);                           <*/
          } else {
-            s_xpos +=  0.0;
-            s_ypos -= 10.0;
+            s_xpos +=  0.0 * x_sizer;
+            s_ypos -= 10.0 * x_sizer;
          }
       } else {
          /*> REVERSE_make_letter  ("dot", a_type, a_skip);                            <*/
@@ -923,7 +792,6 @@ REVERSE_gregg_word      (uchar *a_outline, char a_type, char a_skip)
           *> case SHAPE_LINE     :  REVERSE_line     (a_type, a_skip);  break;        <* 
           *> case SHAPE_ELLIPSE  :  REVERSE_ellipse  (n, a_type, a_skip);  break;     <* 
           *> case SHAPE_CIRCLE   :  REVERSE_circle   (n, a_type, a_skip);  break;     <* 
-          *> case SHAPE_ROUNDISH :  REVERSE_roundish (n, a_type, a_skip);  break;     <* 
           *> case SHAPE_TEARDROP :  REVERSE_teardrop (n, a_type, a_skip);  break;     <* 
           *> case SHAPE_DOT      :  REVERSE_dot      (n, a_type, a_skip);  break;     <* 
           *> case SHAPE_SPACE    :  REVERSE_space    (n, a_type, a_skip);  break;     <* 

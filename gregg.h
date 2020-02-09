@@ -26,8 +26,8 @@
 
 #define     P_VERMAJOR  "5.--= generalization for broader use"
 #define     P_VERMINOR  "5.3 = update for use as coding example"
-#define     P_VERNUM    "5.3b"
-#define     P_VERTXT    "dictionary words loading and basic point mapping/display working"
+#define     P_VERNUM    "5.3c"
+#define     P_VERTXT    "updated raw points and circle/intesection finding.  very nice"
 
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -316,6 +316,9 @@ typedef     struct      cACCESSOR   tACCESSOR;
 struct cACCESSOR {
    /*---(mode)-----------------*/
    char        run_mode;
+   char        time_lapse;
+   short       time_point;
+   float       zoom;
    /*---(reporting)------------*/
    char        rptg_touch;
    char        rptg_raw;
@@ -599,12 +602,11 @@ typedef struct timespec  tTSPEC;
 #define     SHAPE_LINE     'l'
 #define     SHAPE_CIRCLE   'c'
 #define     SHAPE_ELLIPSE  'e'
-#define     SHAPE_ROUNDISH 'r'
 #define     SHAPE_TEARDROP 't'
 #define     SHAPE_DOT      'd'
 #define     SHAPE_SPACE    'w'
 #define     SHAPE_ACCENT   'a'
-#define     SHAPES_ALL     "lcertdwa"
+#define     SHAPES_ALL     "lcetdwa"
 
 
 #define     SHAPE_LOAD     'L'
@@ -620,7 +622,10 @@ struct cPOINT
    short       seq;                    /* sequencal numbering within series   */
    short       p_raw;                  /* tie to raw point                    */
    short       p_bas;                  /* tie to basic point                  */
+   short       p_key;                  /* tie to key point                    */
    char        fake;                   /* artificial point or not (y/n)       */
+   char        prekey;                 /* points pre-identified as key        */
+   char        marked;                 /* pre-marked for specific use         */
    /*---(touchpad)--------------*/
    short       x_touch;                /* x-pos in touchpad coords (captured) */
    short       y_touch;                /* y-pos in touchpad coords (captured) */
@@ -686,7 +691,7 @@ struct cOUTLINE
    short       nkey;                     /* number of key points                */
    short       ckey;                     /* current key point                   */
    /*---(acutal points)------------------*/
-   tPOINT      raw         [MAX_POINTS]; /* raw points                          */
+   tPOINT      raw         [LEN_HUGE];   /* raw points                          */
    tPOINT      bas         [MAX_POINTS]; /* basic points                        */
    tPOINT      avg         [MAX_POINTS]; /* average points                      */
    tPOINT      tmp         [LEN_TERSE];  /* calculation storage                 */
@@ -864,6 +869,8 @@ char*      OUT__unit            (char *a_question, tPOINT *a_curr);
 char        POINT_clear             (tPOINT *a_point, char a_type);
 char        POINT_clear_series      (char a_type);
 char        POINT_clear_all         (void);
+/*---(moving)---------------*/
+char        BASE_push_up            (short x_old);
 /*---(sequencing)-----------*/
 char        POINT_seq_start         (char a_type, tPOINT *p, int c);
 char        POINT_seq_head          (char a_type, tPOINT *p, int c, int a_xpad, int a_ypad);
@@ -871,7 +878,7 @@ char        POINT_seq_normal        (char a_type, tPOINT *p, int c, int a_xpad, 
 char        POINT_seq_tail          (char a_type, tPOINT *p, int c, int a_xpad, int a_ypad);
 char        POINT_seq_finish        (char a_type, tPOINT *p, int c, int a_xpad, int a_ypad);
 /*---(statistics)-----------*/
-char        POINT_position          (tPOINT *a_curr);
+char        POINT_pos               (tPOINT *a_curr);
 char        POINT_calc              (char a_type, tPOINT* a_curr, int a_span);
 /*---(reporting)------------*/
 char        POINT_list              (FILE *a_file, char a_style, tPOINT *a_series, int a_count);
@@ -897,12 +904,29 @@ char        RAW_load                (char *a_points);
 char        RAW_equalize            (void);
 char*       RAW__unit               (char *a_question, int a_num);
 
-/*---(base)-----------------*/
-char       BASE_filter             (void);
-char       BAS_map_update          (tMAPPED *a_map, int a_ycur, int a_ynew);
+/*---(support)--------------*/
+float       BASE__dist              (short a, short b);
+/*---(new)------------------*/
+char        BASE__raw2bas           (short a_raw, short a_bas);
+char        BASE_append             (short a_raw);
+char        BASE_insert             (short a_raw);
+char        BASE_adjust             (short a_bas, short a_raw);
+/*---(statistics)-----------*/
+char        BASE_calc_all           (void);
+char        BASE__push_out          (short a_bas, char a_dir);
+char        BASE__pull_in           (short a_bas);
+char        BASE_extend_ends        (void);
+char        BASE_retract_ends       (void);
+/*---(specialty)------------*/
+char        BASE_add_corners        (void);
+/*---(driver)---------------*/
+char        BASE_filter             (void);
+/*---(mapping)--------------*/
+char        BASE_map_update         (tMAPPED *a_map, int a_ycur, int a_ynew);
 
 
-char       KEY_add           (int, char, char);
+
+
 char       KEY_calc          (char);
 char       KEY_prep          (void);
 char       KEY_label         (int, int, char*);
@@ -912,6 +936,9 @@ char       KEY_filter        (void);
 char       KEY_flatten       (void);
 char       KEY_squeeze       (void);
 char       KEY_sharps        (void);
+/*345678901-12345678901-12345678901-12345678901-12345678901-12345678901-123456*/
+char        KEY_add                 (int a_bas, char a_fake, char a_type, char *a_use);
+char        KEY_driver              (void);
 
 
 char       MATCH_driver      (void);
@@ -920,7 +947,8 @@ char       match_calc        (int, int);
 int        match_size        (int);
 int        match_range       (int);
 
-char       CIRCLE_driver     (void);
+char        CIRCLE_driver_OLD       (void);
+char        CIRCLE_driver           (void);
 
 /*345678901-12345678901-12345678901-12345678901-12345678901-12345678901-123456*/
 char        WORDS__new              (tWORDS **a_word, char *a_english, char *a_gregg);
@@ -962,6 +990,7 @@ char        MAP_locator          (char *a_label, int *a_x, int *a_y, int *a_z);
 char        MAP_addresser        (char *a_label, int a_x, int a_y, int a_z);
 char        USER_words           (char *a_words);
 char        USER_load            (char *a_words);
+char        USER_unload           (void);
 char        USER_guide           (char *a_guide);
 char        USER_init            (void);
 char        USER_quit            (void);
@@ -985,7 +1014,6 @@ char        REVERSE_out_load        (void);
 char        REVERSE_line            (char a_type, char a_skip);
 char        REVERSE_circle          (char a_type, char a_skip);
 char        REVERSE_ellipse         (char a_type, char a_skip);
-char        REVERSE_roundish        (char a_type, char a_skip);
 char        REVERSE_teardrop        (char a_type, char a_skip);
 char        REVERSE_dot             (char a_type, char a_skip);
 char        REVERSE_space           (char a_type, char a_skip);

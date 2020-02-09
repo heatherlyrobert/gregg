@@ -479,7 +479,7 @@ tLOCATION   g_loc [MAX_LETTERS] = {
    { "amN",  SHAPE_TEARDROP,  10,  10, 270,   0,   0, CAT_A   ,   0,   0,    0,    0, 0        , 0, 0, 0, 0, 0, 0, 0, 0 },
    { "aNm",  SHAPE_TEARDROP,   8,  12, 100,   0,   0, CAT_A   ,   0,   0,    0,    0, 0        , 0, 0, 0, 0, 0, 0, 0, 0 },
    /*-m-j-,  ---shape----- , -sx, -sy, rot, beg, arc, -cat--- , -ra, -sz- --tx, --ty, -align-- ,-----,-----clcuate----- */
-   { "amj",  SHAPE_TEARDROP,  12,   7, 330,   0,   0, CAT_A   ,   0,   0,    0,    0, 0        , 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "amj",  SHAPE_TEARDROP,  12,   7, 330,   0,  -1, CAT_A   ,   0,   0,    0,    0, 0        , 0, 0, 0, 0, 0, 0, 0, 0 },
    { "ajm",  SHAPE_TEARDROP,  12,   7, 150,   0,   0, CAT_A   ,   0,   0,    0,    0, 0        , 0, 0, 0, 0, 0, 0, 0, 0 },
    /*-m-f-,  ---shape----- , -sx, -sy, rot, beg, arc, -cat--- , -ra, -sz- --tx, --ty, -align-- ,-----,-----clcuate----- */
    { "amf",  SHAPE_TEARDROP,  10,   8, 300,   0,   0, CAT_A   ,   0,   0,    0,    0, 0        , 0, 0, 0, 0, 0, 0, 0, 0 },
@@ -596,7 +596,7 @@ tLOCATION   g_loc [MAX_LETTERS] = {
 
    /*=====[[ P FIXES ]]=========================================================*/
    /*-ends,  ---shape----- , -sx, -sy, rot, beg, arc, -cat--- , -ra, -sz- --tx, --ty, -align-- ,-----,-----clcuate----- */
-   { "axp",  SHAPE_TEARDROP,   9,   8,  15,   0,   0, CAT_A   ,   0,   0,    0,    0, 0        , 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "axp",  SHAPE_TEARDROP,   9,   8,  15,   0,  -1, CAT_A   ,   0,   0,    0,    0, 0        , 0, 0, 0, 0, 0, 0, 0, 0 },
    { "apx",  SHAPE_TEARDROP,  10,  10,   0,   0,   0, CAT_A   ,   0,   0,    0,    0, 0        , 0, 0, 0, 0, 0, 0, 0, 0 },
    /*-p-r-,  ---shape----- , -sx, -sy, rot, beg, arc, -cat--- , -ra, -sz- --tx, --ty, -align-- ,-----,-----clcuate----- */
    { "app",  SHAPE_TEARDROP,  10,  10,  10,   0,   0, CAT_A   ,   0,   0,    0,    0, 0        , 0, 0, 0, 0, 0, 0, 0, 0 },

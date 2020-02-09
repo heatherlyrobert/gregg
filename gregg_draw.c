@@ -119,7 +119,6 @@ DRAW_init            (void)
    yVIKEYS_cmds_direct (":gridsize 1");
    yVIKEYS_cmds_direct (":layer bas");
    yVIKEYS_cmds_direct (":layer cur");
-   yVIKEYS_cmds_direct (":overlay data");
    /*---(complete)-----------------------*/
    DEBUG_GRAF   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -181,7 +180,7 @@ DRAW_primary         (float a_mag)
    } glPopMatrix   ();
    /*---(parts)--------------------------*/
    /*> DRAW_cursor ();                                                                <*/
-   OVERLAY_samples ();
+   /*> OVERLAY_samples ();                                                            <*/
    /*> REVERSE_outline ("s·l·o2·b", SHAPE_DRAW, 1);                                   <*/
    /*> REVERSE_outline ("r·o2·b", SHAPE_DRAW, 1);                                     <*/
    /*> REVERSE_outline ("k·a·r"   , SHAPE_DRAW, 1);                                   <*/
@@ -222,8 +221,12 @@ DRAW_primary         (float a_mag)
        *>    WORDS_result ();                                                         <* 
        *> } glPopMatrix   ();                                                         <*/
    }
-   LAYER_base ();
-   LAYER_curr ();
+   if (o.nraw > 0)  LAYER_raws ();
+   if (o.navg > 0 && my.time_point >= o.nraw) {
+      LAYER_base ();
+      LAYER_curr ();
+      /*> LAYER_keys ();                                                              <*/
+   }
    /*---(complete)-----------------------*/
    return;
 }
@@ -520,7 +523,7 @@ LAYER_curr          (void)
    /*> printf ("showing curr\n");                                                     <*/
    glPushMatrix(); {
       /*> glTranslatef( o.avg[o.cavg].x_pos, o.avg[o.cavg - 1].y_pos,    0.0);               <*/
-      glTranslatef( o.avg[o.cavg].x_pos, o.avg[o.cavg].y_pos,    0.0);
+      glTranslatef( o.avg[o.cavg].x_pos * my.zoom, o.avg[o.cavg].y_pos * my.zoom,    0.0);
       glBegin(GL_POLYGON); {
          glColor4f(0.0f, 0.0f, 0.0f, 1.0f);       /* nice medium grey            */
          for (d = 0; d <= 360; d += 10) {
@@ -563,23 +566,40 @@ LAYER_raws          (void)
 {
    /*---(locals)-------------------------*/
    float   z     =    5.0;
-   int i;
+   int     i;
+   short       x_end       =     0;
    glLineWidth (2.0);
-   glPointSize (2.0);
-   yVIKEYS_view_color (YCOLOR_POS_DRK, 1.00);
+   glPointSize (1.5);
+   glColor4f  (0.0, 0.0, 0.0, 1.0);
+   /*> yVIKEYS_view_color (YCOLOR_POS_DRK, 1.00);                                     <*/
    /*> glColor4f(0.0f, 0.0f, 0.7f, 1.0f);                                             <*/
    /*> glBegin(GL_LINE_STRIP);                                                        <*/
+   if (my.time_point > o.nraw)  x_end = o.nraw;
+   else                         x_end = my.time_point;
    glBegin(GL_POINTS);
-   for (i = 0; i < o.nraw; ++i) {
+   for (i = 0; i < x_end; ++i) {
       if (o.raw[i].x_pos == 999 && o.raw[i].y_pos == 999) {
          glEnd();
          glBegin(GL_POINTS);
          continue;
       }
-      glVertex3f( o.raw[i].x_pos, o.raw[i].y_pos, z);
+      glVertex3f( o.raw[i].x_pos * my.zoom, o.raw[i].y_pos * my.zoom, z);
    }
    glEnd();
+   if (my.time_point < o.nraw) {
+      glPointSize (3.0);
+      glColor4f   (1.0f, 0.0f, 0.0f, 1.0f);
+      glBegin     (GL_POINTS);
+      glVertex3f  (o.raw [my.time_point].x_pos * my.zoom, o.raw [my.time_point].y_pos * my.zoom, z);
+      glEnd();
+   }
    glLineWidth(0.8);
+   if (my.time_point >= o.nraw) {
+      my.time_lapse = '-';
+      my.time_point = 9999;
+   } else {
+      my.time_point += 2;
+   }
    return 0;
 }
 
@@ -596,9 +616,10 @@ LAYER_base          (void)
       else if (o.bas[i].fake  == 'y') glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
       else                            glColor4f(0.7f, 0.7f, 0.0f, 1.0f);
       if (o.bas[i].fake  == 'y')      glPointSize (4.0);
+      else if (my.zoom <= 2)          glPointSize (1.0);
       else                            glPointSize (2.0);
       glBegin     (GL_POINTS); {
-         glVertex3f( o.avg[i].x_pos, o.avg[i].y_pos, z);
+         glVertex3f( o.avg[i].x_pos * my.zoom, o.avg[i].y_pos * my.zoom, z);
          /*> glVertex3f( o.avg [i].x_pos + 125, o.avg [i].y_pos + 225, z);            <*/
       } glEnd();
       /*---(draw the S extension)--------*/
@@ -608,8 +629,8 @@ LAYER_base          (void)
          glColor4f     (0.0f, 0.0f, 0.0f, 0.5f);
          glLineWidth   (2.0);
          glBegin (GL_LINES); {
-            glVertex3f (o.avg [i    ].x_pos, o.avg [i    ].y_pos, z - 1.50);
-            glVertex3f (o.avg [i + 1].x_pos, o.avg [i + 1].y_pos, z - 1.50);
+            glVertex3f (o.avg [i    ].x_pos * my.zoom, o.avg [i    ].y_pos * my.zoom, z - 1.50);
+            glVertex3f (o.avg [i + 1].x_pos * my.zoom, o.avg [i + 1].y_pos * my.zoom, z - 1.50);
          } glEnd();
          glDisable     (GL_LINE_STIPPLE);
       }
@@ -620,8 +641,8 @@ LAYER_base          (void)
          glColor4f     (0.0f, 0.0f, 0.0f, 0.5f);
          glLineWidth   (2.0);
          glBegin (GL_LINES); {
-            glVertex3f (o.avg [i    ].x_pos, o.avg [i    ].y_pos, z - 1.50);
-            glVertex3f (o.avg [i - 1].x_pos, o.avg [i - 1].y_pos, z - 1.50);
+            glVertex3f (o.avg [i    ].x_pos * my.zoom, o.avg [i    ].y_pos * my.zoom, z - 1.50);
+            glVertex3f (o.avg [i - 1].x_pos * my.zoom, o.avg [i - 1].y_pos * my.zoom, z - 1.50);
          } glEnd();
          glDisable     (GL_LINE_STIPPLE);
       }
@@ -634,7 +655,7 @@ char          /*----: draw the key points and lines --------------------------*/
 LAYER_keys          (void)
 {
    /*---(locals)-------------------------*/
-   float   r1 =   2.0;
+   float   r1 =   4.0;
    float   d;
    float   rad;
    float   x, y;
@@ -645,7 +666,7 @@ LAYER_keys          (void)
    for (i = 0; i < o.nkey; ++i) {
       /*---(draw the point)--------------*/
       glPushMatrix(); {
-         glTranslatef( o.key[i].x_pos, o.key[i].y_pos,    0.0);
+         glTranslatef( o.key[i].x_pos * my.zoom, o.key[i].y_pos * my.zoom,    0.0);
          glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
          if (o.key[i].cano  == 'x') glColor4f (1.0f, 0.0f, 0.0f, 0.5f);
          if (o.key[i].fake  == 'y') glColor4f (0.0f, 1.0f, 1.0f, 0.5f);
@@ -663,45 +684,45 @@ LAYER_keys          (void)
          glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
          glLineWidth(2.0);
          glBegin(GL_LINES); {
-            glVertex3f(o.key[i - 1].x_pos, o.key[i - 1].y_pos, z + 0.25);
-            glVertex3f(o.key[i].x_pos,     o.key[i].y_pos,     z + 0.25);
+            glVertex3f(o.key[i - 1].x_pos * my.zoom, o.key[i - 1].y_pos * my.zoom, z + 0.25);
+            glVertex3f(o.key[i].x_pos * my.zoom,     o.key[i].y_pos * my.zoom,     z + 0.25);
          } glEnd();
       }
       /*---(draw the hidden lines)-------*/
-      if (i > 0 && o.key[i].type == '>') {
-         glColor4f(0.5f, 0.5f, 0.5f, 1.0f);
-         glLineWidth(2.0);
-         glBegin(GL_LINES); {
-            glVertex3f(o.key[i - 1].x_pos, o.key[i - 1].y_pos, z - 1.00);
-            glVertex3f(o.key[i].x_pos,     o.key[i].y_pos,     z - 1.00);
-         } glEnd();
-      }
+      /*> if (i > 0 && o.key[i].type == '>') {                                                      <* 
+       *>    glColor4f(0.5f, 0.5f, 0.5f, 1.0f);                                                     <* 
+       *>    glLineWidth(2.0);                                                                      <* 
+       *>    glBegin(GL_LINES); {                                                                   <* 
+       *>       glVertex3f(o.key[i - 1].x_pos * my.zoom, o.key[i - 1].y_pos * my.zoom, z - 1.00);   <* 
+       *>       glVertex3f(o.key[i].x_pos * my.zoom,     o.key[i].y_pos * my.zoom,     z - 1.00);   <* 
+       *>    } glEnd();                                                                             <* 
+       *> }                                                                                         <*/
       /*---(draw the S extension)--------*/
-      if (o.key[i].type == POINT_HEAD) {
-         pt = o.key[i].p_bas - 1;
-         glEnable      (GL_LINE_STIPPLE);
-         glLineStipple (1, 0x3333);
-         glColor4f     (0.2f, 0.2f, 0.2f, 1.0f);
-         glLineWidth   (2.0);
-         glBegin (GL_LINES); {
-            glVertex3f(o.bas[pt].x_pos    , o.bas[pt].y_pos  , z - 1.50);
-            glVertex3f(o.key[i].x_pos     , o.key[i].y_pos   , z - 1.50);
-         } glEnd();
-         glDisable     (GL_LINE_STIPPLE);
-      }
+      /*> if (o.key[i].type == POINT_HEAD) {                                                        <* 
+       *>    pt = o.key[i].p_bas - 1;                                                               <* 
+       *>    glEnable      (GL_LINE_STIPPLE);                                                       <* 
+       *>    glLineStipple (1, 0x3333);                                                             <* 
+       *>    glColor4f     (0.2f, 0.2f, 0.2f, 1.0f);                                                <* 
+       *>    glLineWidth   (2.0);                                                                   <* 
+       *>    glBegin (GL_LINES); {                                                                  <* 
+       *>       glVertex3f(o.bas[pt].x_pos * my.zoom    , o.bas[pt].y_pos * my.zoom  , z - 1.50);   <* 
+       *>       glVertex3f(o.key[i].x_pos * my.zoom     , o.key[i].y_pos * my.zoom   , z - 1.50);   <* 
+       *>    } glEnd();                                                                             <* 
+       *>    glDisable     (GL_LINE_STIPPLE);                                                       <* 
+       *> }                                                                                         <*/
       /*---(draw the F extension)--------*/
-      if (o.key[i + 1].type == '>' || i + 1 == o.nkey) {
-         pt = o.key[i].p_bas + 1;
-         glEnable      (GL_LINE_STIPPLE);
-         glLineStipple (1, 0x3333);
-         glColor4f     (0.2f, 0.2f, 0.2f, 1.0f);
-         glLineWidth   (2.0);
-         glBegin (GL_LINES); {
-            glVertex3f(o.bas[pt].x_pos    , o.bas[pt].y_pos  , z - 1.50);
-            glVertex3f(o.key[i].x_pos     , o.key[i].y_pos   , z - 1.50);
-         } glEnd();
-         glDisable     (GL_LINE_STIPPLE);
-      }
+      /*> if (o.key[i + 1].type == '>' || i + 1 == o.nkey) {                                        <* 
+       *>    pt = o.key[i].p_bas + 1;                                                               <* 
+       *>    glEnable      (GL_LINE_STIPPLE);                                                       <* 
+       *>    glLineStipple (1, 0x3333);                                                             <* 
+       *>    glColor4f     (0.2f, 0.2f, 0.2f, 1.0f);                                                <* 
+       *>    glLineWidth   (2.0);                                                                   <* 
+       *>    glBegin (GL_LINES); {                                                                  <* 
+       *>       glVertex3f(o.bas[pt].x_pos * my.zoom    , o.bas[pt].y_pos * my.zoom  , z - 1.50);   <* 
+       *>       glVertex3f(o.key[i].x_pos * my.zoom     , o.key[i].y_pos * my.zoom   , z - 1.50);   <* 
+       *>    } glEnd();                                                                             <* 
+       *>    glDisable     (GL_LINE_STIPPLE);                                                       <* 
+       *> }                                                                                         <*/
    }
    /*---(complete)-----------------------*/
    return 0;
@@ -752,61 +773,61 @@ OVERLAY_data    (void)
    int         y_off       =  105;
    /*---(average point)------------------*/
    yVIKEYS_view_color (YCOLOR_BAS_MOR, 0.65);
-   /*> glPushMatrix  (); {                                                                      <* 
-    *>    /+---(counts)----------------------+/                                                 <* 
-    *>    glTranslatef  (x_off, y_off, 30);                                                     <* 
-    *>    snprintf      (t, 100, "%6d", o.nraw);                                                <* 
-    *>    FONT__label   ("raw#", t);                                                            <* 
-    *>    snprintf      (t, 100, "%6d", o.navg);                                                <* 
-    *>    FONT__label   ("avg#", t);                                                            <* 
-    *>    snprintf      (t, 100, "%6d", o.nkey);                                                <* 
-    *>    FONT__label   ("key#", t);                                                            <* 
-    *>    /+---(basics)----------------------+/                                                 <* 
-    *>    /+> glTranslatef  (0.0  , -10.0 , 0.0);                                         <+/   <* 
-    *>    snprintf      (t, 100, "%6d", o.avg[o.cavg].p_bas);                                   <* 
-    *>    FONT__label   ("num"   , t);                                                          <* 
-    *>    snprintf      (t, 100, "%6d", o.avg[o.cavg].p_raw);                                   <* 
-    *>    FONT__label   ("raw"   , t);                                                          <* 
-    *>    snprintf      (t, 100, "%6d", o.avg[o.cavg].x_raw);                                   <* 
-    *>    FONT__label   ("x_raw", t);                                                           <* 
-    *>    snprintf      (t, 100, "%6d", o.avg[o.cavg].y_raw);                                   <* 
-    *>    FONT__label   ("y_raw", t);                                                           <* 
-    *>    snprintf      (t, 100, "%6d", o.avg[o.cavg].x_pos);                                   <* 
-    *>    FONT__label   ("x_pos" , t);                                                          <* 
-    *>    snprintf      (t, 100, "%6d", o.avg[o.cavg].y_pos);                                   <* 
-    *>    FONT__label   ("y_pos" , t);                                                          <* 
-    *>    snprintf      (t, 100, "%6d", o.avg[o.cavg].xd);                                      <* 
-    *>    FONT__label   ("x-diff", t);                                                          <* 
-    *>    snprintf      (t, 100, "%6d", o.avg[o.cavg].yd);                                      <* 
-    *>    FONT__label   ("y-diff", t);                                                          <* 
-    *>    snprintf      (t, 100, "%6d", o.avg[o.cavg].len);                                     <* 
-    *>    FONT__label   ("len"   , t);                                                          <* 
-    *>    /+---(more complex)----------------+/                                                 <* 
-    *>    x_slope = o.avg[o.cavg].slope;                                                        <* 
-    *>    x_icept = o.avg[o.cavg].icept;                                                        <* 
-    *>    /+> if (x_slope >  999) { x_slope = 999.99; b = 999; }                          <*    <* 
-    *>     *> if (x_slope < -999) { x_slope = -999.99; b = -999; }                        <+/   <* 
-    *>    snprintf      (t, 100, "%9.2f", x_slope);                                             <* 
-    *>    FONT__label   ("slope" , t);                                                          <* 
-    *>    snprintf      (t, 100, "%6d",   x_icept);                                             <* 
-    *>    FONT__label   ("b-cept", t);                                                          <* 
-    *>    snprintf      (t, 100, "%9.2f", o.avg[o.cavg].rads);                                  <* 
-    *>    FONT__label   ("rads"  , t);                                                          <* 
-    *>    snprintf      (t, 100, "%6d",   o.avg[o.cavg].degs);                                  <* 
-    *>    FONT__label   ("degs"  , t);                                                          <* 
-    *>    snprintf      (t, 100, "%6d",   o.avg[o.cavg].quad);                                  <* 
-    *>    FONT__label   ("quad"  , t);                                                          <* 
-    *>    snprintf      (t, 100, "     %c", o.avg[o.cavg].type);                                <* 
-    *>    FONT__label   ("type"  , t);                                                          <* 
-    *>    /+---(conversion)------------------+/                                                 <* 
-    *>    snprintf      (t, 100, "%9.2f", my.x_center);                                         <* 
-    *>    FONT__label   ("x_cen" , t);                                                          <* 
-    *>    snprintf      (t, 100, "%9.2f", my.y_center);                                         <* 
-    *>    FONT__label   ("y_cen" , t);                                                          <* 
-    *>    snprintf      (t, 100, "%9.2f", my.ratio);                                            <* 
-    *>    FONT__label   ("ratio" , t);                                                          <* 
-    *>    /+---(done)------------------------+/                                                 <* 
-    *> } glPopMatrix();                                                                         <*/
+   glPushMatrix  (); {
+      /*---(counts)----------------------*/
+      glTranslatef  (x_off, y_off, 30);
+      snprintf      (t, 100, "%6d", o.nraw);
+      FONT__label   ("raw#", t);
+      snprintf      (t, 100, "%6d", o.navg);
+      FONT__label   ("avg#", t);
+      snprintf      (t, 100, "%6d", o.nkey);
+      FONT__label   ("key#", t);
+      /*---(basics)----------------------*/
+      /*> glTranslatef  (0.0  , -10.0 , 0.0);                                         <*/
+      snprintf      (t, 100, "%6d"  , o.avg[o.cavg].p_bas);
+      FONT__label   ("num"   , t);
+      snprintf      (t, 100, "%6d"  , o.avg[o.cavg].p_raw);
+      FONT__label   ("raw"   , t);
+      snprintf      (t, 100, "%6d"  , o.avg[o.cavg].x_raw);
+      FONT__label   ("x_raw", t);
+      snprintf      (t, 100, "%6d"  , o.avg[o.cavg].y_raw);
+      FONT__label   ("y_raw", t);
+      snprintf      (t, 100, "%6.1f", o.avg[o.cavg].x_pos);
+      FONT__label   ("x_pos" , t);
+      snprintf      (t, 100, "%6.1f", o.avg[o.cavg].y_pos);
+      FONT__label   ("y_pos" , t);
+      snprintf      (t, 100, "%6.1f", o.avg[o.cavg].xd);
+      FONT__label   ("x-diff", t);
+      snprintf      (t, 100, "%6.1f", o.avg[o.cavg].yd);
+      FONT__label   ("y-diff", t);
+      snprintf      (t, 100, "%6.1f", o.avg[o.cavg].len);
+      FONT__label   ("len"   , t);
+      /*---(more complex)----------------*/
+      x_slope = o.avg[o.cavg].slope;
+      x_icept = o.avg[o.cavg].icept;
+      /*> if (x_slope >  999) { x_slope = 999.99; b = 999; }                          <* 
+       *> if (x_slope < -999) { x_slope = -999.99; b = -999; }                        <*/
+      snprintf      (t, 100, "%9.2f", x_slope);
+      FONT__label   ("slope" , t);
+      snprintf      (t, 100, "%6.1f",   x_icept);
+      FONT__label   ("b-cept", t);
+      snprintf      (t, 100, "%9.2f", o.avg[o.cavg].rads);
+      FONT__label   ("rads"  , t);
+      snprintf      (t, 100, "%6.1f",   o.avg[o.cavg].degs);
+      FONT__label   ("degs"  , t);
+      snprintf      (t, 100, "     %1d",   o.avg[o.cavg].quad);
+      FONT__label   ("quad"  , t);
+      snprintf      (t, 100, "     %c", o.avg[o.cavg].type);
+      FONT__label   ("type"  , t);
+      /*---(conversion)------------------*/
+      snprintf      (t, 100, "%9.2f", my.x_center);
+      FONT__label   ("x_cen" , t);
+      snprintf      (t, 100, "%9.2f", my.y_center);
+      FONT__label   ("y_cen" , t);
+      snprintf      (t, 100, "%9.2f", my.ratio);
+      FONT__label   ("ratio" , t);
+      /*---(done)------------------------*/
+   } glPopMatrix();
    /*---(complete)-----------------------*/
    return 0;
 }

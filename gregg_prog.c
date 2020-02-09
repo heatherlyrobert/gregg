@@ -49,6 +49,9 @@ PROG_init          (void)
    strcpy (win.face_fixed, "hack");
    /*---(reporting flags)-------------*/
    my.run_mode     = RUN_NORMAL;
+   my.time_lapse   = '-';
+   my.time_point   = 9999;
+   my.zoom         =    1;
    my.dict         = 'y';
    my.rptg_touch   = '-';
    my.rptg_raw     = '-';
@@ -166,6 +169,7 @@ PROG_final (void)
    /*---(key mapping)--------------------*/
    yVIKEYS_map_config  (YVIKEYS_RIGHT, YVIKEYS_map_update, MAP_locator, MAP_addresser);
    REVERSE_report ();
+   yVIKEYS_cmds_direct (":overlay sample");
    /*---(complete)-----------------------*/
    DEBUG_TOPS   yLOG_exit     (__FUNCTION__);
    return 0;

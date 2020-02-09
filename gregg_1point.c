@@ -16,24 +16,26 @@ const float FULL_CIRCLE  = 2 * 3.14159;   // circle in radians
 void o___HELPER_________________o (void) {;}
 
 tPOINT*
-POINT__series           (char a_type, char *a_name, int *a_count)
+POINT__series           (char a_type, char *a_name, int *a_count, int *a_max)
 {
    /*---(locals)-----------+-----+-----+-*/
    tPOINT     *p           = NULL;
    int         c           =    0;
    char        x_name      [LEN_TERSE] = "";
+   int         m           =    0;
    /*---(point type)---------------------*/
    switch (a_type) {
-   case POINTS_RAW : p = o.raw;  c = o.nraw;  strlcpy (x_name, "RAW", LEN_TERSE);   break;
-   case POINTS_BAS : p = o.bas;  c = o.nbas;  strlcpy (x_name, "BAS", LEN_TERSE);   break;
-   case POINTS_AVG : p = o.avg;  c = o.navg;  strlcpy (x_name, "AVG", LEN_TERSE);   break;
-   case POINTS_TMP : p = NULL;   c = 0;       strlcpy (x_name, ""   , LEN_TERSE);   break;
-   case POINTS_KEY : p = o.key;  c = o.nkey;  strlcpy (x_name, "KEY", LEN_TERSE);   break;
-   default         : p = NULL;   c = 0;       strlcpy (x_name, ""   , LEN_TERSE);   break;
+   case POINTS_RAW : p = o.raw;  c = o.nraw;  m = LEN_HUGE;    strlcpy (x_name, "RAW", LEN_TERSE);   break;
+   case POINTS_BAS : p = o.bas;  c = o.nbas;  m = MAX_POINTS;  strlcpy (x_name, "BAS", LEN_TERSE);   break;
+   case POINTS_AVG : p = o.avg;  c = o.navg;  m = MAX_POINTS;  strlcpy (x_name, "AVG", LEN_TERSE);   break;
+   case POINTS_TMP : p = NULL;   c = 0;       m = 5;           strlcpy (x_name, ""   , LEN_TERSE);   break;
+   case POINTS_KEY : p = o.key;  c = o.nkey;  m = MAX_POINTS;  strlcpy (x_name, "KEY", LEN_TERSE);   break;
+   default         : p = NULL;   c = 0;       m = 0;           strlcpy (x_name, ""   , LEN_TERSE);   break;
    }
    /*---(return)-------------------*/
    if (a_count != NULL)  *a_count = c;
    if (a_name  != NULL)  strlcpy (a_name, x_name, LEN_TERSE);
+   if (a_max   != NULL)  *a_max   = m;
    /*---(complete)-----------------*/
    return p;
 }
@@ -51,9 +53,12 @@ POINT_clear             (tPOINT *a_point, char a_type)
    /*---(head)---------------------------*/
    a_point->series  = a_type;
    a_point->seq     = 0;
-   a_point->p_raw   = 0;
-   a_point->p_bas   = 0;
+   a_point->p_raw   = -1;
+   a_point->p_bas   = -1;
+   a_point->p_key   = -1;
    a_point->fake    = '-';
+   a_point->prekey  = '-';
+   a_point->marked  = '-';
    a_point->type    = POINT_NONE;
    /*---(touchpad)-----------------------*/
    a_point->x_touch = a_point->x_raw  = 0;
@@ -78,11 +83,12 @@ POINT_clear_series      (char a_type)
    char        rce         =  -10;
    int         i           =    0;
    tPOINT     *p           = NULL;
+   int         x_max       =    0;
    /*---(header)-------------------------*/
    DEBUG_CALC   yLOG_senter  (__FUNCTION__);
    DEBUG_DATA   yLOG_schar    (a_type);
    /*---(point type)------------------*/
-   p = POINT__series (a_type, NULL, NULL);
+   p = POINT__series (a_type, NULL, NULL, &x_max);
    DEBUG_DATA   yLOG_spoint   (p);
    --rce;  if (p == NULL) {
       DEBUG_CALC   yLOG_sexitr  (__FUNCTION__, rce);
@@ -113,7 +119,7 @@ POINT_clear_series      (char a_type)
     *> }                                                                              <*/
    /*---(clear all)-------------------*/
    DEBUG_DATA   yLOG_snote    ("clear all data");
-   for (i = 0; i < MAX_POINTS; ++i) {
+   for (i = 0; i < x_max; ++i) {
       POINT_clear (p + i, a_type);
    }
    /*---(complete)--------------*/
@@ -134,6 +140,51 @@ POINT_clear_all         (void)
    }
    /*---(complete)--------------*/
    DEBUG_CALC   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+
+
+/*============================--------------------============================*/
+/*===----                      copying and moving                      ----===*/
+/*============================--------------------============================*/
+void o___MOVEMENT_______________o (void) {;}
+
+char
+BASE_push_up            (short a_old)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   short       x_new       = a_old + 1;
+   short       x_raw       =    0;
+   /*---(header)-------------------------*/
+   DEBUG_RAW    yLOG_complex ("copy"      , "%3d into %3d", a_old, x_new);
+   /*---(raw points)---------------------*/
+   x_raw  = o.bas [a_old].p_raw;
+   /*---(fix raw ties)-------------------*/
+   o.raw [x_raw].p_bas   = x_new;
+   /*---(series/seq)---------------------*/
+   o.bas [x_new].series  = o.avg [x_new].series      = o.bas [a_old].series;
+   o.bas [x_new].seq     = o.avg [x_new].seq         = x_new;
+   o.bas [x_new].type    = o.avg [x_new].type        = o.bas [a_old].type;
+   /*---(tie raw and bas)----------------*/
+   o.bas [x_new].p_raw   = o.avg [x_new].p_raw       = x_raw;
+   o.bas [x_new].p_bas   = o.avg [x_new].p_bas       = x_new;
+   o.bas [x_new].p_key   = o.avg [x_new].p_key       = o.bas [a_old].p_key;
+   /*---(characteristics)----------------*/
+   o.bas [x_new].fake    = o.avg [x_new].fake        = o.bas [a_old].fake;
+   o.bas [x_new].prekey  = o.avg [x_new].prekey      = o.bas [a_old].prekey;
+   o.bas [x_new].marked  = o.avg [x_new].marked      = o.bas [a_old].marked;
+   /*---(original)-----------------------*/
+   o.bas [x_new].x_touch = o.avg [x_new].x_touch     = o.bas [a_old].x_touch;
+   o.bas [x_new].y_touch = o.avg [x_new].y_touch     = o.bas [a_old].y_touch;
+   o.bas [x_new].x_raw   = o.avg [x_new].x_raw       = o.bas [a_old].x_raw;
+   o.bas [x_new].y_raw   = o.avg [x_new].y_raw       = o.bas [a_old].y_raw;
+   /*---(screen)-------------------------*/
+   o.bas [x_new].x_rel   = o.avg [x_new].x_rel       = o.bas [a_old].x_rel;
+   o.bas [x_new].y_rel   = o.avg [x_new].y_rel       = o.bas [a_old].y_rel;
+   o.bas [x_new].x_pos   = o.avg [x_new].x_pos       = o.bas [a_old].x_pos;
+   o.bas [x_new].y_pos   = o.avg [x_new].y_pos       = o.bas [a_old].y_pos;
+   /*---(done)---------------------------*/
    return 0;
 }
 
@@ -304,7 +355,7 @@ POINT_seq_finish   (char a_type, tPOINT *p, int c, int a_xpad, int a_ypad)
 void o___STATISTICS_____________o (void) {;}
 
 char
-POINT_position     (tPOINT *a_curr)
+POINT_pos          (tPOINT *a_curr)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
@@ -509,13 +560,14 @@ POINT_show         (FILE *a_file, char a_style, tPOINT *a_curr, int a_num)
     *>    x_slope = -999.99;                                                          <* 
     *>    x_icept = -999;                                                             <* 
     *> }                                                                              <*/
-   fprintf (a_file, "%3d%s %3d%s %3d%s %c%s "            , a_num         , q1, a_curr->p_bas , q1, a_curr->p_raw , q1, a_curr->fake, q2);
-   fprintf (a_file, "%6d%s %6d%s %4d%s %4d%s "           , a_curr->x_raw, q1, a_curr->y_raw, q1, a_curr->xd    , q1, a_curr->yd  , q2);
-   fprintf (a_file, "%4d%s %8.2f%s %6d%s %5.2f%s %3d%s " , a_curr->len   , q1, a_curr->slope , q1, a_curr->icept , q1, a_curr->rads, q1, a_curr->degs , q2);
+   fprintf (a_file, "%3d%s %3d%s %3d%s %4d%s %c%s "      , a_num         , q1, a_curr->p_key , q1, a_curr->p_bas , q1, a_curr->p_raw , q1, a_curr->fake, q2);
+   fprintf (a_file, "%6d%s %6d%s %4.0f%s %4.0f%s "       , a_curr->x_raw, q1, a_curr->y_raw, q1, a_curr->xd    , q1, a_curr->yd  , q2);
+   fprintf (a_file, "%4.0f%s %8.2f%s %6.0f%s %5.2f%s %3.0f%s " , a_curr->len   , q1, a_curr->slope , q1, a_curr->icept , q1, a_curr->rads, q1, a_curr->degs , q2);
+   fprintf (a_file, "%c%s %c%s "                         , a_curr->prekey, q1, a_curr->marked, q1);
    fprintf (a_file, "%1d%s %1d%s %5.1f%s %2d%s "         , a_curr->quad  , q1, a_curr->range , q1, a_curr->cdepth, q1, a_curr->ccat, q1);
    fprintf (a_file, "%c%s %c%s %s%s "                    , a_curr->cano  , q1, a_curr->type  , q1, a_curr->use   , q2);
    fprintf (a_file, "%6.3f%s %6.3f%s "                   , a_curr->x_rel , q1, a_curr->y_rel , q1);
-   fprintf (a_file, "%4d%s %4d%s\n"                      , a_curr->x_pos , q1, a_curr->y_pos , q1);
+   fprintf (a_file, "%4.0f%s %4.0f%s\n"                      , a_curr->x_pos , q1, a_curr->y_pos , q1);
    return 0;
 }
 
@@ -526,10 +578,10 @@ POINT_list         (FILE *a_file, char a_style, tPOINT *a_series, int a_count)
    /*---(header)-------------------------*/
    if (a_style == 'd') {
       fprintf (a_file, "\n");
-      fprintf (a_file, "point inventory-------------------------------------------------------------------------------------------------------------\n");
-      fprintf (a_file, "### bas raw a | --xx-- --yy-- -xd- -yd- | -len -slope-- b-cept -rad- deg | q r curve cc c t u | -xrel- -yrel- xpos ypos xyln\n");
+      fprintf (a_file, "point inventory-----------------------------------------------------------------------------------------------------------------\n");
+      fprintf (a_file, "### key bas raw- a | --xx-- --yy-- -xd- -yd- | -len -slope-- b-cept -rad- deg | k m q r curve cc c t u | -xrel- -yrel- xpos ypos\n");
    } else if (a_style == 'g') {
-      fprintf (a_file, "###  bas  raw  a  --xx--  --yy--  -xd-  -yd-  -len  -slope--  b-cept  -rad-  deg  q  r  curve-  cc  c  t  u  --xrel  --yrel  xpos  ypos  xyln \n");
+      fprintf (a_file, "###  key  bas  raw  a  --xx--  --yy--  -xd-  -yd-  -len  -slope--  b-cept  -rad-  deg  q  r  curve-  cc  c  t  u  --xrel  --yrel  xpos  ypos \n");
    }
    /*---(points)-------------------------*/
    for (i = 0; i < a_count; ++i) {
@@ -537,8 +589,8 @@ POINT_list         (FILE *a_file, char a_style, tPOINT *a_series, int a_count)
    }
    /*---(footer)-------------------------*/
    if (a_style == 'd') {
-      fprintf (a_file, "### bas raw a | --xx-- --yy-- -xd- -yd- | -len -slope-- b-cept -rad- deg | q r curve cc c t u | -xrel- -yrel- xpos ypos xyln\n");
-      fprintf (a_file, "point inventory-------------------------------------------------------------------------------------------------------------\n");
+      fprintf (a_file, "### key bas raw- a | --xx-- --yy-- -xd- -yd- | -len -slope-- b-cept -rad- deg | k m q r curve cc c t u | -xrel- -yrel- xpos ypos\n");
+      fprintf (a_file, "point inventory-----------------------------------------------------------------------------------------------------------------\n");
       fprintf (a_file, "\n");
    }
    /*---(complete)-----------------------*/
@@ -602,7 +654,7 @@ POINT__unit          (char *a_question, char a_type, int a_num)
    char        x_pre       [LEN_TERSE] = "";
    /*---(initialize)---------------------*/
    strlcpy (unit_answer, "POINT unit       : unknownn request", 100);
-   p = POINT__series (a_type, x_pre, &c);
+   p = POINT__series (a_type, x_pre, &c, NULL);
    if (p == NULL)  return unit_answer;
    /*---(core data)----------------------*/
    if        (strncmp (a_question, "types"     , 20)  == 0) {

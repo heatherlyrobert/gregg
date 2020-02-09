@@ -108,14 +108,6 @@ dlist_letters(void)
     *>    glNewList (dl_dotted + i,  GL_COMPILE);  REVERSE_ellipse  (i, SHAPE_SAMPLE, 1);   glEndList();   <* 
     *> }                                                                                                   <*/
    /*---(draw pie wedges)------------------*/
-   /*> DLIST__title ("roundish");                                                                          <* 
-    *> for (i = 0; i < MAX_LETTERS; ++i) {                                                                 <* 
-    *>    if (strncmp(g_loc[i].label, "eof", 5) == 0) break;                                               <* 
-    *>    if (g_loc[i].type != SHAPE_ROUNDISH)                continue;                                    <* 
-    *>    glNewList (dl_solid  + i,  GL_COMPILE);  REVERSE_roundish (i, SHAPE_SAMPLE, 1);   glEndList();   <* 
-    *>    glNewList (dl_dotted + i,  GL_COMPILE);  REVERSE_roundish (i, SHAPE_SAMPLE, 1);   glEndList();   <* 
-    *> }                                                                                                   <*/
-   /*---(draw pie wedges)------------------*/
    /*> DLIST__title ("wedges");                                                                            <* 
     *> for (i = 0; i < MAX_LETTERS; ++i) {                                                                 <* 
     *>    if (strncmp(g_loc[i].label, "eof", 5) == 0) break;                                               <* 

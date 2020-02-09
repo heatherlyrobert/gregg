@@ -93,11 +93,11 @@ match_calc (int a_start, int a_count)
    float liney    = 0.0;
    float diffx    = 0.0;
    float diffy    = 0.0;
-   DEBUG_CURVE  printf("RUNNING CURVE CALCS\n");
-   DEBUG_CURVE  printf("key 1 = %2d at bas = %2d x=%4d, y=%4d\n", a_start, p1, xx1, yy1);
-   DEBUG_CURVE  printf("key 2 = %2d at bas = %2d x=%4d, y=%4d\n", a_start + a_count, p4, xx4, yy4);
-   DEBUG_CURVE  printf("so  slope = %8.3f and intercept = %4d\n", opens.slope, opens.icept);
-   DEBUG_CURVE  printf("   pt# -xx- -yy- --lx-- --ly-- --dx-- --dy-- theta degs curve\n");
+   DEBUG_CURV   printf("RUNNING CURVE CALCS\n");
+   DEBUG_CURV   printf("key 1 = %2d at bas = %2d x=%4d, y=%4d\n", a_start, p1, xx1, yy1);
+   DEBUG_CURV   printf("key 2 = %2d at bas = %2d x=%4d, y=%4d\n", a_start + a_count, p4, xx4, yy4);
+   DEBUG_CURV   printf("so  slope = %8.3f and intercept = %4d\n", opens.slope, opens.icept);
+   DEBUG_CURV   printf("   pt# -xx- -yy- --lx-- --ly-- --dx-- --dy-- theta degs curve\n");
    for (i = p1 + 1; i < p4; ++i) {
       /*---(start with calc'd point)------------*/
       if (opens.slope == 0.0) opens.slope = 0.001;
@@ -135,7 +135,7 @@ match_calc (int a_start, int a_count)
       if (opens.cdepth < rcurve) rcurve = opens.cdepth;
       if (fabs(opens.cdepth) > fabs(opens.cm)) opens.cm = opens.cdepth;
    }
-   DEBUG_CURVE  printf("   pt# -xx- -yy- --lx-- --ly-- --dx-- --dy-- theta degs curve\n");
+   DEBUG_CURV   printf("   pt# -xx- -yy- --lx-- --ly-- --dx-- --dy-- theta degs curve\n");
    opens.cdepth  = opens.cm;
    opens.ccat = -9;
    /*---(positive curves)----------------*/
@@ -636,7 +636,7 @@ combo_flaty        (int a_beg, int a_count, int a_offset)
       return -1;
    }
    /*---(add midpoint)-------------------*/
-   new = KEY_add (mid, 'y', '-');
+   new = KEY_add (mid, 'y', POINT_NORMAL, NULL);
    DEBUG__MATCHES  printf("m=%3d, d=%5.1f, k=%2d\n", mid, min, new);
    /*---(complete)-----------------------*/
    return new;
@@ -679,7 +679,7 @@ combo_midy         (int a_beg, int a_count, int a_offset)
       }
    }
    /*---(add midpoint)-------------------*/
-   new = KEY_add (mid, 'y', '-');
+   new = KEY_add (mid, 'y', POINT_NORMAL, NULL);
    DEBUG__MATCHES  printf("m=%3d, d=%5.1f, k=%2d\n", mid, min, new);
    /*---(complete)-----------------------*/
    return new;
@@ -722,7 +722,7 @@ combo_flatx        (int a_beg, int a_count, int a_offset)
       }
    }
    /*---(add midpoint)-------------------*/
-   new = KEY_add (mid, 'y', '-');
+   new = KEY_add (mid, 'y', POINT_NORMAL, NULL);
    DEBUG__MATCHES  printf("m=%3d, d=%5.1f, k=%2d\n", mid, min, new);
    /*---(complete)-----------------------*/
    return new;
@@ -765,7 +765,7 @@ combo_midx         (int a_beg, int a_count, int a_offset)
       }
    }
    /*---(add midpoint)-------------------*/
-   new = KEY_add (mid, 'y', '-');
+   new = KEY_add (mid, 'y', POINT_NORMAL, NULL);
    DEBUG__MATCHES  printf("m=%3d, d=%5.1f, k=%2d\n", mid, min, new);
    /*---(complete)-----------------------*/
    return new;

@@ -51,7 +51,7 @@ YVIKEYS_map_update      (char a_req)
    }
    /*---(update points/x)----------------*/
    if (rc == 0)  rc = YVIKEYS_map_clear (&g_xmap);
-   if (rc == 0)  rc = BAS_map_update    (&g_xmap, o.curr, g_ymap.gcur);
+   if (rc == 0)  rc = BASE_map_update    (&g_xmap, o.curr, g_ymap.gcur);
    /*> if (rc == 0)  rc = NODE_map_used     ( x_map, x_node,  x_max,  x_curr, a_type);   <*/
    /*> if (rc == 0)  rc = NODE_map_absolute ( x_map,  x_tab,  x_max, a_type);         <*/
    /*> if (rc == 0)  rc = NODE_map_local    ( x_map,  x_max, x_curr, x_node, a_type);   <*/
@@ -232,8 +232,42 @@ char
 USER_load            (char *a_words)
 {
    DEBUG_USER   yLOG_enter   (__FUNCTION__);
+   my.time_lapse = '-';
+   my.time_point = 9999;
    REVERSE_english_text (a_words, SHAPE_LOAD, 1, 'y');
    REVERSE_out_load     ();
+   o.cavg = 0;
+   DEBUG_USER   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+USER_timelapse       (char *a_words)
+{
+   DEBUG_USER   yLOG_enter   (__FUNCTION__);
+   my.time_lapse = 'y';
+   my.time_point =   0;
+   REVERSE_english_text (a_words, SHAPE_LOAD, 1, 'y');
+   REVERSE_out_load     ();
+   DEBUG_USER   yLOG_exit    (__FUNCTION__);
+}
+
+char
+USER_unload           (void)
+{
+   DEBUG_USER   yLOG_enter   (__FUNCTION__);
+   OUT_clear ();                  
+   DEBUG_USER   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+USER_zoom             (float a_zoom)
+{
+   DEBUG_USER   yLOG_enter   (__FUNCTION__);
+   if      (a_zoom < 1.0)  my.zoom = 1.0;
+   else if (a_zoom > 7.0)  my.zoom = 7.0;
+   else                    my.zoom = a_zoom;
    DEBUG_USER   yLOG_exit    (__FUNCTION__);
    return 0;
 }
@@ -267,6 +301,9 @@ USER_init            (void)
    rc = yVIKEYS_cmds_add ('f', "word"        , ""    , "a"    , USER_words           , ""                                                            );
    rc = yVIKEYS_cmds_add ('f', "guide"       , ""    , "s"    , USER_guide           , ""                                                            );
    rc = yVIKEYS_cmds_add ('f', "load"        , ""    , "a"    , USER_load            , ""                                                            );
+   rc = yVIKEYS_cmds_add ('f', "unload"      , ""    , "a"    , USER_unload          , ""                                                            );
+   rc = yVIKEYS_cmds_add ('f', "timelapse"   , ""    , "a"    , USER_timelapse       , ""                                                            );
+   rc = yVIKEYS_cmds_add ('f', "zoom"        , ""    , "f"    , USER_zoom            , ""                                                            );
    /*---(complete)-----------------------*/
    DEBUG_USER   yLOG_exit    (__FUNCTION__);
    return 0;

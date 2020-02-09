@@ -81,7 +81,7 @@ RAW__point         (int a_xpad, int a_ypad, char a_type)
    DEBUG_RAW    yLOG_sint    (o.nraw);
    DEBUG_RAW    yLOG_sint    (MAX_POINTS);
    /*---(max)------------------*/
-   --rce;  if (o.nraw >= MAX_POINTS) {
+   --rce;  if (o.nraw >= LEN_HUGE) {
       DEBUG_RAW    yLOG_snote   ("maxed out");
       DEBUG_RAW    yLOG_sexitr  (__FUNCTION__, rce);
       return rce;
@@ -145,7 +145,7 @@ RAW__point         (int a_xpad, int a_ypad, char a_type)
       break;
    }
    /*---(calculate)----------------------*/
-   POINT_position (o.raw + o.nraw);
+   POINT_pos (o.raw + o.nraw);
    /*---(update counters)----------------*/
    ++o.nraw;
    DEBUG_RAW    yLOG_sint    (o.nraw);
@@ -219,13 +219,21 @@ RAW_lift             (int a_xpad, int a_ypad)
    }
    /*---(process)------------------------*/
    if (rc == 0)  rc = RAW_equalize  ();
-   if (rc == 0)  rc = BASE_filter  ();
+   if (rc == 0)  rc = BASE_filter   ();
+   POINT_list (stdout, 'd', o.bas, o.nbas);
+   if (rc == 0)  rc = BASE_add_corners ();
+   POINT_list (stdout, 'd', o.bas, o.nbas);
+   if (rc == 0)  rc = CIRCLE_driver ();
+   POINT_list (stdout, 'd', o.bas, o.nbas);
+   /*> if (rc == 0)  rc = KEY_driver    ();                                           <*/
    /*> if (rc == 0)  rc = KEY_filter    ();                                           <* 
-    *> if (rc == 0)  rc = KEY_flatten ();                                             <* 
-    *> if (rc == 0)  rc = KEY_squeeze ();                                             <* 
-    *> if (rc == 0)  rc = KEY_sharps  ();                                             <* 
-    *> if (rc == 0)  rc = CIRCLE_driver ();                                           <* 
-    *> if (rc == 0)  rc = MATCH_driver  ();                                           <*/
+    *> if (rc == 0)  rc = KEY_flatten   ();                                           <* 
+    *> if (rc == 0)  rc = KEY_squeeze   ();                                           <* 
+    *> if (rc == 0)  rc = KEY_sharps    ();                                           <*/
+   /*> if (rc == 0)  rc = CIRCLE_driver_OLD ();                                       <*/
+   /*> if (rc == 0)  rc = MATCH_driver  ();                                           <*/
+   /*> POINT_list (stdout, 'd', o.bas, o.nbas);                                       <*/
+   /*> POINT_list (stdout, 'd', o.key, o.nkey);                                       <*/
    if (rc <  0) {
       printf ("dropped out early\n");
       return rc;
