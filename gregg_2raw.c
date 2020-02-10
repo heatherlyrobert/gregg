@@ -3,7 +3,7 @@
 
 
 
-PRIV char    stype     = '-';          /* p=prefix, o=outline, c=continue     */
+static char    stype     = '-';          /* p=prefix, o=outline, c=continue     */
 
 
 /*
@@ -167,28 +167,36 @@ RAW_touch            (int a_xpad, int a_ypad)
    /*---(locals)-----------+-----+-----+-*/
    char        rc          =    0;
    int         r           =  0.0;
+   /*---(header)-------------------------*/
+   DEBUG_RAW    yLOG_enter   (__FUNCTION__);
    /*---(calculate)----------------------*/
    r  = sqrt((a_xpad * a_xpad) + (a_ypad * a_ypad));
+   DEBUG_RAW    yLOG_double  ("r"         , r);
    /*---(assign type)--------------------*/
    /*> OUT_clear ();                                                                  <* 
     *> stype   = PART_MAIN;                                                           <* 
     *> o.xadj  = a_xpad;                                                              <* 
     *> o.yadj  = a_ypad;                                                              <*/
+   DEBUG_RAW    yLOG_char    ("stype"     , stype);
    if (r < SIZE_MED_AVG) {
-      if (stype != 'p')  OUT_clear ();
+      DEBUG_RAW    yLOG_note    ("inside new character ring");
+      if (stype != PART_PREFIX)  OUT_clear ();
       stype   = PART_MAIN;
       o.xadj  = a_xpad;
       o.yadj  = a_ypad;
    } else if (a_xpad < 0.0 && a_ypad > 0.0) {
+      DEBUG_RAW    yLOG_note    ("inside prefix area (-x, +y)");
       OUT_clear ();
       stype   = PART_PREFIX;
    } else {
+      DEBUG_RAW    yLOG_note    ("continue existing outline");
       stype   = PART_CONTINUE;
    }
    /*---(save points)--------------------*/
    if (rc == 0)  rc = RAW__point (a_xpad, a_ypad, POINT_START);
    if (rc == 0)  rc = RAW__point (a_xpad, a_ypad, POINT_HEAD);
    /*---(complete)-----------------------*/
+   DEBUG_RAW    yLOG_exit    (__FUNCTION__);
    return rc;
 }
 
@@ -219,10 +227,10 @@ RAW_lift             (int a_xpad, int a_ypad)
    }
    /*---(process)------------------------*/
    if (rc == 0)  rc = RAW_equalize  ();
+   POINT_list (stdout, 'd', o.raw, o.nraw);
    if (rc == 0)  rc = BASE_filter   ();
    POINT_list (stdout, 'd', o.bas, o.nbas);
    if (rc == 0)  rc = BASE_add_corners ();
-   POINT_list (stdout, 'd', o.bas, o.nbas);
    if (rc == 0)  rc = CIRCLE_driver ();
    POINT_list (stdout, 'd', o.bas, o.nbas);
    /*> if (rc == 0)  rc = KEY_driver    ();                                           <*/
@@ -267,6 +275,7 @@ RAW_load           (char *a_points)
    p = strtok_r (a_points, q, &r);
    /*---(get point pairs)----------------*/
    while (p != NULL) {
+      DEBUG_RAW    yLOG_info    ("first"     , p);
       /*> printf ("[%s]\n", p);                                                       <*/
       switch (p[0]) {
       case 'T' :
@@ -274,12 +283,14 @@ RAW_load           (char *a_points)
          /*> printf ("   touch type\n");                                              <*/
          x_type = 'T';
          p = strtok_r (NULL, q, &r);
+         DEBUG_RAW    yLOG_info    ("TOUCH"     , p);
          break;
       case 'L' :
          DEBUG_RAW    yLOG_note    ("LIFT");
          /*> printf ("   lift type\n");                                               <*/
          x_type = 'L';
          p = strtok_r (NULL, q, &r);
+         DEBUG_RAW    yLOG_info    ("LIFT"      , p);
          break;
       default :
          x_type = '-';
@@ -291,6 +302,7 @@ RAW_load           (char *a_points)
       DEBUG_RAW    yLOG_complex ("x-pos"     , "%s, %dy", p, x);
       p = strtok_r (NULL, q, &r);
       if (p == NULL)  break;
+      DEBUG_RAW    yLOG_info    ("and y"     , p);
       y = atoi (p);
       DEBUG_RAW    yLOG_complex ("y-pos"     , "%s, %dy", p, y);
       switch (x_type) {

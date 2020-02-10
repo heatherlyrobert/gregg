@@ -56,13 +56,25 @@ static short  s_yradius    =    0;
 static void o___OUTPUT_________________o (void) {;}
 
 char
+REVERSE_out__show_tail  (void)
+{
+   int         x_len       =    0;
+   x_len = strlen (s_load);
+   DEBUG_OUTP   yLOG_note    (s_load + x_len - 50);
+
+
+}
+
+char
 REVERSE_out_start       (void)
 {
+   DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
    strlcpy (s_load, ""         , LEN_OUT);
    s_count = 0;
    s_xpos = 0;
    s_ypos = 0;
    REVERSE_out_touch  (0, 0);
+   DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
    return 0;
 }
 
@@ -70,11 +82,14 @@ char
 REVERSE_out_touch       (int x, int y)
 {
    char        t           [LEN_LABEL] = "";
+   DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
    sprintf (t, ";TOUCH,%d,%d", x, y);
    strlcat (s_load, t, LEN_OUT);
    s_xpos = x;
    s_ypos = y;
    ++s_count;
+   REVERSE_out__show_tail ();
+   DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
    return 0;
 }
 
@@ -85,6 +100,7 @@ REVERSE_out_append      (int x, int y)
    sprintf (t, ";%d,%d", x, y);
    strlcat (s_load, t, LEN_OUT);
    ++s_count;
+   REVERSE_out__show_tail ();
    return 0;
 }
 
@@ -92,17 +108,22 @@ char
 REVERSE_out_lift        (int x, int y)
 {
    char        t           [LEN_LABEL] = "";
+   DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
    sprintf (t, ";LIFT,%d,%d", x, y);
    strlcat (s_load, t, LEN_OUT);
    ++s_count;
+   REVERSE_out__show_tail ();
+   DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
    return 0;
 }
 
 char
 REVERSE_out_done        (void)
 {
+   DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
    REVERSE_out_lift (s_xpos, s_ypos);
    strlcat (s_load, ";"        , LEN_OUT);
+   DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
    return 0;
 }
 
@@ -773,8 +794,10 @@ REVERSE_gregg_word      (uchar *a_outline, char a_type, char a_skip)
    /*> REVERSE_make_letter  (">", a_type, a_skip);                           <*/
    /*---(walk)---------------------------*/
    while (p != NULL) {
+      DEBUG_OUTP   yLOG_info    ("p"         , p);
       x_last = p;
       if (strcmp (">", p) == 0) {
+         DEBUG_OUTP   yLOG_note    ("found a multipart indicator");
          if      (a_type == SHAPE_LOAD) {
             REVERSE_out_lift   (s_xpos, s_ypos);
             s_xpos +=  0.0 * x_sizer;
@@ -786,6 +809,7 @@ REVERSE_gregg_word      (uchar *a_outline, char a_type, char a_skip)
             s_ypos -= 10.0 * x_sizer;
          }
       } else {
+         DEBUG_OUTP   yLOG_note    ("normal letter");
          /*> REVERSE_make_letter  ("dot", a_type, a_skip);                            <*/
          REVERSE_make_letter  (p, a_type, a_skip);
          /*> switch (s_type) {                                                        <* 
@@ -913,7 +937,6 @@ REVERSE_english_word    (uchar *a_word, char a_type, char a_skip)
    char        rce         =  -10;
    char        rc          =    0;
    tWORDS     *x_word      = NULL;
-   uchar       x_shown     [LEN_HUND]  = "";
    /*---(header)-------------------------*/
    DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
    /*---(defense)------------------------*/
@@ -931,16 +954,18 @@ REVERSE_english_word    (uchar *a_word, char a_type, char a_skip)
       DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
+   strlcpy (my.word , a_word       , LEN_HUND);
+   strlcpy (my.gregg, x_word->gregg, LEN_HUND);
    /*---(translate)----------------------*/
-   rc = WORDS_drawn_show     (x_word->drawn, x_shown);
+   rc = WORDS_drawn_show     (x_word->drawn, my.shown);
    DEBUG_OUTP   yLOG_value   ("tranlate"  , rc);
    --rce;  if (rc < 0) {
       DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   DEBUG_OUTP   yLOG_info    ("x_shown"   , x_shown);
+   DEBUG_OUTP   yLOG_info    ("my.shown"  , my.shown);
    /*---(display)------------------------*/
-   rc = REVERSE_gregg_word (x_shown, a_type, a_skip);
+   rc = REVERSE_gregg_word (my.shown, a_type, a_skip);
    DEBUG_OUTP   yLOG_value   ("outline"   , rc);
    --rce;  if (rc < 0) {
       DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);

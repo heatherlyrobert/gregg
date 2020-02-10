@@ -15,6 +15,7 @@
 /*---(configuration)------------------*/
 static float   s_append    =  4.0;
 static float   s_adjust    =  0.5;
+static short   s_progress  =    0;
 
 
 /*============================--------------------============================*/
@@ -233,36 +234,62 @@ BASE_handler            (short a_bef, short a_new, short a_aft)
 /*============================--------------------============================*/
 static void o___STATISTICS_____________o (void) {;}
 
+char
+BASE__calc_copy      (short a_dst, short a_src)
+{
+   /*---(base data)----------------------*/
+   o.bas [a_dst].slope = o.bas [a_src].slope;
+   o.bas [a_dst].icept = o.bas [a_src].icept;
+   o.bas [a_dst].rads  = o.bas [a_src].rads;
+   o.bas [a_dst].degs  = o.bas [a_src].degs;
+   o.bas [a_dst].quad  = o.bas [a_src].quad;
+   /*---(average data)-------------------*/
+   o.avg [a_dst].slope = o.avg [a_src].slope;
+   o.avg [a_dst].icept = o.avg [a_src].icept;
+   o.avg [a_dst].rads  = o.avg [a_src].rads;
+   o.avg [a_dst].degs  = o.avg [a_src].degs;
+   o.avg [a_dst].quad  = o.avg [a_src].quad;
+   return 0;
+}
+
 char          /*----: calculate additional information on basic points -------*/
 BASE_calc_all        (void)
 {
    /*---(locals)-----------+-----+-----+-*/
-   int i;
+   int         i;
+   char        x_type      =  '-';
    /*---(calc real points)---------------*/
    for (i = 0; i < o.nbas; ++i) POINT_calc (POINTS_BAS, o.bas + i, 'n');
    for (i = 0; i < o.navg; ++i) POINT_calc (POINTS_AVG, o.avg + i, 'a');
    /*---(fill in bas data)---------------*/
-   o.bas [0].slope = o.bas [1].slope = o.bas [2].slope;
-   o.bas [0].icept = o.bas [1].icept = o.bas [2].icept;
-   o.bas [0].rads  = o.bas [1].rads  = o.bas [2].rads;
-   o.bas [0].degs  = o.bas [1].degs  = o.bas [2].degs;
-   o.bas [0].quad = o.bas [1].quad = o.bas [2].quad;
-   o.bas [o.nbas - 1].slope = o.bas [o.navg - 2].slope;
-   o.bas [o.nbas - 1].icept = o.bas [o.navg - 2].icept;
-   o.bas [o.nbas - 1].rads = o.bas [o.navg - 2].rads;
-   o.bas [o.nbas - 1].degs = o.bas [o.navg - 2].degs;
-   o.bas [o.nbas - 1].quad = o.bas [o.navg - 2].quad;
+   for (i = 0; i < o.navg; ++i) {
+      x_type = o.bas [i].type;
+      if (x_type == POINT_START)  BASE__calc_copy (i, i + 2);
+      if (x_type == POINT_HEAD)   BASE__calc_copy (i, i + 1);
+      if (x_type == POINT_TAIL)   BASE__calc_copy (i, i - 1);
+      if (x_type == POINT_FINISH) BASE__calc_copy (i, i - 2);
+   }
+   /*> o.bas [0].slope = o.bas [1].slope = o.bas [2].slope;                           <* 
+    *> o.bas [0].icept = o.bas [1].icept = o.bas [2].icept;                           <* 
+    *> o.bas [0].rads  = o.bas [1].rads  = o.bas [2].rads;                            <* 
+    *> o.bas [0].degs  = o.bas [1].degs  = o.bas [2].degs;                            <* 
+    *> o.bas [0].quad = o.bas [1].quad = o.bas [2].quad;                              <* 
+    *> o.bas [o.nbas - 1].slope = o.bas [o.navg - 2].slope;                           <* 
+    *> o.bas [o.nbas - 1].icept = o.bas [o.navg - 2].icept;                           <* 
+    *> o.bas [o.nbas - 1].rads = o.bas [o.navg - 2].rads;                             <* 
+    *> o.bas [o.nbas - 1].degs = o.bas [o.navg - 2].degs;                             <* 
+    *> o.bas [o.nbas - 1].quad = o.bas [o.navg - 2].quad;                             <*/
    /*---(fill in avg data)---------------*/
-   o.avg [0].slope = o.avg [1].slope = o.avg [2].slope;
-   o.avg [0].icept = o.avg [1].icept = o.avg [2].icept;
-   o.avg [0].rads = o.avg [1].rads = o.avg [2].rads;
-   o.avg [0].degs = o.avg [1].degs = o.avg [2].degs;
-   o.avg [0].quad = o.avg [1].quad = o.avg [2].quad;
-   o.avg [o.navg - 1].slope = o.avg [o.navg - 2].slope;
-   o.avg [o.navg - 1].icept = o.avg [o.navg - 2].icept;
-   o.avg [o.navg - 1].rads = o.avg [o.navg - 2].rads;
-   o.avg [o.navg - 1].degs = o.avg [o.navg - 2].degs;
-   o.avg [o.navg - 1].quad = o.avg [o.navg - 2].quad;
+   /*> o.avg [0].slope = o.avg [1].slope = o.avg [2].slope;                           <* 
+    *> o.avg [0].icept = o.avg [1].icept = o.avg [2].icept;                           <* 
+    *> o.avg [0].rads = o.avg [1].rads = o.avg [2].rads;                              <* 
+    *> o.avg [0].degs = o.avg [1].degs = o.avg [2].degs;                              <* 
+    *> o.avg [0].quad = o.avg [1].quad = o.avg [2].quad;                              <* 
+    *> o.avg [o.navg - 1].slope = o.avg [o.navg - 2].slope;                           <* 
+    *> o.avg [o.navg - 1].icept = o.avg [o.navg - 2].icept;                           <* 
+    *> o.avg [o.navg - 1].rads = o.avg [o.navg - 2].rads;                             <* 
+    *> o.avg [o.navg - 1].degs = o.avg [o.navg - 2].degs;                             <* 
+    *> o.avg [o.navg - 1].quad = o.avg [o.navg - 2].quad;                             <*/
    /*---(complete)-----------------------*/
    return 0;
 }
@@ -487,21 +514,26 @@ BASE_filter        (void)
 {
    /*---(locals)-----------+-----+-----+-*/
    int         i           =    0;
+   char        x_type      =  '-';
    char        x_prev      =  '-';
    float       d           =  0.0;
+   short       x_beg       =    0;
+   short       x_end       =    0;
    /*---(header)-------------------------*/
    DEBUG_AVG    yLOG_enter   (__FUNCTION__);
    /*---(beg points)---------------------*/
-   o.nbas = o.navg = 0;
+   if (o.nbas > 0)  x_beg = o.bas [o.nbas - 1].p_raw;
+   x_end = o.nraw;
    /*---(find additional points)---------*/
-   for (i = 0; i < o.nraw; ++i) {
+   for (i = x_beg; i < x_end; ++i) {
       /*---(prepare)------------------------*/
       if (o.nbas > 0)  x_prev  = o.bas [o.nbas - 1].type;
+      x_type = o.raw [i].type;
       /*---(check collapse)--------------*/
-      if (o.raw [i].type == POINT_TAIL && x_prev == POINT_NORMAL) {
-         d  = BASE__dist  (i, i - 2);
+      if (x_type == POINT_TAIL && x_prev == POINT_NORMAL) {
+         d  = BASE__dist  (i, o.bas [i - 2].p_raw);
          DEBUG_AVG    yLOG_double  ("to tail"   , d);
-         if (d <= 4.5) {
+         if (d <= s_append)  {
             DEBUG_AVG    yLOG_note    ("collapsing last normal before tail");
             --o.nbas;
             --o.navg;

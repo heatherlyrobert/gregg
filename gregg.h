@@ -26,8 +26,8 @@
 
 #define     P_VERMAJOR  "5.--= generalization for broader use"
 #define     P_VERMINOR  "5.3 = update for use as coding example"
-#define     P_VERNUM    "5.3c"
-#define     P_VERTXT    "updated raw points and circle/intesection finding.  very nice"
+#define     P_VERNUM    "5.3d"
+#define     P_VERTXT    "fixed base point filtering for multi-part outlines"
 
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -282,6 +282,8 @@ struct cWIN {
    int         d_bar;                       /* control bar height             */
    int         d_ansx;                      /* answer x offset                */
    int         d_ansy;                      /* answer y offset                */
+   int         d_reqx;                      /* answer x offset                */
+   int         d_reqy;                      /* answer y offset                */
    /*---(fonts)-------------*/
    char        face_pretty     [50];
    int         font_pretty;
@@ -334,7 +336,10 @@ struct cACCESSOR {
    char        keys        [LEN_LABEL];
    char        key_error;
    char        quit;
-   char        words       [LEN_RECD];
+   uchar       words       [LEN_RECD];
+   uchar       word        [LEN_HUND];
+   uchar       gregg       [LEN_HUND];
+   uchar       shown       [LEN_HUND];
    char        guide       [LEN_RECD];
    /*---(globals)--------------*/
    char        dict;
@@ -829,6 +834,7 @@ char       DRAW_info            (void);
 char       DRAW_info_counts     (void);
 char       DRAW_info_base       (void);
 char       DRAW_info_answer     (void);
+char       DRAW_info_request    (void);
 
 char       draw_letters      (void);
 char       draw_ellipse      (int, char);

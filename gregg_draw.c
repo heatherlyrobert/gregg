@@ -56,6 +56,8 @@ DRAW__sizes        (cint a_wide, cint a_tall)
    win.d_bar    =    20;
    win.d_ansx   =   200;
    win.d_ansy   =  -160;
+   win.d_reqx   =  -100;
+   win.d_reqy   =  -180;
    yVIKEYS_view_bounds   (YVIKEYS_MAIN  , &(my.x_min), &(my.x_max ), NULL, &(my.y_min), &(my.y_max ), NULL);
    yVIKEYS_view_bounds   (YVIKEYS_MAIN  , NULL     , NULL      , &(my.x_wide), NULL     , NULL      , &(my.y_tall));
    my.x_wide    = my.x_wide + 40;
@@ -199,6 +201,7 @@ DRAW_primary         (float a_mag)
    /*> REVERSE_text    ("r·o2·b sh·t·nd"                        , SHAPE_DRAW, 1, 'y');   <*/
    /*> REVERSE_english_text ("rob shorthand"     , SHAPE_DRAW, 1, 'y');               <*/
    REVERSE_english_text (my.words, SHAPE_DRAW, 1, 'y');
+   DRAW_info_request ();
    if (my.touch != 'y') {
       /*> DRAW_info_counts ();                                                        <*/
       /*> DRAW_info_base   ();                                                        <*/
@@ -828,6 +831,26 @@ OVERLAY_data    (void)
       FONT__label   ("ratio" , t);
       /*---(done)------------------------*/
    } glPopMatrix();
+   /*---(complete)-----------------------*/
+   return 0;
+}
+
+char
+DRAW_info_request    (void)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        t           [100];
+   /*---(point counts)-------------------*/
+   glColor4f     (0.0f, 0.0f, 0.0f, 1.0f);
+   glPushMatrix  (); {
+      glTranslatef(  win.d_reqx, win.d_reqy, win.d_zoff);
+      snprintf      (t, 100, "%s",   my.word);
+      FONT__label   ("word"  , t);
+      snprintf      (t, 100, "%s",   my.gregg);
+      FONT__label   ("gregg" , t);
+      snprintf      (t, 100, "%s",   my.shown);
+      FONT__label   ("shown" , t);
+   } glPopMatrix ();
    /*---(complete)-----------------------*/
    return 0;
 }
