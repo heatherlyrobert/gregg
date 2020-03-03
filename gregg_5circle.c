@@ -3,6 +3,26 @@
 
 
 
+
+static int         s_min       =    7;
+static int         s_max       =   20;
+
+
+
+/*============================--------------------============================*/
+/*===----                      program level                           ----===*/
+/*============================--------------------============================*/
+static void o___PROGRAM________________o (void) {;}
+
+char
+CIRCLE_config           (int a_min, int a_max)
+{
+   s_min    = a_min;
+   s_max    = a_max;
+   return 0;
+}
+
+
 /*============================--------------------============================*/
 /*===----                       identify circles                       ----===*/
 /*============================--------------------============================*/
@@ -212,7 +232,9 @@ CIRCLE_idenfication     (void)
    /*---(mark bas/avg points)------------*/
    x_beg = o.raw [mina].p_bas;
    x_end = o.raw [minb].p_bas;
-   for (i = x_beg; i <= x_end; ++i) {
+   for (i = x_beg + 1; i <= x_end; ++i) {
+      o.bas [i].prekey = '/';
+      o.avg [i].prekey = '/';
       o.bas [i].marked = x_type;
       o.avg [i].marked = x_type;
    }
@@ -518,18 +540,22 @@ CIRCLE_driver           (void)
 {
    char        rc          =    0;
    int         a, b;
-   int         x_min       =    4;
-   int         x_max       =   20;
    int         x_beg       =    0;
    int         x_end       =    0;
    int         c           =    0;
    /*---(header)-------------------------*/
    DEBUG_CIRC   yLOG_enter   (__FUNCTION__);
-   for (a = 0; a < o.navg - x_min; ++a) {
-      x_beg = a + x_min;
-      x_end = a + x_max;
-      if (x_end > o.navg)  x_end = o.navg;
+   DEBUG_CIRC   yLOG_value   ("s_min"     , s_min);
+   DEBUG_CIRC   yLOG_value   ("s_max"     , s_max);
+   for (a = 0; a < o.navg - s_min; ++a) {
+      if (o.bas [a].type == POINT_TAIL)    continue;
+      if (o.bas [a].type == POINT_FINISH)  continue;
+      x_beg = a + s_min;
+      x_end = a + s_max;
+      if (x_end >= o.navg)  x_end = o.navg - 1;
       for (b = x_beg; b < x_end; ++b) {
+         if (o.bas [b].type == POINT_TAIL)    break;
+         if (o.bas [b].type == POINT_FINISH)  break;
          rc = CIRCLE__intersect (a, b);
          if (rc < 0)  continue;
          rc = CIRCLE__fix_ends  (a, b);

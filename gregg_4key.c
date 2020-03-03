@@ -75,7 +75,7 @@ KEY_curve          (int a_pt)
    int i;
    int deg   = o.key[a_pt].degs;
    int range = -1;
-   range = match_range(deg);
+   range = MATCH_range(deg);
    o.key[a_pt].range = range;
    /*---(calc the arch)-------------------------*/
    int   p1       = o.key[a_pt - 1].p_bas;
@@ -92,10 +92,10 @@ KEY_curve          (int a_pt)
    float liney    = 0.0;
    float diffx    = 0.0;
    float diffy    = 0.0;
-      /*> printf("RUNNING CURVE CALCS\n");                                                      <* 
-       *> printf("key 1 = %2d at bas = %2d x=%4d, y=%4d\n", a_start, p1, xx1, yy1);             <* 
-       *> printf("key 2 = %2d at bas = %2d x=%4d, y=%4d\n", a_start + a_count, p4, xx4, yy4);   <* 
-       *> printf("so  slope = %8.3f and intercept = %4d\n", x_slope, x_icept);                          <*/
+   /*> printf("RUNNING CURVE CALCS\n");                                                      <* 
+    *> printf("key 1 = %2d at bas = %2d x=%4d, y=%4d\n", a_start, p1, xx1, yy1);             <* 
+    *> printf("key 2 = %2d at bas = %2d x=%4d, y=%4d\n", a_start + a_count, p4, xx4, yy4);   <* 
+    *> printf("so  slope = %8.3f and intercept = %4d\n", x_slope, x_icept);                          <*/
    for (i = p1 + 1; i < p4; ++i) {
       liney   = (x_slope * o.bas[i].x_raw) + x_icept;
       linex   = (o.bas[i].y_raw - x_icept) / x_slope;
@@ -117,10 +117,8 @@ KEY_curve          (int a_pt)
       if (curve < rcurve) rcurve = curve;
       if (fabs(curve) > fabs(maxcurve)) maxcurve = curve;
    }
-   DEBUG_CURV  printf("key_curve for key points %d/%d (bas %02d/%02d) maxcurve=%5.1f\n", a_pt, a_pt + 1, p1, p4, maxcurve);
-   o.key[a_pt].cdepth = maxcurve / my.ratio;
-   o.key[a_pt].cano   = '-';
-   if (lcurve != 0 && rcurve != 0) o.key[a_pt].cano = 'x';
+   /*> DEBUG_CURV  printf("key_curve for key points %d/%d (bas %02d/%02d) maxcurve=%5.1f\n", a_pt, a_pt + 1, p1, p4, maxcurve);   <*/
+   o.key[a_pt].depth = maxcurve / my.ratio;
    o.key[a_pt].ccat = -9;
    if      (maxcurve >=  (o.key[a_pt].len * 0.15) || maxcurve >=  2.0)   o.key[a_pt].ccat = +1;
    else if (maxcurve <= -(o.key[a_pt].len * 0.15) || maxcurve <= -2.0)   o.key[a_pt].ccat = -1;
@@ -141,18 +139,17 @@ KEY_calc           (char a_mode)
    /*---(process)------------------------*/
    for (i = 0; i < o.nkey; ++i) {
       /*---(initialize)------------------*/
-      o.key [i].xd = o.key [i].yd = o.key [i].len               = 0;
-      o.key [i].slope  = o.key [i].icept  = o.key [i].rads  = o.key [i].degs  = 0;
-      o.key [i].quad  = o.key [i].range = o.key [i].cdepth  = o.key [i].ccat = 0;
-      o.key [i].cano = '-';
+      o.key [i].xd    = o.key [i].yd    = o.key [i].len   = 0;
+      o.key [i].slope = o.key [i].icept = o.key [i].rads  = o.key [i].degs  = 0;
+      o.key [i].quad  = o.key [i].range = o.key [i].depth = o.key [i].ratio = o.key [i].ccat = 0;
       /*---(display)---------------------*/
       /*> POINT_display (o.key + i);                                                  <*/
       /*---(filter)----------------------*/
       if (a_mode == 'n' && o.key[i].type == POINT_HEAD) continue;
       if (a_mode == 'c' && o.key[i].type == POINT_START) continue;
       /*---(calculate)-------------------*/
-      POINT_calc (POINTS_KEY, o.key + i, 'n');
-      KEY_curve (i);
+      POINT_calc  (POINTS_KEY, o.key + i, 'n');
+      POINT_curve (i - 1, i, o.key [i].len, o.key [i].slope, o.key [i].icept, &(o.key [i].depth), &(o.key [i].ratio), &(o.key [i].ccat));
    }
    /*---(complete)-----------------------*/
    return 0;
@@ -168,17 +165,51 @@ KEY_find           (int a_pt)
    return -1;
 }
 
-char          /*----: add a key point from a avg point -----------------------*/
-KEY_add            (int a_bas, char a_fake, char a_type, char *a_use)
+
+
+/*============================--------------------============================*/
+/*===----                      adding raw points                       ----===*/
+/*============================--------------------============================*/
+static void o___NEW____________________o (void) {;}
+
+char
+KEY__force_point    (uchar a_type, short x, short y, uchar a_mark, uchar a_sharp)
 {
-   DEBUG_CRIT  printf("   key request for %4d as a=%c, t=%c : ", a_bas, a_fake, a_type);
+   /*---(tie raw and bas)-----------------*/
+   o.key [o.nkey].p_raw   = -1;
+   o.key [o.nkey].p_bas   = -1;
+   /*---(head)----------------------------*/
+   o.key [o.nkey].seq     = o.nkey;
+   o.key [o.nkey].fake    = '-';
+   o.key [o.nkey].type    = a_type;
+   o.key [o.nkey].marked  = a_mark;
+   /*---(touchpad)------------------------*/
+   o.key [o.nkey].x_touch = x;
+   o.key [o.nkey].x_raw   = x;
+   o.key [o.nkey].y_touch = y;
+   o.key [o.nkey].y_raw   = y;
+   /*---(series)--------------------------*/
+   o.key [o.nkey].series  = POINTS_KEY;
+   /*---(position)-----------------------*/
+   POINT_pos (o.key + o.nkey);
+   o.key [o.nkey].sharp   = a_sharp;
+   /*---(counters)-----------------------*/
+   ++o.nkey;
+   /*---(complete)-----------------------*/
+   return 0;
+}
+
+char          /*----: add a key point from a avg point -----------------------*/
+KEY_add            (short a_bas, uchar a_fake, uchar a_type, uchar *a_use)
+{
+   /*> DEBUG_CRIT  printf("   key request for %4d as a=%c, t=%c : ", a_bas, a_fake, a_type);   <*/
    /*---(locals)-------------------------*/
    int pt  = -1;
    short       x_raw       =    0;
    /*---(check for existing)-------------*/
    pt  = KEY_find (a_bas);
    if (pt >= 0) {
-      DEBUG_CRIT  printf("already exists as %d\n", pt);
+      /*> DEBUG_CRIT  printf("already exists as %d\n", pt);                           <*/
       return pt;
    }
    /*---(link raw/bas)-------------------*/
@@ -202,11 +233,11 @@ KEY_add            (int a_bas, char a_fake, char a_type, char *a_use)
    o.key [o.nkey].type   = a_type;
    /*---(update the keys)----------------*/
    ++o.nkey;
-   KEY__sort ();
+   /*> KEY__sort ();                                                                  <*/
    KEY_calc  ('n');
    /*---(locate after sort)--------------*/
-   pt = KEY_find (a_bas);
-   DEBUG_CRIT  printf("added as %d\n", pt);
+   /*> pt = KEY_find (a_bas);                                                         <*/
+   /*> DEBUG_CRIT  printf("added as %d\n", pt);                                       <*/
    /*---(complete)-----------------------*/
    return pt;
 }
@@ -214,7 +245,7 @@ KEY_add            (int a_bas, char a_fake, char a_type, char *a_use)
 char          /*----: remove a key point -------------------------------------*/
 KEY_del            (int a_pt)
 {
-   DEBUG_CRIT  printf("   key delete  for %4d\n", a_pt);
+   /*> DEBUG_CRIT  printf("   key delete  for %4d\n", a_pt);                          <*/
    int i;
    for (i = a_pt + 1 ; i < o.nkey; ++i) {
       o.key[i - 1].p_raw  = o.key[i].p_raw;
@@ -237,7 +268,7 @@ KEY_prep           (void)
 {
    int i;
    int     nclean  = 0;
-   DEBUG_CRIT  printf("   preparing for matching\n");
+   /*> DEBUG_CRIT  printf("   preparing for matching\n");                             <*/
    for (i = 0 ; i < o.nkey; ++i) {
       if (o.key[i].type == POINT_HEAD) {
          strncpy(o.key[i].use, ">", 5);
@@ -251,17 +282,17 @@ KEY__clean           (void)
 {
    int i;
    int     nclean  = 0;
-   DEBUG_CRIT  printf("   cleaning for similar points\n");
+   /*> DEBUG_CRIT  printf("   cleaning for similar points\n");                        <*/
    for (i = 1 ; i < o.nkey; ++i) {
       if (o.key[i].type == POINT_HEAD)            continue;
       if (o.key[i].quad == o.key[i - 1].quad) {
-         DEBUG_CRIT  printf("   cleaned out %d\n", i);
+         /*> DEBUG_CRIT  printf("   cleaned out %d\n", i);                            <*/
          KEY_del(i - 1);
          --i;
          ++nclean;
       }
    }
-   if (nclean == 0) DEBUG_CRIT  printf("   none cleaned\n");
+   /*> if (nclean == 0) DEBUG_CRIT  printf("   none cleaned\n");                      <*/
    return 0;
 }
 
@@ -280,7 +311,7 @@ KEY__extend        (void)
          rad = o.key[i + 1].rads;
          o.bas[pt].x_raw  = o.avg[pt].x_raw  = o.key[i].x_raw - (15 * my.ratio * cos (rad)) ;
          o.bas[pt].y_raw  = o.avg[pt].y_raw  = o.key[i].y_raw - (15 * my.ratio * sin (rad)) ;
-         DEBUG_CRIT  printf("   extended beg %4d to %4dx, %4dy for circle detection\n", pt, o.bas[pt].x_raw, o.bas[pt].y_raw);
+         /*> DEBUG_CRIT  printf("   extended beg %4d to %4dx, %4dy for circle detection\n", pt, o.bas[pt].x_raw, o.bas[pt].y_raw);   <*/
       }
       /*---(ending)-------------------------*/
       if (o.key[i + 1].type == POINT_HEAD || i + 1 == o.nkey) {
@@ -288,49 +319,69 @@ KEY__extend        (void)
          rad = o.key[i    ].rads;
          o.bas[pt].x_raw  = o.avg[pt].x_raw  = o.key[i].x_raw + (15 * my.ratio * cos (rad)) ;
          o.bas[pt].y_raw  = o.avg[pt].y_raw  = o.key[i].y_raw + (15 * my.ratio * sin (rad)) ;
-         DEBUG_RAW   printf("   extended end %4d to %4dx, %4dy for circle detection\n", pt, o.bas[pt].x_raw, o.bas[pt].y_raw);
+         /*> DEBUG_RAW   printf("   extended end %4d to %4dx, %4dy for circle detection\n", pt, o.bas[pt].x_raw, o.bas[pt].y_raw);   <*/
       }
    }
    /*---(complete)-----------------------*/
    return 0;
 }
 
-char          /*----: identify key points from bas/avg ones ------------------*/
-KEY_filter         (void)
-{
-   int i;
-   DEBUG_CRIT  printf("KEY POINTS (begin)\n");
-   /*---(identify criticals)-------------*/
-   o.nkey = 0;
-   /*> key_beg ();                                                                    <*/
-   /*> key_end ();                                                                    <*/
-   /*---(process)------------------------*/
-   for (i = 0; i < o.navg; ++i) {
-      /*---(filter)----------------------*/
-      if      (o.avg[i].type == POINT_START )  continue;
-      if      (o.avg[i].type == POINT_FINISH)  continue;
-      /*---(mark)------------------------*/
-      if        (o.avg[i + 1].type == POINT_FINISH) {
-         KEY_add (i, '-', POINT_FINISH, NULL);
-      } else if (o.avg[i - 1].type == POINT_START) {
-         KEY_add (i, '-', POINT_HEAD  , NULL);
-      } else if (o.avg[i - 1].quad == 0) {
-         continue;
-      } else if (o.avg[i].quad != o.avg[i - 1].quad) {
-         KEY_add (i, '-', POINT_NORMAL, NULL);
-      }
-   }
-   /*> KEY__clean   ();                                                               <*/
-   /*> KEY__extend  ();                                                               <*/
-   /*> CLEAN_sharpen ();                                                               <*/
-   /*---(display version)----------------*/
-   /*> for (i = 0; i < o.nkey; ++i) {                                                 <* 
-    *>    POINT_display (o.key + i);                                                  <* 
-    *> }                                                                              <*/
-   /*---(completion)---------------------*/
-   DEBUG_CRIT  printf("KEY POINTS (end)\n\n");
-   return 0;
-}
+/*> char          /+----: identify key points from bas/avg ones ------------------+/             <* 
+ *> KEY_filter         (void)                                                                    <* 
+ *> {                                                                                            <* 
+ *>    /+---(locals)-----------+-----+-----+-+/                                                  <* 
+ *>    int         i           =    0;                                                           <* 
+ *>    char        x_type      =  '-';                                                           <* 
+ *>    char        q1          =  '-';                                                           <* 
+ *>    char        q2          =  '-';                                                           <* 
+ *>    /+---(header)-------------------------+/                                                  <* 
+ *>    DEBUG_AVG    yLOG_enter   (__FUNCTION__);                                                 <* 
+ *>    /+---(identify criticals)-------------+/                                                  <* 
+ *>    o.nkey = 0;                                                                               <* 
+ *>    /+> key_beg ();                                                                    <+/    <* 
+ *>    /+> key_end ();                                                                    <+/    <* 
+ *>    /+---(process)------------------------+/                                                  <* 
+ *>    for (i = 0; i < o.navg; ++i) {                                                            <* 
+ *>       /+---(filter)----------------------+/                                                  <* 
+ *>       if (o.avg [i].type == POINT_START )  continue;                                         <* 
+ *>       if (o.avg [i].type == POINT_FINISH)  continue;                                         <* 
+ *>       /+---(prepare)---------------------+/                                                  <* 
+ *>       x_type  = o.avg [i    ].type;                                                          <* 
+ *>       q1      = o.avg [i    ].quad;                                                          <* 
+ *>       q2      = o.avg [i + 1].quad;                                                          <* 
+ *>       /+---(always key)------------------+/                                                  <* 
+ *>       if (x_type == POINT_HEAD) {                                                            <* 
+ *>          KEY_add (i, '-', POINT_HEAD, NULL);                                                 <* 
+ *>          continue;                                                                           <* 
+ *>       }                                                                                      <* 
+ *>       if (x_type == POINT_TAIL) {                                                            <* 
+ *>          KEY_add (i, '-', POINT_TAIL, NULL);                                                 <* 
+ *>          continue;                                                                           <* 
+ *>       }                                                                                      <* 
+ *>       /+---(premarked)-------------------+/                                                  <* 
+ *>       if (o.avg [i].prekey == 'k') {                                                         <* 
+ *>          KEY_add (i, '-', POINT_NORMAL, NULL);                                               <* 
+ *>          continue;                                                                           <* 
+ *>       }                                                                                      <* 
+ *>       if (o.avg [i].prekey != '-') {                                                         <* 
+ *>          continue;                                                                           <* 
+ *>       }                                                                                      <* 
+ *>       /+---(mark)------------------------+/                                                  <* 
+ *>       if (o.avg [i].quad != o.avg [i + 1].quad) {                                            <* 
+ *>          KEY_add (i, '-', POINT_NORMAL, NULL);                                               <* 
+ *>       }                                                                                      <* 
+ *>    }                                                                                         <* 
+ *>    /+> KEY__clean   ();                                                               <+/    <* 
+ *>    /+> KEY__extend  ();                                                               <+/    <* 
+ *>    /+> CLEAN_sharpen ();                                                               <+/   <* 
+ *>    /+---(display version)----------------+/                                                  <* 
+ *>    /+> for (i = 0; i < o.nkey; ++i) {                                                 <*     <* 
+ *>     *>    POINT_display (o.key + i);                                                  <*     <* 
+ *>     *> }                                                                              <+/    <* 
+ *>    /+---(complete)-----------------------+/                                                  <* 
+ *>    DEBUG_AVG    yLOG_exit    (__FUNCTION__);                                                 <* 
+ *>    return 0;                                                                                 <* 
+ *> }                                                                                            <*/
 
 char          /*---: label a range of key points with a use ------------------*/
 KEY_label          (int a_pt, int a_count, char *a_use)
@@ -352,64 +403,64 @@ KEY_flatten          (void)
    int       i         = 0;
    int       dd        = 0;
    /*---(report out)---------------------*/
-   DEBUG_LINE  printf("STRAIGHTENING LINES (begin)\n");
+   /*> DEBUG_LINE  printf("STRAIGHTENING LINES (begin)\n");                           <*/
    /*> DEBUG_LINE  POINT_list (stdout, o.key, o.nkey);                              <*/
    /*---(process)------------------------*/
-   DEBUG_LINE  printf("   start...\n");
+   /*> DEBUG_LINE  printf("   start...\n");                                           <*/
    while (i < o.nkey - 1) {
-      DEBUG_LINE  printf("   %3d/%3d) q=%d and q=%d ", i, i + 1, o.key[i].quad, o.key[i + 1].quad);
+      /*> DEBUG_LINE  printf("   %3d/%3d) q=%d and q=%d ", i, i + 1, o.key[i].quad, o.key[i + 1].quad);   <*/
       /*---(skip start and finishes)-----*/
       if (o.key[i    ].type == POINT_HEAD || o.key[i + 1].type == POINT_HEAD) {
-         DEBUG_LINE  printf(": touches a line start, skipping\n");
+         /*> DEBUG_LINE  printf(": touches a line start, skipping\n");                <*/
          ++i;
          continue;
       }
       /*---(initial calcs)---------------*/
       dd = abs(o.key[i].degs - o.key[i + 1].degs);
       if (dd > 180) dd = 360 - dd;
-      DEBUG_LINE  printf("dd=%4d : ", dd);
+      /*> DEBUG_LINE  printf("dd=%4d : ", dd);                                        <*/
       /*---(1 to 4)----------------------*/
       if (o.key[i].quad == 1 && o.key[i + 1].quad == 4) {
-         DEBUG_LINE  printf("#1 d1=%4d vs. d2=%4d : ", o.key[i].degs, o.key[i + 1].degs);
+         /*> DEBUG_LINE  printf("#1 d1=%4d vs. d2=%4d : ", o.key[i].degs, o.key[i + 1].degs);   <*/
          if (dd <= 25 && o.key[i].degs <= 20 && o.key[i + 1].degs >= 340) {
-            DEBUG_LINE  printf("can be removed");
+            /*> DEBUG_LINE  printf("can be removed");                                 <*/
             KEY_del (i);
             i = 0;
          } else {
-            DEBUG_LINE  printf("no match");
+            /*> DEBUG_LINE  printf("no match");                                       <*/
          }
       }
       /*---(4 to 1)----------------------*/
       else if (o.key[i].quad == 4 && o.key[i + 1].quad == 1) {
-         DEBUG_LINE  printf("#2 d1=%4d vs. d2=%4d : ", o.key[i].degs, o.key[i + 1].degs);
+         /*> DEBUG_LINE  printf("#2 d1=%4d vs. d2=%4d : ", o.key[i].degs, o.key[i + 1].degs);   <*/
          if (dd <= 25 && o.key[i].degs >= 340 && o.key[i + 1].degs <= 20) {
-            DEBUG_LINE  printf("can be removed");
+            /*> DEBUG_LINE  printf("can be removed");                                 <*/
             KEY_del (i);
             i = 0;
          } else {
-            DEBUG_LINE  printf("no match");
+            /*> DEBUG_LINE  printf("no match");                                       <*/
          }
       }
       /*---(same quad)-------------------*/
       else if (o.key[i].quad == o.key[i + 1].quad) {
-         DEBUG_LINE  printf("#3 same quadrant       : can be removed");
+         /*> DEBUG_LINE  printf("#3 same quadrant       : can be removed");           <*/
          KEY_del (i);
          i = 0;
       }
       /*---(otherwise)-------------------*/
       else {
-         DEBUG_LINE  printf("no rule");
+         /*> DEBUG_LINE  printf("no rule");                                           <*/
       }
       /*---(wrap)------------------------*/
-      DEBUG_LINE  printf("\n");
-      if (i == 0) DEBUG_LINE  printf("   restart tests after delete ---------\n");
+      /*> DEBUG_LINE  printf("\n");                                                   <*/
+      /*> if (i == 0) DEBUG_LINE  printf("   restart tests after delete ---------\n");   <*/
       ++i;
    }
-   DEBUG_LINE  printf("   done\n\n");
+   /*> DEBUG_LINE  printf("   done\n\n");                                             <*/
    /*---(report out)---------------------*/
    /*> DEBUG_LINE  POINT_list (stdout, o.key, o.nkey);                              <*/
    /*---(complete)-------------------------------*/
-   DEBUG_LINE  printf("STRAIGHTENING LINES (end)\n\n");
+   /*> DEBUG_LINE  printf("STRAIGHTENING LINES (end)\n\n");                           <*/
    return 0;
 }
 
@@ -425,14 +476,14 @@ KEY_stretch        (void)
    int       new       = 0;
    int       base      = 0;
    /*---(beginning)----------------------*/
-   DEBUG_CRIT  printf("   pushing key points into corners/extremes\n");
+   /*> DEBUG_CRIT  printf("   pushing key points into corners/extremes\n");           <*/
    for (i = 0 ; i < o.nkey; ++i) {
       if (o.key[i    ].type == POINT_HEAD) {
-         DEBUG_CRIT  printf("      #00 [SKIPPING] (%3d) stroke beginning ------\n", i);
+         /*> DEBUG_CRIT  printf("      #00 [SKIPPING] (%3d) stroke beginning ------\n", i);   <*/
          continue;
       }
       if (o.key[i    ].type == POINT_HEAD || i+ 1 == o.nkey) {
-         DEBUG_CRIT  printf("      #00 [SKIPPING] (%3d) stroke ending ---------\n", i);
+         /*> DEBUG_CRIT  printf("      #00 [SKIPPING] (%3d) stroke ending ---------\n", i);   <*/
          continue;
       }
       q1   = o.key[i    ].quad;
@@ -441,102 +492,102 @@ KEY_stretch        (void)
       /*---(bigger y)--------------------*/
       if ((q1 == 1 && q2 == 4) || (q1 == 2 && q2 == 3)) {
          base = max  = o.key[i].y_raw;
-         DEBUG_CRIT  printf("      #01 [BIGGER Y] (%3d) %3d is %1d and %1d : base = %3d --------------------\n", i, o.key[i].p_bas, q1, q2, base);
+         /*> DEBUG_CRIT  printf("      #01 [BIGGER Y] (%3d) %3d is %1d and %1d : base = %3d --------------------\n", i, o.key[i].p_bas, q1, q2, base);   <*/
          for (j = o.key[i - 1].p_bas; j < o.key[i + 1].p_bas; ++j) {
-            DEBUG_CRIT  printf("         %3d is %3d : ", j, o.avg[j].y_raw);
+            /*> DEBUG_CRIT  printf("         %3d is %3d : ", j, o.avg[j].y_raw);      <*/
             if        (o.avg[j].p_bas == o.key[i].p_bas) {
-               DEBUG_CRIT  printf("existing\n");
+               /*> DEBUG_CRIT  printf("existing\n");                                  <*/
             } else if (o.avg[j].y_raw >  base) {
-               DEBUG_CRIT  printf("NEW MAX\n");
+               /*> DEBUG_CRIT  printf("NEW MAX\n");                                   <*/
                max = o.avg[j].y_raw;
                new = o.avg[j].p_bas;
             } else {
-               DEBUG_CRIT  printf("-\n");
+               /*> DEBUG_CRIT  printf("-\n");                                         <*/
             }
          }
          if (new != o.key[i].p_bas) {
-            DEBUG_CRIT  printf("         new max, %3d moves from %3d to %3d\n", i, o.key[i].p_bas, new);
+            /*> DEBUG_CRIT  printf("         new max, %3d moves from %3d to %3d\n", i, o.key[i].p_bas, new);   <*/
             KEY_del (i);
             KEY_add (new, '-', POINT_NORMAL, NULL);
          } else {
-            DEBUG_CRIT  printf("         max remains\n");
+            /*> DEBUG_CRIT  printf("         max remains\n");                         <*/
          }
       }
       /*---(lesser y)--------------------*/
       else if ((q1 == 4 && q2 == 1) || (q1 == 3 && q2 == 2)) {
          base = max  = o.key[i].y_raw;
-         DEBUG_CRIT  printf("      #02 [LESSER Y] (%3d) %3d is %1d and %1d : base = %3d --------------------\n", i, o.key[i].p_bas, q1, q2, base);
+         /*> DEBUG_CRIT  printf("      #02 [LESSER Y] (%3d) %3d is %1d and %1d : base = %3d --------------------\n", i, o.key[i].p_bas, q1, q2, base);   <*/
          for (j = o.key[i - 1].p_bas; j < o.key[i + 1].p_bas; ++j) {
-            DEBUG_CRIT  printf("         %3d is %3d : ", j, o.avg[j].y_raw);
+            /*> DEBUG_CRIT  printf("         %3d is %3d : ", j, o.avg[j].y_raw);      <*/
             if        (o.avg[j].p_bas == o.key[i].p_bas) {
-               DEBUG_CRIT  printf("existing\n");
+               /*> DEBUG_CRIT  printf("existing\n");                                  <*/
             } else if (o.avg[j].y_raw <  base) {
-               DEBUG_CRIT  printf("NEW MAX\n");
+               /*> DEBUG_CRIT  printf("NEW MAX\n");                                   <*/
                max = o.avg[j].y_raw;
                new = o.avg[j].p_bas;
             } else {
-               DEBUG_CRIT  printf("-\n");
+               /*> DEBUG_CRIT  printf("-\n");                                         <*/
             }
          }
          if (new != o.key[i].p_bas) {
-            DEBUG_CRIT  printf("         new max, %3d moves from %3d to %3d\n", i, o.key[i].p_bas, new);
+            /*> DEBUG_CRIT  printf("         new max, %3d moves from %3d to %3d\n", i, o.key[i].p_bas, new);   <*/
             KEY_del (i);
             KEY_add (new, '-', POINT_NORMAL, NULL);
          } else {
-            DEBUG_CRIT  printf("         max remains\n");
+            /*> DEBUG_CRIT  printf("         max remains\n");                         <*/
          }
       }
       /*---(bigger x)--------------------*/
       else if ((q1 == 1 && q2 == 2) || (q1 == 4 && q2 == 3)) {
          base = max  = o.key[i].x_raw;
-         DEBUG_CRIT  printf("      #03 [BIGGER X] (%3d) %3d is %1d and %1d : base = %3d --------------------\n", i, o.key[i].p_bas, q1, q2, base);
+         /*> DEBUG_CRIT  printf("      #03 [BIGGER X] (%3d) %3d is %1d and %1d : base = %3d --------------------\n", i, o.key[i].p_bas, q1, q2, base);   <*/
          for (j = o.key[i - 1].p_bas; j < o.key[i + 1].p_bas; ++j) {
-            DEBUG_CRIT  printf("         %3d is %3d : ", j, o.avg[j].x_raw);
+            /*> DEBUG_CRIT  printf("         %3d is %3d : ", j, o.avg[j].x_raw);      <*/
             if        (o.avg[j].p_bas == o.key[i].p_bas) {
-               DEBUG_CRIT  printf("existing\n");
+               /*> DEBUG_CRIT  printf("existing\n");                                  <*/
             } else if (o.avg[j].x_raw >  base) {
-               DEBUG_CRIT  printf("NEW MAX\n");
+               /*> DEBUG_CRIT  printf("NEW MAX\n");                                   <*/
                max = o.avg[j].x_raw;
                new = o.avg[j].p_bas;
             } else {
-               DEBUG_CRIT  printf("-\n");
+               /*> DEBUG_CRIT  printf("-\n");                                         <*/
             }
          }
          if (new != o.key[i].p_bas) {
-            DEBUG_CRIT  printf("         new max, %3d moves from %3d to %3d\n", i, o.key[i].p_bas, new);
+            /*> DEBUG_CRIT  printf("         new max, %3d moves from %3d to %3d\n", i, o.key[i].p_bas, new);   <*/
             KEY_del (i);
             KEY_add (new, '-', POINT_NORMAL, NULL);
          } else {
-            DEBUG_CRIT  printf("         max remains\n");
+            /*> DEBUG_CRIT  printf("         max remains\n");                         <*/
          }
       }
       /*---(lesser x)--------------------*/
       else if ((q1 == 2 && q2 == 1) || (q1 == 3 && q2 == 4)) {
          base = max  = o.key[i].x_raw;
-         DEBUG_CRIT  printf("      #04 [LESSER X] (%3d) %3d is %1d and %1d : base = %3d --------------------\n", i, o.key[i].p_bas, q1, q2, base);
+         /*> DEBUG_CRIT  printf("      #04 [LESSER X] (%3d) %3d is %1d and %1d : base = %3d --------------------\n", i, o.key[i].p_bas, q1, q2, base);   <*/
          for (j = o.key[i - 1].p_bas; j < o.key[i + 1].p_bas; ++j) {
-            DEBUG_CRIT  printf("         %3d is %3d : ", j, o.avg[j].x_raw);
+            /*> DEBUG_CRIT  printf("         %3d is %3d : ", j, o.avg[j].x_raw);      <*/
             if        (o.avg[j].p_bas == o.key[i].p_bas) {
-               DEBUG_CRIT  printf("existing\n");
+               /*> DEBUG_CRIT  printf("existing\n");                                  <*/
             } else if (o.avg[j].x_raw <  base) {
-               DEBUG_CRIT  printf("NEW MAX\n");
+               /*> DEBUG_CRIT  printf("NEW MAX\n");                                   <*/
                max = o.avg[j].x_raw;
                new = o.avg[j].p_bas;
             } else {
-               DEBUG_CRIT  printf("-\n");
+               /*> DEBUG_CRIT  printf("-\n");                                         <*/
             }
          }
          if (new != o.key[i].p_bas) {
-            DEBUG_CRIT  printf("         new max, %3d moves from %3d to %3d\n", i, o.key[i].p_bas, new);
+            /*> DEBUG_CRIT  printf("         new max, %3d moves from %3d to %3d\n", i, o.key[i].p_bas, new);   <*/
             KEY_del (i);
             KEY_add (new, '-', POINT_NORMAL, NULL);
          } else {
-            DEBUG_CRIT  printf("         max remains\n");
+            /*> DEBUG_CRIT  printf("         max remains\n");                         <*/
          }
       }
       /*---(quad 1 to 2)-----------------*/
       else {
-         DEBUG_CRIT  printf("      #?? (%3d) %3d is %1d and %1d\n", i, o.key[i].p_bas, q1, q2);
+         /*> DEBUG_CRIT  printf("      #?? (%3d) %3d is %1d and %1d\n", i, o.key[i].p_bas, q1, q2);   <*/
       }
    }
    KEY_calc  ('n');
@@ -551,124 +602,126 @@ KEY_squeeze      (void)
    int       i         = 0;
    int       dd        = 0;
    /*---(report out)---------------------*/
-   DEBUG_LINE  printf("SQUEEZING LINES (begin)\n");
+   /*> DEBUG_LINE  printf("SQUEEZING LINES (begin)\n");                               <*/
    /*> DEBUG_LINE  POINT_list (stdout, o.key, o.nkey);                              <*/
    /*---(process)------------------------*/
-   DEBUG_LINE  printf("   start...\n");
+   /*> DEBUG_LINE  printf("   start...\n");                                           <*/
    while (i < o.nkey - 1) {
-      DEBUG_LINE  printf("   %3d/%3d) q=%d and %3d q=%d ", i, i + 1, o.key[i].quad, i + 1, o.key[i + 1].quad);
+      /*> DEBUG_LINE  printf("   %3d/%3d) q=%d and %3d q=%d ", i, i + 1, o.key[i].quad, i + 1, o.key[i + 1].quad);   <*/
       /*---(skip start and finishes)-----*/
       if (o.key[i    ].type == POINT_HEAD || o.key[i + 1].type == POINT_HEAD) {
-         DEBUG_LINE  printf(": touches a line start, skipping\n");
+         /*> DEBUG_LINE  printf(": touches a line start, skipping\n");                <*/
          ++i;
          continue;
       }
       /*---(initial calcs)---------------*/
       dd = abs(o.key[i].degs - o.key[i + 1].degs);
-      DEBUG_LINE  printf("dd=%3d : ", dd);
+      /*> DEBUG_LINE  printf("dd=%3d : ", dd);                                        <*/
       if (o.key[i].quad == 4 && o.key[i + 1].quad == 3) {
-         DEBUG_LINE  printf("rule #1 d1=%4d vs. d2=%4d : ", o.key[i].degs, o.key[i + 1].degs);
+         /*> DEBUG_LINE  printf("rule #1 d1=%4d vs. d2=%4d : ", o.key[i].degs, o.key[i + 1].degs);   <*/
          if (dd <= 20 && o.key[i].degs <= 280 && o.key[i + 1].degs >= 260) {
-            DEBUG_LINE  printf("can be removed");
+            /*> DEBUG_LINE  printf("can be removed");                                 <*/
             KEY_del (i);
             i = 0;
          } else {
-            DEBUG_LINE  printf("no match");
+            /*> DEBUG_LINE  printf("no match");                                       <*/
          }
       } else if (o.key[i].quad == 3 && o.key[i + 1].quad == 4) {
-         DEBUG_LINE  printf("rule #2 d1=%4d vs. d2=%4d : ", o.key[i].degs, o.key[i + 1].degs);
+         /*> DEBUG_LINE  printf("rule #2 d1=%4d vs. d2=%4d : ", o.key[i].degs, o.key[i + 1].degs);   <*/
          if (dd <= 20 && o.key[i].degs >= 260 && o.key[i + 1].degs <= 280) {
-            DEBUG_LINE  printf("can be removed");
+            /*> DEBUG_LINE  printf("can be removed");                                 <*/
             KEY_del (i);
             i = 0;
          } else {
-            DEBUG_LINE  printf("no match");
+            /*> DEBUG_LINE  printf("no match");                                       <*/
          }
       } else if (o.key[i].quad == o.key[i + 1].quad) {
-         DEBUG_LINE  printf("rule #3 same quadrant       : can be removed");
+         /*> DEBUG_LINE  printf("rule #3 same quadrant       : can be removed");      <*/
          KEY_del (i);
          i = 0;
       } else {
-         DEBUG_LINE  printf("no rule");
+         /*> DEBUG_LINE  printf("no rule");                                           <*/
       }
-      DEBUG_LINE  printf("\n");
-      if (i == 0) DEBUG_LINE  printf("   restart tests after delete ---------\n");
+      /*> DEBUG_LINE  printf("\n");                                                   <*/
+      /*> if (i == 0) DEBUG_LINE  printf("   restart tests after delete ---------\n");   <*/
       ++i;
    }
-   DEBUG_LINE  printf("   done\n\n");
+   /*> DEBUG_LINE  printf("   done\n\n");                                             <*/
    /*---(report out)---------------------*/
    /*> DEBUG_LINE  POINT_list (stdout, o.key, o.nkey);                              <*/
    /*---(complete)-------------------------------*/
-   DEBUG_LINE  printf("SQUEEZING LINES (end)\n\n");
+   /*> DEBUG_LINE  printf("SQUEEZING LINES (end)\n\n");                               <*/
    return 0;
 }
 
-char
-KEY_sharps           (void)
-{
-   int i = 0;
-   int  avg_pt;
-   int  d1, d2, dd;
-   int  sharp = 70;
-   /*> int  sharp = 60;                                                               <*/
-   /*> o.key[o.nkey - 1].sharp = 'x';                                                    <*/
-   DEBUG__SHARPS  printf("RUNNING SHARPS (beg) :: tolerance at >= %d\n", sharp);
-   for (i = 1; i < o.nkey - 1; ++i) {
-      DEBUG__SHARPS  printf("  %02d) ", i);
-      if (o.key[i    ].sharp != '-' || o.key[i + 1].sharp != '-') {
-         DEBUG__SHARPS  printf("skipping as its marked (%c) or the next is (%c)\n", o.key[i].sharp, o.key[i + 1].sharp);
-         continue;
-      }
-      avg_pt = o.key[i].p_bas;
-      d1     = o.avg[avg_pt - 1].degs;
-      d2     = o.avg[avg_pt + 1].degs;
-      dd     = d1 - d2;
-      if (dd >  180) dd -= 360;
-      if (dd < -180) dd += 360;
-      DEBUG__SHARPS  printf(" is %5d vs. %5d, so %5d   ", d1, d2, abs(dd));
-      o.key[i].sharp = '-';
-      if (abs(dd) >= sharp) {
-         o.key[i].sharp = 'x';
-         DEBUG__SHARPS  printf("SHARP\n");
-      }
-      /*> } else DEBUG__SHARPS  printf("no\n");                                       <*/
-   }
-   DEBUG__SHARPS  printf("RUNNING SHARPS (end)\n");
-   return 0;
-}
-
+/*> char                                                                                                                                 <* 
+ *> KEY_sharps           (void)                                                                                                          <* 
+ *> {                                                                                                                                    <* 
+ *>    int i = 0;                                                                                                                        <* 
+ *>    int  avg_pt;                                                                                                                      <* 
+ *>    int  d1, d2, dd;                                                                                                                  <* 
+ *>    int  sharp = 70;                                                                                                                  <* 
+ *>    /+> int  sharp = 60;                                                               <+/                                            <* 
+ *>    /+> o.key[o.nkey - 1].sharp = 'x';                                                    <+/                                         <* 
+ *>    /+---(header)-------------------------+/                                                                                          <* 
+ *>    DEBUG_CRIT   yLOG_enter   (__FUNCTION__);                                                                                         <* 
+ *>    for (i = 1; i < o.nkey - 1; ++i) {                                                                                                <* 
+ *>       /+> DEBUG__SHARPS  printf("  %02d) ", i);                                       <+/                                            <* 
+ *>       if (o.key[i    ].sharp != '-' || o.key[i + 1].sharp != '-') {                                                                  <* 
+ *>          /+> DEBUG__SHARPS  printf("skipping as its marked (%c) or the next is (%c)\n", o.key[i].sharp, o.key[i + 1].sharp);   <+/   <* 
+ *>          continue;                                                                                                                   <* 
+ *>       }                                                                                                                              <* 
+ *>       avg_pt = o.key[i].p_bas;                                                                                                       <* 
+ *>       d1     = o.avg[avg_pt - 1].degs;                                                                                               <* 
+ *>       d2     = o.avg[avg_pt + 1].degs;                                                                                               <* 
+ *>       dd     = d1 - d2;                                                                                                              <* 
+ *>       if (dd >  180) dd -= 360;                                                                                                      <* 
+ *>       if (dd < -180) dd += 360;                                                                                                      <* 
+ *>       /+> DEBUG__SHARPS  printf(" is %5d vs. %5d, so %5d   ", d1, d2, abs(dd));       <+/                                            <* 
+ *>       o.key[i].sharp = '-';                                                                                                          <* 
+ *>       if (abs(dd) >= sharp) {                                                                                                        <* 
+ *>          o.key[i].sharp = 'x';                                                                                                       <* 
+ *>          /+> DEBUG__SHARPS  printf("SHARP\n");                                        <+/                                            <* 
+ *>       }                                                                                                                              <* 
+ *>    }                                                                                                                                 <* 
+ *>    /+---(complete)-----------------------+/                                                                                          <* 
+ *>    DEBUG_CRIT   yLOG_exit    (__FUNCTION__);                                                                                         <* 
+ *>    return 0;                                                                                                                         <* 
+ *> }                                                                                                                                    <*/
 
 char
 KEY_driver              (void)
 {
-   int i;
-   /*---(identify criticals)-------------*/
-   o.nkey = 0;
+   /*---(locals)-----------+-----+-----+-*/
+   int         i           =    0;
+   char        x_type      =  '-';
+   char        q1          =  '-';
+   char        q2          =  '-';
+   /*---(header)-------------------------*/
+   DEBUG_CRIT   yLOG_enter   (__FUNCTION__);
    /*---(process)------------------------*/
    for (i = 0; i < o.navg; ++i) {
-      /*---(start/finish)----------------*/
-      if (o.avg[i].type == POINT_START )  continue;
-      if (o.avg[i].type == POINT_FINISH)  continue;
-      /*---(head/tail)-------------------*/
-      if (o.avg [i].type == POINT_HEAD) {
-            KEY_add (i, '-', POINT_HEAD  , NULL);
-         continue;
-      }
-      if (o.avg [i].type == POINT_TAIL) {
-            KEY_add (i, '-', POINT_TAIL  , NULL);
-         continue;
-      }
-      /*---(circles)---------------------*/
-      if (o.avg [i].prekey == 'k') {
-            KEY_add (i, '-', POINT_NORMAL, NULL);
-         continue;
-      }
-      if (o.avg [i].marked != '-') continue;
-      /*---(normal)----------------------*/
-      /*> if (o.avg[i - 1].quad == 0) {                                               <* 
-       *>    continue;                                                                <*/
-      if (o.avg [i].quad != o.avg [i - 1].quad) {
-            KEY_add (i, '-', POINT_NORMAL, NULL);
+      /*---(prepare)---------------------*/
+      x_type  = o.avg [i    ].type;
+      q1      = o.avg [i    ].quad;
+      q2      = o.avg [i + 1].quad;
+      DEBUG_CRIT   yLOG_complex ("review"    , "%2d, %c, %4.0fx %4.0fy, %c %c, %d %d", i, x_type, o.avg [i].x_pos, o.avg [i].y_pos, o.avg [i].prekey, o.avg [i].marked, q1, q2);
+      /*---(always filter)---------------*/
+      if (x_type == POINT_START )  continue;
+      if (x_type == POINT_FINISH)  continue;
+      /*---(always key)------------------*/
+      if      (x_type == POINT_HEAD)    KEY_add (i, '-', POINT_HEAD  , NULL);
+      else if (x_type == POINT_TAIL)    KEY_add (i, '-', POINT_TAIL  , NULL);
+      else if (o.avg [i].prekey == 'k') KEY_add (i, '-', POINT_NORMAL, NULL);
+      else                              continue;
+      /*---(premarked)-------------------*/
+      o.key [o.nkey - 1].prekey = o.avg [i].prekey;
+      o.key [o.nkey - 1].marked = o.avg [i].marked;
+      o.key [o.nkey - 1].sharp  = o.avg [i].sharp;
+      DEBUG_CRIT   yLOG_complex ("marking"   , "%2d %c %c %c, %2d %c %c %c", o.nkey - 1, o.key [o.nkey - 1].prekey, o.key [o.nkey - 1].marked, o.key [o.nkey - 1].sharp, i, o.avg [i].prekey, o.avg [i].marked, o.avg [i].sharp);
+      /*---(premark)---------------------*/
+      if (o.key [o.nkey - 1].prekey == 'k') {
+         sprintf (o.key [o.nkey - 1].use, "%c", o.key [o.nkey - 1].marked);
       }
       /*---(done)------------------------*/
    }
@@ -679,7 +732,8 @@ KEY_driver              (void)
    /*> for (i = 0; i < o.nkey; ++i) {                                                 <* 
     *>    POINT_display (o.key + i);                                                  <* 
     *> }                                                                              <*/
-   /*---(completion)---------------------*/
+   /*---(complete)-----------------------*/
+   DEBUG_CRIT   yLOG_exit    (__FUNCTION__);
    return 0;
 }
 

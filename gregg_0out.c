@@ -15,7 +15,7 @@ static int    s_nfield    =   0;
 char
 OUT_init             (void)
 {
-   OUT_clear ();
+   OUT_clear (CLEAR_FULL);
    /*---(locals)---------------------------*/
    int       i             = 0;
    o.craw     = 0;
@@ -26,7 +26,7 @@ OUT_init             (void)
 }
 
 char          /*----: clear all point data -----------------------------------*/
-OUT_clear          (void)
+OUT_clear          (char a_full)
 {
    /*---(locals)-----------+-----+-----+-*/
    int         x_type      =    0;
@@ -48,45 +48,15 @@ OUT_clear          (void)
    o.word   [0]  = '\0';
    /*---(clear counters)-----------------*/
    DEBUG_DATA   yLOG_note     ("counters");
-   o.craw = o.cavg = o.ckey = 0;
-   o.nraw = o.nbas = o.navg = o.nkey  = 0;
+   o.nbas = o.navg = o.cavg = 0;
+   o.nkey = o.ckey = 0;
    /*---(clear structures)---------------*/
-   POINT_clear_all ();
-   /*> for (x_type = 0; x_type < 4; ++x_type) {                                                           <* 
-    *>    /+---(point type)------------------+/                                                           <* 
-    *>    switch (x_type) {                                                                               <* 
-    *>    case 0:                                                                                         <* 
-    *>       p = o.raw;                                                                                   <* 
-    *>       DEBUG_DATA   yLOG_snote    ("raw");                                                          <* 
-    *>       break;                                                                                       <* 
-    *>    case 1:                                                                                         <* 
-    *>       p = o.bas;                                                                                   <* 
-    *>       DEBUG_DATA   yLOG_snote    ("base");                                                         <* 
-    *>       break;                                                                                       <* 
-    *>    case 2:                                                                                         <* 
-    *>       p = o.avg;                                                                                   <* 
-    *>       DEBUG_DATA   yLOG_snote    ("avg");                                                          <* 
-    *>       break;                                                                                       <* 
-    *>    case 3:                                                                                         <* 
-    *>       p = o.key;                                                                                   <* 
-    *>       DEBUG_DATA   yLOG_snote    ("key");                                                          <* 
-    *>       break;                                                                                       <* 
-    *>    }                                                                                               <* 
-    *>    /+---(clear points)----------------+/                                                           <* 
-    *>    for (x_pt = 0; x_pt < MAX_POINTS; ++x_pt) {                                                     <* 
-    *>       p [x_pt].type   = POINT_NONE;                                                                <* 
-    *>       p [x_pt].p_raw  = p [x_pt].p_bas  = 0;                                                       <* 
-    *>       p [x_pt].x_raw = p [x_pt].y_raw = 0;                                                       <* 
-    *>       p [x_pt].xd     = p [x_pt].yd     = 0;                                                       <* 
-    *>       p [x_pt].len    = p [x_pt].icept  = p [x_pt].degs   = p [x_pt].quad   = p [x_pt].ccat = 0;   <* 
-    *>       p [x_pt].slope  = p [x_pt].rads   = p [x_pt].range  = p [x_pt].cdepth = 0.0;                 <* 
-    *>       p [x_pt].sharp  = p [x_pt].cano   = p [x_pt].fake   = '-';                                   <* 
-    *>       strlcpy (p [x_pt].use, "-", 5);                                                              <* 
-    *>       p [x_pt].x_rel  = p [x_pt].y_rel  = 0.0;                                                     <* 
-    *>       p [x_pt].x_pos  = p [x_pt].y_pos  = 0;                                                       <* 
-    *>    }                                                                                               <* 
-    *>    /+---(done)------------------------+/                                                           <* 
-    *> }                                                                                                  <*/
+   if (a_full == CLEAR_FULL) {
+      o.nraw = o.craw = 0;
+      POINT_clear_all ();
+   } else {
+      POINT_clear_for_more ();
+   }
    /*---(bounds)-------------------------*/
    o.xmin = o.ymin =     0;
    o.xmax = o.ymax =     0;
@@ -461,7 +431,7 @@ OUT__unit            (char *a_question, tPOINT *a_curr)
       snprintf (unit_answer, LEN_STR, "OUT stats        : %c   s %8.2f, b %6d, r %5.2f, d %3d, q %d", a_curr->type, a_curr->slope, a_curr->icept, a_curr->rads, a_curr->degs, a_curr->quad);
    }
    else if   (strncmp (a_question, "other"     , 20)  == 0) {
-      snprintf (unit_answer, LEN_STR, "OUT other        : %c   depth %5.1f, cat %2d, anom %c, sharp %c", a_curr->type, a_curr->cdepth, a_curr->ccat, a_curr->cano, a_curr->sharp);
+      snprintf (unit_answer, LEN_STR, "OUT other        : %c   depth %5.1f, ratio %5.1f, cat %2d, sharp %c", a_curr->type, a_curr->depth, a_curr->ratio, a_curr->ccat, a_curr->sharp);
    }
    /*---(complete)-----------------------*/
    return unit_answer;

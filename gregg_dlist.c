@@ -12,12 +12,12 @@ PRIV char  DLIST_back       (void);
 char
 dlist_init         (void)
 {
-   DEBUG_GRAF  printf("dlist_init() -- drive loading\n");
-   DEBUG_GRAF  printf("   - clear letters\n\n");
-   DEBUG_GRAF  printf("   - create buttons\n\n");
+   /*> DEBUG_GRAF  printf("dlist_init() -- drive loading\n");                         <*/
+   /*> DEBUG_GRAF  printf("   - clear letters\n\n");                                  <*/
+   /*> DEBUG_GRAF  printf("   - create buttons\n\n");                                 <*/
    dlist_letters();
    DLIST_back();
-   DEBUG_GRAF  printf("   - done\n\n");
+   /*> DEBUG_GRAF  printf("   - done\n\n");                                           <*/
    return 0;
 }
 
@@ -28,8 +28,8 @@ DLIST__title         (char *a_name)
 {
    RPTG_LETTER {
       s_count = 0;
-      if (a_name [0] != ' ')  printf ("\n");
-      printf ("%-8.8s  ltr--  r s f  sz-x sz-y rota begd arcd    end-x end-y len deg    lef rig    grp\n", a_name);
+      /*> if (a_name [0] != ' ')  printf ("\n");                                      <*/
+      /*> printf ("%-8.8s  ltr--  r s f  sz-x sz-y rota begd arcd    end-x end-y len deg    lef rig    grp\n", a_name);   <*/
    }
    return 0;
 }
@@ -37,29 +37,29 @@ DLIST__title         (char *a_name)
 char
 DLIST__show          (int a_who, char a_dotted)
 {
-   if (a_dotted != 'n')   return 0;
-   RPTG_LETTER {
-      if (s_count >= 5)  DLIST__title ("    ---");
-      printf ("    %03d   %-5s  %d %d %c  %4d %4d %4d %4d %4d    %5.1f %5.1f %3d %3d    %3d %3d    %c\n",
-            a_who,
-            g_loc [a_who].label,
-            g_loc [a_who].range,
-            g_loc [a_who].size,
-            g_loc [a_who].type,
-            g_loc [a_who].x_ellipse,
-            g_loc [a_who].y_ellipse,
-            g_loc [a_who].r_ellipse,
-            g_loc [a_who].b_arc,
-            g_loc [a_who].l_arc,
-            g_loc [a_who].x_end,
-            g_loc [a_who].y_end,
-            g_loc [a_who].xy_len,
-            g_loc [a_who].deg,
-            g_loc [a_who].x_lef,
-            g_loc [a_who].x_rig,
-            g_loc [a_who].lcat);
-      ++s_count;
-   }
+   /*> if (a_dotted != 'n')   return 0;                                                                         <* 
+    *> RPTG_LETTER {                                                                                            <* 
+    *>    if (s_count >= 5)  DLIST__title ("    ---");                                                          <* 
+    *>    printf ("    %03d   %-5s  %d %d %c  %4d %4d %4d %4d %4d    %5.1f %5.1f %3d %3d    %3d %3d    %c\n",   <* 
+    *>          a_who,                                                                                          <* 
+    *>          g_loc [a_who].label,                                                                            <* 
+    *>          g_loc [a_who].range,                                                                            <* 
+    *>          g_loc [a_who].size,                                                                             <* 
+    *>          g_loc [a_who].type,                                                                             <* 
+    *>          g_loc [a_who].x_ellipse,                                                                        <* 
+    *>          g_loc [a_who].y_ellipse,                                                                        <* 
+    *>          g_loc [a_who].r_ellipse,                                                                        <* 
+    *>          g_loc [a_who].b_arc,                                                                            <* 
+    *>          g_loc [a_who].l_arc,                                                                            <* 
+    *>          g_loc [a_who].x_end,                                                                            <* 
+    *>          g_loc [a_who].y_end,                                                                            <* 
+    *>          g_loc [a_who].xy_len,                                                                           <* 
+    *>          g_loc [a_who].deg,                                                                              <* 
+    *>          g_loc [a_who].x_lef,                                                                            <* 
+    *>          g_loc [a_who].x_rig,                                                                            <* 
+    *>          g_loc [a_who].lcat);                                                                            <* 
+    *>    ++s_count;                                                                                            <* 
+    *> }                                                                                                        <*/
    return 0;
 }
 
@@ -530,14 +530,14 @@ BACK__rangefan     (void)
    float     r = SIZE_LRG_AVG * 2;
    /*---(mark ranges)--------------------*/
    for (i = 0; i < MAX_RANGES; ++i) {
-      if (strncmp(ranges[i].nam, "eof", 5) == 0) break;
-      min = (ranges[i].min + 2) * DEG2RAD;
-      beg = (ranges[i].beg + 1) * DEG2RAD;
-      end = (ranges[i].end - 1) * DEG2RAD;
-      max = (ranges[i].max - 2) * DEG2RAD;
+      if (strncmp (g_ranges [i].nam, "eof", 5) == 0) break;
+      min = (g_ranges [i].min + 2) * DEG2RAD;
+      beg = (g_ranges [i].beg + 1) * DEG2RAD;
+      end = (g_ranges [i].end - 1) * DEG2RAD;
+      max = (g_ranges [i].max - 2) * DEG2RAD;
       glLineWidth(1.0);
       /*---(arc)---------------------------*/
-      if (ranges[i].len == 1) {
+      if (g_ranges [i].len == 1) {
          r  = SIZE_LRG_AVG * 1.75;
          z  =   -2.00;
       } else {
@@ -545,8 +545,8 @@ BACK__rangefan     (void)
          z  =   -1.00;
       }
       glLineWidth(0.8);
-      if (strncmp(ranges[i].nam, "", 5) == 0 || strncmp(ranges[i].nam, "---", 5) == 0) {
-         if (ranges[i].len == 1) draw_arc (min, max, -1, z);
+      if (strncmp(g_ranges [i].nam, "", 5) == 0 || strncmp(g_ranges [i].nam, "---", 5) == 0) {
+         if (g_ranges [i].len == 1) draw_arc (min, max, -1, z);
          else                    draw_arc (min, max,  2, z);
       } else {
          draw_arc (min, beg,  1, z);
@@ -555,27 +555,27 @@ BACK__rangefan     (void)
       }
       /*---(label)--------------------------*/
       z  =    2.00;
-      if (strncmp(ranges[i].nam, "---", 5) != 0) {
-         if      (ranges[i].len == 2)                 radius = r + 10;
-         else if (strncmp(ranges[i].nam, "", 5) == 0) radius = r - 20;
+      if (strncmp(g_ranges [i].nam, "---", 5) != 0) {
+         if      (g_ranges [i].len == 2)                 radius = r + 10;
+         else if (strncmp(g_ranges [i].nam, "", 5) == 0) radius = r - 20;
          else                                         radius = r + 30;
          yVIKEYS_view_color (YCOLOR_BAS_MOR, 0.25);
-         rad = (ranges[i].tar) * DEG2RAD;
+         rad = (g_ranges [i].tar) * DEG2RAD;
          x =  radius * cos(rad);
          y =  radius * sin(rad);
-         snprintf(msg, 100, "%d", ranges[i].num);
+         snprintf(msg, 100, "%d", g_ranges [i].num);
          glPushMatrix(); {
             glTranslatef(  x,     y,    z);
             yFONT_print (win.font_pretty, 20, YF_MIDCEN, msg);
          } glPopMatrix();
       }
       /*---(target line)-------------------*/
-      if (ranges[i].num <= 5) {
+      if (g_ranges [i].num <= 5) {
          yVIKEYS_view_color (YCOLOR_BAS_MOR, 0.65);
          glLineWidth(2.0);
          z  =    1.00;
          glBegin(GL_LINES); {
-            rad = (ranges[i].tar) * DEG2RAD;
+            rad = (g_ranges [i].tar) * DEG2RAD;
             x = SIZE_LRG_AVG * cos(rad);
             y = SIZE_LRG_AVG * sin(rad);
             glVertex3f(   x,   y,   z);
@@ -770,7 +770,7 @@ DLIST_back         (void)
    } glPopMatrix();
    /*---(end)-------------------------------*/
    glEndList();
-   DEBUG_PROG  printf("success\n");
+   /*> DEBUG_PROG  printf("success\n");                                               <*/
    /*---(complete)--------------------------*/
    return 0;
 }

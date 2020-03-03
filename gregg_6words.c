@@ -447,6 +447,8 @@ WORDS_dict_vary   (tWORDS *a_new, uchar *a_type, uchar *a_vary)
    tWORDS     *x_other     = NULL;
    uchar       x_check     [LEN_LABEL] = "";
    uchar      *x_valids    = " ´ e a t d dd th tn tm ts df n m mm u k g o r l nk ng sh ch j z p b s f v pt bd ";
+   /*---(header)-------------------------*/
+   DEBUG_CONF   yLOG_enter   (__FUNCTION__);
    /*---(defenses)-----------------------*/
    DEBUG_CONF   yLOG_point   ("a_new"     , a_new);
    --rce;  if (a_new == NULL) {
@@ -529,7 +531,7 @@ WORDS_dict_parse   (uchar *a_recd)
    strlcpy (s_english, x_english, LEN_HUND);
    strltrim (s_english, ySTR_BOTH, LEN_HUND);
    DEBUG_CONF   yLOG_info    ("s_english" , s_english);
-   /*---(english)------------------------*/
+   /*---(gregg)--------------------------*/
    x_gregg   = strtok_r (NULL  , q, &r);
    DEBUG_CONF   yLOG_point   ("x_gregg"   , x_gregg);
    --rce;  if (x_gregg   == NULL) {
@@ -565,8 +567,27 @@ WORDS_dict_parse   (uchar *a_recd)
     *>    return 0;                                                                   <* 
     *> }                                                                              <* 
     *> WORDS_dict_notes  (x_new, x_notes);                                            <*/
-   /*---(variations)---------------------*/
+   /*---(tail)---------------------------*/
+   x_new->part = '-';
    x_type  = strtok_r (NULL  , q, &r);
+   DEBUG_CONF   yLOG_point   ("read"      , x_type);
+   if (x_type == NULL) {
+      DEBUG_CONF   yLOG_note    ("no variations or part of speech");
+      DEBUG_CONF   yLOG_exit    (__FUNCTION__);
+      return 0;
+   }
+   DEBUG_CONF   yLOG_info    ("x_part"    , x_type);
+   DEBUG_CONF   yLOG_value   ("len"       , strlen (x_type));
+   /*---(check for part of speech)-------*/
+   if (strlen (x_type) == 3 || strlen (x_type) == 5) {
+      DEBUG_CONF   yLOG_note    ("working on part of speech");
+      if (strchr (PARTS_OF_SPEECH, x_type [1]) != NULL) {
+         x_new->part = x_type [1];
+         x_type  = strtok_r (NULL  , q, &r);
+      }
+   }
+   DEBUG_CONF   yLOG_char    ("part"      , x_new->part);
+   /*---(variations)---------------------*/
    DEBUG_CONF   yLOG_point   ("x_type"    , x_type);
    while (x_type != NULL) {
       x_vary  = strtok_r (NULL  , q, &r);
@@ -767,18 +788,36 @@ uchar  s_ae  [16] [16] [LEN_TERSE] = {
 uchar  s_ou   [16] [LEN_LABEL] = {
    /*         xdTHDmkrRNjfpP"   */
    /* -   */ "·798·983····8·",
-   /* d   */ "······8·······",
+   /* d   */ "8·····8·······",
    /* oth */ "··············",
    /* uth */ "··············",
    /* df  */ "··············",
    /* m   */ "·····8········",
    /* k   */ "··············",
-   /* r   */ "············8·",
+   /* r   */ "7·····7·····8·",
    /* rd  */ "··············",
    /* ng  */ "··············",
    /* ch  */ "··············",
    /* f   */ "··············",
    /* p   */ "·4·····4······",
+   /* pt  */ "··············",
+};
+
+uchar  s_sz   [16] [LEN_LABEL] = {
+   /*         xdTHDmkrRNjfpP"   */
+   /* -   */ "··············",
+   /* d   */ "··············",
+   /* oth */ "··············",
+   /* uth */ "··············",
+   /* df  */ "··············",
+   /* m   */ "77777777777777",
+   /* k   */ "77777777777777",
+   /* r   */ "77777777777777",
+   /* rd  */ "··············",
+   /* ng  */ "··············",
+   /* ch  */ "··············",
+   /* f   */ "77777777777777",
+   /* p   */ "22222222222222",
    /* pt  */ "··············",
 };
 
@@ -900,6 +939,14 @@ WORDS_drawn_fix         (uchar *a_index, short a_drawn [])
             n = REVERSE_find_letter (x_name, LTRS_ALL);
          }
          a_drawn [i] = n;
+      } else if (strlen (g_loc [x_curr].label) == 1 && strchr ("sz", g_loc [x_curr].label [0]) != NULL) {
+         sprintf (x_name, "s%c", s_sz [x_pcat][x_ncat]);
+         n = REVERSE_find_letter (x_name, LTRS_ALL);
+         if (n <= 0) {
+            x_name [1] = '\0';
+            n = REVERSE_find_letter (x_name, LTRS_ALL);
+         }
+         a_drawn [i] = n;
       } else {
          DEBUG_CONF   yLOG_value   ("copy"      , a_index [i]);
          a_drawn [i] = a_index [i];
@@ -928,10 +975,10 @@ words_outstring (            /* locate outline in the translation dictionary  */
    int count = 0;
    for (i = 0; i < MAX_WORDS; ++i) {
       if (strncmp(s_words[i].english, "eof",  MAX_LEN) == 0)  return -1;
-      /*> DEBUG__MATCHES  printf("look <<%s>>\n", s_words[i].gregg);                    <*/
+      /*> DEBUG_MATCH   printf("look <<%s>>\n", s_words[i].gregg);                    <*/
       if (strncmp(s_words[i].gregg, a_outstring, MAX_LEN) != 0)  continue;
       /*> DEBUG__WRITING  printf("%3d) <<%s>>\n", i, s_words[i].gregg);             <* 
-       *> DEBUG__MATCHES  printf("%3d) <<%s>>\n", i, s_words[i].gregg);             <*/
+       *> DEBUG_MATCH   printf("%3d) <<%s>>\n", i, s_words[i].gregg);             <*/
       ++count;
       if (count == 1) strlcpy (o.word, "", MAX_LEN);
       if (count >  1) strncat(o.word, ",", MAX_LEN);
@@ -1194,22 +1241,22 @@ words_translate    (int a_word)
  *>    letter = letters[a_index - 1];                                                           <* 
  *>    one    = 0;                                                                              <* 
  *>    for (i = 0; i < MAX_GROUPS; ++i) {                                                       <* 
- *>       if (i > 0 && strncmp(groups[i].cat, groups[i - 1].cat, 5) == 0) continue;             <* 
- *>       /+> printf("%s ", groups[i].cat);                                             <+/     <* 
- *>       if (strncmp(groups[i].cat, "eof",  5) == 0)                    break;                 <* 
- *>       if (strncmp(g_loc[letter].cat, groups[i].cat, 5) != 0)            continue;           <* 
- *>       one = groups[i].gr_num;                                                               <* 
+ *>       if (i > 0 && strncmp(g_groups [i].cat, g_groups [i - 1].cat, 5) == 0) continue;             <* 
+ *>       /+> printf("%s ", g_groups [i].cat);                                             <+/     <* 
+ *>       if (strncmp(g_groups [i].cat, "eof",  5) == 0)                    break;                 <* 
+ *>       if (strncmp(g_loc[letter].cat, g_groups [i].cat, 5) != 0)            continue;           <* 
+ *>       one = g_groups [i].gr_num;                                                               <* 
  *>       break;                                                                                <* 
  *>    }                                                                                        <* 
  *>    /+---(current letter)-----------------+/                                                 <* 
  *>    letter = letters[a_index];                                                               <* 
  *>    two    = 0;                                                                              <* 
  *>    for (i = 0; i < MAX_GROUPS; ++i) {                                                       <* 
- *>       if (i > 0 && strncmp(groups[i].cat, groups[i - 1].cat, 5) == 0) continue;             <* 
- *>       /+> printf("%s ", groups[i].cat);                                             <+/     <* 
- *>       if (strncmp(groups[i].cat, "eof",  5) == 0)                    break;                 <* 
- *>       if (strncmp(g_loc[letter].cat, groups[i].cat, 5) != 0)            continue;           <* 
- *>       two = groups[i].gr_num;                                                               <* 
+ *>       if (i > 0 && strncmp(g_groups [i].cat, g_groups [i - 1].cat, 5) == 0) continue;             <* 
+ *>       /+> printf("%s ", g_groups [i].cat);                                             <+/     <* 
+ *>       if (strncmp(g_groups [i].cat, "eof",  5) == 0)                    break;                 <* 
+ *>       if (strncmp(g_loc[letter].cat, g_groups [i].cat, 5) != 0)            continue;           <* 
+ *>       two = g_groups [i].gr_num;                                                               <* 
  *>       break;                                                                                <* 
  *>    }                                                                                        <* 
  *>    /+---(complete)-----------------------+/                                                 <* 
@@ -1253,11 +1300,11 @@ words_translate    (int a_word)
  *>       /+> printf("   letter one = %2d, %2s, %2s ( ", letter, g_loc[letter].label, g_loc[letter].cat);   <+/   <* 
  *>       one    = 0;                                                                                             <* 
  *>       for (i = 0; i < MAX_GROUPS; ++i) {                                                                      <* 
- *>          if (i > 0 && strncmp(groups[i].cat, groups[i - 1].cat, 5) == 0) continue;                            <* 
- *>          /+> printf("%s ", groups[i].cat);                                             <+/                    <* 
- *>          if (strncmp(groups[i].cat, "eof",  5) == 0)                    break;                                <* 
- *>          if (strncmp(g_loc[letter].cat, groups[i].cat, 5) != 0)            continue;                          <* 
- *>          one = groups[i].gr_num;                                                                              <* 
+ *>          if (i > 0 && strncmp(g_groups [i].cat, g_groups [i - 1].cat, 5) == 0) continue;                            <* 
+ *>          /+> printf("%s ", g_groups [i].cat);                                             <+/                    <* 
+ *>          if (strncmp(g_groups [i].cat, "eof",  5) == 0)                    break;                                <* 
+ *>          if (strncmp(g_loc[letter].cat, g_groups [i].cat, 5) != 0)            continue;                          <* 
+ *>          one = g_groups [i].gr_num;                                                                              <* 
  *>          break;                                                                                               <* 
  *>       }                                                                                                       <* 
  *>    }                                                                                                          <* 
@@ -1271,11 +1318,11 @@ words_translate    (int a_word)
  *>       /+> printf("   letter two = %2d, %2s, %2s ( ", letter, g_loc[letter].label, g_loc[letter].cat);   <+/   <* 
  *>       two    = 0;                                                                                             <* 
  *>       for (i = 0; i < MAX_GROUPS; ++i) {                                                                      <* 
- *>          if (i > 0 && strncmp(groups[i].cat, groups[i - 1].cat, 5) == 0) continue;                            <* 
- *>          /+> printf("%s ", groups[i].cat);                                             <+/                    <* 
- *>          if (strncmp(groups[i].cat, "eof",  5) == 0)                    break;                                <* 
- *>          if (strncmp(g_loc[letter].cat, groups[i].cat, 5) != 0)            continue;                          <* 
- *>          two = groups[i].gr_num;                                                                              <* 
+ *>          if (i > 0 && strncmp(g_groups [i].cat, g_groups [i - 1].cat, 5) == 0) continue;                            <* 
+ *>          /+> printf("%s ", g_groups [i].cat);                                             <+/                    <* 
+ *>          if (strncmp(g_groups [i].cat, "eof",  5) == 0)                    break;                                <* 
+ *>          if (strncmp(g_loc[letter].cat, g_groups [i].cat, 5) != 0)            continue;                          <* 
+ *>          two = g_groups [i].gr_num;                                                                              <* 
  *>          break;                                                                                               <* 
  *>       }                                                                                                       <* 
  *>    }                                                                                                          <* 

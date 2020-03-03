@@ -256,7 +256,7 @@ char
 USER_unload           (void)
 {
    DEBUG_USER   yLOG_enter   (__FUNCTION__);
-   OUT_clear ();                  
+   OUT_clear (CLEAR_FULL);
    DEBUG_USER   yLOG_exit    (__FUNCTION__);
    return 0;
 }

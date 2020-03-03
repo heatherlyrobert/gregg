@@ -132,7 +132,7 @@ SCRP          v21  (OUT   ) check point calculations                          
      get      v21  review other                         OUT__unit             "other"        , o.raw + 6                                              s_equal     OUT other        : /   depth   0.0, cat  0, anom -, sharp -                                          
 
    COND       v21  clear point data                                             - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((01.003))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
-     exec     v21  call clear                           OUT_clear                                                                                     i_equal     0                                                                                                    
+     exec     v21  call clear                           OUT_clear             CLEAR_FULL                                                              i_equal     0                                                                                                    
 
    COND       v21  check stroke positions                                       - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((01.003))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
      get      v21  review coords                        OUT__unit             "coord"        , o.raw                                                  s_equal     OUT coord        : /   x     0 (0.000)    0   y     0 (0.000)    0                                   

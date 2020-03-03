@@ -26,8 +26,8 @@
 
 #define     P_VERMAJOR  "5.--= generalization for broader use"
 #define     P_VERMINOR  "5.3 = update for use as coding example"
-#define     P_VERNUM    "5.3d"
-#define     P_VERTXT    "fixed base point filtering for multi-part outlines"
+#define     P_VERNUM    "5.3e"
+#define     P_VERTXT    "basic letter group searching functioning"
 
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -395,8 +395,6 @@ struct cDEBUG {
    char      writing;  /* process of creating outlines             */
 } debug_old;
 
-#define   DEBUG__SHARPS     if (debug_old.sharps   == 'y')
-#define   DEBUG__MATCHES    if (debug_old.matches  == 'y')
 #define   DEBUG__SHAPES     if (debug_old.shapes   == 'y')
 #define   DEBUG__WRITING    if (debug_old.writing  == 'y')
 
@@ -448,48 +446,46 @@ typedef struct cRANGES tRANGES;
 struct cRANGES {
    int     num;          /* link to other tables           */
    int     len;          /* normal=1, short =2             */
-   char    nam[5];       /* short description              */
+   char    nam          [LEN_TERSE];       /* short description              */
    int     min;          /* minimum degree                 */
    int     beg;          /* begin normal range             */
    int     tar;          /* best case degree               */
    int     end;          /* end normal range               */
    int     max;          /* minimum degree                 */
 };
-extern tRANGES ranges[MAX_RANGES];
+extern tRANGES g_ranges [MAX_RANGES];
 
 
 #define   MAX_GROUPS      200
 typedef struct cGROUPS tGROUPS;
 struct cGROUPS {
-   int     range;        /* range of full letter           */
-   int     op;           /* open points                    */
-   char    sh[5];        /* shape flow                     */
-   char    fl[5];        /* quadrent flow                  */
-   char    ca[10];       /* valid curvatures               */
-   char        cat         [LEN_TERSE];          /* letter group              */
-   int     gr_num;       /* letter group number            */
-   int     ac;           /* active? (y/n)                  */
+   char        range;                       /* range of full letter           */
+   char        opens;                       /* open points                    */
+   char        flow        [LEN_LABEL];     /* quadrent flow                  */
+   char        curve       [LEN_LABEL];     /* valid curvatures               */
+   int         gr_num;                      /* letter group number            */
+   char        ac;                          /* active? (y/n)                  */
 };
-extern tGROUPS groups[MAX_GROUPS];
+extern tGROUPS g_groups [MAX_GROUPS];
 #define   CURVE_OFFSET      4
 
 
 #define   MAX_COMBOS      200
 typedef struct cCOMBOS tCOMBOS;
 struct cCOMBOS {
-   char    nm[5];        /* short description              */
-   int     op;           /* open points                    */
-   int     sh;           /* position of sharp point        */
-   char    fl[10];       /* quadrent flow                  */
-   char    mm[5];        /* midpoint method (x, y, -)      */
-   int     st;           /* start for midpoint             */
-   int     of;           /* offset to second letter        */
-   char    on[5];        /* letter group one               */
-   char    tw[5];        /* letter group two               */
-   char    re[5];        /* replace letters with           */
-   int     ac;           /* active? (y/n)                  */
+   char        name        [LEN_TERSE];     /* short description             */
+   char        opens;                       /* open points                   */
+   int         sh;                          /* position of sharp point       */
+   char        flow        [LEN_TERSE];     /* quadrent flow                 */
+   char        mm          [LEN_TERSE];     /* midpoint method (x, y, -)     */
+   int         st;                          /* start for midpoint            */
+   int         of;                          /* offset to second letter       */
+   char        on          [LEN_TERSE];     /* letter group one              */
+   char        tw          [LEN_TERSE];     /* letter group two              */
+   char        re          [LEN_TERSE];     /* replace letters with          */
+   char        ac;                          /* active? (y/n)                 */
 };
-extern tCOMBOS combos[MAX_COMBOS];
+extern tCOMBOS g_combos [MAX_COMBOS];
 
 
 #define    CAT_NONE    0
@@ -580,6 +576,7 @@ typedef struct timespec  tTSPEC;
 #define     POINTS_KEY     'k'
 #define     POINTS_TMP     't'
 #define     POINTS_ALL     "rbakt"
+#define     POINTS_NOT_RAW "bakt"
 
 #define     SPAN_NORM      'n'
 #define     SPAN_AVG       'a'
@@ -587,14 +584,22 @@ typedef struct timespec  tTSPEC;
 #define     SPAN_ALL       "na-"
 
 
-#define     POINT_TYPES    "S>-<F"
+#define     POINT_TYPES    "S>p-s<F"
 #define     POINT_START    'S'
 #define     POINT_HEAD     '>'
+#define     POINT_PREFIX   'p'
 #define     POINT_NORMAL   '-'
+#define     POINT_SUFFIX   's'
 #define     POINT_TAIL     '<'
 #define     POINT_FINISH   'F'
 #define     POINT_NONE     '/'
 #define     POINT_FAKE     'y'
+#define     POINT_ALIGNER  "ps"
+#define     POINT_SPECIAL  "S>ps<F"
+
+#define     CLEAR_FULL     'y'
+#define     CLEAR_MORE     '-'
+
 
 #define     MODE_CURSOR    '-'
 #define     MODE_TOUCH     'y'
@@ -628,9 +633,10 @@ struct cPOINT
    short       p_raw;                  /* tie to raw point                    */
    short       p_bas;                  /* tie to basic point                  */
    short       p_key;                  /* tie to key point                    */
-   char        fake;                   /* artificial point or not (y/n)       */
-   char        prekey;                 /* points pre-identified as key        */
-   char        marked;                 /* pre-marked for specific use         */
+   uchar       type;                   /* type of key point (sharp/rounded)   */
+   uchar       fake;                   /* artificial point or not (y/n)       */
+   uchar       prekey;                 /* points pre-identified as key        */
+   uchar       marked;                 /* pre-marked for specific use         */
    /*---(touchpad)--------------*/
    short       x_touch;                /* x-pos in touchpad coords (captured) */
    short       y_touch;                /* y-pos in touchpad coords (captured) */
@@ -646,12 +652,11 @@ struct cPOINT
    float       degs;                   // degrees of line from last point
    char        quad;                   // quadrent of line from last point
    char        range;                  // range of point
-   float       cdepth;                 // pixels of curvature at mid point
-   char        cano;                   // curve anomolies '-' = normal, 'x' = jittery
+   float       depth;                  // pixels of curvature at mid point
+   float       ratio;                  /* length to depth ratio               */
    char        ccat;                   // curve category : +1, 0, -1                    
    char        sharp;                  /* distinct break before-to-after      */        
    char        use         [LEN_TERSE];/* use of this point in outline        */
-   char        type;                   /* type of key point (sharp/rounded)   */
    /*---(display)---------------*/
    float       x_rel;                  /* input device relative x_coord       */
    float       y_rel;                  /* input device relative y_coord       */
@@ -725,6 +730,8 @@ struct cOUTLINE
 #define     COLOR_WARN          'W'
 
 
+#define     PARTS_OF_SPEECH     "-npvjdeci"
+
 
 
 /*---(words structure)--------------------------*/
@@ -740,6 +747,8 @@ struct cWORDS {
    char        g_len;
    llong       g_key;
    short       drawn       [LEN_LABEL];     /* gregg as drawn                 */
+   /*---(info)-----------------*/
+   char        part;                        /* primary part of speech         */
    /*---(source)---------------*/
    /*> uchar       ver;                                                               <* 
     *> uchar       book;                                                              <* 
@@ -859,7 +868,7 @@ char       dlist_init        (void);
 /*---(outline)--------------*/
 char       OUT_status         (char *a_list);
 char       OUT_init             (void);
-char       OUT_clear            (void);
+char       OUT_clear            (char a_full);
 char       OUT__open            (char *a_mode);
 char       OUT__close           (void);
 char       OUT_count            (void);
@@ -875,8 +884,7 @@ char*      OUT__unit            (char *a_question, tPOINT *a_curr);
 char        POINT_clear             (tPOINT *a_point, char a_type);
 char        POINT_clear_series      (char a_type);
 char        POINT_clear_all         (void);
-/*---(moving)---------------*/
-char        BASE_push_up            (short x_old);
+char        POINT_clear_for_more    (void);
 /*---(sequencing)-----------*/
 char        POINT_seq_start         (char a_type, tPOINT *p, int c);
 char        POINT_seq_head          (char a_type, tPOINT *p, int c, int a_xpad, int a_ypad);
@@ -885,7 +893,8 @@ char        POINT_seq_tail          (char a_type, tPOINT *p, int c, int a_xpad, 
 char        POINT_seq_finish        (char a_type, tPOINT *p, int c, int a_xpad, int a_ypad);
 /*---(statistics)-----------*/
 char        POINT_pos               (tPOINT *a_curr);
-char        POINT_calc              (char a_type, tPOINT* a_curr, int a_span);
+char        POINT_calc              (char a_type, tPOINT* a_curr, char a_span);
+char        POINT_curve             (short a_start, short a_finish, float a_len, float a_slope, float a_icept, float *a_depth, float *a_ratio, char *a_cat);
 /*---(reporting)------------*/
 char        POINT_list              (FILE *a_file, char a_style, tPOINT *a_series, int a_count);
 char        POINT_show              (FILE *a_file, char a_style, tPOINT *a_curr  , int a_num);
@@ -910,11 +919,19 @@ char        RAW_load                (char *a_points);
 char        RAW_equalize            (void);
 char*       RAW__unit               (char *a_question, int a_num);
 
+
+
+/*---(program)--------------*/
+char        BASE_config             (float a_append, float a_adjust, float a_sharp);
 /*---(support)--------------*/
 float       BASE__dist              (short a, short b);
+/*---(moving)---------------*/
+char        BASE__push_up           (short x_old);
+char        BASE_bas2avg            (short a_bas);
 /*---(new)------------------*/
+char        BASE__force_point       (uchar a_type, short x, short y);
 char        BASE__raw2bas           (short a_raw, short a_bas);
-char        BASE_append             (short a_raw);
+char        BASE_append             (short a_raw, uchar a_force);
 char        BASE_insert             (short a_raw);
 char        BASE_adjust             (short a_bas, short a_raw);
 /*---(statistics)-----------*/
@@ -924,7 +941,8 @@ char        BASE__pull_in           (short a_bas);
 char        BASE_extend_ends        (void);
 char        BASE_retract_ends       (void);
 /*---(specialty)------------*/
-char        BASE_add_corners        (void);
+char        BASE_add_extremes       (void);
+char        BASE_mark_sharps        (void);
 /*---(driver)---------------*/
 char        BASE_filter             (void);
 /*---(mapping)--------------*/
@@ -932,6 +950,9 @@ char        BASE_map_update         (tMAPPED *a_map, int a_ycur, int a_ynew);
 
 
 
+
+char        KEY__force_point        (uchar a_type, short x, short y, uchar a_mark, uchar a_sharp);
+char        KEY_add                 (short a_bas, uchar a_fake, uchar a_type, uchar *a_use);
 
 char       KEY_calc          (char);
 char       KEY_prep          (void);
@@ -943,16 +964,20 @@ char       KEY_flatten       (void);
 char       KEY_squeeze       (void);
 char       KEY_sharps        (void);
 /*345678901-12345678901-12345678901-12345678901-12345678901-12345678901-123456*/
-char        KEY_add                 (int a_bas, char a_fake, char a_type, char *a_use);
 char        KEY_driver              (void);
 
 
-char       MATCH_driver      (void);
-char       match_calc        (int, int);
+short       MATCH_count_open        (short a_beg);
+char        MATCH_driver            (void);
+char        MATCH__calc_call        (short a_start, short a_finish);
+char        MATCH__curvature        (short a_start, short a_finish);
+char        MATCH_calc              (short a_beg, char a_count);
 
-int        match_size        (int);
-int        match_range       (int);
+char        MATCH_size              (short a_len);
+char        MATCH_range             (int a_deg);
+char*       MATCH__unit             (char *a_question, int a_num);
 
+char        CIRCLE_config           (int a_min, int a_max);
 char        CIRCLE_driver_OLD       (void);
 char        CIRCLE_driver           (void);
 

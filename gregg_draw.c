@@ -112,7 +112,7 @@ DRAW_init            (void)
     *> yVIKEYS_view_ribbon ("tools"   , "shower"      );                              <* 
     *> yVIKEYS_cmds_direct (":ribbon show");                                          <*/
    /*---(overlay/layers)-----------------*/
-   yVIKEYS_view_option (YVIKEYS_OVERLAY, "data"  , OVERLAY_data    , "current point statistics");
+   yVIKEYS_view_option (YVIKEYS_OVERLAY, "point" , OVERLAY_data    , "current point statistics");
    yVIKEYS_view_option (YVIKEYS_OVERLAY, "sample", OVERLAY_samples , "letter samples");
    yVIKEYS_dataset_add   ("raw"     , LAYER_raws, "raw data points"     );
    yVIKEYS_dataset_add   ("bas"     , LAYER_base, "bas/avg data points" );
@@ -228,7 +228,7 @@ DRAW_primary         (float a_mag)
    if (o.navg > 0 && my.time_point >= o.nraw) {
       LAYER_base ();
       LAYER_curr ();
-      /*> LAYER_keys ();                                                              <*/
+      LAYER_keys ();
    }
    /*---(complete)-----------------------*/
    return;
@@ -321,8 +321,8 @@ static void      o___GUIDES__________________o (void) {;}
  *>    int       j         = 0;            /+ loop iterator -- location           +/   <* 
  *>    /+---(locals)-------------------------+/                                        <* 
  *>    for (i = 0; i < MAX_GROUPS; ++i) {                                              <* 
- *>       if (strncmp(groups[j].gr, "eof", 5)              == 0) break;                <* 
- *>       if (groups[i].fl[0] != a_quad)  continue;                                    <* 
+ *>       if (strncmp(g_groups [j].gr, "eof", 5)              == 0) break;                <* 
+ *>       if (g_groups [i].fl[0] != a_quad)  continue;                                    <* 
  *>       for (j = 0; j < MAX_LETTERS; ++j) {                                          <* 
  *>          if (strncmp(g_loc[j].label, "eof", 5)              == 0) break;                 <* 
  *>       }                                                                            <* 
@@ -614,7 +614,7 @@ LAYER_base          (void)
    int     i;
    for (i = 0; i < o.navg; ++i) {
       /*---(draw the point)--------------*/
-      if      (o.avg[i].cano  == 'x') glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
+      if      (o.avg[i].sharp == 'x') glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
       else if (o.avg[i].type  == 'm') glColor4f(1.0f, 0.0f, 1.0f, 1.0f);
       else if (o.bas[i].fake  == 'y') glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
       else                            glColor4f(0.7f, 0.7f, 0.0f, 1.0f);
@@ -666,30 +666,35 @@ LAYER_keys          (void)
    int     pt = 0;
    int     i;
    /*---(draw keys)----------------------*/
+   if      (my.zoom < 2)   r1 =  2.0;
+   else if (my.zoom < 4)   r1 =  3.0;
+   else                    r1 =  4.0;
    for (i = 0; i < o.nkey; ++i) {
       /*---(draw the point)--------------*/
-      glPushMatrix(); {
-         glTranslatef( o.key[i].x_pos * my.zoom, o.key[i].y_pos * my.zoom,    0.0);
-         glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
-         if (o.key[i].cano  == 'x') glColor4f (1.0f, 0.0f, 0.0f, 0.5f);
+      glPushMatrix (); {
+         glTranslatef  (o.key[i].x_pos * my.zoom, o.key[i].y_pos * my.zoom,    0.0);
+         glColor4f     (1.0f, 1.0f, 1.0f, 0.5f);
          if (o.key[i].fake  == 'y') glColor4f (0.0f, 1.0f, 1.0f, 0.5f);
-         glBegin(GL_POLYGON); {
+         glBegin (GL_POLYGON); {
             for (d = 0; d <= 360; d += 10) {
                rad = d * DEG2RAD;
-               x   = r1 * cos(rad);
-               y   = r1 * sin(rad);
-               glVertex3f( x, y, z);
+               x   = r1 * cos (rad);
+               y   = r1 * sin (rad);
+               glVertex3f (x, y, z);
             }
-         } glEnd();
-      } glPopMatrix();
+         } glEnd ();
+      } glPopMatrix ();
       /*---(draw the segment)------------*/
       if (o.key[i].type != '>') {
-         glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-         glLineWidth(2.0);
-         glBegin(GL_LINES); {
+         glColor4f     (1.0f, 1.0f, 1.0f, 1.0f);
+         glEnable      (GL_LINE_STIPPLE);
+         glLineStipple (1, 0x3333);
+         glLineWidth   (1.0);
+         glBegin       (GL_LINES); {
             glVertex3f(o.key[i - 1].x_pos * my.zoom, o.key[i - 1].y_pos * my.zoom, z + 0.25);
             glVertex3f(o.key[i].x_pos * my.zoom,     o.key[i].y_pos * my.zoom,     z + 0.25);
          } glEnd();
+         glDisable     (GL_LINE_STIPPLE);
       }
       /*---(draw the hidden lines)-------*/
       /*> if (i > 0 && o.key[i].type == '>') {                                                      <* 
@@ -876,7 +881,7 @@ DRAW_info_answer     (void)
 char
 DRAW_info (void)
 {
-   DEBUG_GRAF  printf("   - draw_info()\n");
+   /*> DEBUG_GRAF  printf("   - draw_info()\n");                                      <*/
    char msg[100];
    glColor4f(1.0f, 1.0f, 0.0f, 1.0f);
    if (o.saved == 'y') {
@@ -963,12 +968,12 @@ DRAW_info (void)
       /*---(advanced)--------------------------*/
       snprintf(msg, 100, "%4d"  , o.key[xkey].range);
       FONT__label ("ra"  , msg);
-      snprintf(msg, 100, "%7.2f", o.key[xkey].cdepth);
-      FONT__label ("c" , msg);
+      snprintf(msg, 100, "%7.2f", o.key[xkey].depth);
+      FONT__label ("de", msg);
+      snprintf(msg, 100, "   %c", o.key[xkey].ratio);
+      FONT__label ("rt"  , msg);
       snprintf(msg, 100, "  %2d", o.key[xkey].ccat);
       FONT__label ("cc"  , msg);
-      snprintf(msg, 100, "   %c", o.key[xkey].cano);
-      FONT__label ("ca"  , msg);
       snprintf(msg, 100, "   %c", o.key[xkey].fake);
       FONT__label ("a"   , msg);
       snprintf(msg, 100, "%4.4s", o.key[xkey].use);
@@ -995,7 +1000,7 @@ DRAW_info (void)
    FONT__label ("ltrs"   , msg);
    glPopMatrix();
    /*---(complete)-------------------------*/
-   DEBUG_GRAF  printf("   - draw_info()          : complete\n");
+   /*> DEBUG_GRAF  printf("   - draw_info()          : complete\n");                  <*/
    return 0;
 }
 

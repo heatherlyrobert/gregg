@@ -65,6 +65,7 @@ PROG_init          (void)
    my.quit         = '-';
    /*> my.ratio        = GREGG_WACOM;                                                 <*/
    my.ratio        = 10;
+   BASE_config     (10.0, 2.0, 70.0);
    /*---(other)-----------------------*/
    strlcpy (my.words, "", LEN_RECD);
    strlcpy (my.guide, "", LEN_RECD);
@@ -283,6 +284,7 @@ PROG__unit_loud     (void)
    yURG_name  ("raw"          , YURG_ON);
    yURG_name  ("avg"          , YURG_ON);
    yURG_name  ("calc"         , YURG_ON);
+   yURG_name  ("match"        , YURG_ON);
    PROG_args   (2, x_args);
    PROG_begin  ();
    my.dict = '-';

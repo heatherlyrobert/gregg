@@ -173,23 +173,25 @@ RAW_touch            (int a_xpad, int a_ypad)
    r  = sqrt((a_xpad * a_xpad) + (a_ypad * a_ypad));
    DEBUG_RAW    yLOG_double  ("r"         , r);
    /*---(assign type)--------------------*/
-   /*> OUT_clear ();                                                                  <* 
+   /*> OUT_clear (CLEAR_FULL);                                                                  <* 
     *> stype   = PART_MAIN;                                                           <* 
     *> o.xadj  = a_xpad;                                                              <* 
     *> o.yadj  = a_ypad;                                                              <*/
    DEBUG_RAW    yLOG_char    ("stype"     , stype);
    if (r < SIZE_MED_AVG) {
       DEBUG_RAW    yLOG_note    ("inside new character ring");
-      if (stype != PART_PREFIX)  OUT_clear ();
+      if (stype != PART_PREFIX)  OUT_clear (CLEAR_FULL);
+      else                       OUT_clear (CLEAR_MORE);
       stype   = PART_MAIN;
       o.xadj  = a_xpad;
       o.yadj  = a_ypad;
    } else if (a_xpad < 0.0 && a_ypad > 0.0) {
       DEBUG_RAW    yLOG_note    ("inside prefix area (-x, +y)");
-      OUT_clear ();
+      OUT_clear (CLEAR_FULL);
       stype   = PART_PREFIX;
    } else {
       DEBUG_RAW    yLOG_note    ("continue existing outline");
+      OUT_clear (CLEAR_MORE);
       stype   = PART_CONTINUE;
    }
    /*---(save points)--------------------*/
@@ -230,18 +232,22 @@ RAW_lift             (int a_xpad, int a_ypad)
    POINT_list (stdout, 'd', o.raw, o.nraw);
    if (rc == 0)  rc = BASE_filter   ();
    POINT_list (stdout, 'd', o.bas, o.nbas);
-   if (rc == 0)  rc = BASE_add_corners ();
-   if (rc == 0)  rc = CIRCLE_driver ();
+   POINT_list (stdout, 'd', o.avg, o.navg);
+   if (rc == 0)  rc = BASE_add_extremes ();
+   if (rc == 0)  rc = BASE_extend_ends  ();
    POINT_list (stdout, 'd', o.bas, o.nbas);
-   /*> if (rc == 0)  rc = KEY_driver    ();                                           <*/
+   POINT_list (stdout, 'd', o.avg, o.navg);
+   if (rc == 0)  rc = BASE_mark_sharps  ();
+   if (rc == 0)  rc = CIRCLE_driver     ();
+   if (rc == 0)  rc = KEY_driver        ();
    /*> if (rc == 0)  rc = KEY_filter    ();                                           <* 
     *> if (rc == 0)  rc = KEY_flatten   ();                                           <* 
     *> if (rc == 0)  rc = KEY_squeeze   ();                                           <* 
     *> if (rc == 0)  rc = KEY_sharps    ();                                           <*/
    /*> if (rc == 0)  rc = CIRCLE_driver_OLD ();                                       <*/
-   /*> if (rc == 0)  rc = MATCH_driver  ();                                           <*/
-   /*> POINT_list (stdout, 'd', o.bas, o.nbas);                                       <*/
-   /*> POINT_list (stdout, 'd', o.key, o.nkey);                                       <*/
+   if (rc == 0)  rc = MATCH_driver      ();
+   POINT_list (stdout, 'd', o.bas, o.nbas);
+   POINT_list (stdout, 'd', o.key, o.nkey);
    if (rc <  0) {
       printf ("dropped out early\n");
       return rc;
