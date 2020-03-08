@@ -711,7 +711,7 @@ WORDS_find           (char *a_word)
    /*---(search)-------------------------*/
    for (i = 0; i < MAX_WORDS; ++i) {
       printf ("reviewing %d, %s, %s\n", i, s_words [i].english, s_words [i].gregg);
-      if (strncmp (s_words[i].english, "eof",  MAX_LEN) == 0)  return -1;
+      if (strncmp (s_words[i].english, "EOF",  MAX_LEN) == 0)  return -1;
       if (strncmp (s_words[i].english, a_word, MAX_LEN) != 0)  continue;
       printf ("FOUND     %d, %s, %s\n", i, s_words [i].english, s_words [i].gregg);
       return  i;
@@ -974,7 +974,7 @@ words_outstring (            /* locate outline in the translation dictionary  */
    strlcpy (o.word, "(unknown)", MAX_LEN);
    int count = 0;
    for (i = 0; i < MAX_WORDS; ++i) {
-      if (strncmp(s_words[i].english, "eof",  MAX_LEN) == 0)  return -1;
+      if (strncmp(s_words[i].english, "EOF",  MAX_LEN) == 0)  return -1;
       /*> DEBUG_MATCH   printf("look <<%s>>\n", s_words[i].gregg);                    <*/
       if (strncmp(s_words[i].gregg, a_outstring, MAX_LEN) != 0)  continue;
       /*> DEBUG__WRITING  printf("%3d) <<%s>>\n", i, s_words[i].gregg);             <* 
@@ -1243,7 +1243,7 @@ words_translate    (int a_word)
  *>    for (i = 0; i < MAX_GROUPS; ++i) {                                                       <* 
  *>       if (i > 0 && strncmp(g_groups [i].cat, g_groups [i - 1].cat, 5) == 0) continue;             <* 
  *>       /+> printf("%s ", g_groups [i].cat);                                             <+/     <* 
- *>       if (strncmp(g_groups [i].cat, "eof",  5) == 0)                    break;                 <* 
+ *>       if (strncmp(g_groups [i].cat, "EOF",  5) == 0)                    break;                 <* 
  *>       if (strncmp(g_loc[letter].cat, g_groups [i].cat, 5) != 0)            continue;           <* 
  *>       one = g_groups [i].gr_num;                                                               <* 
  *>       break;                                                                                <* 
@@ -1254,7 +1254,7 @@ words_translate    (int a_word)
  *>    for (i = 0; i < MAX_GROUPS; ++i) {                                                       <* 
  *>       if (i > 0 && strncmp(g_groups [i].cat, g_groups [i - 1].cat, 5) == 0) continue;             <* 
  *>       /+> printf("%s ", g_groups [i].cat);                                             <+/     <* 
- *>       if (strncmp(g_groups [i].cat, "eof",  5) == 0)                    break;                 <* 
+ *>       if (strncmp(g_groups [i].cat, "EOF",  5) == 0)                    break;                 <* 
  *>       if (strncmp(g_loc[letter].cat, g_groups [i].cat, 5) != 0)            continue;           <* 
  *>       two = g_groups [i].gr_num;                                                               <* 
  *>       break;                                                                                <* 
@@ -1302,7 +1302,7 @@ words_translate    (int a_word)
  *>       for (i = 0; i < MAX_GROUPS; ++i) {                                                                      <* 
  *>          if (i > 0 && strncmp(g_groups [i].cat, g_groups [i - 1].cat, 5) == 0) continue;                            <* 
  *>          /+> printf("%s ", g_groups [i].cat);                                             <+/                    <* 
- *>          if (strncmp(g_groups [i].cat, "eof",  5) == 0)                    break;                                <* 
+ *>          if (strncmp(g_groups [i].cat, "EOF",  5) == 0)                    break;                                <* 
  *>          if (strncmp(g_loc[letter].cat, g_groups [i].cat, 5) != 0)            continue;                          <* 
  *>          one = g_groups [i].gr_num;                                                                              <* 
  *>          break;                                                                                               <* 
@@ -1320,7 +1320,7 @@ words_translate    (int a_word)
  *>       for (i = 0; i < MAX_GROUPS; ++i) {                                                                      <* 
  *>          if (i > 0 && strncmp(g_groups [i].cat, g_groups [i - 1].cat, 5) == 0) continue;                            <* 
  *>          /+> printf("%s ", g_groups [i].cat);                                             <+/                    <* 
- *>          if (strncmp(g_groups [i].cat, "eof",  5) == 0)                    break;                                <* 
+ *>          if (strncmp(g_groups [i].cat, "EOF",  5) == 0)                    break;                                <* 
  *>          if (strncmp(g_loc[letter].cat, g_groups [i].cat, 5) != 0)            continue;                          <* 
  *>          two = g_groups [i].gr_num;                                                                              <* 
  *>          break;                                                                                               <* 

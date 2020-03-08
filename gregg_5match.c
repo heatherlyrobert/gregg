@@ -21,7 +21,7 @@ static struct {
    float       len;                      /* length                              */
    char        range;
    char        range2;
-   char        lcat;                     /* length category                     */
+   char        size;                     /* length category                     */
    float       degs;                     /* degree                              */
    float       slope;                    /* slope                               */
    float       icept;
@@ -82,7 +82,7 @@ MATCH__calc_call        (short a_start, short a_finish)
    opens.qs     = o.key [a_start + 1].quad;
    DEBUG_MATCH   yLOG_complex ("calcs"     , "%4.0fxd %4.0fyd %4.0fl %8.2fs %8.2fi %4.0fd %1d", opens.xd, opens.yd, opens.len, opens.slope, opens.icept, opens.degs, opens.quad);
    /*---(fill in rest)--------------------------*/
-   opens.lcat   = MATCH_size  (opens.len);
+   opens.size   = MATCH_size  (opens.len);
    opens.range  = MATCH_range (opens.degs);
    opens.depth  = 0.0;
    opens.ratio  = 0.0;
@@ -215,7 +215,11 @@ MATCH_calc              (short a_start, char a_count)
    /*---(prepare)-------------------------------*/
    x_finish  = a_start + a_count;
    MATCH__calc_call (a_start, x_finish);
-   POINT_curve (a_start, x_finish, o.tmp [1].len, o.tmp [1].slope, o.tmp [1].icept, &(opens.depth), &(opens.ratio), &(opens.ccat));
+   /*> POINT_curve (a_start, x_finish, o.tmp [1].len, o.tmp [1].slope, o.tmp [1].icept, &(opens.depth), &(opens.ratio), &(opens.ccat));   <*/
+   POINT_curve (a_start, x_finish, o.tmp [1].len, o.tmp [1].slope, o.tmp [1].icept, &(o.tmp [1].depth), &(o.tmp [1].ratio), &(o.tmp [1].ccat));
+   opens.depth = o.tmp [1].depth;
+   opens.ratio = o.tmp [1].ratio;
+   opens.ccat  = o.tmp [1].ccat;
    /*---(put back)------------------------------*/
    if (a_count == 1) {
       o.key [x_finish].depth  = opens.depth;
@@ -265,7 +269,7 @@ MATCH_calc_OLD          (short a_start, char a_count)
     *> opens.degs    = o.tmp[1].degs;                                                 <* 
     *> opens.quad    = o.tmp[1].quad;                                                 <* 
     *> opens.qs   = o.key[a_start + 1].quad;                                          <* 
-    *> opens.lcat = MATCH_size (opens.len);                                           <* 
+    *> opens.size = MATCH_size (opens.len);                                           <* 
     *> opens.range = MATCH_range (opens.degs);                                        <* 
     *> opens.depth    = 0;                                                           <* 
     *> opens.ccat = 0;                                                                <* 
@@ -374,11 +378,11 @@ MATCH_size              (short a_len)
     * larger          is 6/24/40
     */
    int    x_size  = -1;
-   if      (a_len <  SIZE_SML_MIN)    x_size = 0;
-   else if (a_len <= SIZE_SML_MAX)    x_size = 1;
-   else if (a_len <= SIZE_MED_MAX)    x_size = 2;
-   else if (a_len <= SIZE_LRG_MAX)    x_size = 3;
-   else                               x_size = 4;
+   if      (a_len <  SIZE_SML_MIN * 10.0)    x_size = 0;
+   else if (a_len <= SIZE_SML_MAX * 10.0)    x_size = 1;
+   else if (a_len <= SIZE_MED_MAX * 10.0)    x_size = 2;
+   else if (a_len <= SIZE_LRG_MAX * 10.0)    x_size = 3;
+   else                                      x_size = 4;
    return x_size;
 }
 
@@ -398,7 +402,7 @@ MATCH_range             (int a_deg)
    opens.range2  =  0;
    for (i = 0; i < MAX_RANGES; ++i) {
       /*---(catch end)-------------------*/
-      if (strncmp (g_ranges [i].nam, "eof", 5) == 0) break;
+      if (strncmp (g_ranges [i].nam, "EOF", 5) == 0) break;
       /*---(filter)----------------------*/
       if (a_deg <= g_ranges [i].min) continue;
       if (a_deg >  g_ranges [i].max) continue;
@@ -665,8 +669,8 @@ match_location     (int a_rule, int a_beg, int a_opens, int a_size)
    trys_ltr = 0;
    for (j = 0; j < MAX_LETTERS; ++j) {
       /*---(primary filtering)---------------*/
-      if (strncmp (g_loc[j].label, "eof", 5)              == 0) break;
-      /*> if (strncmp (g_groups [a_rule].cat, g_loc[j].cat, 5) != 0) continue;           <*/
+      if (strncmp (g_loc[j].label, "EOF", 5)              == 0) break;
+      /*> if (strncmp (g_groups [a_rule].lcat, g_loc[j].lcat, 5) != 0) continue;           <*/
       /*---(screen letters)------------------*/
       ++trys_ltr;
       if (trys_ltr <= 3) {
@@ -721,7 +725,7 @@ match_location     (int a_rule, int a_beg, int a_opens, int a_size)
  *>          strncpy(gname, "n/a", 5);                                                                                               <* 
  *>       } else {                                                                                                                   <* 
  *>          strncpy(gname, a_group, 5);                                                                                             <* 
- *>          if (strncmp(g_groups [i].cat, a_group, 5) != 0) continue;                                                               <* 
+ *>          if (strncmp(g_groups [i].lcat, a_group, 5) != 0) continue;                                                               <* 
  *>       }                                                                                                                          <* 
  *>       /+---(start report out)----------------+/                                                                                  <* 
  *>       /+> printf("      #%02d [%-3.3s] f=%2d o=%1d, r=%1d, c=%2d : ",                 <*                                         <* 
@@ -749,12 +753,37 @@ match_location     (int a_rule, int a_beg, int a_opens, int a_size)
  *> }                                                                                                                                <*/
 
 char
+MATCH_mark            (short a_match)
+{
+   short       i         =    0;
+   char        x_cont    =  '-';
+   DEBUG_MATCH   yLOG_value   ("a_match"   , a_match);
+   for (i = opens.beg + 1; i <= opens.beg + opens.count; ++i) {
+      DEBUG_MATCH   yLOG_value   ("i"         , i);
+      o.key [i].marked = '!';
+      if      (a_match    >=  0) {
+         if (x_cont == '-')  strlcpy (o.key [i].use, g_loc [a_match].label, LEN_TERSE);
+         else                strlcpy (o.key [i].use, "+", LEN_TERSE);
+         x_cont = 'y';
+      }
+      else if (opens.size ==  0)  strlcpy (o.key [i].use, "·", LEN_TERSE);
+      else if (a_match    == -1)  strlcpy (o.key [i].use, "¡", LEN_TERSE);
+      else if (a_match    == -2)  strlcpy (o.key [i].use, "¢", LEN_TERSE);
+      DEBUG_MATCH   yLOG_info    ("use"       , o.key [i].use);
+      /*> DEBUG_MATCH   yLOG_complex ("mark"      "%2d, %2d, %s", i, a_match, o.key [i].use);   <*/
+   }
+   return 0;
+}
+
+char
 MATCH_group        (void)
 {
    /*---(locals)-------------------------*/
-   int         i         =    0;                 /* loop iterator -- key points    */
+   char        rce       =  -10;
+   short       i         =    0;
    char        rc        =    0;
-   int         j         =    0;                 /* curve index                    */
+   short       x_match   =   -1;
+   char        x_cat     =    0;
    /*---(header)-------------------------*/
    DEBUG_MATCH   yLOG_enter   (__FUNCTION__);
    DEBUG_MATCH   yLOG_complex ("target"    , "%1dc, %1d/%1dr, %-7.7s, %1dc", opens.count, opens.range, opens.range2, opens.flow, opens.ccat);
@@ -762,19 +791,46 @@ MATCH_group        (void)
    for (i = 0; g_groups [i].range < 10; ++i) {
       DEBUG_MATCH   yLOG_complex ("group"     , "%3d#, %1do, %1d/-r, %-7.7s, %-8.8s", i, g_groups [i].opens, g_groups [i].range, g_groups [i].flow, g_groups [i].curve);
       /*---(only review active rules)--------*/
-      if (g_groups [i].ac    != 1)                          continue;
+      if (g_groups [i].ac    != 1)                                continue;
       /*---(quick filtering)-----------------*/
-      if (g_groups [i].opens != opens.count)                continue;
+      if (g_groups [i].opens != opens.count)                      continue;
       if (g_groups [i].range == opens.range)   ++rc;
       if (g_groups [i].range == opens.range2)  ++rc;
-      if (rc < 1)                                           continue;
+      if (rc < 1)                                                 continue;
       /*---(complex filtering)---------------*/
-      if (strcmp (g_groups [i].flow , opens.flow) != 0)     continue;
-      if (strchr (g_groups [i].curve, opens.ccat) == NULL)  continue;
+      if (strcmp (g_groups [i].flow , opens.flow) != 0)           continue;
+      if (strchr (g_groups [i].curve, opens.ccat + '0') == NULL)  continue;
       DEBUG_MATCH   yLOG_note    ("FOUND");
+      x_match = i;
       break;
    }
+   DEBUG_MATCH   yLOG_value   ("x_match"   , x_match);
+   --rce;  if (x_match < 0) {
+      MATCH_mark (-1);
+      DEBUG_MATCH   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(get letter)-------------------------*/
+   x_cat   = g_groups [x_match].lcat;
+   DEBUG_MATCH   yLOG_complex ("sizing"    , "%2dc, %4.0fl, %1ds", x_cat, opens.len, opens.size);
+   x_match = -1;
+   for (i = 0; i < MAX_LETTERS; ++i) {
+      if (strcmp (g_loc [i].label, "END") == 0)     break;
+      if (strcmp (g_loc [i].label, "EOF") == 0)     break;
+      DEBUG_MATCH   yLOG_complex ("letter"    , "%3d#, %1dc, %-5.5s, %1ds", i, g_loc [i].lcat, g_loc [i].label, g_loc [i].size);
+      if (g_loc [i].lcat != x_cat)                  continue;
+      if (g_loc [i].size != opens.size)             continue;
+      DEBUG_MATCH   yLOG_note    ("FOUND");
+      x_match = i;
+      break;
+   }
+   --rce;  if (x_match < 0) {
+      MATCH_mark (-2);
+      DEBUG_MATCH   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
    /*---(mark letter)------------------------*/
+   MATCH_mark (x_match);
    /*---(complete)-----------------------*/
    DEBUG_MATCH   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -805,7 +861,7 @@ MATCH_driver_OLD   (void)
          /*> printf("\n   %02d-%02d%c =========  o=%1d, r=%1d, c=%2d : ",                           <* 
           *>       beg, beg + count, count > (opens.norm) ? '*' : ' ', count, opens.range, opens.ccat);   <*/
          /*> printf("le=%4d, sz=%1d, de=%4d, mc=%5.1f  ==========================\n",   <* 
-          *>       opens.len, opens.lcat, opens.d, opens.cm);                               <*/
+          *>       opens.len, opens.size, opens.d, opens.cm);                               <*/
          if (count >= 3 && opens.sharps >= 3)  rc = combo_driver (beg, count);
          if (rc == 1) break;
          trys_grp = 0;
@@ -868,10 +924,49 @@ MATCH_count_open        (short a_beg)
 }
 
 char
+MATCH_result            (char *a_result)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   short       c           =    0;
+   short       i           =    0;
+   char        t           [LEN_LABEL];
+   /*---(header)-------------------------*/
+   DEBUG_MATCH   yLOG_enter   (__FUNCTION__);
+   /*---(defense)------------------------*/
+   DEBUG_MATCH   yLOG_point   ("a_result"  , a_result);
+   --rce;  if (a_result == NULL) {
+      DEBUG_MATCH   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   strlcpy (a_result, "", LEN_HUND);
+   /*---(walk)---------------------------*/
+   for (i = 1; i < o.nkey; ++i) {
+      if        (o.key [i].type == '>') {
+         sprintf (t, "%s", "·>");
+      } else if (o.key [i].use [0] == '+') {
+         strlcpy (t, "", LEN_TERSE);
+      } else if (o.key [i].use [0] == '·') {
+         strlcpy (t, "", LEN_TERSE);
+      } else  {
+         if (c > 0)  sprintf (t, "·%s", o.key [i].use);
+         else        sprintf (t, "%s" , o.key [i].use);
+         ++c;
+      }
+      strlcat (a_result, t, LEN_HUND);
+   }
+   DEBUG_MATCH   yLOG_info    ("a_result"  , a_result);
+   /*---(complete)-----------------------*/
+   DEBUG_MATCH   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
 MATCH_driver            (void)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
+   char        rc          =    0;
    short       x_max       =    7;
    /*---(header)-------------------------*/
    DEBUG_MATCH   yLOG_enter   (__FUNCTION__);
@@ -888,10 +983,12 @@ MATCH_driver            (void)
       for (opens.count = opens.opens; opens.count >= 1; --opens.count) {
          MATCH_calc  (opens.beg, opens.count);
          MATCH_flow  (opens.beg, opens.count);
-         MATCH_group ();
+         rc = MATCH_group ();
+         if (rc == 0) break;
       }
       /*---(done)------------------------*/
    }
+   MATCH_result (o.gregg);
    /*---(complete)-----------------------*/
    DEBUG_MATCH   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -1160,7 +1257,7 @@ combo_driver       (int a_beg, int a_count)
    for (i = 0; i < MAX_COMBOS; ++i) {
       /*> DEBUG_MATCH   printf("      looking at %s, ac=%1d, op=%1d, q1=%c\n", combos[i].name, combos[i].ac, combos[i].opens, combos[i].flow [0]);   <*/
       /*---(screen)----------------------*/
-      if (strcmp(g_combos [i].name, "eof") == 0)     break;
+      if (strcmp(g_combos [i].name, "EOF") == 0)     break;
       if (g_combos [i].ac    == 0)                 continue;
       if (g_combos [i].opens    != a_count)           continue;
       if (g_combos [i].flow [0] != quad)              continue;
@@ -1247,7 +1344,7 @@ MATCH__unit          (char *a_question, int a_num)
             opens.xd   , opens.yd   , opens.len,
             opens.slope, opens.icept,
             opens.degs , opens.quad,
-            opens.lcat , opens.range, opens.range2);
+            opens.size , opens.range, opens.range2);
    }
    else if   (strncmp (a_question, "curve"     , 20)  == 0) {
       snprintf (unit_answer, LEN_STR, "OPENS curve      : %6.1fl %6.1fd %6.1fr, %1dc",

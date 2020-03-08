@@ -184,7 +184,7 @@ BASE__raw2bas       (short a_raw, short a_bas)
    return 0;
 }
 
-char          /*----: add an additional basic point from a raw point ---------*/
+short         /*----: add an additional basic point from a raw point ---------*/
 BASE_append             (short a_raw, uchar a_force)
 {
    /*---(locals)-----------+-----+-----+-*/
@@ -198,6 +198,7 @@ BASE_append             (short a_raw, uchar a_force)
    short       x_pprev     =   -1;
    short       x_tail      =   -1;
    float       dt, pt      =  0.0;
+   short       x_new       =   -1;
    /*---(if tail)------------------------*/
    if (o.raw [a_raw].type == POINT_TAIL)  BASE_append (a_raw - 5, POINT_SUFFIX);
    /*---(header)-------------------------*/
@@ -220,7 +221,7 @@ BASE_append             (short a_raw, uchar a_force)
       DEBUG_RAW    yLOG_snote   ("reassign");
       o.bas [o.nbas - 1].type = a_force;
       DEBUG_RAW    yLOG_sexit   (__FUNCTION__);
-      return 0;
+      return x_curr;
    }
    /*---(prepare)------------------------*/
    x_type = o.raw [x_curr].type;
@@ -319,9 +320,10 @@ BASE_append             (short a_raw, uchar a_force)
    /*---(report complete)----------------*/
    DEBUG_RAW    yLOG_sexit   (__FUNCTION__);
    /*---(check head)---------------------*/
-   if (o.raw [x_curr].type == POINT_HEAD)  BASE_append (x_curr + 5, POINT_PREFIX);
+   x_new = x_curr;
+   if (o.raw [x_curr].type == POINT_HEAD)  x_new = BASE_append (x_curr + 5, POINT_PREFIX);
    /*---(complete)-----------------------*/
-   return 0;
+   return x_new;
 }
 
 char
@@ -700,6 +702,7 @@ char          /*----: filter raw points into basic points --------------------*/
 BASE_filter        (void)
 {
    /*---(locals)-----------+-----+-----+-*/
+   short       x_new       =   -1;
    int         i           =    0;
    char        x_type      =  '-';
    char        x_prev      =  '-';
@@ -711,18 +714,9 @@ BASE_filter        (void)
       /*---(prepare)------------------------*/
       if (o.nbas > 0)  x_prev  = o.bas [o.nbas - 1].type;
       x_type = o.raw [i].type;
-      /*---(check collapse)--------------*/
-      /*> if (x_type == POINT_TAIL && x_prev == POINT_NORMAL) {                       <* 
-       *>    d  = BASE__dist  (i, o.bas [i - 2].p_raw);                               <* 
-       *>    DEBUG_AVG    yLOG_double  ("to tail"   , d);                             <* 
-       *>    if (d <= s_append)  {                                                    <* 
-       *>       DEBUG_AVG    yLOG_note    ("collapsing last normal before tail");     <* 
-       *>       --o.nbas;                                                             <* 
-       *>       --o.navg;                                                             <* 
-       *>    }                                                                        <* 
-       *> }                                                                           <*/
       /*---(normal)----------------------*/
-      BASE_append (i, POINT_NORMAL);
+      x_new = BASE_append (i, POINT_NORMAL);
+      if (x_new >= 0)  i = x_new;
       /*---(done)------------------------*/
    }
    /*---(end points)---------------------*/

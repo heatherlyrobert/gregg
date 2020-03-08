@@ -34,8 +34,8 @@ static void      o___CIRCLES_________________o (void) {;}
  * circles may not close at the beginning and ending of words
  *
  */
-int       mina      = 0;               /* circle entrance point               */
-int       minb      = 0;               /* circle exit point                   */
+int       s_mina      = 0;               /* circle entrance point               */
+int       s_minb      = 0;               /* circle exit point                   */
 int       one       = 0;               /* new circle intersection point       */
 int       two       = 0;               /* new circle intersection point       */
 char      use[5]    = "";              /* circle letter use                   */
@@ -161,28 +161,28 @@ CIRCLE__fix_ends     (int a_p1, int a_p3)
          d    = sqrt ((xd * xd) + (yd * yd));
          /*---(check min)----------------*/
          if (d < x_min) {
-            x_min   = d;
-            mina    = a;
-            minb    = b;
-            DEBUG_CIRC_M yLOG_complex ("new min"   , "%4d and %4d at %8.3f", mina, minb, x_min);
+            x_min     = d;
+            s_mina    = a;
+            s_minb    = b;
+            DEBUG_CIRC_M yLOG_complex ("new min"   , "%4d and %4d at %8.3f", s_mina, s_minb, x_min);
          }
          /*---(done)---------------------*/
       }
    }
    /*---(test results)-------------------*/
-   DEBUG_CIRC   yLOG_complex ("minimum"   , "%4d:%4d (%4d) %4d:%4d and %4d:%4d (%4d) %4d:%4d at %8.2f", p1, ab, mina, p2, ae, p3, bb, minb, p4, be, x_min);
+   DEBUG_CIRC   yLOG_complex ("minimum"   , "%4d:%4d (%4d) %4d:%4d and %4d:%4d (%4d) %4d:%4d at %8.2f", p1, ab, s_mina, p2, ae, p3, bb, s_minb, p4, be, x_min);
    --rce;  if (x_min > 12.0) {
       DEBUG_CIRC   yLOG_note    ("minimum rejected as too large");
-      mina = -1;
-      minb = -1;
+      s_mina = -1;
+      s_minb = -1;
       DEBUG_CIRC   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
    /*---(add new base points)------------*/
-   BASE_handler (ab, mina, ae);
-   BASE_handler (bb, minb, be);
-   /*> if (mina != ab && mina != ae)  BASE_adjust (p2, mina);                         <*/
-   /*> if (minb != bb && minb != be)  BASE_adjust (p3, minb);                         <*/
+   BASE_handler (ab, s_mina, ae);
+   BASE_handler (bb, s_minb, be);
+   /*> if (s_mina != ab && s_mina != ae)  BASE_adjust (p2, s_mina);                         <*/
+   /*> if (s_minb != bb && s_minb != be)  BASE_adjust (p3, s_minb);                         <*/
    /*> BASE_calc_all ();                                                              <*/
    /*---(complete)-----------------------*/
    DEBUG_CIRC   yLOG_exit    (__FUNCTION__);
@@ -193,9 +193,9 @@ char
 CIRCLE_idenfication     (void)
 {
    short       x_min       = 9999;
-   short       x_max       =    0;
+   short       x_max       =-9999;
    short       y_min       = 9999;
-   short       y_max       =    0;
+   short       y_max       =-9999;
    int         i           =    0;
    short       x_beg       =    0;
    short       x_end       =    0;
@@ -206,7 +206,7 @@ CIRCLE_idenfication     (void)
    /*---(header)-------------------------*/
    DEBUG_CIRC   yLOG_enter   (__FUNCTION__);
    /*---(get extremes)-------------------*/
-   for (i = mina; i <= minb; ++i) {
+   for (i = s_mina; i <= s_minb; ++i) {
       /*---(min)---------------*/
       if (o.raw [i].x_raw < x_min)   x_min = o.raw [i].x_raw;
       if (o.raw [i].y_raw < y_min)   y_min = o.raw [i].y_raw;
@@ -226,12 +226,12 @@ CIRCLE_idenfication     (void)
    if (x_avg <= 150)  x_type = 'e';
    else               x_type = 'a';
    /*---(mark raw points)----------------*/
-   for (i = mina; i <= minb; ++i) {
+   for (i = s_mina; i <= s_minb; ++i) {
       o.raw [i].marked = x_type;
    }
    /*---(mark bas/avg points)------------*/
-   x_beg = o.raw [mina].p_bas;
-   x_end = o.raw [minb].p_bas;
+   x_beg = o.raw [s_mina].p_bas;
+   x_end = o.raw [s_minb].p_bas;
    for (i = x_beg + 1; i <= x_end; ++i) {
       o.bas [i].prekey = '/';
       o.avg [i].prekey = '/';
@@ -477,9 +477,9 @@ CIRCLE__update      (int a_one, int a_two, int a_size)
  *>    rc       = CIRCLE__fix_ends  (a_p1, a_p3);                                                  <* 
  *>    if (rc != 0) return -1;                                                                     <* 
  *>    /+---(identify)-----------------------+/                                                    <* 
- *>    csize  = CIRCLE__size_OLD  (mina, minb);                                                    <* 
+ *>    csize  = CIRCLE__size_OLD  (s_mina, s_minb);                                                    <* 
  *>    /+---(mark)---------------------------+/                                                    <* 
- *>    rc     = CIRCLE__update               (mina, minb, csize);                                  <* 
+ *>    rc     = CIRCLE__update               (s_mina, s_minb, csize);                                  <* 
  *>    if (rc != 0) return -1;                                                                     <* 
  *>    CIRCLE__backward             ();                                                            <* 
  *>    CIRCLE__forward              ();                                                            <* 

@@ -26,8 +26,8 @@
 
 #define     P_VERMAJOR  "5.--= generalization for broader use"
 #define     P_VERMINOR  "5.3 = update for use as coding example"
-#define     P_VERNUM    "5.3e"
-#define     P_VERTXT    "basic letter group searching functioning"
+#define     P_VERNUM    "5.3f"
+#define     P_VERTXT    "can product simple results based on reverse input"
 
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -463,7 +463,7 @@ struct cGROUPS {
    char        opens;                       /* open points                    */
    char        flow        [LEN_LABEL];     /* quadrent flow                  */
    char        curve       [LEN_LABEL];     /* valid curvatures               */
-   int         gr_num;                      /* letter group number            */
+   int         lcat;                        /* letter category                */
    char        ac;                          /* active? (y/n)                  */
 };
 extern tGROUPS g_groups [MAX_GROUPS];
@@ -682,6 +682,7 @@ struct cOUTLINE
    int         messiness;                /* how messy is outline                */
    char        points [LEN_RECD];        /* raw data points from file           */
    /*---(match)--------------------------*/
+   char        gregg       [LEN_HUND];   /* detailed match result               */
    char        letters[50];              /* detailed match result               */
    char        actual [50];              /* actual match result                 */
    char        grade  [50];              /* grading of match                    */
@@ -931,7 +932,7 @@ char        BASE_bas2avg            (short a_bas);
 /*---(new)------------------*/
 char        BASE__force_point       (uchar a_type, short x, short y);
 char        BASE__raw2bas           (short a_raw, short a_bas);
-char        BASE_append             (short a_raw, uchar a_force);
+short       BASE_append             (short a_raw, uchar a_force);
 char        BASE_insert             (short a_raw);
 char        BASE_adjust             (short a_bas, short a_raw);
 /*---(statistics)-----------*/

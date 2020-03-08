@@ -496,10 +496,6 @@ POINT_curve             (short a_start, short a_finish, float a_len, float a_slo
    char        x_label      [LEN_LABEL];
    float       x_max       =  0.0;
    char        x_cat       =  '0';
-   float lcurve   = 0.0;
-   float rcurve   = 0.0;
-   float theta    = 0.0;
-   int   thetad   = 0;
    /*---(header)-------------------------*/
    DEBUG_MATCH   yLOG_enter   (__FUNCTION__);
    DEBUG_MATCH   yLOG_complex ("args"      , "%3ds, %3df, %6.0fs, %6.0fi, %-10.10pd, %-10.10pc",  a_start, a_finish, a_slope, a_icept, a_depth, a_cat);
@@ -543,27 +539,27 @@ POINT_curve             (short a_start, short a_finish, float a_len, float a_slo
          /*---(get perpendicular values)-*/
          s2   = -1.0 / s1;
          if (s2 ==   0.0)    s2 =  0.001;
-         if (s2 >  999.0)    s1 =  999.0;
-         if (s2 < -999.0)    s2 = -999.0;
+         /*> if (s2 >  999.0)    s2 =  999.0;                                         <* 
+          *> if (s2 < -999.0)    s2 = -999.0;                                         <*/
          b2   = yr - (s2 * xr);
-         if (b2 >  999.0)    b2 =  999.0;
-         if (b2 < -999.0)    b2 = -999.0;
+         /*> if (b2 >  999.0)    b2 =  999.0;                                         <* 
+          *> if (b2 < -999.0)    b2 = -999.0;                                         <*/
          /*---(calc intersection)--------*/
          xp   = (b2 - b1) / (s1 - s2);
-         if (xp >  999.0)    xp =  999.0;
-         if (xp < -999.0)    xp = -999.0;
+         /*> if (xp >  999.0)    xp =  999.0;                                         <* 
+          *> if (xp < -999.0)    xp = -999.0;                                         <*/
          yp   = (s1 * xp) + b1;
-         if (yp >  999.0)    yp =  999.0;
-         if (yp < -999.0)    yp = -999.0;
-         DEBUG_MATCH   yLOG_complex ("details"   , "%6.0fb2, %6.0fb1, %6.0fbd, %6.1fs1, %6.1fs2, %6.1fsd, %6.1fcx, %6.1fxp, %6.1fcy, %6.1fyp", b1, b2, b2 - b1, s1, s2, s1 - s2, (b2 - b1) / (s1 - s2), xp, (s1 * xp) + b1, yp);
+         /*> if (yp >  999.0)    yp =  999.0;                                         <* 
+          *> if (yp < -999.0)    yp = -999.0;                                         <*/
+         DEBUG_MATCH   yLOG_complex ("details"   , "%6.0fb1, %6.0fb2, %6.0fbd, %6.1fs1, %6.1fs2, %6.1fsd, %6.1fcx, %6.1fxp, %6.1fcy, %6.1fyp", b1, b2, b2 - b1, s1, s2, s1 - s2, (b2 - b1) / (s1 - s2), xp, (s1 * xp) + b1, yp);
       }
       /*---(calc differences)------------*/
       xd   = xr - xp;
-      if (xd >  999) xd =  999;
-      if (xd < -999) xd = -999;
+      /*> if (xd >  999) xd =  999;                                                   <* 
+       *> if (xd < -999) xd = -999;                                                   <*/
       yd   = yr - yp;
-      if (yd >  999) yd =  999;
-      if (yd < -999) yd = -999;
+      /*> if (yd >  999) yd =  999;                                                   <* 
+       *> if (yd < -999) yd = -999;                                                   <*/
       fd   = sqrt ((xd * xd) + (yd * yd));
       /*---(report out)------------------*/
       DEBUG_MATCH   yLOG_complex ("main line" , "%3db, %4.0fxr %4.0fyr, %6.1fs1 %6.0fb1", i, xr, yr, s1, b1);
@@ -573,7 +569,11 @@ POINT_curve             (short a_start, short a_finish, float a_len, float a_slo
       if (fd > x_max)  x_max = fd;
    }
    /*---(categorize)---------------------*/
-   if      (x_max >=  40.0)      x_cat = +4;
+   if      (x_max >= 120.0)      x_cat = +7;
+   else if (x_max >= 100.0)      x_cat = +7;
+   else if (x_max >=  80.0)      x_cat = +6;
+   else if (x_max >=  60.0)      x_cat = +5;
+   else if (x_max >=  40.0)      x_cat = +4;
    else if (x_max >=  25.0)      x_cat = +3;
    else if (x_max >=   7.0)      x_cat = +2;
    else if (x_max >=   3.0)      x_cat = +1;
@@ -733,7 +733,7 @@ POINT__unit          (char *a_question, char a_type, int a_num)
             p [a_num].rads , p [a_num].degs , p [a_num].quad);
    }
    else if   (strncmp (a_question, "curve"     , 20)  == 0) {
-      snprintf (unit_answer, LEN_STR, "%-3.3s curve   (%2d) : %6.1fl %6.1fd %6.1fr %1dc",
+      snprintf (unit_answer, LEN_STR, "%-3.3s curve   (%2d) : %6.1fl %6.1fd %6.3fr   %1dc",
             x_pre, a_num, p [a_num].len, p [a_num].depth, p [a_num].ratio, p [a_num].ccat);
    }
    /*---(complete)-----------------------*/

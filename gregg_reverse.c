@@ -24,6 +24,7 @@
 
 #define    SCR2RAW     10
 #define    LEN_OUT     100000
+#define    SCALING     1.3
 
 static char   s_load       [LEN_OUT] = "";
 static short  s_count      = 0;
@@ -42,11 +43,11 @@ static float  s_push       = 0;
 static short  s_index      =    0;
 static char   s_label      [LEN_TERSE];
 static char   s_type       =  '-';
-static short  s_rot        =    0;
-static short  s_beg        =    0;
-static short  s_arc        =    0;
-static short  s_xradius    =    0;
-static short  s_yradius    =    0;
+static float  s_rot        =    0;
+static float  s_beg        =    0;
+static float  s_arc        =    0;
+static float  s_xradius    =    0;
+static float  s_yradius    =    0;
 
 
 
@@ -60,7 +61,7 @@ REVERSE_out__show_tail  (void)
 {
    int         x_len       =    0;
    x_len = strlen (s_load);
-   DEBUG_OUTP   yLOG_note    (s_load + x_len - 50);
+   DEBUG_OUTP   yLOG_info    ("tail"      , s_load + x_len - 50);
 
 
 }
@@ -153,8 +154,8 @@ REVERSE_find_letter     (char *a_ltr, char a_scope)
    if (a_ltr == NULL)  return n;
    for (i = 0; i < MAX_LETTERS; ++i) {
       /*---(check end)-------------------*/
-      if (a_scope != LTRS_ALL && strcmp (g_loc[i].label, "end") == 0)    break;
-      if (strcmp (g_loc[i].label, "eof") == 0)                           break;
+      if (a_scope != LTRS_ALL && strcmp (g_loc[i].label, "END") == 0)    break;
+      if (strcmp (g_loc[i].label, "EOF") == 0)                           break;
       /*---(check match)-----------------*/
       if (strcmp (a_ltr, g_loc[i].label) != 0)                           continue;
       /*---(found)-----------------------*/
@@ -177,11 +178,11 @@ REVERSE_make_current    (char *a_ltr)
    /*---(clear values)-------------------*/
    s_index      = 0;
    s_type       = '-';
-   s_rot        = 0;
-   s_beg        = 0;
-   s_arc        = 0;
-   s_xradius    = 0;
-   s_yradius    = 0;
+   s_rot        = 0.0;
+   s_beg        = 0.0;
+   s_arc        = 0.0;
+   s_xradius    = 0.0;
+   s_yradius    = 0.0;
    /*---(defense)------------------------*/
    --rce;  if (a_ltr == NULL)  return rce;
    /*---(prepare)------------------------*/
@@ -211,6 +212,9 @@ REVERSE_make_current    (char *a_ltr)
       else if (s_yradius <= 11)  s_yradius = 4;
       else                       s_yradius = 5;
    }
+   /*---(scale)--------------------------*/
+   s_xradius   *= SCALING;
+   s_yradius   *= SCALING;
    /*---(complete)-----------------------*/
    return 0;
 }
@@ -243,10 +247,10 @@ REVERSE_draw_reset  (void)
 {
    s_xpos    = 0;
    s_ypos    = 0;
-   s_lef  = 0;
-   s_rig  = 0;
-   s_top  = 0;
-   s_bot  = 0;
+   s_lef     = 0;
+   s_rig     = 0;
+   s_top     = 0;
+   s_bot     = 0;
    return 0;
 }
 
@@ -254,11 +258,11 @@ char
 REVERSE_draw_init   (void)
 {
    /*---(initialize)---------------------*/
-   s_lef  = 0;
-   s_rig  = 0;
-   s_top  = 0;
-   s_bot  = 0;
-   s_push = 0;
+   s_lef     = 0;
+   s_rig     = 0;
+   s_top     = 0;
+   s_bot     = 0;
+   s_push    = 0;
    /*---(complete)-----------------------*/
    return 0;
 }
@@ -506,6 +510,7 @@ REVERSE_ellipse         (char a_type, char a_skip)
    x_adj  = (x_len * a_cos * b_cos) - (y_len * a_sin * b_sin);
    y_adj  = (x_len * a_cos * b_sin) + (y_len * a_sin * b_cos);
    /*---(draw dotted outline)------------*/
+   DEBUG_OUTP   yLOG_note    ("before dots");
    if (a_type == SHAPE_SAMPLE)   REVERSE_draw_reset ();
    if (a_type == SHAPE_SAMPLE) {
       REVERSE_dots_begin ();
@@ -519,9 +524,11 @@ REVERSE_ellipse         (char a_type, char a_skip)
       }
       REVERSE_dots_end   ();
    }
+   DEBUG_OUTP   yLOG_note    ("after dots");
    /*---(create points)------------------*/
    if (a_type != SHAPE_LOAD)     REVERSE_draw_begin ();
    if (x_arc >= 0) {
+      DEBUG_OUTP   yLOG_note    ("draw positive");
       for (i = x_beg; i <= x_beg + x_arc; i += a_skip) {
          a     = i * DEG2RAD;
          a_sin = sin (a);
@@ -534,6 +541,7 @@ REVERSE_ellipse         (char a_type, char a_skip)
          if (i == x_beg) {  x_1st = x; y_1st = y; }
       }
    } else {
+      DEBUG_OUTP   yLOG_note    ("draw negative");
       for (i = x_beg; i >= x_beg + x_arc; i -= a_skip) {
          a     = i * DEG2RAD;
          a_sin = sin (a);
@@ -546,6 +554,7 @@ REVERSE_ellipse         (char a_type, char a_skip)
          if (i == x_beg) {  x_1st = x; y_1st = y; }
       }
    }
+   DEBUG_OUTP   yLOG_note    ("after draw");
    /*---(save)---------------------------*/
    if (a_type != SHAPE_LOAD)     REVERSE_draw_end   (x, y);
    if (a_type == SHAPE_SAMPLE)   REVERSE_draw_wrap  (x, y);
@@ -753,6 +762,25 @@ REVERSE_make_letter     (uchar *a_ltr, char a_type, char a_skip)
 }
 
 char
+REVERSE_make_offset     (int a_sizer)
+{
+   s_xpos +=  0.0 * a_sizer * SCALING;
+   s_ypos -= 10.0 * a_sizer * SCALING;
+   return 0;
+}
+
+char
+REVERSE_make_next       (void)
+{
+   s_xpos = s_push + 10.0 * SCALING;
+   if (s_xpos > 750)  {
+      s_xpos  = 30.0;
+      s_ypos -= 60.0 * SCALING;
+   }
+   return 0;
+}
+
+char
 REVERSE_gregg_word      (uchar *a_outline, char a_type, char a_skip)
 {
    /*---(locals)-----------+-----+-----+-*/
@@ -799,14 +827,11 @@ REVERSE_gregg_word      (uchar *a_outline, char a_type, char a_skip)
       if (strcmp (">", p) == 0) {
          DEBUG_OUTP   yLOG_note    ("found a multipart indicator");
          if      (a_type == SHAPE_LOAD) {
-            REVERSE_out_lift   (s_xpos, s_ypos);
-            s_xpos +=  0.0 * x_sizer;
-            s_ypos -= 10.0 * x_sizer;
-            REVERSE_out_touch  (s_xpos, s_ypos);
-            /*> REVERSE_make_letter  (">", a_type, a_skip);                           <*/
+            REVERSE_out_lift    (s_xpos, s_ypos);
+            REVERSE_make_offset (x_sizer);
+            REVERSE_out_touch   (s_xpos, s_ypos);
          } else {
-            s_xpos +=  0.0 * x_sizer;
-            s_ypos -= 10.0 * x_sizer;
+            REVERSE_make_offset (x_sizer);
          }
       } else {
          DEBUG_OUTP   yLOG_note    ("normal letter");
@@ -843,9 +868,6 @@ REVERSE_gregg_text      (uchar *a_text, char a_type, char a_skip, char a_reset)
    uchar      *p           = NULL;
    uchar      *q           = " ";
    char       *r           = NULL;
-   int         x           =    0;
-   int         y           =    0;
-   int         n           =    0;
    int         x_len       =    0;
    /*---(header)-------------------------*/
    DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
@@ -858,25 +880,19 @@ REVERSE_gregg_text      (uchar *a_text, char a_type, char a_skip, char a_reset)
    DEBUG_OUTP   yLOG_info    ("a_text"    , a_text);
    /*---(start parsing)------------------*/
    if (a_reset == 'y')  REVERSE_draw_reset  ();
-   y = s_ypos;
-   x = s_xpos;
    strlcpy  (t, a_text, LEN_HUGE);
    p = strtok_r (t, q, &r);
    /*---(walk)---------------------------*/
    while (p != NULL) {
       x_len = strlen (p);
       DEBUG_OUTP   yLOG_complex ("parsed"    , "%2d[%s]", x_len, p);
-      if (x_len == 1 && p [0] == (uchar) '¦')  { s_push = 20.0; y -= 60.0; }
-      else                                     REVERSE_gregg_word (p, a_type, a_skip);
+      if (x_len == 1 && p [0] == (uchar) '¦')   s_xpos = 9999;
+      else                                      REVERSE_gregg_word (p, a_type, a_skip);
+      s_xpos = s_push + 10.0 * SCALING;
       DEBUG_OUTP   yLOG_value   ("s_rig"     , s_rig);
       DEBUG_OUTP   yLOG_value   ("s_push"    , s_push);
       /*---(prepare next)----------------*/
-      s_xpos = s_push + 10.0;
-      if (s_xpos > 750) {
-         s_xpos  = 30.0;
-         y   -= 60.0;
-      }
-      s_ypos = y;
+      REVERSE_make_next    ();
       DEBUG_OUTP   yLOG_complex ("big_pos "  , "%5.1fsx, %5.1fsy", s_xpos, s_ypos);
       p = strtok_r (NULL, q, &r);
    }
@@ -884,44 +900,6 @@ REVERSE_gregg_text      (uchar *a_text, char a_type, char a_skip, char a_reset)
    DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
    return 0;
 }
-
-/*> char                                                                                           <* 
- *> REVERSE_page            (uchar *a_text, char a_type, char a_skip, char a_reset)                <* 
- *> {                                                                                              <* 
- *>    /+---(locals)-----------+-----+-----+-+/                                                    <* 
- *>    char        rc          =    0;                                                             <* 
- *>    uint        x_tex       =    0;            /+ texture for image            +/               <* 
- *>    uint        x_fbo       =    0;            /+ framebuffer                  +/               <* 
- *>    uint        x_depth     =    0;            /+ depth buffer                 +/               <* 
- *>    int         n           =    0;                                                             <* 
- *>    int         x, y;                                                                           <* 
- *>    /+---(header)-------------------------+/                                                    <* 
- *>    DEBUG_OUTP   yLOG_enter   (__FUNCTION__);                                                   <* 
- *>    REVERSE_draw_reset  ();                                                                     <* 
- *>    s_xpos =  30.0;                                                                             <* 
- *>    s_ypos = -50.0;                                                                             <* 
- *>    /+---(create texture)-----------------+/                                                    <* 
- *>    yVIKEYS_view_color_clear (YCOLOR_BAS_MED);                                                  <* 
- *>    rc = yGLTEX_new (&x_tex, &x_fbo, &x_depth, 850, 1100);                                      <* 
- *>    rc = yGLTEX_draw_start   (x_fbo, YGLTEX_TOPLEF, 850, 1100, 1.0);                            <* 
- *>    glColor4f (1.00f, 1.00f, 1.00f, 1.0f);                                                      <* 
- *>    /+---(mark corners)-------------------+/                                                    <* 
- *>    /+> for (x = 0.0; x <=  850.0; x += 50.0) {                                        <*       <* 
- *>     *>    for (y = 0.0; y >= -11000.0; y -= 50.0) {                                   <*       <* 
- *>     *>       s_xpos = x;                                                                 <*    <* 
- *>     *>       s_ypos = y;                                                                 <*    <* 
- *>     *>       REVERSE_outline  ("a", a_type, a_skip);                                  <*       <* 
- *>     *>    }                                                                           <*       <* 
- *>     *> }                                                                              <+/      <* 
- *>    /+---(draw text)----------------------+/                                                    <* 
- *>    REVERSE_gregg_text    (a_text, a_type, a_skip, '-');                                        <* 
- *>    /+---(write out image)----------------+/                                                    <* 
- *>    rc = yGLTEX_tex2png      ("/tmp/gregg.png", 850, 1100);                                     <* 
- *>    rc = yGLTEX_draw_end     (x_tex);                                                           <* 
- *>    /+---(complete)-----------------------+/                                                    <* 
- *>    DEBUG_OUTP   yLOG_exit    (__FUNCTION__);                                                   <* 
- *>    return 0;                                                                                   <* 
- *> }                                                                                              <*/
 
 
 
@@ -985,8 +963,6 @@ REVERSE_english_text    (uchar *a_text, char a_type, char a_skip, char a_reset)
    uchar      *p           = NULL;
    uchar      *q           = " ";
    char       *r           = NULL;
-   int         x           =    0;
-   int         y           =    0;
    int         n           =    0;
    int         x_len       =    0;
    /*---(header)-------------------------*/
@@ -1000,25 +976,19 @@ REVERSE_english_text    (uchar *a_text, char a_type, char a_skip, char a_reset)
    DEBUG_OUTP   yLOG_info    ("a_text"    , a_text);
    /*---(start parsing)------------------*/
    if (a_reset == 'y')  REVERSE_draw_reset  ();
-   y = s_ypos;
-   x = s_xpos;
    strlcpy  (t, a_text, LEN_HUGE);
    p = strtok_r (t, q, &r);
    /*---(walk)---------------------------*/
    while (p != NULL) {
       x_len = strlen (p);
       DEBUG_OUTP   yLOG_complex ("parsed"    , "%2d[%s]", x_len, p);
-      if (x_len == 1 && p [0] == (uchar) '¦')  { s_push = 20.0; y -= 60.0; }
-      else                                     REVERSE_english_word (p, a_type, a_skip);
+      if (x_len == 1 && p [0] == (uchar) '¦')   s_xpos = 9999;
+      else                                      REVERSE_english_word (p, a_type, a_skip);
+      s_xpos = s_push + 10.0 * SCALING;
       DEBUG_OUTP   yLOG_value   ("s_rig"     , s_rig);
       DEBUG_OUTP   yLOG_value   ("s_push"    , s_push);
       /*---(prepare next)----------------*/
-      s_xpos = s_push + 10.0;
-      if (s_xpos > 750) {
-         s_xpos  = 30.0;
-         y   -= 60.0;
-      }
-      s_ypos = y;
+      REVERSE_make_next    ();
       DEBUG_OUTP   yLOG_complex ("big_pos "  , "%5.1fsx, %5.1fsy", s_xpos, s_ypos);
       p = strtok_r (NULL, q, &r);
    }
@@ -1026,44 +996,6 @@ REVERSE_english_text    (uchar *a_text, char a_type, char a_skip, char a_reset)
    DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
    return 0;
 }
-
-/*> char                                                                                           <* 
- *> REVERSE_english_page    (uchar *a_text, char a_type, char a_skip, char a_reset)                <* 
- *> {                                                                                              <* 
- *>    /+---(locals)-----------+-----+-----+-+/                                                    <* 
- *>    char        rc          =    0;                                                             <* 
- *>    uint        x_tex       =    0;            /+ texture for image            +/               <* 
- *>    uint        x_fbo       =    0;            /+ framebuffer                  +/               <* 
- *>    uint        x_depth     =    0;            /+ depth buffer                 +/               <* 
- *>    int         n           =    0;                                                             <* 
- *>    int         x, y;                                                                           <* 
- *>    /+---(header)-------------------------+/                                                    <* 
- *>    DEBUG_OUTP   yLOG_enter   (__FUNCTION__);                                                   <* 
- *>    REVERSE_draw_reset  ();                                                                     <* 
- *>    s_xpos =  30.0;                                                                             <* 
- *>    s_ypos = -50.0;                                                                             <* 
- *>    /+---(create texture)-----------------+/                                                    <* 
- *>    yVIKEYS_view_color_clear (YCOLOR_BAS_MED);                                                  <* 
- *>    rc = yGLTEX_new (&x_tex, &x_fbo, &x_depth, 850, 1100);                                      <* 
- *>    rc = yGLTEX_draw_start   (x_fbo, YGLTEX_TOPLEF, 850, 1100, 1.0);                            <* 
- *>    glColor4f (1.00f, 1.00f, 1.00f, 1.0f);                                                      <* 
- *>    /+---(mark corners)-------------------+/                                                    <* 
- *>    /+> for (x = 0.0; x <=  850.0; x += 50.0) {                                        <*       <* 
- *>     *>    for (y = 0.0; y >= -11000.0; y -= 50.0) {                                   <*       <* 
- *>     *>       s_xpos = x;                                                                 <*    <* 
- *>     *>       s_ypos = y;                                                                 <*    <* 
- *>     *>       REVERSE_outline  ("a", a_type, a_skip);                                  <*       <* 
- *>     *>    }                                                                           <*       <* 
- *>     *> }                                                                              <+/      <* 
- *>    /+---(draw text)----------------------+/                                                    <* 
- *>    REVERSE_english_text    (a_text, a_type, a_skip, '-');                                      <* 
- *>    /+---(write out image)----------------+/                                                    <* 
- *>    rc = yGLTEX_tex2png      ("/tmp/gregg.png", 850, 1100);                                     <* 
- *>    rc = yGLTEX_draw_end     (x_tex);                                                           <* 
- *>    /+---(complete)-----------------------+/                                                    <* 
- *>    DEBUG_OUTP   yLOG_exit    (__FUNCTION__);                                                   <* 
- *>    return 0;                                                                                   <* 
- *> }                                                                                              <*/
 
 
 
@@ -1129,7 +1061,7 @@ REVERSE_report          (void)
    short       i           =    0;
    /*---(walk letters)-------------------*/
    for (i = 0; i < MAX_LETTERS; ++i) {
-      if (strcmp (g_loc [i].label, "eof") == 0)   break;
+      if (strcmp (g_loc [i].label, "EOF") == 0)   break;
       if (strcmp (g_loc [i].label, "."  ) == 0)   break;
       if (strcmp (g_loc [i].label, "bof") == 0)   continue;
       printf ("%3d  %-5.5s %6.1fd %6.1fl\n", i, g_loc [i].label, g_loc [i].deg, g_loc [i].xy_len);

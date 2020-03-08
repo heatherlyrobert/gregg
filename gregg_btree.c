@@ -147,7 +147,7 @@ BTREE_gregg2key         (uchar *a_word, uchar *a_index)
       /*---(find letter)-----------------*/
       n = REVERSE_find_letter (p, LTRS_NORM);
       /*> for (i = 0; i < MAX_LETTERS; ++i) {                                         <* 
-       *>    if (strcmp (g_loc [i].label, "eof") == 0)  break;                        <* 
+       *>    if (strcmp (g_loc [i].label, "EOF") == 0)  break;                        <* 
        *>    if (strcmp (g_loc [i].label, p) != 0)      continue;                     <* 
        *>    n = i;                                                                   <* 
        *> }                                                                           <*/

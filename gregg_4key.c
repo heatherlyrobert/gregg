@@ -697,6 +697,7 @@ KEY_driver              (void)
    char        x_type      =  '-';
    char        q1          =  '-';
    char        q2          =  '-';
+   char        x_prev      =  '-';
    /*---(header)-------------------------*/
    DEBUG_CRIT   yLOG_enter   (__FUNCTION__);
    /*---(process)------------------------*/
@@ -721,7 +722,9 @@ KEY_driver              (void)
       DEBUG_CRIT   yLOG_complex ("marking"   , "%2d %c %c %c, %2d %c %c %c", o.nkey - 1, o.key [o.nkey - 1].prekey, o.key [o.nkey - 1].marked, o.key [o.nkey - 1].sharp, i, o.avg [i].prekey, o.avg [i].marked, o.avg [i].sharp);
       /*---(premark)---------------------*/
       if (o.key [o.nkey - 1].prekey == 'k') {
-         sprintf (o.key [o.nkey - 1].use, "%c", o.key [o.nkey - 1].marked);
+         x_prev = o.key [o.nkey - 2].marked;
+         if (x_prev != o.key [o.nkey - 1].marked)   sprintf (o.key [o.nkey - 1].use, "%c", o.key [o.nkey - 1].marked);
+         else                                       strlcpy (o.key [o.nkey - 1].use, "+", LEN_TERSE);
       }
       /*---(done)------------------------*/
    }

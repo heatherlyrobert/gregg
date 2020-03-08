@@ -321,10 +321,10 @@ static void      o___GUIDES__________________o (void) {;}
  *>    int       j         = 0;            /+ loop iterator -- location           +/   <* 
  *>    /+---(locals)-------------------------+/                                        <* 
  *>    for (i = 0; i < MAX_GROUPS; ++i) {                                              <* 
- *>       if (strncmp(g_groups [j].gr, "eof", 5)              == 0) break;                <* 
+ *>       if (strncmp(g_groups [j].gr, "EOF", 5)              == 0) break;                <* 
  *>       if (g_groups [i].fl[0] != a_quad)  continue;                                    <* 
  *>       for (j = 0; j < MAX_LETTERS; ++j) {                                          <* 
- *>          if (strncmp(g_loc[j].label, "eof", 5)              == 0) break;                 <* 
+ *>          if (strncmp(g_loc[j].label, "EOF", 5)              == 0) break;                 <* 
  *>       }                                                                            <* 
  *>    }                                                                               <* 
  *>    /+---(complete)-----------------------+/                                        <* 
@@ -848,13 +848,15 @@ DRAW_info_request    (void)
    /*---(point counts)-------------------*/
    glColor4f     (0.0f, 0.0f, 0.0f, 1.0f);
    glPushMatrix  (); {
-      glTranslatef(  win.d_reqx, win.d_reqy, win.d_zoff);
+      glTranslatef(  win.d_reqx, win.d_reqy + 10.0, win.d_zoff);
       snprintf      (t, 100, "%s",   my.word);
       FONT__label   ("word"  , t);
       snprintf      (t, 100, "%s",   my.gregg);
       FONT__label   ("gregg" , t);
       snprintf      (t, 100, "%s",   my.shown);
       FONT__label   ("shown" , t);
+      snprintf      (t, 100, "%s",   o.gregg);
+      FONT__label   ("result", t);
    } glPopMatrix ();
    /*---(complete)-----------------------*/
    return 0;
@@ -1106,7 +1108,7 @@ OVERLAY_samples        (void)
    glPushMatrix(); {
       glTranslatef (win.d_xoff - 50, win.d_yoff + 30, win.d_zoff);
       glScalef              (1.5, 1.5, 1.5);
-      for (i = 1; i < MAX_LETTERS && strncmp(g_loc[i].label, "eof", 5) != 0; ++i) {
+      for (i = 1; i < MAX_LETTERS && strncmp(g_loc[i].label, "EOF", 5) != 0; ++i) {
          if (g_loc [i].x_show == 0 && g_loc [i].y_show == 0)  continue;
          glPushMatrix();
          glTranslatef(g_loc [i].x_show, g_loc [i].y_show,  0.0);
@@ -1142,7 +1144,7 @@ OVERLAY_samples        (void)
  *>    /+---(cycle samples)------------------+/                                                 <* 
  *>    glPushMatrix(); {                                                                        <* 
  *>       glScalef(2.0, 2.0, 2.0);                                                              <* 
- *>       for (i = 0; i < MAX_LETTERS && strncmp(g_loc[i].label, "eof", 5) != 0; ++i) {               <* 
+ *>       for (i = 0; i < MAX_LETTERS && strncmp(g_loc[i].label, "EOF", 5) != 0; ++i) {               <* 
  *>          glPushMatrix();                                                                    <* 
  *>          glTranslatef(g_loc[i].x_show, g_loc[i].y_show,  0.0);                                          <* 
  *>          yFONT_print(win.font_fixed,  5, YF_BOTRIG, g_loc[i].label);                                 <* 
