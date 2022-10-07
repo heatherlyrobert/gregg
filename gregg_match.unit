@@ -612,7 +612,7 @@ SCRP          (MATCH) verify detailed calculation                              
 SCRP          (MATCH) verify curvature calculation                               MATCH__calc_call                                                                                      ((01.---))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
 
    COND       initialize the testing environment                                 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((01.001))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
-     exec     start testing                        PROG__unit_quiet                                                                                                                  i_equal     0                                                                                                    
+     exec     start testing                        PROG__unit_loud                                                                                                                   i_equal     0                                                                                                    
 
    GROUP      start with lines                                                   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   - - - - -   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
 

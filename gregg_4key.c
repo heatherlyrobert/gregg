@@ -10,6 +10,14 @@ char oname[] = "/home/dotsuu/p_gvskav/gregg.gregg_shorthand_system/strokes_new.d
 
 
 
+char
+KEY_init             (void)
+{
+   o.nkey     = 0;
+   POINT_clear_series (POINTS_KEY);
+   return 0;
+}
+
 
 /*============================--------------------============================*/
 /*===----                            key points                        ----===*/
@@ -20,11 +28,16 @@ PRIV char     /*----: swap two points during the sort ------------------------*/
 KEY__swap          (int a_i, int a_j)
 {
    /*---(locals)-------------------------*/
+   short       x_tmp       = MAX_POINTS - 1;
+   short       x_raw, x_bas;
+   short       
    int or, p, xf, yf, x, y, a, t;
    char  u[5];
    /*---(save 1st)-----------------------*/
+   /*---(indexes)------*//*--- seq and key do not move ----------------*/
    or = o.key [a_i].p_raw;
    p  = o.key [a_i].p_bas;
+   /*---(raw values)---*/
    xf = o.key [a_i].x_raw;
    yf = o.key [a_i].y_raw;
    x  = o.key [a_i].x_pos;
@@ -35,8 +48,8 @@ KEY__swap          (int a_i, int a_j)
    /*---(copy 2nd to 1st)----------------*/
    o.key [a_i].p_raw  = o.key [a_j].p_raw;
    o.key [a_i].p_bas  = o.key [a_j].p_bas;
-   o.key [a_i].x_raw = o.key [a_j].x_raw;
-   o.key [a_i].y_raw = o.key [a_j].y_raw;
+   o.key [a_i].x_raw  = o.key [a_j].x_raw;
+   o.key [a_i].y_raw  = o.key [a_j].y_raw;
    o.key [a_i].x_pos  = o.key [a_j].x_pos;
    o.key [a_i].y_pos  = o.key [a_j].y_pos;
    o.key [a_i].fake   = o.key [a_j].fake;
@@ -45,8 +58,8 @@ KEY__swap          (int a_i, int a_j)
    /*---(put saved into 2nd)-------------*/
    o.key [a_j].p_raw  = or;
    o.key [a_j].p_bas  = p;
-   o.key [a_j].x_raw = xf;
-   o.key [a_j].y_raw = yf;
+   o.key [a_j].x_raw  = xf;
+   o.key [a_j].y_raw  = yf;
    o.key [a_j].x_pos  = x;
    o.key [a_j].y_pos  = y;
    o.key [a_j].fake   = a;

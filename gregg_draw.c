@@ -58,8 +58,7 @@ DRAW__sizes        (cint a_wide, cint a_tall)
    win.d_ansy   =  -160;
    win.d_reqx   =  -100;
    win.d_reqy   =  -180;
-   yVIKEYS_view_bounds   (YVIKEYS_MAIN  , &(my.x_min), &(my.x_max ), NULL, &(my.y_min), &(my.y_max ), NULL);
-   yVIKEYS_view_bounds   (YVIKEYS_MAIN  , NULL     , NULL      , &(my.x_wide), NULL     , NULL      , &(my.y_tall));
+   yVIEW_bounds  (YVIEW_MAIN  , NULL, NULL, &(my.x_min), &(my.x_max ), &(my.x_wide), &(my.y_min), &(my.y_max ), &(my.y_tall));
    my.x_wide    = my.x_wide + 40;
    my.x_center  = abs (my.x_min) / (float) my.x_wide;
    my.y_center  = abs (my.y_min) / (float) a_tall;
@@ -87,19 +86,21 @@ DRAW_init            (void)
    /*---(header)-------------------------*/
    DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
    /*---(window)-------------------------*/
-   yVIKEYS_view_config   ("gregg shorthand interpreter", P_VERNUM, YVIKEYS_OPENGL, 500, 350, 0);
-   yVIKEYS_view_defsize  (YVIKEYS_YAXIS    , 15, 0);
-   yVIKEYS_view_setup    (YVIKEYS_MAIN     , YVIKEYS_FLAT, YVIKEYS_TOPLEF, -125, 500, 125 - 350, 350, 0, 0, YCOLOR_BAS    , DRAW_primary);
-   yVIKEYS_view_simple   (YVIKEYS_XAXIS    , YCOLOR_BAS_DRK, DRAW_xaxis  );
-   yVIKEYS_view_simple   (YVIKEYS_YAXIS    , YCOLOR_BAS_DRK, DRAW_yaxis  );
+   /*> yVIKEYS_view_config   ("gregg shorthand interpreter", P_VERNUM, YVIKEYS_OPENGL, 500, 350, 0);   <*/
+   /*> yVIKEYS_view_setup    (YVIEW_MAIN     , YVIKEYS_FLAT, YVIKEYS_TOPLEF, -125, 500, 125 - 350, 350, 0, 0, YCOLOR_BAS, YOLOR_MED, DRAW_primary);   <*/
+   yVIEW_full    (YVIEW_MAIN , YVIEW_FLAT, YVIEW_BOTLEF, YCOLOR_BAS, YCOLOR_MED, DRAW_primary);
+   yVIEW_simple  (YVIEW_XAXIS, YCOLOR_BAS, YCOLOR_DRK, DRAW_xaxis  );
+   yVIEW_simple  (YVIEW_YAXIS, YCOLOR_BAS, YCOLOR_DRK, DRAW_yaxis  );
+   yVIEW_defsize (YVIEW_YAXIS, 15, 0);
    /*> yVIKEYS_cmds_direct (":xaxis show");                                           <*/
    /*> yVIKEYS_cmds_direct (":yaxis show");                                           <*/
-   DRAW__sizes           (500, 350);
+   DRAW__sizes   (500, 350);
    /*---(colors)-------------------------*/
-   yVIKEYS_cmds_direct   (":palette 190 rcomp pale earthy");
-   yVIKEYS_view_colors   (YCOLOR_POS, YCOLOR_BAS, YCOLOR_NEG, YCOLOR_POS);
+   /*> yCOLOR_palette (190, "rcomp", "pale", "earthy");                               <*/
+   yCOLOR_palette (190, "rcomp", "pale", "warm");
+   /*> yVIKEYS_view_colors   (YCOLOR_POS, YCOLOR_BAS, YCOLOR_NEG, YCOLOR_POS);        <*/
    /*---(custom drawing)-----------------*/
-   yGLTEX_init     ();
+   yGLTEX_config   ();
    FONT__load      ();
    dlist_init      ();
    yGLTEX_new (&s_tex, &s_fbo, &s_depth, win.tex_w, win.tex_h);
@@ -112,15 +113,15 @@ DRAW_init            (void)
     *> yVIKEYS_view_ribbon ("tools"   , "shower"      );                              <* 
     *> yVIKEYS_cmds_direct (":ribbon show");                                          <*/
    /*---(overlay/layers)-----------------*/
-   yVIKEYS_view_option (YVIKEYS_OVERLAY, "point" , OVERLAY_data    , "current point statistics");
-   yVIKEYS_view_option (YVIKEYS_OVERLAY, "sample", OVERLAY_samples , "letter samples");
-   yVIKEYS_dataset_add   ("raw"     , LAYER_raws, "raw data points"     );
-   yVIKEYS_dataset_add   ("bas"     , LAYER_base, "bas/avg data points" );
-   yVIKEYS_dataset_add   ("key"     , LAYER_keys, "key/crit data points");
-   yVIKEYS_dataset_add   ("cur"     , LAYER_curr, "current point"       );
-   yVIKEYS_cmds_direct (":gridsize 1");
-   yVIKEYS_cmds_direct (":layer bas");
-   yVIKEYS_cmds_direct (":layer cur");
+   /*> yVIKEYS_view_option (YVIKEYS_OVERLAY, "point" , OVERLAY_data    , "current point statistics");   <*/
+   /*> yVIKEYS_view_option (YVIKEYS_OVERLAY, "sample", OVERLAY_samples , "letter samples");   <*/
+   /*> yVIKEYS_dataset_add   ("raw"     , LAYER_raws, "raw data points"     );        <*/
+   /*> yVIKEYS_dataset_add   ("bas"     , LAYER_base, "bas/avg data points" );        <*/
+   /*> yVIKEYS_dataset_add   ("key"     , LAYER_keys, "key/crit data points");        <*/
+   /*> yVIKEYS_dataset_add   ("cur"     , LAYER_curr, "current point"       );        <*/
+   /*> yVIKEYS_cmds_direct (":gridsize 1");                                           <*/
+   /*> yVIKEYS_cmds_direct (":layer bas");                                            <*/
+   /*> yVIKEYS_cmds_direct (":layer cur");                                            <*/
    /*---(complete)-----------------------*/
    DEBUG_GRAF   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -153,11 +154,9 @@ char
 DRAW_primary         (float a_mag)
 {
    char     x_on = 'y';
-   int      x_left, x_bott, x_wide, x_tall;
-   int      x_xmin, x_xmax;
-   int      x_ymin, x_ymax;
-   yVIKEYS_view_size     (YVIKEYS_MAIN, &x_left, &x_wide, &x_bott, &x_tall, NULL);
-   yVIKEYS_view_bounds   (YVIKEYS_MAIN, &x_xmin, &x_xmax, NULL, &x_ymin, &x_ymax, NULL);
+   short    x_xmin, x_xmax, x_wide;
+   short    x_ymin, x_ymax, x_tall;
+   yVIEW_bounds  (YVIEW_MAIN, NULL, NULL, &x_xmin, &x_xmax, &x_wide, &x_ymin, &x_ymax, &x_tall);
    /*> printf ("t %c %3d %3d %3d %3d %s\n", x_on, x_left, x_bott, x_wide, x_tall, x_text);   <*/
    /*---(setup view)---------------------*/
    /*> glViewport      (x_left, x_bott, x_wide, x_tall);                              <* 
@@ -199,7 +198,7 @@ DRAW_primary         (float a_mag)
    /*> REVERSE_outline ("ar·l·g·lg"                , SHAPE_DRAW, 1);                 <*/
    /*> REVERSE_text    ("m·emd·d·edm·m m·amj·sh·ajm·n"    , SHAPE_DRAW, 1, 'y');      <*/
    /*> REVERSE_text    ("r·o2·b sh·t·nd"                        , SHAPE_DRAW, 1, 'y');   <*/
-   /*> REVERSE_english_text ("rob shorthand"     , SHAPE_DRAW, 1, 'y');               <*/
+   REVERSE_english_text ("rob shorthand"     , SHAPE_DRAW, 1, 'y');
    REVERSE_english_text (my.words, SHAPE_DRAW, 1, 'y');
    DRAW_info_request ();
    if (my.touch != 'y') {
@@ -251,9 +250,9 @@ DRAW_back            (void)
    /*---(header)-------------------------*/
    DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
    /*---(setup)--------------------------*/
-   yVIKEYS_view_color_clear (YCOLOR_BAS_MED);
-   yVIKEYS_view_bounds      (YVIKEYS_MAIN, &x_xmin, &x_xmax, NULL, &x_ymin, &x_ymax, NULL);
-   rc = yGLTEX_draw_start   (s_fbo, YGLTEX_GREGG, win.tex_w, win.tex_h, 2.0);
+   yVIEW_color_clear (YVIEW_MAIN);
+   yVIEW_bounds    (YVIEW_MAIN, NULL, NULL, &x_xmin, &x_xmax, NULL, &x_ymin, &x_ymax, NULL);
+   rc = yGLTEX_draw         (s_fbo, YGLTEX_GREGG, win.tex_w, win.tex_h, 2.0);
    /*---(draw)---------------------------*/
    glCallList (dl_back);
    /*> draw_horz   ();                                                                <*/
@@ -300,7 +299,7 @@ DRAW_back            (void)
     *>    WORDS_display (my.guide, '-');                                              <* 
     *> } glPopMatrix   ();                                                            <*/
    /*---(mipmaps)------------------------*/
-   rc = yGLTEX_draw_end  (s_tex);
+   rc = yGLTEX_done      (s_tex);
    /*---(complete)-----------------------*/
    DEBUG_GRAF   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -454,19 +453,19 @@ DRAW_xaxis           (void)
    int   right = 0;
    int   left  = 0;
    /*> DEBUG__SHAPES  if (g_loc[a_who].x_rig == 0) printf("   %-5s", g_loc[a_who].label);    <*/
-   yVIKEYS_view_size        (YVIKEYS_XAXIS, NULL, &x_wide, NULL, NULL, NULL);
+   yVIEW_size  (YVIEW_XAXIS, NULL, NULL, &x_wide, NULL, NULL);
    x_spacing = (x_wide - 20.0) / (o.navg - 1);
    glPushMatrix(); {
       glTranslatef ( 10.0, 7.0,    0.0);
       for (x_pnt = 0; x_pnt < o.navg; ++x_pnt) {
          glLineWidth  (2.0);
          switch (o.avg [x_pnt].type) {
-         case 'S' : yVIKEYS_view_color (YCOLOR_BAS_MIN, 0.4);  break;
-         case '>' : yVIKEYS_view_color (YCOLOR_BAS_MOR, 0.4);  break;
-         case '-' : yVIKEYS_view_color (YCOLOR_BAS_MOR, 0.4);  break;
-         case 'F' : yVIKEYS_view_color (YCOLOR_BAS_MIN, 0.4);  break;
+         case 'S' : yCOLOR_opengl (YCOLOR_BAS, YCOLOR_MIN, 0.4);  break;
+         case '>' : yCOLOR_opengl (YCOLOR_BAS, YCOLOR_MOR, 0.4);  break;
+         case '-' : yCOLOR_opengl (YCOLOR_BAS, YCOLOR_MOR, 0.4);  break;
+         case 'F' : yCOLOR_opengl (YCOLOR_BAS, YCOLOR_MIN, 0.4);  break;
          }
-         if (x_pnt == o.cavg)   yVIKEYS_view_color (YCOLOR_BAS_MAX, 0.3);
+         if (x_pnt == o.cavg)   yCOLOR_opengl (YCOLOR_BAS, YCOLOR_MAX, 0.3);
          glBegin(GL_LINE_STRIP);
          for (x_deg = 0; x_deg <= 360; x_deg += 5) {
             rad  = x_deg * DEG2RAD;
@@ -487,7 +486,7 @@ DRAW_yaxis           (void)
    int         x_out       =    0;
    int         x_tall      =    0;
    float       x_radius    =    0;
-   yVIKEYS_view_size        (YVIKEYS_YAXIS, NULL, NULL, NULL, &x_tall, NULL);
+   yVIEW_size  (YVIEW_YAXIS, NULL, NULL, NULL, NULL, &x_tall);
    x_radius  = (x_tall / (float) (o.total)) / 2.0;
    glPushMatrix(); {
       glTranslatef (  0.0, -x_radius,    0.0);
@@ -574,7 +573,7 @@ LAYER_raws          (void)
    glLineWidth (2.0);
    glPointSize (1.5);
    glColor4f  (0.0, 0.0, 0.0, 1.0);
-   /*> yVIKEYS_view_color (YCOLOR_POS_DRK, 1.00);                                     <*/
+   /*> yCOLOR_opengl (YCOLOR_POS, YCOLOR_DRK, 1.00);                                     <*/
    /*> glColor4f(0.0f, 0.0f, 0.7f, 1.0f);                                             <*/
    /*> glBegin(GL_LINE_STRIP);                                                        <*/
    if (my.time_point > o.nraw)  x_end = o.nraw;
@@ -780,7 +779,7 @@ OVERLAY_data    (void)
    int         x_off       =  200;
    int         y_off       =  105;
    /*---(average point)------------------*/
-   yVIKEYS_view_color (YCOLOR_BAS_MOR, 0.65);
+   yCOLOR_opengl (YCOLOR_BAS, YCOLOR_MOR, 0.65);
    glPushMatrix  (); {
       /*---(counts)----------------------*/
       glTranslatef  (x_off, y_off, 30);
@@ -1030,7 +1029,7 @@ FONT__load           (void)
       fprintf(stderr, "Problem loading %s\n", ICON_SET);
       exit(1);
    }
-   yVIKEYS_view_font (win.font_fixed);
+   /*> yVIKEYS_view_font (win.font_fixed);                                            <*/
    return 0;
 }
 
@@ -1106,7 +1105,8 @@ OVERLAY_samples        (void)
     *> } glPopMatrix();                                                               <*/
    /*---(cycle samples)------------------*/
    glPushMatrix(); {
-      glTranslatef (win.d_xoff - 50, win.d_yoff + 30, win.d_zoff);
+      /*> glTranslatef (win.d_xoff - 50, win.d_yoff + 30, win.d_zoff);                <*/
+      glTranslatef (win.d_xoff +  50, win.d_yoff + 60, win.d_zoff);
       glScalef              (1.5, 1.5, 1.5);
       for (i = 1; i < MAX_LETTERS && strncmp(g_loc[i].label, "EOF", 5) != 0; ++i) {
          if (g_loc [i].x_show == 0 && g_loc [i].y_show == 0)  continue;

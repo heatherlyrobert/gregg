@@ -119,35 +119,36 @@ RAW__point         (int a_xpad, int a_ypad, char a_type)
    }
    /*---(save point)---------------------*/
    DEBUG_RAW    yLOG_snote   ("add point");
-   o.raw [o.nraw].series  = POINTS_RAW;
-   o.raw [o.nraw].seq     = o.nraw;
-   o.raw [o.nraw].p_raw   = o.nraw;
-   o.raw [o.nraw].x_touch = o.raw [o.nraw].x_raw = a_xpad;
-   o.raw [o.nraw].y_touch = o.raw [o.nraw].y_raw = a_ypad;
-   o.raw [o.nraw].type    = a_type;
+   POINT_raw_add (a_type, a_xpad, a_ypad);
+   /*> o.raw [o.nraw].series  = POINTS_RAW;                                           <* 
+    *> o.raw [o.nraw].seq     = o.nraw;                                               <* 
+    *> o.raw [o.nraw].p_raw   = o.nraw;                                               <* 
+    *> o.raw [o.nraw].x_touch = o.raw [o.nraw].x_raw = a_xpad;                        <* 
+    *> o.raw [o.nraw].y_touch = o.raw [o.nraw].y_raw = a_ypad;                        <* 
+    *> o.raw [o.nraw].type    = a_type;                                               <*/
    /*---(save point)---------------------*/
-   DEBUG_RAW    yLOG_snote   ("assign type/calc");
-   switch (a_type) {
-   case POINT_START   :
-      o.raw [o.nraw].fake = POINT_FAKE;
-      break;
-   case POINT_HEAD    :
-      o.raw [o.nraw].fake = POINT_NORMAL;
-      break;
-   case POINT_NORMAL  :
-      o.raw [o.nraw].fake = POINT_NORMAL;
-      break;
-   case POINT_TAIL    :
-      o.raw [o.nraw].fake = POINT_NORMAL;
-      break;
-   case POINT_FINISH  :
-      o.raw [o.nraw].fake = POINT_FAKE;
-      break;
-   }
+   /*> DEBUG_RAW    yLOG_snote   ("assign type/calc");                                <*/
+   /*> switch (a_type) {                                                              <* 
+    *> case POINT_START   :                                                           <* 
+    *>    o.raw [o.nraw].fake = POINT_FAKE;                                           <* 
+    *>    break;                                                                      <* 
+    *> case POINT_HEAD    :                                                           <* 
+    *>    o.raw [o.nraw].fake = POINT_NORMAL;                                         <* 
+    *>    break;                                                                      <* 
+    *> case POINT_NORMAL  :                                                           <* 
+    *>    o.raw [o.nraw].fake = POINT_NORMAL;                                         <* 
+    *>    break;                                                                      <* 
+    *> case POINT_TAIL    :                                                           <* 
+    *>    o.raw [o.nraw].fake = POINT_NORMAL;                                         <* 
+    *>    break;                                                                      <* 
+    *> case POINT_FINISH  :                                                           <* 
+    *>    o.raw [o.nraw].fake = POINT_FAKE;                                           <* 
+    *>    break;                                                                      <* 
+    *> }                                                                              <*/
    /*---(calculate)----------------------*/
-   POINT_pos (o.raw + o.nraw);
+   POINT_pos (o.raw + o.nraw - 1);
    /*---(update counters)----------------*/
-   ++o.nraw;
+   /*> ++o.nraw;                                                                      <*/
    DEBUG_RAW    yLOG_sint    (o.nraw);
    /*---(complete)-----------------------*/
    DEBUG_RAW    yLOG_sexit   (__FUNCTION__);

@@ -52,19 +52,19 @@ POINT_clear             (tPOINT *a_point, char a_type)
 {
    /*---(base)---------------------------*/
    a_point->series  = a_type;
-   a_point->seq     = 0;
+   a_point->seq     = -1;
    a_point->type    = POINT_NONE;
    /*---(links)--------------------------*/
    a_point->p_raw   = -1;
    a_point->p_bas   = -1;
    a_point->p_key   = -1;
-   /*---(touchpad)-----------------------*/
-   a_point->x_touch = a_point->x_raw  = 0;
-   a_point->y_touch = a_point->y_raw  = 0;
    /*---(markings)-----------------------*/
    a_point->fake    = '-';
    a_point->prekey  = '-';
    a_point->marked  = '-';
+   /*---(touchpad)-----------------------*/
+   a_point->x_touch = a_point->x_raw  = 0;
+   a_point->y_touch = a_point->y_raw  = 0;
    /*---(statistics)---------------------*/
    a_point->xd      = a_point->yd     = 0;
    a_point->len     = a_point->icept  = a_point->degs   = a_point->quad   = a_point->ccat   = 0;
@@ -144,6 +144,644 @@ POINT_clear_for_more    (void)
    }
    /*---(complete)--------------*/
    DEBUG_CALC   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+
+
+/*============================--------------------============================*/
+/*===----                     creation/destruction                     ----===*/
+/*============================--------------------============================*/
+void o___CREATION_______________o (void) {;}
+
+char
+POINT__copy             (char a_type, short a_old, short a_new, char a_clear)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   short       x_raw       =    0;
+   short       x_bas       =    0;
+   tPOINT     *p           = NULL;
+   char        x_name      [LEN_TERSE] = "";
+   /*---(header)-------------------------*/
+   p = POINT__series (a_type, x_name, NULL, NULL);
+   /*---(header)-------------------------*/
+   DEBUG_DATA    yLOG_complex ("copy"      , "%s, %3d into %3d", x_name, a_old, a_new);
+   /*---(fix raw ties)-------------------*/
+   switch (a_type) {
+   case POINTS_BAS :
+   case POINTS_AVG :
+      x_raw  = o.bas [a_old].p_raw;
+      o.raw [x_raw].p_bas   = a_new;
+      break;
+   case POINTS_KEY :
+      x_bas  = o.key [a_old].p_bas;
+      o.bas [x_bas].p_key   = a_new;
+      o.avg [x_bas].p_key   = a_new;
+      break;
+   }
+   /*---(series/seq)---------------------*/
+   p [a_new].seq     = a_new;
+   p [a_new].series  = p [a_old].series;
+   p [a_new].type    = p [a_old].type;
+   /*---(tie raw and bas)----------------*/
+   /*> if (strchr ("R" , x_name [0]) == NULL)  p [a_new].p_raw   = p [a_old].p_raw;   <* 
+    *> if (strchr ("BA", x_name [0]) == NULL)  p [a_new].p_bas   = p [a_old].p_bas;   <* 
+    *> if (strchr ("K" , x_name [0]) == NULL)  p [a_new].p_key   = p [a_old].p_key;   <*/
+   p [a_new].p_raw   = p [a_old].p_raw;
+   p [a_new].p_bas   = p [a_old].p_bas;
+   p [a_new].p_key   = p [a_old].p_key;
+   /*---(characteristics)----------------*/
+   p [a_new].fake    = p [a_old].fake;
+   p [a_new].prekey  = p [a_old].prekey;
+   p [a_new].marked  = p [a_old].marked;
+   /*---(original)-----------------------*/
+   p [a_new].x_touch = p [a_old].x_touch;
+   p [a_new].y_touch = p [a_old].y_touch;
+   p [a_new].x_raw   = p [a_old].x_raw;
+   p [a_new].y_raw   = p [a_old].y_raw;
+   /*---(screen)-------------------------*/
+   p [a_new].x_rel   = p [a_old].x_rel;
+   p [a_new].y_rel   = p [a_old].y_rel;
+   p [a_new].x_pos   = p [a_old].x_pos;
+   p [a_new].y_pos   = p [a_old].y_pos;
+   /*---(clear old)----------------------*/
+   if (a_clear == 'y')  POINT_clear (&(p [a_old]), POINT_NORMAL);
+   /*---(done)---------------------------*/
+   return 0;
+}
+
+char
+POINT_copy              (char a_type, short a_old, short a_new)
+{
+   POINT__copy (a_type, a_old, a_new, '-');
+   return 0;
+}
+
+char
+POINT_move              (char a_type, short a_old, short a_new)
+{
+   POINT__copy (a_type, a_old, a_new, 'y');
+   return 0;
+}
+
+char
+POINT_push_up           (char a_type, short a_old)
+{
+   POINT__copy (a_type, a_old, a_old + 1, 'y');
+   /*> ++(o.bas [a_old + 1].seq);                                                     <* 
+    *> ++(o.avg [a_old + 1].seq);                                                     <*/
+   return 0;
+}
+
+char
+POINT_pull_down         (char a_type, short a_old)
+{
+   POINT__copy (a_type, a_old + 1, a_old, 'y');
+   return 0;
+}
+
+char
+POINT_wipe              (char a_type, short a_old)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   tPOINT     *p           = NULL;
+   short       x_raw       =    0;
+   short       x_bas       =    0;
+   /*---(header)-------------------------*/
+   p = POINT__series (a_type, NULL, NULL, NULL);
+   switch (a_type) {
+   case POINTS_BAS :
+   case POINTS_AVG :
+      x_raw  = o.bas [a_old].p_raw;
+      o.raw [x_raw].p_bas   = -1;
+      break;
+   case POINTS_KEY :
+      x_bas  = o.key [a_old].p_bas;
+      o.bas [x_bas].p_key   = -1;
+      o.avg [x_bas].p_key   = -1;
+      break;
+   }
+   return POINT_clear (p + a_old, a_type);
+}
+
+char
+POINT_reseq             (char a_type)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   tPOINT     *p           = NULL;
+   short       i           =    0;
+   char        x_name      [LEN_TERSE];
+   int         c           =    0;
+   int         x_max       =    0;
+   int         x_seq       =    0;
+   /*---(header)-------------------------*/
+   DEBUG_DATA    yLOG_senter  (__FUNCTION__);
+   p = POINT__series (a_type, x_name, &c, &x_max);
+   DEBUG_DATA    yLOG_schar   (a_type);
+   DEBUG_DATA    yLOG_snote   (x_name);
+   DEBUG_DATA    yLOG_sint    (c);
+   DEBUG_DATA    yLOG_sint    (x_max);
+   for (i = 0; i < x_max; ++i) {
+      x_seq = i;
+      if (i >= c)  x_seq = -1;
+      p [i].seq   = x_seq;
+      switch (a_type) {
+      case POINTS_RAW  :
+         p [i].p_raw = x_seq;
+         break;
+      case POINTS_BAS  :
+      case POINTS_AVG  :
+         p [i].p_bas = x_seq;
+         break;
+      case POINTS_KEY  :
+         p [i].p_key = x_seq;
+         break;
+      }
+   }
+   /*---(complete)-----------------------*/
+   DEBUG_DATA    yLOG_sexit   (__FUNCTION__);
+   return 0;
+}
+
+char
+POINT_rekey             (void)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   short       i           =    0;
+   int         c           =    0;
+   short       x_raw       =    0;
+   short       x_bas       =    0;
+   /*---(header)-------------------------*/
+   DEBUG_DATA    yLOG_senter  (__FUNCTION__);
+   /*---(clear raw key links)------------*/
+   for (i = 0; i < o.nraw; ++i) {
+      o.raw [i].p_key = -1;
+   }
+   /*---(clear bas/avg key links)--------*/
+   for (i = 0; i < o.nbas; ++i) {
+      o.bas [i].p_key = -1;
+      o.avg [i].p_key = -1;
+   }
+   /*---(update)-------------------------*/
+   for (i = 0; i < o.nkey; ++i) {
+      /*---(get pointers)------*/
+      x_raw = o.key [i].p_raw;
+      x_bas = o.key [i].p_bas;
+      /*---(update raw)--------*/
+      o.raw [x_raw].p_key = i;
+      /*---(update bas/avg)----*/
+      o.bas [x_bas].p_key = i;
+      o.avg [x_bas].p_key = i;
+      /*---(done)--------------*/
+   }
+   /*---(complete)-----------------------*/
+   DEBUG_DATA    yLOG_sexit   (__FUNCTION__);
+   return 0;
+}
+
+char
+POINT_swap              (char a_type, short a_old, short a_new)
+{
+   short       x_tmp       =    0;
+   POINT__series (a_type, NULL, NULL, &x_tmp);
+   --x_tmp;
+   POINT__copy (a_type, a_old, x_tmp, 'y');
+   POINT__copy (a_type, a_new, a_old, 'y');
+   POINT__copy (a_type, x_tmp, a_new, 'y');
+   return 0;
+}
+
+
+
+/*============================--------------------============================*/
+/*===----                       raw point support                      ----===*/
+/*============================--------------------============================*/
+void o___RAWS___________________o (void) {;}
+
+char
+POINT_raw_add           (char a_type, int x, int y)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   /*---(header)-------------------------*/
+   DEBUG_DATA    yLOG_enter   (__FUNCTION__);
+   /*---(defense)------------------------*/
+   DEBUG_DATA    yLOG_char    ("a_type"    , a_type);
+   --rce;  if (a_type == 0 || strchr (POINT_TYPES, a_type) == NULL) {
+      DEBUG_DATA    yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_DATA    yLOG_value   ("x"         , x);
+   DEBUG_DATA    yLOG_value   ("y"         , y);
+   --rce;  if (x < 0 || y < 0) {
+      DEBUG_DATA    yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(base values)--------------------*/
+   o.raw [o.nraw].series  = POINTS_RAW;
+   o.raw [o.nraw].seq     = o.nraw;
+   o.raw [o.nraw].p_raw   = o.nraw;
+   o.raw [o.nraw].x_touch = o.raw [o.nraw].x_raw = x;
+   o.raw [o.nraw].y_touch = o.raw [o.nraw].y_raw = y;
+   o.raw [o.nraw].type    = a_type;
+   /*---(label fakes)--------------------*/
+   switch (a_type) {
+   case POINT_START   :
+      o.raw [o.nraw].fake = POINT_FAKE;
+      break;
+   case POINT_HEAD    :
+      o.raw [o.nraw].fake = POINT_NORMAL;
+      break;
+   case POINT_NORMAL  :
+      o.raw [o.nraw].fake = POINT_NORMAL;
+      break;
+   case POINT_TAIL    :
+      o.raw [o.nraw].fake = POINT_NORMAL;
+      break;
+   case POINT_FINISH  :
+      o.raw [o.nraw].fake = POINT_FAKE;
+      break;
+   }
+   /*---(update counters)----------------*/
+   ++o.nraw;
+   POINT_reseq (POINTS_RAW);
+   /*---(complete)-----------------------*/
+   DEBUG_DATA    yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+
+
+/*============================--------------------============================*/
+/*===----                      base point support                      ----===*/
+/*============================--------------------============================*/
+void o___BASE___________________o (void) {;}
+
+char
+POINT_raw2bas       (short a_raw, short a_bas)
+{
+   /*---(tie raw and bas)-----------------*/
+   o.raw [a_raw].p_bas   = a_bas;
+   o.bas [a_bas].p_raw   = o.avg [a_bas].p_raw   = a_raw;
+   o.bas [a_bas].p_bas   = o.avg [a_bas].p_bas   = a_bas;
+   o.bas [a_bas].p_key   = o.avg [a_bas].p_key   = -1;
+   /*---(head)----------------------------*/
+   o.bas [a_bas].seq     = o.avg [a_bas].seq     = a_bas;
+   o.bas [a_bas].fake    = o.avg [a_bas].fake    = o.raw [a_raw].fake;
+   o.bas [a_bas].type    = o.avg [a_bas].type    = o.raw [a_raw].type;
+   /*---(touchpad)------------------------*/
+   o.bas [a_bas].x_touch = o.avg [a_bas].x_touch = o.raw [a_raw].x_touch;
+   o.bas [a_bas].x_raw   = o.avg [a_bas].x_raw   = o.raw [a_raw].x_raw;
+   o.bas [a_bas].y_touch = o.avg [a_bas].y_touch = o.raw [a_raw].y_touch;
+   o.bas [a_bas].y_raw   = o.avg [a_bas].y_raw   = o.raw [a_raw].y_raw;
+   /*---(display)-------------------------*/
+   o.bas [a_bas].x_pos   = o.avg [a_bas].x_pos   = o.raw [a_raw].x_pos;
+   o.bas [a_bas].x_rel   = o.avg [a_bas].x_rel   = o.raw [a_raw].x_rel;
+   o.bas [a_bas].y_pos   = o.avg [a_bas].y_pos   = o.raw [a_raw].y_pos;
+   o.bas [a_bas].y_rel   = o.avg [a_bas].y_rel   = o.raw [a_raw].y_rel;
+   /*---(complete)-----------------------*/
+   return 0;
+}
+
+#define     FIND_EXACT      '='
+#define     FIND_INSERT     '<'
+
+short
+POINT_bas_find          (char a_style, short a_raw)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   short       i           =    0;
+   short       n           =   -1;
+   /*---(header)-------------------------*/
+   DEBUG_DATA    yLOG_enter   (__FUNCTION__);
+   /*---(defense)------------------------*/
+   DEBUG_DATA    yLOG_value   ("a_raw"     , a_raw);
+   --rce;  if (a_raw < 0 || a_raw >= o.nraw) {
+      DEBUG_DATA    yLOG_note    ("out of range");
+      DEBUG_DATA    yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(find point)---------------------*/
+   --rce;  for (i = 0; i < o.nbas; ++i) {
+      DEBUG_DATA_M  yLOG_complex ("compare"   , "%2d, %4d to %4d", i, a_raw, o.bas [i].p_raw);
+      /*---(found)-------------*/
+      if (a_style == FIND_EXACT  && a_raw == o.bas [i].p_raw) {
+         DEBUG_DATA    yLOG_value   ("found"     , i);
+         n = i;
+         break;
+      }
+      /*---(duplicate)---------*/
+      if (a_style == FIND_INSERT && a_raw == o.bas [i].p_raw) {
+         DEBUG_DATA    yLOG_note    ("duplicate, already exists");
+         DEBUG_DATA    yLOG_exitr   (__FUNCTION__, rce);
+         return rce;
+      }
+      /*---(put before)--------*/
+      if (a_style == FIND_INSERT && a_raw <  o.bas [i].p_raw) {
+         DEBUG_DATA    yLOG_value   ("found"     , i);
+         n = i;
+         break;
+      }
+      /*---(done)--------------*/
+   }
+   /*---(failed)-------------------------*/
+   DEBUG_DATA    yLOG_value   ("n"         , n);
+   if (n < 0) {
+      /*---(not found)---------*/
+      if (a_style == FIND_EXACT) {
+         DEBUG_DATA    yLOG_exitr   (__FUNCTION__, rce);
+         return rce;
+      }
+      /*---(append)------------*/
+      n = MAX_POINTS + 1;
+   }
+   /*---(failed)-------------------------*/
+   DEBUG_DATA    yLOG_exit    (__FUNCTION__);
+   return n;
+}
+
+char
+POINT_bas_add           (short a_raw)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   short       i           =    0;
+   short       n           =   -1;
+   /*---(header)-------------------------*/
+   DEBUG_DATA    yLOG_enter   (__FUNCTION__);
+   /*---(find)---------------------------*/
+   n = POINT_bas_find (FIND_INSERT, a_raw);
+   DEBUG_DATA    yLOG_value   ("n"         , n);
+   /*---(duplicate)----------------------*/
+   if (n < 0) {
+      DEBUG_DATA    yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(append)-------------------------*/
+   if (n >= MAX_POINTS) {
+      DEBUG_DATA    yLOG_note    ("append mode");
+      POINT_raw2bas (a_raw, o.nbas);
+   }
+   /*---(insert)-------------------------*/
+   else {
+      DEBUG_DATA    yLOG_note    ("insert mode");
+      for (i = o.nbas - 1; i >= n; --i)   POINT_push_up (POINTS_BAS, i);
+      POINT_raw2bas (a_raw, n);
+   }
+   /*---(increment counters)-------------*/
+   ++o.nbas;
+   ++o.navg;
+   POINT_reseq (POINTS_BAS);
+   POINT_reseq (POINTS_AVG);
+   /*---(complete)-----------------------*/
+   DEBUG_DATA    yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+POINT_bas_adjust        (short a_old, short a_new)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   short       n           =   -1;
+   short       x_key       =    0;
+   /*---(header)-------------------------*/
+   DEBUG_DATA    yLOG_enter   (__FUNCTION__);
+   /*---(defense)------------------------*/
+   DEBUG_DATA    yLOG_value   ("a_new"     , a_new);
+   --rce;  if (a_new < 0 || a_new >= o.nraw) {
+      DEBUG_DATA    yLOG_note    ("out of range");
+      DEBUG_DATA    yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(find)---------------------------*/
+   n = POINT_bas_find (FIND_EXACT, a_old);
+   /*---(not found)----------------------*/
+   --rce;  if (n < 0) {
+      DEBUG_DATA    yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(save)---------------------------*/
+   x_key  = o.raw [a_old].p_key;
+   /*---(clear old raw)------------------*/
+   o.raw [a_old].p_bas  = -1;
+   o.raw [a_old].p_key  = -1;
+   /*---(update new raw)-----------------*/
+   o.raw [a_new].p_bas  = n;
+   o.raw [a_new].p_key  = x_key;
+   /*---(update bas/avg)-----------------*/
+   o.bas [n].p_raw  = o.avg [n].p_raw  = a_new;
+   /*---(update key)---------------------*/
+   if (x_key >= 0)   o.key [x_key].p_raw  = a_new;
+   /*---(complete)-----------------------*/
+   DEBUG_DATA    yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+POINT_bas_del           (short a_raw)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   short       i           =    0;
+   short       n           =   -1;
+   short       x_raw       =   -1;
+   /*---(header)-------------------------*/
+   DEBUG_DATA    yLOG_enter   (__FUNCTION__);
+   /*---(find)---------------------------*/
+   n = POINT_bas_find (FIND_EXACT, a_raw);
+   /*---(not found)----------------------*/
+   --rce;  if (n < 0) {
+      DEBUG_DATA    yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(check key)----------------------*/
+   --rce;  if (o.bas [n].p_key >= 0) {
+      DEBUG_DATA    yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(remove)-------------------------*/
+   x_raw  = o.bas [n].p_raw;
+   o.raw [x_raw].p_bas   = -1;
+   for (i = n; i < o.nbas; ++i)  {
+      POINT_pull_down (POINTS_BAS, i);
+      POINT_pull_down (POINTS_AVG, i);
+   }
+   POINT_wipe (POINTS_BAS, o.nbas - 1);
+   POINT_wipe (POINTS_AVG, o.nbas - 1);
+   /*---(decrement counters)-------------*/
+   --o.nbas;
+   --o.navg;
+   POINT_reseq (POINTS_BAS);
+   POINT_reseq (POINTS_AVG);
+   /*---(complete)-----------------------*/
+   DEBUG_DATA    yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+
+
+/*============================--------------------============================*/
+/*===----                       key point support                      ----===*/
+/*============================--------------------============================*/
+void o___KEYS___________________o (void) {;}
+
+char
+POINT_bas2key       (short a_bas, short a_key)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   short       x_raw       =    0;
+   /*---(fix raw ties)-------------------*/
+   x_raw  = o.bas [a_bas].p_raw;
+   /*---(tie raw and bas)-----------------*/
+   o.raw [x_raw].p_key   = a_key;
+   o.bas [a_bas].p_key   = o.avg [a_bas].p_key   = a_key;
+   /*---(tie key)-------------------------*/
+   o.key [a_key].p_raw   = x_raw;
+   o.key [a_key].p_bas   = a_bas;
+   o.key [a_key].p_key   = a_key;
+   /*---(head)----------------------------*/
+   o.key [a_key].seq     = a_key;
+   o.key [a_key].fake    = o.bas [a_bas].fake;
+   o.key [a_key].type    = o.bas [a_bas].type;
+   /*---(touchpad)------------------------*/
+   o.key [a_key].x_touch = o.bas [a_bas].x_touch;
+   o.key [a_key].x_raw   = o.bas [a_bas].x_raw;
+   o.key [a_key].y_touch = o.bas [a_bas].y_touch;
+   o.key [a_key].y_raw   = o.bas [a_bas].y_raw;
+   /*---(display)-------------------------*/
+   o.key [a_key].x_pos   = o.bas [a_bas].x_pos;
+   o.key [a_key].x_rel   = o.bas [a_bas].x_rel;
+   o.key [a_key].y_pos   = o.bas [a_bas].y_pos;
+   o.key [a_key].y_rel   = o.bas [a_bas].y_rel;
+   /*---(complete)-----------------------*/
+   return 0;
+}
+
+short
+POINT_key_find          (char a_style, short a_bas)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   short       i           =    0;
+   short       n           =   -1;
+   /*---(header)-------------------------*/
+   DEBUG_DATA    yLOG_enter   (__FUNCTION__);
+   /*---(defense)------------------------*/
+   DEBUG_DATA    yLOG_value   ("a_bas"     , a_bas);
+   --rce;  if (a_bas < 0 || a_bas >= o.nbas) {
+      DEBUG_DATA    yLOG_note    ("out of range");
+      DEBUG_DATA    yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(find point)---------------------*/
+   --rce;  for (i = 0; i < o.nkey; ++i) {
+      DEBUG_DATA_M  yLOG_complex ("compare"   , "%2d, %4d to %4d", i, a_bas, o.key [i].p_bas);
+      /*---(found)-------------*/
+      if (a_style == FIND_EXACT  && a_bas == o.key [i].p_bas) {
+         DEBUG_DATA    yLOG_value   ("found"     , i);
+         n = i;
+         break;
+      }
+      /*---(duplicate)---------*/
+      if (a_style == FIND_INSERT && a_bas == o.key [i].p_bas) {
+         DEBUG_DATA    yLOG_note    ("duplicate, already exists");
+         DEBUG_DATA    yLOG_exitr   (__FUNCTION__, rce);
+         return rce;
+      }
+      /*---(put before)--------*/
+      if (a_style == FIND_INSERT && a_bas <  o.key [i].p_bas) {
+         DEBUG_DATA    yLOG_value   ("found"     , i);
+         n = i;
+         break;
+      }
+      /*---(done)--------------*/
+   }
+   /*---(failed)-------------------------*/
+   DEBUG_DATA    yLOG_value   ("n"         , n);
+   if (n < 0) {
+      /*---(not found)---------*/
+      if (a_style == FIND_EXACT) {
+         DEBUG_DATA    yLOG_exitr   (__FUNCTION__, rce);
+         return rce;
+      }
+      /*---(append)------------*/
+      n = MAX_POINTS + 1;
+   }
+   /*---(failed)-------------------------*/
+   DEBUG_DATA    yLOG_exit    (__FUNCTION__);
+   return n;
+}
+
+char
+POINT_key_add           (short a_bas)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   short       i           =    0;
+   short       n           =   -1;
+   /*---(header)-------------------------*/
+   DEBUG_DATA    yLOG_enter   (__FUNCTION__);
+   /*---(find)---------------------------*/
+   n = POINT_key_find (FIND_INSERT, a_bas);
+   DEBUG_DATA    yLOG_value   ("n"         , n);
+   /*---(duplicate)----------------------*/
+   if (n < 0) {
+      DEBUG_DATA    yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(append)-------------------------*/
+   if (n >= MAX_POINTS) {
+      DEBUG_DATA    yLOG_note    ("append mode");
+      POINT_bas2key (a_bas, o.nkey);
+   }
+   /*---(insert)-------------------------*/
+   else {
+      DEBUG_DATA    yLOG_note    ("insert mode");
+      for (i = o.nkey - 1; i >= n; --i)   POINT_push_up (POINTS_KEY, i);
+      POINT_bas2key (a_bas, n);
+   }
+   /*---(increment counters)-------------*/
+   ++o.nkey;
+   POINT_reseq (POINTS_KEY);
+   POINT_rekey ();
+   /*---(complete)-----------------------*/
+   DEBUG_DATA    yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+POINT_key_del           (short a_bas)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   short       i           =    0;
+   short       n           =   -1;
+   short       x_bas       =   -1;
+   /*---(header)-------------------------*/
+   DEBUG_DATA    yLOG_enter   (__FUNCTION__);
+   /*---(find)---------------------------*/
+   n = POINT_key_find (FIND_EXACT, a_bas);
+   /*---(not found)----------------------*/
+   --rce;  if (n < 0) {
+      DEBUG_DATA    yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(remove)-------------------------*/
+   x_bas  = o.key [n].p_bas;
+   o.bas [x_bas].p_key   = -1;
+   o.avg [x_bas].p_key   = -1;
+   for (i = n; i < o.nkey; ++i)  {
+      POINT_pull_down (POINTS_KEY, i);
+   }
+   POINT_wipe (POINTS_KEY, o.nkey - 1);
+   /*---(decrement counters)-------------*/
+   --o.nkey;
+   POINT_reseq (POINTS_KEY);
+   POINT_rekey ();
+   /*---(complete)-----------------------*/
+   DEBUG_DATA    yLOG_exit    (__FUNCTION__);
    return 0;
 }
 
@@ -494,8 +1132,14 @@ POINT_curve             (short a_start, short a_finish, float a_len, float a_slo
    float       s1, s2;
    float       b1, b2;
    char        x_label      [LEN_LABEL];
-   float       x_max       =  0.0;
    char        x_cat       =  '0';
+   char        x_horz      =  '?';
+   char        x_vert      =  '?';
+   float       f_max       =  0.0;
+   float       x_min       =    0;
+   float       x_max       =    0;
+   float       y_min       =    0;
+   float       y_max       =    0;
    /*---(header)-------------------------*/
    DEBUG_MATCH   yLOG_enter   (__FUNCTION__);
    DEBUG_MATCH   yLOG_complex ("args"      , "%3ds, %3df, %6.0fs, %6.0fi, %-10.10pd, %-10.10pc",  a_start, a_finish, a_slope, a_icept, a_depth, a_cat);
@@ -539,48 +1183,58 @@ POINT_curve             (short a_start, short a_finish, float a_len, float a_slo
          /*---(get perpendicular values)-*/
          s2   = -1.0 / s1;
          if (s2 ==   0.0)    s2 =  0.001;
-         /*> if (s2 >  999.0)    s2 =  999.0;                                         <* 
-          *> if (s2 < -999.0)    s2 = -999.0;                                         <*/
          b2   = yr - (s2 * xr);
-         /*> if (b2 >  999.0)    b2 =  999.0;                                         <* 
-          *> if (b2 < -999.0)    b2 = -999.0;                                         <*/
          /*---(calc intersection)--------*/
          xp   = (b2 - b1) / (s1 - s2);
-         /*> if (xp >  999.0)    xp =  999.0;                                         <* 
-          *> if (xp < -999.0)    xp = -999.0;                                         <*/
          yp   = (s1 * xp) + b1;
-         /*> if (yp >  999.0)    yp =  999.0;                                         <* 
-          *> if (yp < -999.0)    yp = -999.0;                                         <*/
          DEBUG_MATCH   yLOG_complex ("details"   , "%6.0fb1, %6.0fb2, %6.0fbd, %6.1fs1, %6.1fs2, %6.1fsd, %6.1fcx, %6.1fxp, %6.1fcy, %6.1fyp", b1, b2, b2 - b1, s1, s2, s1 - s2, (b2 - b1) / (s1 - s2), xp, (s1 * xp) + b1, yp);
       }
       /*---(calc differences)------------*/
       xd   = xr - xp;
-      /*> if (xd >  999) xd =  999;                                                   <* 
-       *> if (xd < -999) xd = -999;                                                   <*/
       yd   = yr - yp;
-      /*> if (yd >  999) yd =  999;                                                   <* 
-       *> if (yd < -999) yd = -999;                                                   <*/
       fd   = sqrt ((xd * xd) + (yd * yd));
+      /*---(directions)------------------*/
+      if (xd < x_min)  x_min = xd;
+      if (xd > x_max)  x_max = xd;
+      if (yd < y_min)  y_min = yd;
+      if (yd > y_max)  y_max = yd;
+      if (xd >=  3.0 && x_horz != '+') {
+         if (x_horz == '?')   x_horz = '+';
+         else                 x_horz = '*';
+      }
+      if (xd <= -3.0 && x_horz != '-') {
+         if (x_horz == '?')   x_horz = '-';
+         else                 x_horz = '*';
+      }
+      if (yd >=  3.0 && x_vert != '+') {
+         if (x_vert == '?')   x_vert = '+';
+         else                 x_vert = '*';
+      }
+      if (yd <= -3.0 && x_vert != '-') {
+         if (x_vert == '?')   x_vert = '-';
+         else                 x_vert = '*';
+      }
       /*---(report out)------------------*/
       DEBUG_MATCH   yLOG_complex ("main line" , "%3db, %4.0fxr %4.0fyr, %6.1fs1 %6.0fb1", i, xr, yr, s1, b1);
       DEBUG_MATCH   yLOG_complex ("intersect" , "%4.4s, %4.0fxp %4.0fyp, %6.1fs2 %6.0fb2", x_label, xp, yp, s2, b2);
       DEBUG_MATCH   yLOG_complex ("dist"      , "%4.0fxd %4.0fyd %4.0ffd", xd, yd, fd);
       /*---(set the curve)---------------*/
-      if (fd > x_max)  x_max = fd;
+      if (fd > f_max)  f_max = fd;
    }
+   DEBUG_MATCH   yLOG_complex ("maxes"     , "%4.0ff, %4.0f to %4.0fx %c, %4.0f to %4.0fy %c", f_max, x_min, x_max, x_horz, y_min, y_max, x_vert);
    /*---(categorize)---------------------*/
-   if      (x_max >= 120.0)      x_cat = +7;
-   else if (x_max >= 100.0)      x_cat = +7;
-   else if (x_max >=  80.0)      x_cat = +6;
-   else if (x_max >=  60.0)      x_cat = +5;
-   else if (x_max >=  40.0)      x_cat = +4;
-   else if (x_max >=  25.0)      x_cat = +3;
-   else if (x_max >=   7.0)      x_cat = +2;
-   else if (x_max >=   3.0)      x_cat = +1;
+   if      (f_max >= 120.0)      x_cat = +8;
+   else if (f_max >= 100.0)      x_cat = +7;
+   else if (f_max >=  80.0)      x_cat = +6;
+   else if (f_max >=  60.0)      x_cat = +5;
+   else if (f_max >=  40.0)      x_cat = +4;
+   else if (f_max >=  25.0)      x_cat = +3;
+   else if (f_max >=   7.0)      x_cat = +2;
+   else if (f_max >=   3.0)      x_cat = +1;
    else                          x_cat =  0;
    /*---(return)-------------------------*/
-   if (a_depth != NULL)  *a_depth = x_max;
-   if (a_ratio != NULL)  *a_ratio = x_max / a_len;
+   if (a_depth != NULL)  *a_depth = f_max;
+   if (a_ratio != NULL)  *a_ratio = f_max / a_len;
    if (a_cat   != NULL)  *a_cat   = x_cat;
    /*---(complete)-----------------------*/
    DEBUG_MATCH   yLOG_exit    (__FUNCTION__);
@@ -716,6 +1370,21 @@ POINT__unit          (char *a_question, char a_type, int a_num)
       if (c > 45)  sprintf (s, "[%s>", t);
       else         sprintf (s, "[%s]", t);
       snprintf (unit_answer, LEN_STR, "%-3.3s by type      : %2d %s", x_pre, c, s);
+   }
+   else if   (strncmp (a_question, "links"     , 20)  == 0) {
+      snprintf (unit_answer, LEN_STR, "%-3.3s links   (%2d) : %c ", x_pre, a_num, p [a_num].type);
+      if (p [a_num].seq   >= 0)  sprintf  (t, " %4d%c" , p [a_num].seq  , '#');
+      else                       sprintf  (t, "    -%c",                  '#');
+      strlcat (unit_answer, t, LEN_STR);
+      if (p [a_num].p_raw >= 0)  sprintf  (t, " %4d%c" , p [a_num].p_raw, 'r');
+      else                       sprintf  (t, "    -%c",                  'r');
+      strlcat (unit_answer, t, LEN_STR);
+      if (p [a_num].p_bas >= 0)  sprintf  (t, " %4d%c" , p [a_num].p_bas, 'b');
+      else                       sprintf  (t, "    -%c",                  'b');
+      strlcat (unit_answer, t, LEN_STR);
+      if (p [a_num].p_key >= 0)  sprintf  (t, " %4d%c" , p [a_num].p_key, 'k');
+      else                       sprintf  (t, "    -%c",                  'k');
+      strlcat (unit_answer, t, LEN_STR);
    }
    else if   (strncmp (a_question, "touch"     , 20)  == 0) {
       snprintf (unit_answer, LEN_STR, "%-3.3s touch   (%2d) : %c  %4dx %4dy  %4dx %4dy",

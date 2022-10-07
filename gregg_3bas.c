@@ -36,6 +36,16 @@ BASE_config             (float a_append, float a_adjust, float a_sharp)
    return 0;
 }
 
+char
+BASE_init            (void)
+{
+   o.nbas     = 0;
+   o.navg     = 0;
+   POINT_clear_series (POINTS_BAS);
+   POINT_clear_series (POINTS_AVG);
+   return 0;
+}
+
 
 
 /*============================--------------------============================*/
@@ -159,30 +169,30 @@ BASE__force_point   (uchar a_type, short x, short y)
    return 0;
 }
 
-char
-BASE__raw2bas       (short a_raw, short a_bas)
-{
-   /*---(tie raw and bas)-----------------*/
-   o.raw [a_raw].p_bas   = a_bas;
-   o.bas [a_bas].p_raw   = o.avg [a_bas].p_raw   = a_raw;
-   o.bas [a_bas].p_bas   = o.avg [a_bas].p_bas   = a_bas;
-   /*---(head)----------------------------*/
-   o.bas [a_bas].seq     = o.avg [a_bas].seq     = a_bas;
-   o.bas [a_bas].fake    = o.avg [a_bas].fake    = o.raw [a_raw].fake;
-   o.bas [a_bas].type    = o.avg [a_bas].type    = o.raw [a_raw].type;
-   /*---(touchpad)------------------------*/
-   o.bas [a_bas].x_touch = o.avg [a_bas].x_touch = o.raw [a_raw].x_touch;
-   o.bas [a_bas].x_raw   = o.avg [a_bas].x_raw   = o.raw [a_raw].x_raw;
-   o.bas [a_bas].y_touch = o.avg [a_bas].y_touch = o.raw [a_raw].y_touch;
-   o.bas [a_bas].y_raw   = o.avg [a_bas].y_raw   = o.raw [a_raw].y_raw;
-   /*---(display)-------------------------*/
-   o.bas [a_bas].x_pos   = o.avg [a_bas].x_pos   = o.raw [a_raw].x_pos;
-   o.bas [a_bas].x_rel   = o.avg [a_bas].x_rel   = o.raw [a_raw].x_rel;
-   o.bas [a_bas].y_pos   = o.avg [a_bas].y_pos   = o.raw [a_raw].y_pos;
-   o.bas [a_bas].y_rel   = o.avg [a_bas].y_rel   = o.raw [a_raw].y_rel;
-   /*---(complete)-----------------------*/
-   return 0;
-}
+/*> char                                                                              <* 
+ *> BASE__raw2bas       (short a_raw, short a_bas)                                    <* 
+ *> {                                                                                 <* 
+ *>    /+---(tie raw and bas)-----------------+/                                      <* 
+ *>    o.raw [a_raw].p_bas   = a_bas;                                                 <* 
+ *>    o.bas [a_bas].p_raw   = o.avg [a_bas].p_raw   = a_raw;                         <* 
+ *>    o.bas [a_bas].p_bas   = o.avg [a_bas].p_bas   = a_bas;                         <* 
+ *>    /+---(head)----------------------------+/                                      <* 
+ *>    o.bas [a_bas].seq     = o.avg [a_bas].seq     = a_bas;                         <* 
+ *>    o.bas [a_bas].fake    = o.avg [a_bas].fake    = o.raw [a_raw].fake;            <* 
+ *>    o.bas [a_bas].type    = o.avg [a_bas].type    = o.raw [a_raw].type;            <* 
+ *>    /+---(touchpad)------------------------+/                                      <* 
+ *>    o.bas [a_bas].x_touch = o.avg [a_bas].x_touch = o.raw [a_raw].x_touch;         <* 
+ *>    o.bas [a_bas].x_raw   = o.avg [a_bas].x_raw   = o.raw [a_raw].x_raw;           <* 
+ *>    o.bas [a_bas].y_touch = o.avg [a_bas].y_touch = o.raw [a_raw].y_touch;         <* 
+ *>    o.bas [a_bas].y_raw   = o.avg [a_bas].y_raw   = o.raw [a_raw].y_raw;           <* 
+ *>    /+---(display)-------------------------+/                                      <* 
+ *>    o.bas [a_bas].x_pos   = o.avg [a_bas].x_pos   = o.raw [a_raw].x_pos;           <* 
+ *>    o.bas [a_bas].x_rel   = o.avg [a_bas].x_rel   = o.raw [a_raw].x_rel;           <* 
+ *>    o.bas [a_bas].y_pos   = o.avg [a_bas].y_pos   = o.raw [a_raw].y_pos;           <* 
+ *>    o.bas [a_bas].y_rel   = o.avg [a_bas].y_rel   = o.raw [a_raw].y_rel;           <* 
+ *>    /+---(complete)-----------------------+/                                       <* 
+ *>    return 0;                                                                      <* 
+ *> }                                                                                 <*/
 
 short         /*----: add an additional basic point from a raw point ---------*/
 BASE_append             (short a_raw, uchar a_force)
@@ -308,7 +318,7 @@ BASE_append             (short a_raw, uchar a_force)
    /*---(typing)--------------------------*/
    o.bas [o.nbas].series  = POINTS_BAS;
    o.avg [o.navg].series  = POINTS_AVG;
-   BASE__raw2bas  (x_curr, o.nbas);
+   POINT_raw2bas  (x_curr, o.nbas);
    if (strchr (POINT_ALIGNER, a_force) != NULL) {
       o.bas [o.nbas].type = a_force;
       o.avg [o.navg].type = a_force;
@@ -359,7 +369,7 @@ BASE_insert             (short a_raw)
    }
    /*---(insert new point)---------------*/
    DEBUG_RAW    yLOG_note    ("copy data");
-   BASE__raw2bas  (a_raw, n);
+   POINT_raw2bas  (a_raw, n);
    ++o.nbas;
    ++o.navg;
    /*---(update values)------------------*/
@@ -392,7 +402,7 @@ BASE_adjust             (short a_bas, short a_raw)
    o.raw [a_raw].p_bas  = a_bas;
    o.raw [a_raw].p_key  = x_key;
    /*---(repoint bas)--------------------*/
-   BASE__raw2bas  (a_raw, a_bas);
+   POINT_raw2bas  (a_raw, a_bas);
    BASE_calc_all ();
    /*---(complete)-----------------------*/
    DEBUG_AVG    yLOG_sexit   (__FUNCTION__);
@@ -742,38 +752,38 @@ BASE_filter        (void)
 /*============================--------------------============================*/
 static void o___MAPPING________________o (void) {;}
 
-char
-BASE_map_update          (tMAPPED *a_map, int a_ycur, int a_ynew)
-{
-   /*---(locals)-----------+-----------+-*/
-   int         i           =    0;
-   /*---(header)-------------------------*/
-   DEBUG_MAP    yLOG_enter   (__FUNCTION__);
-   /*---(update map)---------------------*/
-   for (i = 0; i < o.navg; ++i) {
-      a_map->map [i] = i;
-   }
-   /*---(globals)------------------------*/
-   a_map->gmin   = a_map->gamin  = 0;
-   a_map->gmax   = a_map->gamax  = o.navg - 1;
-   a_map->uavail = o.navg;
-   /*---(screen)-------------------------*/
-   a_map->umin   = a_map->ubeg   = 0;
-   a_map->umax   = a_map->uend   = a_map->ulen   = a_map->utend  = o.navg - 1;
-   /*---(units)--------------------------*/
-   a_map->gbeg   = 0;
-   a_map->gend   = o.navg - 1;
-   /*---(update current)-----------------*/
-   if (a_ycur == a_ynew) {
-      o.cavg       = a_map->gcur;
-   } else {
-      a_map->ucur  = 0;
-      a_map->gcur  = 0;
-   }
-   /*---(complete)-----------------------*/
-   DEBUG_MAP    yLOG_exit    (__FUNCTION__);
-   return 0;
-}
+/*> char                                                                              <* 
+ *> BASE_map_update          (tMAPPED *a_map, int a_ycur, int a_ynew)                 <* 
+ *> {                                                                                 <* 
+ *>    /+---(locals)-----------+-----------+-+/                                       <* 
+ *>    int         i           =    0;                                                <* 
+ *>    /+---(header)-------------------------+/                                       <* 
+ *>    DEBUG_MAP    yLOG_enter   (__FUNCTION__);                                      <* 
+ *>    /+---(update map)---------------------+/                                       <* 
+ *>    for (i = 0; i < o.navg; ++i) {                                                 <* 
+ *>       a_map->map [i] = i;                                                         <* 
+ *>    }                                                                              <* 
+ *>    /+---(globals)------------------------+/                                       <* 
+ *>    a_map->gmin   = a_map->gamin  = 0;                                             <* 
+ *>    a_map->gmax   = a_map->gamax  = o.navg - 1;                                    <* 
+ *>    a_map->uavail = o.navg;                                                        <* 
+ *>    /+---(screen)-------------------------+/                                       <* 
+ *>    a_map->umin   = a_map->ubeg   = 0;                                             <* 
+ *>    a_map->umax   = a_map->uend   = a_map->ulen   = a_map->utend  = o.navg - 1;    <* 
+ *>    /+---(units)--------------------------+/                                       <* 
+ *>    a_map->gbeg   = 0;                                                             <* 
+ *>    a_map->gend   = o.navg - 1;                                                    <* 
+ *>    /+---(update current)-----------------+/                                       <* 
+ *>    if (a_ycur == a_ynew) {                                                        <* 
+ *>       o.cavg       = a_map->gcur;                                                 <* 
+ *>    } else {                                                                       <* 
+ *>       a_map->ucur  = 0;                                                           <* 
+ *>       a_map->gcur  = 0;                                                           <* 
+ *>    }                                                                              <* 
+ *>    /+---(complete)-----------------------+/                                       <* 
+ *>    DEBUG_MAP    yLOG_exit    (__FUNCTION__);                                      <* 
+ *>    return 0;                                                                      <* 
+ *> }                                                                                 <*/
 
 
 

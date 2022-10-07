@@ -1,7 +1,6 @@
 /*============================---(source-start)---============================*/
 
 
-
 /*===[[ BEG_HEADER ]]=========================================================*/
 /*345678901-12345678901-12345678901-12345678901-12345678901-12345678901-12345678901-12345678901-*/
 
@@ -9,25 +8,33 @@
 
 #define     P_FOCUS     "AI (alternate input)"
 #define     P_NICHE     "pe (pen-based)"
-#define     P_PURPOSE   "efficient, versatle, and standard keyboard mini-language"
+#define     P_SUBJECT   "gregg-shorthand language"
+#define     P_PURPOSE   "hyper-efficient, effective pen-based english input"
 
-#define     P_NAMESAKE  "xenophon, greek general of the ten-thousand"
+#define     P_NAMESAKE  "xenophon-strategos (greek general)"
 #define     P_HERITAGE  "xenophon was a ancient greek general, mercenary, philosopher, and historian"
 #define     P_IMAGERY   "brilliant, hardened, and practical military man who found fame as a historian"
-#define     P_PATRONAGE "xenephon invented the earliest known western shorthand system"
+#define     P_REASON    "xenephon invented the earliest known western shorthand system"
+
+#define     P_ONELINE   P_NAMESAKE " " P_SUBJECT
+
+#define     P_BASENAME  ""
+#define     P_FULLPATH  ""
+#define     P_SUFFIX    ""
+#define     P_CONTENT   ""
 
 #define     P_SYSTEM    "gnu/linux   (powerful, ubiquitous, technical, and hackable)"
 #define     P_LANGUAGE  "ansi-c      (wicked, limitless, universal, and everlasting)"
 #define     P_CODESIZE  "moderate    (appoximately 5,000 slocl)"
+#define     P_DEPENDS   "none"
 
 #define     P_AUTHOR    "heatherlyrobert"
 #define     P_CREATED   "2008-07"
-#define     P_DEPENDS   "none"
 
 #define     P_VERMAJOR  "5.--= generalization for broader use"
 #define     P_VERMINOR  "5.3 = update for use as coding example"
-#define     P_VERNUM    "5.3f"
-#define     P_VERTXT    "can product simple results based on reverse input"
+#define     P_VERNUM    "5.4a"
+#define     P_VERTXT    "working with yVIOPENGL/yCOLOR.  not perfect, but working"
 
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -237,25 +244,37 @@
 #include   <unistd.h>             /* POSIX  standard operating system API     */
 #include   <sys/time.h>           /* POSIX  standard time access              */
 
-/*---(X11 standard)----------------------*/
-#include   <X11/X.h>              /* X11    standard overall file             */
-#include   <X11/Xlib.h>           /* X11    standard C API                    */
-
-
-/*---(opengl standard)-------------------*/
-#include   <GL/gl.h>              /* opengl standard primary header           */
-#include   <GL/glx.h>             /* opengl standard X11 integration          */
+/*---(x11/opengl standard)---------------*/
+#include    <X11/X.h>        /* X11     standard overall file                 */
+#include    <X11/Xlib.h>     /* X11     standard C API                        */
+#include    <GL/gl.h>        /* OPENGL  standard primary header               */
+#include    <GL/glx.h>       /* OPENGL  standard X11 integration              */
 
 /*===[[ CUSTOM LIBRARIES ]]===================================================*/
-#include    <yLOG.h>         /* CUSTOM : heatherly program logging            */
-#include    <yURG.h>         /* CUSTOM : heatherly urgent processing          */
+/*---(custom core)-----------------------*/
+#include    <yURG.h>              /* heatherly urgent processing              */
+#include    <yLOG.h>              /* heatherly program logging                */
+#include    <ySTR.h>              /* heatherly string processing              */
+/*---(vi-keys foundation)----------------*/
+#include    <yMODE.h>             /* heatherly vikeys mode tracking           */
+#include    <yKEYS.h>             /* heatherly vikeys key handling            */
+#include    <yFILE.h>             /* heatherly vikeys content file handling   */
+#include    <yVIEW.h>             /* heatherly vikeys view management         */
+/*---(vi-keys major)---------------------*/
+#include    <yMAP.h>              /* heatherly vikeys location management     */
+#include    <yCMD.h>              /* heatherly vikeys command processing      */
+#include    <yMACRO.h>            /* heatherly vikeys macro processing        */
+#include    <ySRC.h>              /* heatherly vikeys source editing          */
+#include    <yMARK.h>             /* heatherly vikeys search and marking      */
+/*---(custom opengl)---------------------*/
+#include    <yVIOPENGL.h>    /* heatherly vikeys curses handler          */
+#include    <yX11.h>         /* CUSTOM  heatherly xlib/glx setup/teardown     */
+#include    <yFONT.h>        /* CUSTOM  heatherly texture-mapped fonts        */
+#include    <yCOLOR.h>       /* CUSTOM  heatherly opengl color handling       */
+#include    <yGLTEX.h>       /* CUSTOM  heatherly texture handling            */
+/*---(custom other)----------------------*/
 #include    <yVAR.h>         /* CUSTOM : heatherly variable testing           */
-#include    <ySTR.h>         /* CUSTOM : heatherly string handling            */
-#include    <yX11.h>         /* CUSTOM : heatherly xlib/glx setup/teardown    */
-#include    <yFONT.h>        /* CUSTOM : heatherly texture-mapped fonts       */
-#include    <yGLTEX.h>       /* CUSTOM : heatherly texture handling           */
-#include    <yVIKEYS.h>      /* CUSTOM : heatherly vi_keys standard           */
-#include    <yCOLOR.h>       /* CUSTOM : heatherly color handling             */
+#include    <yPARSE.h>       /* heatherly file reading and writing      */
 
 
 
@@ -798,22 +817,32 @@ extern int     g_iword;
 /*===----                           prototypes                         ----===*/
 /*============================--------------------============================*/
 
-/*---(main)-----------------*/
-int        main              (int argc, char *argv[]);
 
-/*---(prog)-----------------*/
-char*      PROG_version         (void);
-char       PROG_init            ();
-char       PROG_args            (int argc, char *argv[]);
-char       PROG_begin           (void);
-char       PROG_final           (void);
-char       PROG_event           (void);
-char       PROG_finish          (void);
-char       PROG_end             (void);
+/*===[[ arachne_prog.c ]]=====================================================*/
+/*345678901-12345678901-12345678901-12345678901-12345678901-12345678901-123456*/
+/*---(support)---------------------------*/
+char*       PROG_version            (void);
+/*---(startup)---------------------------*/
+char        PROG__init              (int argc, char *argv[]);
+char        PROG__args              (int argc, char *argv[]);
+char        PROG__begin             (void);
+char        PROG_startup            (int argc, char *argv[]);
+/*---(execution)-------------------------*/
+char        PROG_dawn               (void);
+char        PROG_dusk               (void);
+/*---(shutdown)--------------------------*/
+char        PROG__end               (void);
+char        PROG_shutdown           (void);
+
+
+
+/*===[[ arachne_test.c ]]=====================================================*/
 /*345678901-12345678901-12345678901-12345678901-12345678901-12345678901-123456*/
 char        PROG__unit_quiet        (void);
 char        PROG__unit_loud         (void);
 char        PROG__unit_end          (void);
+
+
 
 char       DRAW_init            (void);
 /*> char       DRAW__resize         (cchar a_format, cchar *a_title, cint a_wide, cint a_tall);   <*/
@@ -892,6 +921,18 @@ char        POINT_seq_head          (char a_type, tPOINT *p, int c, int a_xpad, 
 char        POINT_seq_normal        (char a_type, tPOINT *p, int c, int a_xpad, int a_ypad);
 char        POINT_seq_tail          (char a_type, tPOINT *p, int c, int a_xpad, int a_ypad);
 char        POINT_seq_finish        (char a_type, tPOINT *p, int c, int a_xpad, int a_ypad);
+/*---(raws)-----------------*/
+char        POINT_raw_add           (char a_type, int x, int y);
+/*---(base)-----------------*/
+char        POINT_raw2bas           (short a_raw, short a_bas);
+short       POINT_bas_find          (char a_style, short a_raw);
+char        POINT_bas_add           (short a_raw);
+char        POINT_bas_del           (short a_raw);
+/*---(keys)-----------------*/
+char        POINT_bas2key           (short a_bas, short a_key);
+short       POINT_key_find          (char a_style, short a_bas);
+char        POINT_key_add           (short a_bas);
+char        POINT_key_del           (short a_bas);
 /*---(statistics)-----------*/
 char        POINT_pos               (tPOINT *a_curr);
 char        POINT_calc              (char a_type, tPOINT* a_curr, char a_span);
@@ -924,6 +965,7 @@ char*       RAW__unit               (char *a_question, int a_num);
 
 /*---(program)--------------*/
 char        BASE_config             (float a_append, float a_adjust, float a_sharp);
+char        BASE_init               (void);
 /*---(support)--------------*/
 float       BASE__dist              (short a, short b);
 /*---(moving)---------------*/
@@ -931,7 +973,6 @@ char        BASE__push_up           (short x_old);
 char        BASE_bas2avg            (short a_bas);
 /*---(new)------------------*/
 char        BASE__force_point       (uchar a_type, short x, short y);
-char        BASE__raw2bas           (short a_raw, short a_bas);
 short       BASE_append             (short a_raw, uchar a_force);
 char        BASE_insert             (short a_raw);
 char        BASE_adjust             (short a_bas, short a_raw);
@@ -947,11 +988,12 @@ char        BASE_mark_sharps        (void);
 /*---(driver)---------------*/
 char        BASE_filter             (void);
 /*---(mapping)--------------*/
-char        BASE_map_update         (tMAPPED *a_map, int a_ycur, int a_ynew);
+/*> char        BASE_map_update         (tMAPPED *a_map, int a_ycur, int a_ynew);     <*/
 
 
 
 
+char        KEY_init                (void);
 char        KEY__force_point        (uchar a_type, short x, short y, uchar a_mark, uchar a_sharp);
 char        KEY_add                 (short a_bas, uchar a_fake, uchar a_type, uchar *a_use);
 
@@ -1087,6 +1129,22 @@ char        STDIN_handler           (void);
 
 
 char        YVIKEYS_map_update      (char a_req);
+
+
+/*===[[ arachne_ymap.c ]]=====================================================*/
+/*345678901-12345678901-12345678901-12345678901-12345678901-12345678901-123456*/
+/*---(label)----------------*/
+char        api_ymap_locator        (char a_strict, char *a_label, ushort *u, ushort *x, ushort *y, ushort *z);
+char        api_ymap_addressor      (char a_strict, char *a_label, ushort u, ushort x, ushort y, ushort z);
+/*---(load)-----------------*/
+char        api_ymap_sizer          (char a_axis, ushort *n, ushort *a, ushort *b, ushort *c, ushort *e, ushort *m, ushort *x);
+char        api_ymap_entry          (char a_axis, ushort a_pos, short *r_ref, uchar *r_wide, uchar *r_used);
+/*---(update)---------------*/
+char        api_ymap_placer         (char a_axis, ushort b, ushort c, ushort e);
+char        api_ymap_done           (void);
+/*---(done)-----------------*/
+
+
 
 #endif
 /*============================----(source-end)----============================*/

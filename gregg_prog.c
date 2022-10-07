@@ -32,18 +32,101 @@ PROG_version         (void)
    return verstring;
 }
 
-char       /*----: one-time initialization of program environment ------------*/
-PROG_init          (void)
+
+
+/*====================------------------------------------====================*/
+/*===----                       pre-initialization                     ----===*/
+/*====================------------------------------------====================*/
+static void      o___PREINIT_________________o (void) {;}
+
+char       /*----: very first setup ------------------s-----------------------*/
+PROG__header            (void)
 {
-   /*---(header)-------------------------*/
-   DEBUG_TOPS   yLOG_enter    (__FUNCTION__);
-   /*---(log header)---------------------*/
-   DEBUG_TOPS   yLOG_info     ("purpose" , "hyper-efficient, effective pen-based english input");
-   DEBUG_TOPS   yLOG_info     ("gregg"   , PROG_version    ());
-   DEBUG_TOPS   yLOG_info     ("yLOG"    , yLOGS_version   ());
-   DEBUG_TOPS   yLOG_info     ("yURG"    , yURG_version    ());
-   DEBUG_TOPS   yLOG_info     ("ySTR"    , ySTR_version    ());
-   DEBUG_TOPS   yLOG_info     ("yGLTEX"  , yGLTEX_version  ());
+   /*---(header)----------------------*/
+   DEBUG_PROG   yLOG_enter (__FUNCTION__);
+   /*---(versioning)------------------*/
+   DEBUG_PROG   yLOG_info     ("arachne" , PROG_version      ());
+   DEBUG_PROG   yLOG_info     ("purpose" , P_PURPOSE);
+   DEBUG_PROG   yLOG_info     ("namesake", P_NAMESAKE);
+   DEBUG_PROG   yLOG_info     ("heritage", P_HERITAGE);
+   DEBUG_PROG   yLOG_info     ("imagery" , P_IMAGERY);
+   DEBUG_PROG   yLOG_note     ("custom core");
+   DEBUG_PROG   yLOG_info     ("yURG"    , yURG_version      ());
+   DEBUG_PROG   yLOG_info     ("yLOG"    , yLOGS_version     ());
+   DEBUG_PROG   yLOG_info     ("ySTR"    , ySTR_version      ());
+   DEBUG_PROG   yLOG_note     ("yvikeys foundation");
+   DEBUG_PROG   yLOG_info     ("yMODE"   , yMODE_version     ());
+   DEBUG_PROG   yLOG_info     ("yKEYS"   , yKEYS_version     ());
+   DEBUG_PROG   yLOG_info     ("yFILE"   , yFILE_version     ());
+   DEBUG_PROG   yLOG_info     ("yVIEW"   , yVIEW_version     ());
+   DEBUG_PROG   yLOG_note     ("yvikeys major");
+   DEBUG_PROG   yLOG_info     ("yMAP"    , yMAP_version      ());
+   DEBUG_PROG   yLOG_info     ("yCMD"    , yCMD_version      ());
+   DEBUG_PROG   yLOG_info     ("yMACRO"  , yMACRO_version    ());
+   DEBUG_PROG   yLOG_info     ("ySRC"    , ySRC_version      ());
+   DEBUG_PROG   yLOG_info     ("yMARK"   , yMARK_version     ());
+   DEBUG_PROG   yLOG_note     ("custom opengl");
+   DEBUG_PROG   yLOG_info     ("yVIOP"   , yVIOPENGL_version ());
+   DEBUG_PROG   yLOG_info     ("yX11"    , yX11_version      ());
+   DEBUG_PROG   yLOG_info     ("yFONT"   , yFONT_version     ());
+   DEBUG_PROG   yLOG_info     ("yCOLOR"  , yCOLOR_version    ());
+   DEBUG_PROG   yLOG_info     ("yGLTEX"  , yGLTEX_version    ());
+   DEBUG_PROG   yLOG_note     ("custom other");
+   DEBUG_PROG   yLOG_info     ("yVAR"    , yVAR_version      ());
+   DEBUG_PROG   yLOG_info     ("yPARSE"  , yPARSE_version    ());
+   /*---(complete)-----------------------*/
+   DEBUG_PROG   yLOG_exit  (__FUNCTION__);
+   return 0;
+}
+
+char
+PROG_urgents            (int a_argc, char *a_argv [])
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
+   /*---(set mute)-----------------------*/
+   yURG_all_mute ();
+   /*---(start logger)-------------------*/
+   rc = yURG_logger  (a_argc, a_argv);
+   DEBUG_PROG   yLOG_value    ("logger"    , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_PROG   yLOG_exitr    (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(process urgents)----------------*/
+   rc = yURG_urgs    (a_argc, a_argv);
+   DEBUG_PROG   yLOG_value    ("logger"    , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_PROG   yLOG_exitr    (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(process urgents)----------------*/
+   rc = PROG__header ();
+   DEBUG_PROG   yLOG_value    ("header"    , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_PROG   yLOG_exitr    (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(complete)-----------------------*/
+   return rc;
+}
+
+
+
+/*====================------------------------------------====================*/
+/*===----                        program startup                       ----===*/
+/*====================------------------------------------====================*/
+static void      o___STARTUP_________________o (void) {;}
+
+char       /*----: very first setup ------------------s-----------------------*/
+PROG__init              (int a_argc, char *a_argv[])
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
+   /*---(header)----------------------*/
+   DEBUG_PROG   yLOG_enter (__FUNCTION__);
    /*---(fonts)-----------------------*/
    strcpy (win.face_pretty, "comfortaa");
    strcpy (win.face_fixed, "hack");
@@ -69,24 +152,79 @@ PROG_init          (void)
    /*---(other)-----------------------*/
    strlcpy (my.words, "", LEN_RECD);
    strlcpy (my.guide, "", LEN_RECD);
-   /*---(setup vikeys)----------------*/
-   yVIKEYS_init  (MODE_MAP);
-   /*---(complete)--------------------*/
-   DEBUG_TOPS   yLOG_exit     (__FUNCTION__);
+   /*---(yvicurses config)---------------*/
+   rc = yVIOPENGL_init   ("gregg shorthand interpreter", P_VERNUM, MODE_MAP, 500, 350);
+   DEBUG_PROG   yLOG_value    ("yVIOPENGL" , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_PROG   yLOG_exitr    (__FUNCTION__, rce);
+      return rce;
+   }
+   /*> strlcpy (my.t_text     , "arachne, spider robot visualization and simulation"       , LEN_STR  );   <*/
+   /*---(library config)-----------------*/
+   rc = yMAP_config       (YMAP_OFFICE, api_ymap_locator, api_ymap_addressor, api_ymap_sizer, api_ymap_entry, api_ymap_placer, api_ymap_done);
+   DEBUG_PROG   yLOG_value    ("yMAP"      , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_PROG   yLOG_exitr    (__FUNCTION__, rce);
+      return rce;
+   }
+   /*> rc = FILE_init      ();                                                        <* 
+    *> DEBUG_PROG   yLOG_value    ("yFILE"     , rc);                                 <* 
+    *> --rce;  if (rc < 0) {                                                          <* 
+    *>    DEBUG_PROG   yLOG_exitr    (__FUNCTION__, rce);                             <* 
+    *>    return rce;                                                                 <* 
+    *> }                                                                              <*/
+   /*---(setup yVIKEYS)------------------*/
+   DEBUG_PROG   yLOG_note  ("prepare modes");
+   /*> yVIKEYS_init   (MODE_GOD);                                                     <*/
+   /*> yGOLEM_init    ();                                                             <*/
+   /*> yVIKEYS_mode_init    ();                                                       <* 
+    *> yVIKEYS_mode_enter   (MODE_GOD);                                               <*/
+   /*---(complete)-----------------------*/
+   DEBUG_PROG   yLOG_exit  (__FUNCTION__);
    return 0;
 }
 
-char       /*----: process command line arguments ----------------------------*/
-PROG_args          (int argc, char *argv[])
+char
+PROG__args              (int a_argc, char *a_argv[])
 {
-   char *a = NULL;
-   int   i = 0;
+   /*---(locals)-----------+-----+-----+-*/
+   char        rc          =    0;
+   int         i           =    0;
+   char       *a           = NULL;
+   char       *b           = NULL;
+   int         x_total     =    0;
+   int         x_args      =    0;
+   uchar       x_name      [LEN_FULL]  = "";
+   uchar       t           [LEN_FULL]  = "";
    /*---(header)-------------------------*/
-   DEBUG_TOPS   yLOG_enter    (__FUNCTION__);
-   for (i = 1; i < argc; ++i) {
-      a = argv[i];
-      if (a[0] == '@')  continue;
-      DEBUG_ARGS  yLOG_info    ("cli arg", a);
+   /*> printf ("entering PROG_args\n");                                               <*/
+   DEBUG_ARGS  yLOG_enter   (__FUNCTION__);
+   /*---(process)------------------------*/
+   for (i = 1; i < a_argc; ++i) {
+      /*---(set up args)-----------------*/
+      DEBUG_ARGS  yLOG_value   ("check----" , i);
+      a = a_argv [i];
+      if (i + 1 < a_argc)  b = a_argv [i + 1];
+      else                 b = NULL;
+      DEBUG_ARGS  yLOG_info    ("a"         , a);
+      DEBUG_ARGS  yLOG_info    ("b"         , b);
+      ++x_total;
+      /*---(check vikeys)----------------*/
+      rc = yKEYS_arg_handle (&i, a, b);
+      DEBUG_ARGS  yLOG_value   ("ykeys"     , rc);
+      if (rc == 1) {
+         DEBUG_ARGS  yLOG_note    ("handled by yKEYS_arg_handle");
+         DEBUG_ARGS  yLOG_value   ("bumped i"  , i);
+         continue;
+      }
+      /*---(filter)----------------------*/
+      if (a[0] == '@') {
+         DEBUG_ARGS  yLOG_note    ("skipped urgent");
+         continue;
+      }
+      /*---(local)-----------------------*/
+      DEBUG_ARGS  yLOG_note    ("check for local argument handling");
+      ++x_args;
       if      (strcmp (a, "--rptg-touch"        ) == 0)   my.rptg_touch   = 'y';
       else if (strcmp (a, "--rptg-raw"          ) == 0)   my.rptg_raw     = 'y';
       else if (strcmp (a, "--rptg-base"         ) == 0)   my.rptg_base    = 'y';
@@ -102,200 +240,170 @@ PROG_args          (int argc, char *argv[])
       else if (strcmp (a, "--exact"             ) == 0)   my.run_mode     = RUN_EXACT;
       else if (strcmp (a, "--reverse"           ) == 0)   my.run_mode     = RUN_REVERSE;
       else if (strcmp (a, "--words"             ) == 0)   my.run_mode     = RUN_WORDS;
-      /*> else if (strncmp(a, "@x", 5) == 0)  debug.top = debug.prep        = 'y';    <* 
-       *> else if (strncmp(a, "@i", 5) == 0)  debug.top = debug.input       = 'y';    <* 
-       *> else if (strncmp(a, "@o", 5) == 0)  debug.top = debug.output      = 'y';    <* 
-       *> else if (strncmp(a, "@p", 5) == 0)  debug.top = debug.proc        = 'y';    <* 
-       *> else if (strncmp(a, "@e", 5) == 0)  debug.top = debug.event       = 'y';    <* 
-       *> else if (strncmp(a, "@g", 5) == 0)  debug.top = debug.graph       = 'y';    <* 
-       *> else if (strncmp(a, "@@raw"         , 20) == 0) debug.raw         = 'y';    <* 
-       *> else if (strncmp(a, "@@bas"         , 20) == 0) debug.bas         = 'y';    <* 
-       *> else if (strncmp(a, "@@avg"         , 20) == 0) debug.averages    = 'y';    <* 
-       *> else if (strncmp(a, "@@key"         , 20) == 0) debug.key         = 'y';    <* 
-       *> else if (strncmp(a, "@@sharp"       , 20) == 0) debug.sharps      = 'y';    <* 
-       *> else if (strncmp(a, "@@circle"      , 20) == 0) debug.circles     = 'y';    <* 
-       *> else if (strncmp(a, "@@line"        , 20) == 0) debug.lines       = 'y';    <* 
-       *> else if (strncmp(a, "@@match"       , 20) == 0) debug.matches     = 'y';    <* 
-       *> else if (strncmp(a, "@@shape"       , 20) == 0) debug.shapes      = 'y';    <* 
-       *> else if (strncmp(a, "@@curve"       , 20) == 0) debug.curves      = 'y';    <* 
-       *> else if (strncmp(a, "@@writing"     , 20) == 0) debug.writing     = 'y';    <* 
-       *> else if (strncmp(a, "@@dict"        , 20) == 0) debug.dict        = 'y';    <* 
-       *> else if (strncmp(a, "@@dictg"       , 20) == 0) debug.dictg       = 'y';    <* 
-       *> else if (strncmp(a, "@@dicte"       , 20) == 0) debug.dicte       = 'y';    <* 
-       *> else if (strncmp(a, "@@sum"         , 20) == 0) debug.summ        = 'y';    <* 
-       *> else if (strncmp(a, "@@lock"        , 20) == 0) debug.lock        = 'y';    <* 
-       *> else if (a[0] >= '0' && a[0] <= '9')            out_start  = atoi(a);       <*/
-      /*> else {                                                                      <* 
-       *>    printf("\noption [%s] not understood\n", a);                             <* 
-       *> }                                                                           <*/
+   }
+   DEBUG_ARGS  yLOG_value  ("entries"   , x_total);
+   DEBUG_ARGS  yLOG_value  ("arguments" , x_args);
+   if (x_args == 0) {
+      DEBUG_ARGS  yLOG_note   ("no arguments identified");
    }
    /*---(complete)-----------------------*/
-   DEBUG_TOPS   yLOG_exit     (__FUNCTION__);
+   DEBUG_ARGS  yLOG_exit  (__FUNCTION__);
    return 0;
 }
 
-/* PURPOSE : drive the program startup activities                             */
-char
-PROG_begin(void)
+
+char       /*----: drive program setup activities ----------------------------*/
+PROG__begin             (void)
 {
-   /*---(header)-------------------------*/
-   DEBUG_TOPS   yLOG_enter    (__FUNCTION__);
+   char        rc          =    0;
+   DEBUG_PROG   yLOG_enter   (__FUNCTION__);
+   DEBUG_PROG   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+PROG_startup            (int a_argc, char *a_argv [])
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
+   /*---(header)----------------------*/
+   yURG_stage_check (YURG_BEG);
+   DEBUG_PROG  yLOG_enter   (__FUNCTION__);
+   /*---(initialize)---------------------*/
+   rc = PROG__init   (a_argc, a_argv);
+   DEBUG_PROG   yLOG_value    ("init"      , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_PROG   yLOG_exitr    (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(arguments)----------------------*/
+   rc = PROG__args   (a_argc, a_argv);
+   DEBUG_PROG   yLOG_value    ("args"      , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_PROG   yLOG_exitr    (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(begin)--------------------------*/
+   rc = PROG__begin  ();
+   DEBUG_PROG   yLOG_value    ("begin"     , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_PROG   yLOG_exitr    (__FUNCTION__, rce);
+      return rce;
+   }
    /*---(complete)-----------------------*/
-   DEBUG_TOPS   yLOG_exit     (__FUNCTION__);
-   return 0;
+   DEBUG_PROG  yLOG_exit  (__FUNCTION__);
+   yURG_stage_check (YURG_MID);
+   return rc;
 }
 
-/* PURPOSE : drive the program startup activities                             */
-char
-PROG_final (void)
+
+
+/*====================------------------------------------====================*/
+/*===----                        program execution                     ----===*/
+/*====================------------------------------------====================*/
+static void      o___EXECUTION_______________o (void) {;}
+
+char       /*----: process the xwindows event stream -------------------------*/
+PROG_dawn          (void)
 {
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
    /*---(header)-------------------------*/
-   DEBUG_TOPS   yLOG_enter    (__FUNCTION__);
+   DEBUG_PROG   yLOG_enter   (__FUNCTION__);
+   /*---(create window)------------------*/
+   rc = yVIOPENGL_dawn ();
+   DEBUG_PROG   yLOG_value   ("dawn"      , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
    WORDS_table_ae ();
    if (my.dict   == 'y')  WORDS_import ();
    DRAW_init  ();
    TOUCH_init ();
-   yVIKEYS_view_option (YVIKEYS_BUFFER, "file" , OUT_status, "current file name and stats");
-   yVIKEYS_cmds_direct (":buffer file");
-   yVIKEYS_cmds_direct (":keys hide");
-   yVIKEYS_cmds_add    ('e', "dump"        , ""    , "Cs"   , POINT_clipboard      , "save point list to the clipboard");
-   yVIKEYS_cmds_add    ('e', "clip"        , ""    , "Cs"   , POINT_clipboard      , "save point list to the clipboard");
-   yVIKEYS_cmds_add    ('e', "gyges"       , ""    , "Cs"   , POINT_clipboard      , "save point list to the clipboard");
-   yVIKEYS_cmds_add    ('f', "write"       , ""    , ""     , OUT_append           , "save outline to stroke file");
+   /*> yVIKEYS_view_option (YVIKEYS_BUFFER, "file" , OUT_status, "current file name and stats");   <*/
+   /*> yCMDS_direct (":buffer file");                                                 <*/
+   /*> yCMDS_direct (":keys hide");                                                   <*/
+   /*> yVIKEYS_cmds_add    ('e', "dump"        , ""    , "Cs"   , POINT_clipboard      , "save point list to the clipboard");   <*/
+   /*> yVIKEYS_cmds_add    ('e', "clip"        , ""    , "Cs"   , POINT_clipboard      , "save point list to the clipboard");   <*/
+   /*> yVIKEYS_cmds_add    ('e', "gyges"       , ""    , "Cs"   , POINT_clipboard      , "save point list to the clipboard");   <*/
+   /*> yVIKEYS_cmds_add    ('f', "write"       , ""    , ""     , OUT_append           , "save outline to stroke file");   <*/
    USER_init     ();
    /*---(final program)------------------*/
    OUT_init      ();
    /*> FILE_rename   ("");                                                            <*/
    if (out_start > 0) o.curr = out_start;
    /*---(key mapping)--------------------*/
-   yVIKEYS_map_config  (YVIKEYS_RIGHT, YVIKEYS_map_update, MAP_locator, MAP_addresser);
+   /*> yVIKEYS_map_config  (YVIKEYS_RIGHT, YVIKEYS_map_update, MAP_locator, MAP_addresser);   <*/
    REVERSE_report ();
-   yVIKEYS_cmds_direct (":overlay sample");
+   /*> yVIKEYS_cmds_direct (":overlay sample");                                       <*/
+   DEBUG_PROG   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+PROG_dusk          (void)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
+   /*---(header)-------------------------*/
+   DEBUG_PROG  yLOG_enter (__FUNCTION__);
+   /*---(destroy window)-----------------*/
+   rc = yVIOPENGL_dusk ();
+   DEBUG_PROG   yLOG_value   ("dusk"      , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
    /*---(complete)-----------------------*/
-   DEBUG_TOPS   yLOG_exit     (__FUNCTION__);
+   DEBUG_PROG  yLOG_exit  (__FUNCTION__);
    return 0;
 }
 
 
 
+/*====================------------------------------------====================*/
+/*===----                        program shutdown                      ----===*/
+/*====================------------------------------------====================*/
+static void      o___SHUTDOWN________________o (void) {;}
 
-/*============================--------------------============================*/
-/*===----                          event loop                          ----===*/
-/*============================--------------------============================*/
-void o___EVENT__________________o (void) {;}
-
-/*> char                                                                                        <* 
- *> PROG_event()                                                                                <* 
- *> {                                                                                           <* 
- *>    /+---(local variables)------------------+/                                               <* 
- *>    char  input_type = '-';                                                                  <* 
- *>    /+> out_read  (o.curr);                                                            <+/   <* 
- *>    int    i = o.curr;                                                                       <* 
- *>    int       j         = 0;                                                                 <* 
- *>    tTSPEC      x_dur;                                                                       <* 
- *>    /+---(for keypresses)-------------------+/                                               <* 
- *>    XKeyEvent *key_event;                                                                    <* 
- *>    char       the_key[5];                                                                   <* 
- *>    char       x_ch     = ' ';                                                               <* 
- *>    uchar      x_key    = ' ';                                                               <* 
- *>    int        the_bytes;                                                                    <* 
- *>    char       rc;                                                                           <* 
- *>    int        x_loop  = 0;                                                                  <* 
- *>    /+---(for timer)------------------------+/                                               <* 
- *>    /+> struct     timespec timer, remain;                                             <+/   <* 
- *>    x_dur.tv_sec    = 0;                                                                     <* 
- *>    x_dur.tv_nsec   = 0.5 * 1000000;                                                         <* 
- *>    /+---(header)-------------------------+/                                                 <* 
- *>    DEBUG_TOPS   yLOG_enter    (__FUNCTION__);                                               <* 
- *>    while (1) {                                                                              <* 
- *>       x_key = 0;                                                                            <* 
- *>       if (XPending(DISP)) {                                                                 <* 
- *>          XNextEvent(DISP, &EVNT);                                                           <* 
- *>          ++j;                                                                               <* 
- *>          switch(EVNT.type) {                                                                <* 
- *>          case KeyPress:                                                                     <* 
- *>             DEBUG_LOOP  printf("event (%5d) keypress\n", j);                                <* 
- *>             i = o.curr;                                                                     <* 
- *>             /+---(get the key)---------------------+/                                       <* 
- *>             key_event  = (XKeyEvent *) &EVNT;                                               <* 
- *>             the_bytes = XLookupString((XKeyEvent *) &EVNT, the_key, 5, NULL, NULL);         <* 
- *>             if (the_bytes < 1) break;                                                       <* 
- *>             x_key = the_key [0];                                                            <* 
- *>             break;                                                                          <* 
- *>          }                                                                                  <* 
- *>       }                                                                                     <* 
- *>       x_key = yVIKEYS_main_input  (RUN_USER, x_key);                                        <* 
- *>       yVIKEYS_main_handle (x_key);                                                          <* 
- *>       if (yVIKEYS_quit ())  break;                                                          <* 
- *>       ++x_loop;                                                                             <* 
- *>       TOUCH_read ();                                                                        <* 
- *>       if ((x_loop % 20) == 0)  yVIKEYS_view_all (0.0);                                      <* 
- *>       /+---(sleeping)--------------------+/                                                 <* 
- *>       nanosleep    (&x_dur, NULL);                                                          <* 
- *>    }                                                                                        <* 
- *>    /+---(complete)------------------------------+/                                          <* 
- *>    DEBUG_TOPS   yLOG_exit     (__FUNCTION__);                                               <* 
- *>    return 1;                                                                                <* 
- *> }                                                                                           <*/
-
-char
-PROG_finish          (void)
+char       /*----: drive the program closure activities ----------------------*/
+PROG__end               (void)
 {
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
+   /*---(shutdown)--------------------*/
+   DEBUG_PROG   yLOG_enter   (__FUNCTION__);
+   /*---(destroy window)-----------------*/
+   rc = yVIOPENGL_wrap ();
+   DEBUG_PROG   yLOG_value   ("wrap"      , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
    TOUCH_wrap   ();
    DRAW_wrap    ();
-   yVIKEYS_wrap ();
+   /*> yXINIT_end  ();                                                                <*/
+   /*---(complete)-----------------------*/
+   DEBUG_PROG   yLOG_exit    (__FUNCTION__);
    return 0;
 }
 
-char
-PROG_end             (void)
+char             /* [------] drive the program closure activities ------------*/
+PROG_shutdown           (void)
 {
-   yLOGS_end ();
-   return 0;
-}
-
-
-/*============================--------------------============================*/
-/*===----                         unit testing                         ----===*/
-/*============================--------------------============================*/
-void o___UNITTEST_______________o (void) {;}
-
-char         /*-> set up programgents/debugging ------[ light  [uz.320.011.05]*/ /*-[00.0000.00#.#]-*/ /*-[--.---.---.--]-*/
-PROG__unit_quiet    (void)
-{
-   char       *x_args [1]  = { "gregg" };
-   yURG_logger (1, x_args);
-   PROG_init   ();
-   yURG_urgs   (1, x_args);
-   PROG_args   (1, x_args);
-   PROG_begin  ();
-   my.dict = '-';
-   PROG_final  ();
-   return 0;
-}
-
-char         /*-> set up programgents/debugging ------[ light  [uz.320.011.05]*/ /*-[00.0000.00#.!]-*/ /*-[--.---.---.--]-*/
-PROG__unit_loud     (void)
-{
-   char       *x_args [2]  = { "gregg_unit", "@@kitchen"    };
-   yURG_logger (2, x_args);
-   PROG_init   ();
-   yURG_urgs   (2, x_args);
-   yURG_name  ("raw"          , YURG_ON);
-   yURG_name  ("avg"          , YURG_ON);
-   yURG_name  ("calc"         , YURG_ON);
-   yURG_name  ("match"        , YURG_ON);
-   PROG_args   (2, x_args);
-   PROG_begin  ();
-   my.dict = '-';
-   PROG_final  ();
-   return 0;
-}
-
-char         /*-> set up program urgents/debugging ---[ light  [uz.210.001.01]*/ /*-[00.0000.00#.!]-*/ /*-[--.---.---.--]-*/
-PROG__unit_end      (void)
-{
-   PROG_end       ();
+   /*---(stage-check)--------------------*/
+   yURG_stage_check (YURG_END);
+   /*---(header)-------------------------*/
+   DEBUG_PROG   yLOG_enter    (__FUNCTION__);
+   PROG__end ();
+   /*---(complete)-----------------------*/
+   DEBUG_PROG   yLOG_exit     (__FUNCTION__);
+   DEBUG_PROG   yLOGS_end    ();
    return 0;
 }
 

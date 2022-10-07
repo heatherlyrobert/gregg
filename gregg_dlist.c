@@ -180,7 +180,7 @@ draw_ellipse (int a_who, char a_dotted)
    /*---(draw dotted outline)-------------------*/
    glLineWidth (2.0);
    glPointSize (2.0);
-   yVIKEYS_view_color (YCOLOR_BAS_MIN, 1.00);
+   yCOLOR_opengl (YCOLOR_BAS, YCOLOR_MIN, 1.00);
    if (a_dotted == 'y') {
       glBegin(GL_POINTS);
       for (i = 0; i <= 360; i += a_st) {
@@ -290,10 +290,10 @@ draw_arc (float a_beg, float a_end, int a_color, int a_z)
    /*---(defense)------------------------*/
    if (a_beg == a_end) return -1;
    /*---(color)--------------------------*/
-   if      (a_color ==  1) yVIKEYS_view_color (YCOLOR_NEG_MED, 0.65);
-   else if (a_color ==  2) yVIKEYS_view_color (YCOLOR_NEG_DRK, 0.65);
-   else if (a_color == -1) yVIKEYS_view_color (YCOLOR_BAS_MUT, 0.65);
-   else                    yVIKEYS_view_color (YCOLOR_NEG_LIG, 0.65);
+   if      (a_color ==  1) yCOLOR_opengl (YCOLOR_NEG, YCOLOR_MED, 0.65);
+   else if (a_color ==  2) yCOLOR_opengl (YCOLOR_NEG, YCOLOR_DRK, 0.65);
+   else if (a_color == -1) yCOLOR_opengl (YCOLOR_BAS, YCOLOR_MUT, 0.65);
+   else                    yCOLOR_opengl (YCOLOR_NEG, YCOLOR_LIG, 0.65);
    /*---(fill)---------------------------*/
    glBegin(GL_POLYGON); {
       glVertex3f(   0,   0,   a_z);
@@ -492,7 +492,7 @@ BACK__degticks     (void)
    float r;
    float x, y, z;
    /*---(prepare)------------------------*/
-   yVIKEYS_view_color (YCOLOR_BAS_MAX, 0.65);
+   yCOLOR_opengl (YCOLOR_BAS, YCOLOR_MAX, 0.65);
    glLineWidth(2.0);
    z   = 2;
    r   = SIZE_LRG_AVG * 1.75;
@@ -559,7 +559,7 @@ BACK__rangefan     (void)
          if      (g_ranges [i].len == 2)                 radius = r + 10;
          else if (strncmp(g_ranges [i].nam, "", 5) == 0) radius = r - 20;
          else                                         radius = r + 30;
-         yVIKEYS_view_color (YCOLOR_BAS_MOR, 0.25);
+         yCOLOR_opengl (YCOLOR_BAS, YCOLOR_MOR, 0.25);
          rad = (g_ranges [i].tar) * DEG2RAD;
          x =  radius * cos(rad);
          y =  radius * sin(rad);
@@ -571,7 +571,7 @@ BACK__rangefan     (void)
       }
       /*---(target line)-------------------*/
       if (g_ranges [i].num <= 5) {
-         yVIKEYS_view_color (YCOLOR_BAS_MOR, 0.65);
+         yCOLOR_opengl (YCOLOR_BAS, YCOLOR_MOR, 0.65);
          glLineWidth(2.0);
          z  =    1.00;
          glBegin(GL_LINES); {
@@ -599,7 +599,7 @@ DLIST__ring_center   (float a_size, float a_thick)
    float       y           =  0.0;          /* y position                     */
    /*---(draw)---------------------------*/
    glLineWidth   (a_thick);
-   yVIKEYS_view_color (YCOLOR_BAS_MED, 0.50);
+   yCOLOR_opengl (YCOLOR_BAS, YCOLOR_MED, 0.50);
    glBegin  (GL_POLYGON); {
       for (d = 0; d <= 360; d += 1) {
          r   = d * DEG2RAD;
@@ -622,7 +622,7 @@ DLIST__ring_avg      (float a_size, float a_thick)
    float       y           =  0.0;          /* y position                     */
    /*---(draw)---------------------------*/
    glLineWidth   (a_thick);
-   yVIKEYS_view_color (YCOLOR_BAS_MAX, 0.50);
+   yCOLOR_opengl (YCOLOR_BAS, YCOLOR_MAX, 0.50);
    glBegin  (GL_LINE_STRIP); {
       for (d = 0; d <= 360; d += 1) {
          r   = d * DEG2RAD;
@@ -647,7 +647,7 @@ DLIST__ring_minmax   (float a_size, float a_thick)
    glLineWidth   (a_thick);
    glEnable      (GL_LINE_STIPPLE);
    glLineStipple (1, 0x3333);
-   yVIKEYS_view_color (YCOLOR_BAS_MAX, 0.50);
+   yCOLOR_opengl (YCOLOR_BAS, YCOLOR_MAX, 0.50);
    glBegin  (GL_LINE_STRIP); {
       for (d = -140; d <=  75; d +=  1) {
          r   = d * DEG2RAD;
@@ -692,12 +692,12 @@ BACK__guidelines   (void)
 {
    /*---(locals)-------------------------*/
    float     z;                        /* cartesian coordinates               */
-   int       x_max;
+   short     x_max;
    /*---(guides)----------------------------*/
-   yVIKEYS_view_bounds (YVIKEYS_MAIN, NULL, &x_max, NULL, NULL, NULL, NULL);
+   yVIEW_bounds (YVIEW_MAIN, NULL, NULL, NULL, &x_max, NULL, NULL, NULL, NULL);
    glLineWidth(0.8);
    z =  -10.0;
-   yVIKEYS_view_color (YCOLOR_BAS_MAX, 0.65);
+   yCOLOR_opengl (YCOLOR_BAS, YCOLOR_MAX, 0.65);
    /*---(90's)-----*/
    glBegin(GL_LINES); {
       glVertex3f ( x_max,  0.0  , z);
@@ -747,6 +747,52 @@ BACK__guidelines   (void)
    return 0;
 }
 
+PRIV char
+BACK__edging       (void)
+{
+   /*---(locals)-------------------------*/
+   float     z;                        /* cartesian coordinates               */
+   short     x_min, x_max, y_min, y_max;
+   /*---(guides)----------------------------*/
+   yVIEW_bounds (YVIEW_MAIN, NULL, NULL, &x_min, &x_max, NULL, &y_min, &y_max, NULL);
+   glLineWidth(0.8);
+   z =  100.0;
+   yCOLOR_opengl (YCOLOR_SPE, YCOLOR_BLK, 1.00);
+   x_min -= 125;
+   x_max -= 125;
+   y_min -= 225;
+   y_max -= 225;
+   /*---(left)-----*/
+   glBegin(GL_POLYGON); {
+      glVertex3f ( x_min      , y_min      , z);
+      glVertex3f ( x_min + 2.0, y_min      , z);
+      glVertex3f ( x_min + 2.0, y_max      , z);
+      glVertex3f ( x_min      , y_max      , z);
+   } glEnd();
+   /*---(right)----*/
+   glBegin(GL_POLYGON); {
+      glVertex3f ( x_max      , y_min      , z);
+      glVertex3f ( x_max - 2.0, y_min      , z);
+      glVertex3f ( x_max - 2.0, y_max      , z);
+      glVertex3f ( x_max      , y_max      , z);
+   } glEnd();
+   /*---(top)------*/
+   glBegin(GL_POLYGON); {
+      glVertex3f ( x_min      , y_max      , z);
+      glVertex3f ( x_max      , y_max      , z);
+      glVertex3f ( x_max      , y_max - 2.0, z);
+      glVertex3f ( x_min      , y_max - 2.0, z);
+   } glEnd();
+   /*---(bottom)---*/
+   glBegin(GL_POLYGON); {
+      glVertex3f ( x_min      , y_min      , z);
+      glVertex3f ( x_max      , y_min      , z);
+      glVertex3f ( x_max      , y_min + 2.0, z);
+      glVertex3f ( x_min      , y_min + 2.0, z);
+   } glEnd();
+   return 0;
+}
+
 PRIV char     /*----: create display list for entry background ---------------*/
 DLIST_back         (void)
 {
@@ -767,6 +813,7 @@ DLIST_back         (void)
       BACK__rangefan   ();
       BACK__rangerings ();
       BACK__guidelines ();
+      BACK__edging     ();
    } glPopMatrix();
    /*---(end)-------------------------------*/
    glEndList();

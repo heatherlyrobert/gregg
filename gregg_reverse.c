@@ -342,7 +342,7 @@ REVERSE_dots_begin  (void)
    /*---(start drawing)------------------*/
    glLineWidth (1.0);
    glPointSize (1.0);
-   yVIKEYS_view_color (YCOLOR_BAS_MIN, 0.50);
+   yCOLOR_opengl (YCOLOR_BAS, YCOLOR_MIN, 0.50);
    glBegin(GL_POINTS);
    /*---(complete)-----------------------*/
    return 0;
@@ -1022,9 +1022,9 @@ REVERSE_page_beg        (void)
    s_xpos =  30.0;
    s_ypos = -50.0;
    /*---(create texture)-----------------*/
-   yVIKEYS_view_color_clear (YCOLOR_BAS_MED);
+   yCOLOR_opengl_clear (YVIEW_MAIN, YCOLOR_MED);
    rc = yGLTEX_new (&s_tex, &s_fbo, &s_depth, 850, 1100);
-   rc = yGLTEX_draw_start   (s_fbo, YGLTEX_TOPLEF, 850, 1100, 1.0);
+   rc = yGLTEX_draw         (s_fbo, YGLTEX_TOPLEF, 850, 1100, 1.0);
    glColor4f (1.00f, 1.00f, 1.00f, 1.0f);
    /*---(complete)-----------------------*/
    DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
@@ -1041,7 +1041,7 @@ REVERSE_page_end        (void)
    /*---(write out image)----------------*/
    rc = yGLTEX_tex2png      ("/tmp/gregg.png", 850, 1100);
    /*---(close texture)------------------*/
-   rc = yGLTEX_draw_end     (s_tex);
+   rc = yGLTEX_done         (s_tex);
    /*---(complete)-----------------------*/
    DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
    return 0;

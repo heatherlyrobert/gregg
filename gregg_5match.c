@@ -806,9 +806,9 @@ MATCH_group        (void)
    }
    DEBUG_MATCH   yLOG_value   ("x_match"   , x_match);
    --rce;  if (x_match < 0) {
-      MATCH_mark (-1);
+      /*> MATCH_mark (-1);                                                            <*/
       DEBUG_MATCH   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
+      return -1;
    }
    /*---(get letter)-------------------------*/
    x_cat   = g_groups [x_match].lcat;
@@ -825,15 +825,15 @@ MATCH_group        (void)
       break;
    }
    --rce;  if (x_match < 0) {
-      MATCH_mark (-2);
+      /*> MATCH_mark (-2);                                                            <*/
       DEBUG_MATCH   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
+      return -2;
    }
    /*---(mark letter)------------------------*/
-   MATCH_mark (x_match);
+   /*> MATCH_mark (x_match);                                                          <*/
    /*---(complete)-----------------------*/
    DEBUG_MATCH   yLOG_exit    (__FUNCTION__);
-   return 0;
+   return x_match;
 }
 
 char          /*----: walk through rules for all normal letters --------------*/
@@ -931,6 +931,7 @@ MATCH_result            (char *a_result)
    short       c           =    0;
    short       i           =    0;
    char        t           [LEN_LABEL];
+   char        s           [LEN_TERSE];
    /*---(header)-------------------------*/
    DEBUG_MATCH   yLOG_enter   (__FUNCTION__);
    /*---(defense)------------------------*/
@@ -949,8 +950,10 @@ MATCH_result            (char *a_result)
       } else if (o.key [i].use [0] == '·') {
          strlcpy (t, "", LEN_TERSE);
       } else  {
-         if (c > 0)  sprintf (t, "·%s", o.key [i].use);
-         else        sprintf (t, "%s" , o.key [i].use);
+         strlcpy (s, o.key [i].use, LEN_TERSE);
+         if (strcmp (s, "z") == 0)  strlcpy (s, "s", LEN_TERSE);
+         if (c > 0)  sprintf (t, "·%s", s);
+         else        sprintf (t, "%s" , s);
          ++c;
       }
       strlcat (a_result, t, LEN_HUND);
@@ -981,10 +984,14 @@ MATCH_driver            (void)
       /*---(cycle)-----------------------*/
       if (opens.opens > x_max)  opens.opens = x_max;
       for (opens.count = opens.opens; opens.count >= 1; --opens.count) {
+         /*---(prepare)--------*/
          MATCH_calc  (opens.beg, opens.count);
          MATCH_flow  (opens.beg, opens.count);
+         /*---(test match)-----*/
          rc = MATCH_group ();
-         if (rc == 0) break;
+         MATCH_mark (rc);
+         if (rc >= 0)  break;
+         /*---(done)-----------*/
       }
       /*---(done)------------------------*/
    }
@@ -1315,6 +1322,11 @@ combo_driver       (int a_beg, int a_count)
    }
    /*---(complete)-----------------------*/
    return 0;
+}
+
+char
+COMBO_driver               (short a_beg, short a_count)
+{
 }
 
 
