@@ -17,10 +17,6 @@ main                    (int a_argc, char *a_argv [])
    rc = PROG_startup (a_argc, a_argv);
    DEBUG_PROG   yLOG_value    ("startup"   , rc);
    if (rc <  0) { PROG_shutdown (); return -2; }
-   /*---(visual setup)-------------------*/
-   rc = PROG_dawn    ();
-   DEBUG_PROG   yLOG_value    ("dawn"      , rc);
-   if (rc <  0) { PROG_shutdown (); return -3; }
    /*---(main-loop)----------------------*/
 
    /*> strlcpy  (t, ""                                      , LEN_HUGE);              <* 
@@ -34,7 +30,13 @@ main                    (int a_argc, char *a_argv [])
 
    switch (my.run_mode) {
    case RUN_NORMAL  :
+      rc = PROG_dawn    ();
+      DEBUG_PROG   yLOG_value    ("dawn"      , rc);
+      if (rc <  0) { PROG_shutdown (); return -3; }
       rc = yVIOPENGL_main ("500us", "10ms", NULL);
+      DEBUG_PROG   yLOG_value    ("main"      , rc);
+      rc = PROG_dusk     ();
+      DEBUG_PROG   yLOG_value    ("dusk"      , rc);
       break;
    case RUN_CONVERT : case RUN_EXACT   : case RUN_REVERSE :
    case RUN_ENGLISH : case RUN_GREGG   :
@@ -45,8 +47,6 @@ main                    (int a_argc, char *a_argv [])
       break;
    }
    /*---(wrap-up)------------------------*/
-   rc = PROG_dusk     ();
-   DEBUG_PROG   yLOG_value    ("dusk"      , rc);
    rc = PROG_shutdown ();
    /*---(complete)-----------------------*/
    return 0;

@@ -1,46 +1,54 @@
 /*============================---(source-start)---============================*/
 
 
-/*===[[ BEG_HEADER ]]=========================================================*/
-/*345678901-12345678901-12345678901-12345678901-12345678901-12345678901-12345678901-12345678901-*/
-
 /*===[[ ONE_LINERS ]]=========================================================*/
-
+/*                      ´·········1·········2·········3·········4·········5·········6·········7*/
+/*--------- 12345678901 ´123456789-123456789-123456789-123456789-123456789-123456789-123456789-*/
+/*········· ··········· ´·····························´········································*/
 #define     P_FOCUS     "AI (alternate input)"
 #define     P_NICHE     "pe (pen-based)"
-#define     P_SUBJECT   "gregg-shorthand language"
+#define     P_SUBJECT   "hyper-efficient shorthand"
 #define     P_PURPOSE   "hyper-efficient, effective pen-based english input"
-
+/*········· ··········· ´·····························´········································*/
 #define     P_NAMESAKE  "xenophon-strategos (greek general)"
+#define     P_PRONOUNCE ""
 #define     P_HERITAGE  "xenophon was a ancient greek general, mercenary, philosopher, and historian"
+#define     P_BRIEFLY   ""
 #define     P_IMAGERY   "brilliant, hardened, and practical military man who found fame as a historian"
 #define     P_REASON    "xenephon invented the earliest known western shorthand system"
-
+/*········· ··········· ´·····························´········································*/
 #define     P_ONELINE   P_NAMESAKE " " P_SUBJECT
-
-#define     P_BASENAME  ""
-#define     P_FULLPATH  ""
-#define     P_SUFFIX    ""
-#define     P_CONTENT   ""
-
+/*········· ··········· ´·····························´········································*/
+#define     P_HOMEDIR   "/home/system/gregg.shorthand_interpreter;
+#define     P_BASENAME  "gregg"
+#define     P_FULLPATH  "/usr/local/bin/gregg""
+#define     P_SUFFIX    "···"
+#define     P_CONTENT   "···"
+/*········· ··········· ´·····························´········································*/
 #define     P_SYSTEM    "gnu/linux   (powerful, ubiquitous, technical, and hackable)"
 #define     P_LANGUAGE  "ansi-c      (wicked, limitless, universal, and everlasting)"
+#define     P_COMPILER  "gcc 5.3.0"
 #define     P_CODESIZE  "moderate    (appoximately 5,000 slocl)"
+/*········· ··········· ´·····························´········································*/
 #define     P_DEPENDS   "none"
-
+/*········· ··········· ´·····························´········································*/
 #define     P_AUTHOR    "heatherlyrobert"
 #define     P_CREATED   "2008-07"
-
+/*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "5.--= generalization for broader use"
-#define     P_VERMINOR  "5.3 = update for use as coding example"
-#define     P_VERNUM    "5.4a"
-#define     P_VERTXT    "working with yVIOPENGL/yCOLOR.  not perfect, but working"
-
+#define     P_VERMINOR  "5.4 = update for use as coding example"
+#define     P_VERNUM    "5.4b"
+#define     P_VERTXT    "updated to latest vi-keys for opengl"
+/*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
 #define     P_REMINDER  "there are many better options, but i *own* every byte of this one"
+/*········· ··········· ´·····························´········································*/
+#define     P_HEADERS   P_FOCUS, P_NICHE, P_SUBJECT, P_PURPOSE, P_NAMESAKE, P_PRONOUNCE, P_HERITAGE, P_BRIEFLY, P_IMAGERY, P_REASON, P_ONELINE, P_HOMEDIR, P_BASENAME, P_FULLPATH, P_SUFFIX, P_CONTENT, P_SYSTEM, P_LANGUAGE, P_COMPILER, P_CODESIZE, P_DEPENDS, P_AUTHOR, P_CREATED, P_VERMAJOR, P_VERMINOR, P_VERNUM, P_VERTXT
+/*········· ··········· ´·····························´········································*/
+/*--------- 12345678901 ´123456789-123456789-123456789-123456789-123456789-123456789-123456789-*/
 
-/*===[[ END_HEADER ]]=========================================================*/
+/*===[[ END ONE_LINERS ]]=====================================================*/
 
 
 
@@ -250,31 +258,36 @@
 #include    <GL/gl.h>        /* OPENGL  standard primary header               */
 #include    <GL/glx.h>       /* OPENGL  standard X11 integration              */
 
+
+#include    <make_opengl.h>             /* heatherly opengl standard headers     */
+
+
 /*===[[ CUSTOM LIBRARIES ]]===================================================*/
 /*---(custom core)-----------------------*/
-#include    <yURG.h>              /* heatherly urgent processing              */
-#include    <yLOG.h>              /* heatherly program logging                */
-#include    <ySTR.h>              /* heatherly string processing              */
+/*> #include    <yURG.h>              /+ heatherly urgent processing              +/   <* 
+ *> #include    <yLOG.h>              /+ heatherly program logging                +/   <* 
+ *> #include    <ySTR.h>              /+ heatherly string processing              +/   <*/
 /*---(vi-keys foundation)----------------*/
-#include    <yMODE.h>             /* heatherly vikeys mode tracking           */
-#include    <yKEYS.h>             /* heatherly vikeys key handling            */
-#include    <yFILE.h>             /* heatherly vikeys content file handling   */
-#include    <yVIEW.h>             /* heatherly vikeys view management         */
+/*> #include    <yMODE.h>             /+ heatherly vikeys mode tracking           +/   <* 
+ *> #include    <yKEYS.h>             /+ heatherly vikeys key handling            +/   <* 
+ *> #include    <yFILE.h>             /+ heatherly vikeys content file handling   +/   <* 
+ *> #include    <yVIEW.h>             /+ heatherly vikeys view management         +/   <*/
 /*---(vi-keys major)---------------------*/
-#include    <yMAP.h>              /* heatherly vikeys location management     */
-#include    <yCMD.h>              /* heatherly vikeys command processing      */
-#include    <yMACRO.h>            /* heatherly vikeys macro processing        */
-#include    <ySRC.h>              /* heatherly vikeys source editing          */
-#include    <yMARK.h>             /* heatherly vikeys search and marking      */
+/*> #include    <yMAP.h>              /+ heatherly vikeys location management     +/   <* 
+ *> #include    <yCMD.h>              /+ heatherly vikeys command processing      +/   <* 
+ *> #include    <yMACRO.h>            /+ heatherly vikeys macro processing        +/   <* 
+ *> #include    <ySRC.h>              /+ heatherly vikeys source editing          +/   <* 
+ *> #include    <yMARK.h>             /+ heatherly vikeys search and marking      +/   <*/
 /*---(custom opengl)---------------------*/
-#include    <yVIOPENGL.h>    /* heatherly vikeys curses handler          */
-#include    <yX11.h>         /* CUSTOM  heatherly xlib/glx setup/teardown     */
-#include    <yFONT.h>        /* CUSTOM  heatherly texture-mapped fonts        */
-#include    <yCOLOR.h>       /* CUSTOM  heatherly opengl color handling       */
-#include    <yGLTEX.h>       /* CUSTOM  heatherly texture handling            */
+/*> #include    <yVIOPENGL.h>    /+ heatherly vikeys curses handler          +/        <* 
+ *> #include    <yX11.h>         /+ CUSTOM  heatherly xlib/glx setup/teardown     +/   <* 
+ *> #include    <yFONT.h>        /+ CUSTOM  heatherly texture-mapped fonts        +/   <* 
+ *> #include    <yCOLOR.h>       /+ CUSTOM  heatherly opengl color handling       +/   <* 
+ *> #include    <yGLTEX.h>       /+ CUSTOM  heatherly texture handling            +/   <*/
 /*---(custom other)----------------------*/
-#include    <yVAR.h>         /* CUSTOM : heatherly variable testing           */
+/*> #include    <yVAR.h>         /+ CUSTOM : heatherly variable testing           +/   <*/
 #include    <yPARSE.h>       /* heatherly file reading and writing      */
+#include    <ySORT.h>        /* CUSTOM  heatherly sort and search             */
 
 
 
@@ -292,6 +305,7 @@ typedef     const int           cint;
 #define    PRIV      static
 
 /*---(window formatting)-------------------*/
+typedef struct cWIN  tWIN;
 struct cWIN {
    /*---(detail)------------*/
    int         d_xoff;                      /* left offset of text details    */
@@ -313,7 +327,8 @@ struct cWIN {
    int         tex_h;                  /* texture height                      */
    int         tex_w;                  /* texture width                       */
    /*---(done)--------------*/
-} win;
+};
+extern tWIN  win;
 
 #define     ICON_SET  "/usr/local/share/fonts/outline_icons.png"
 
@@ -333,13 +348,14 @@ struct cWIN {
 
 
 /*---(struct.re)--------+-----------+-*//*-+----------------------------------*/
-typedef     struct      cACCESSOR   tACCESSOR;
-struct cACCESSOR {
+typedef     struct      cMY   tMY;
+struct cMY {
    /*---(mode)-----------------*/
    char        run_mode;
    char        time_lapse;
    short       time_point;
    float       zoom;
+   char        points      [LEN_LABEL];
    /*---(reporting)------------*/
    char        rptg_touch;
    char        rptg_raw;
@@ -385,7 +401,8 @@ struct cACCESSOR {
    int         f_lines;                     /* file line count                */
    char        f_recd      [LEN_RECD];      /* current file record            */
    /*---(done)-----------------*/
-} my;
+};
+extern tMY  my;
 
 #define     RPTG_TOUCH   if (my.rptg_touch   == 'y') 
 #define     RPTG_RAW     if (my.rptg_raw     == 'y') 
@@ -406,16 +423,16 @@ extern char unit_answer  [LEN_STR];
 
 
 /*===[[ DEBUGGER : GENERIC ]]=================================================*/
-struct cDEBUG {
-   /*---(specific processing)------------*/
-   char      sharps;   /* finding sharp corners                    */
-   char      matches;  /* matching logic                           */
-   char      shapes;   /* shape formation in display lists         */
-   char      writing;  /* process of creating outlines             */
-} debug_old;
+/*> struct cDEBUG {                                                                   <* 
+ *>    /+---(specific processing)------------+/                                       <* 
+ *>    char      sharps;   /+ finding sharp corners                    +/             <* 
+ *>    char      matches;  /+ matching logic                           +/             <* 
+ *>    char      shapes;   /+ shape formation in display lists         +/             <* 
+ *>    char      writing;  /+ process of creating outlines             +/             <* 
+ *> } debug_old;                                                                      <*/
 
-#define   DEBUG__SHAPES     if (debug_old.shapes   == 'y')
-#define   DEBUG__WRITING    if (debug_old.writing  == 'y')
+/*> #define   DEBUG__SHAPES     if (debug_old.shapes   == 'y')                        <*/
+/*> #define   DEBUG__WRITING    if (debug_old.writing  == 'y')                        <*/
 
 
 
@@ -551,13 +568,13 @@ extern int   vowels[16][16];
 
 /*---(display lists)---------------*/
 /*> GLuint    dl_arrow;                                                               <*/
-GLuint    dl_solid;
-GLuint    dl_dotted;
+extern GLuint    dl_solid;
+extern GLuint    dl_dotted;
 /*> GLuint    dl_arrowed;                                                             <*/
-GLuint    dl_undo;
-GLuint    dl_redo;
-GLuint    dl_clear;
-GLuint    dl_back;
+extern GLuint    dl_undo;
+extern GLuint    dl_redo;
+extern GLuint    dl_clear;
+extern GLuint    dl_back;
 
 extern const float  DEG2RAD;
 extern const float  RAD2DEG;
@@ -732,7 +749,8 @@ struct cOUTLINE
    float       xmax;
    float       ymax;
    /*---(done)---------------------------*/
-} o;
+};
+extern tOUTLINE  o;
 
 
 #define     COLOR_BASE          'b'
@@ -956,6 +974,7 @@ char        RAW__point              (int a_xpad, int a_ypad, char a_type);
 char        RAW_touch               (int a_xpad, int a_ypad);
 char        RAW_lift                (int a_xpad, int a_ypad);
 char        RAW_normal              (int a_xpad, int a_ypad);
+char        RAW_driver              (void);
 
 char        RAW_load                (char *a_points);
 char        RAW_equalize            (void);
@@ -1078,12 +1097,13 @@ ushort      REVERSE_find_letter     (char *a_ltr, char a_scope);
 char        REVERSE_begin           (int x, int y);
 char        REVERSE_end             (void);
 /*---(loading)--------------*/
-char        REVERSE_out_start       (void);
-char        REVERSE_out_touch       (int x, int y);
-char        REVERSE_out_append      (int x, int y);
-char        REVERSE_out_lift        (int x, int y);
-char        REVERSE_out_done        (void);
-char        REVERSE_out_load        (void);
+char        REV_load_start          (void);
+char        REV_load_touch          (int x, int y);
+char        REV_load_point          (int x, int y);
+char        REV_load_lift           (int x, int y);
+char        REV_load_done           (int x, int y);
+char        REV_load_raw            (void);
+char        REV_load__show_tail     (void);
 /*---(shapes)---------------*/
 char        REVERSE_line            (char a_type, char a_skip);
 char        REVERSE_circle          (char a_type, char a_skip);
@@ -1104,7 +1124,7 @@ char        REVERSE_page_end        (void);
 /*---(reporting)------------*/
 char        REVERSE_report          (void);
 /*---(unit_test)------------*/
-char*       REVERSE__unit           (char *a_question, int a_num);
+char*       REV__unit           (char *a_question, int a_num);
 /*---(done)-----------------*/
 
 

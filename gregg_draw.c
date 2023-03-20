@@ -89,9 +89,9 @@ DRAW_init            (void)
    /*> yVIKEYS_view_config   ("gregg shorthand interpreter", P_VERNUM, YVIKEYS_OPENGL, 500, 350, 0);   <*/
    /*> yVIKEYS_view_setup    (YVIEW_MAIN     , YVIKEYS_FLAT, YVIKEYS_TOPLEF, -125, 500, 125 - 350, 350, 0, 0, YCOLOR_BAS, YOLOR_MED, DRAW_primary);   <*/
    yVIEW_full    (YVIEW_MAIN , YVIEW_FLAT, YVIEW_BOTLEF, YCOLOR_BAS, YCOLOR_MED, DRAW_primary);
-   yVIEW_simple  (YVIEW_XAXIS, YCOLOR_BAS, YCOLOR_DRK, DRAW_xaxis  );
-   yVIEW_simple  (YVIEW_YAXIS, YCOLOR_BAS, YCOLOR_DRK, DRAW_yaxis  );
-   yVIEW_defsize (YVIEW_YAXIS, 15, 0);
+   /*> yVIEW_simple  (YVIEW_XAXIS, YCOLOR_BAS, YCOLOR_DRK, DRAW_xaxis  );             <*/
+   /*> yVIEW_simple  (YVIEW_YAXIS, YCOLOR_BAS, YCOLOR_DRK, DRAW_yaxis  );             <*/
+   /*> yVIEW_defsize (YVIEW_YAXIS, 15, 0);                                            <*/
    /*> yVIKEYS_cmds_direct (":xaxis show");                                           <*/
    /*> yVIKEYS_cmds_direct (":yaxis show");                                           <*/
    DRAW__sizes   (500, 350);
@@ -156,6 +156,8 @@ DRAW_primary         (float a_mag)
    char     x_on = 'y';
    short    x_xmin, x_xmax, x_wide;
    short    x_ymin, x_ymax, x_tall;
+   /*---(header)-------------------------*/
+   DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
    yVIEW_bounds  (YVIEW_MAIN, NULL, NULL, &x_xmin, &x_xmax, &x_wide, &x_ymin, &x_ymax, &x_tall);
    /*> printf ("t %c %3d %3d %3d %3d %s\n", x_on, x_left, x_bott, x_wide, x_tall, x_text);   <*/
    /*---(setup view)---------------------*/
@@ -181,7 +183,7 @@ DRAW_primary         (float a_mag)
    } glPopMatrix   ();
    /*---(parts)--------------------------*/
    /*> DRAW_cursor ();                                                                <*/
-   /*> OVERLAY_samples ();                                                            <*/
+   OVERLAY_samples ();
    /*> REVERSE_outline ("s·l·o2·b", SHAPE_DRAW, 1);                                   <*/
    /*> REVERSE_outline ("r·o2·b", SHAPE_DRAW, 1);                                     <*/
    /*> REVERSE_outline ("k·a·r"   , SHAPE_DRAW, 1);                                   <*/
@@ -198,8 +200,14 @@ DRAW_primary         (float a_mag)
    /*> REVERSE_outline ("ar·l·g·lg"                , SHAPE_DRAW, 1);                 <*/
    /*> REVERSE_text    ("m·emd·d·edm·m m·amj·sh·ajm·n"    , SHAPE_DRAW, 1, 'y');      <*/
    /*> REVERSE_text    ("r·o2·b sh·t·nd"                        , SHAPE_DRAW, 1, 'y');   <*/
-   REVERSE_english_text ("rob shorthand"     , SHAPE_DRAW, 1, 'y');
-   REVERSE_english_text (my.words, SHAPE_DRAW, 1, 'y');
+   /*---(cycle samples)------------------*/
+   glPushMatrix(); {
+      /*> glTranslatef (win.d_xoff - 50, win.d_yoff + 30, win.d_zoff);                <*/
+      glTranslatef (win.d_xoff -  75, win.d_yoff + 125, win.d_zoff);
+      /*> REVERSE_english_text ("rob shorthand"     , SHAPE_DRAW, 1, 'y');            <*/
+      /*> REVERSE_english_text ("rob"               , SHAPE_LOAD, 1, 'y');            <*/
+   } glPopMatrix();
+   /*> REVERSE_english_text (my.words, SHAPE_DRAW, 1, 'y');                           <*/
    DRAW_info_request ();
    if (my.touch != 'y') {
       /*> DRAW_info_counts ();                                                        <*/
@@ -224,12 +232,14 @@ DRAW_primary         (float a_mag)
        *> } glPopMatrix   ();                                                         <*/
    }
    if (o.nraw > 0)  LAYER_raws ();
-   if (o.navg > 0 && my.time_point >= o.nraw) {
+   /*> if (o.navg > 0 && my.time_point >= o.nraw) {                                   <*/
+   if (o.navg > 0) {
       LAYER_base ();
-      LAYER_curr ();
+      /*> LAYER_curr ();                                                              <*/
       LAYER_keys ();
    }
    /*---(complete)-----------------------*/
+   DEBUG_GRAF   yLOG_exit    (__FUNCTION__);
    return;
 }
 
@@ -524,10 +534,12 @@ LAYER_curr          (void)
    /*---(draw current point)-------------*/
    /*> printf ("showing curr\n");                                                     <*/
    glPushMatrix(); {
+      yCOLOR_opengl (YCOLOR_SPE, YCOLOR_WRN, 1.00);
       /*> glTranslatef( o.avg[o.cavg].x_pos, o.avg[o.cavg - 1].y_pos,    0.0);               <*/
+      glTranslatef (win.d_xoff -  75, win.d_yoff + 125, win.d_zoff);
       glTranslatef( o.avg[o.cavg].x_pos * my.zoom, o.avg[o.cavg].y_pos * my.zoom,    0.0);
       glBegin(GL_POLYGON); {
-         glColor4f(0.0f, 0.0f, 0.0f, 1.0f);       /* nice medium grey            */
+         /*> glColor4f(0.0f, 0.0f, 0.0f, 1.0f);       /+ nice medium grey            +/   <*/
          for (d = 0; d <= 360; d += 10) {
             rad = d * DEG2RAD;
             x   = r1 * cos(rad);
@@ -539,7 +551,7 @@ LAYER_curr          (void)
       /*> if (o.cavg > 1 && o.bas [o.cavg].fake != 'y' && o.bas [o.cavg].fake != 'y') {   <*/
       int xa  = (int) (cos (o.avg [o.cavg].rads) * 20);
       int ya  = (int) (sin (o.avg [o.cavg].rads) * 20);
-      glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
+      /*> glColor4f (1.0f, 1.0f, 1.0f, 1.0f);                                         <*/
       glLineWidth (1.0);
       glBegin(GL_LINES); {
          glVertex3f( 0.0, 0.0, z);
@@ -548,11 +560,11 @@ LAYER_curr          (void)
          glVertex3f(  xa,  ya, z);
       } glEnd();
       glPointSize(5.0);
-      glColor4f (0.0f, 0.0f, 0.0f, 1.0f);
+      /*> glColor4f (0.0f, 0.0f, 0.0f, 1.0f);                                         <*/
       glBegin(GL_POINTS); {
          glVertex3f( -xa, -ya, z);
       } glEnd();
-      glColor4f(1.0f, 1.0f, 0.0f, 1.0f);
+      /*> glColor4f(1.0f, 1.0f, 0.0f, 1.0f);                                          <+/   <*/
       glBegin(GL_POINTS); {
          glVertex3f(  xa,  ya, z);
       } glEnd();
@@ -570,38 +582,50 @@ LAYER_raws          (void)
    float   z     =    5.0;
    int     i;
    short       x_end       =     0;
-   glLineWidth (2.0);
-   glPointSize (1.5);
-   glColor4f  (0.0, 0.0, 0.0, 1.0);
-   /*> yCOLOR_opengl (YCOLOR_POS, YCOLOR_DRK, 1.00);                                     <*/
-   /*> glColor4f(0.0f, 0.0f, 0.7f, 1.0f);                                             <*/
-   /*> glBegin(GL_LINE_STRIP);                                                        <*/
-   if (my.time_point > o.nraw)  x_end = o.nraw;
-   else                         x_end = my.time_point;
-   glBegin(GL_POINTS);
-   for (i = 0; i < x_end; ++i) {
-      if (o.raw[i].x_pos == 999 && o.raw[i].y_pos == 999) {
-         glEnd();
-         glBegin(GL_POINTS);
-         continue;
+   /*---(header)-------------------------*/
+   DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
+   /*---(setup)--------------------------*/
+   glPushMatrix (); {
+      glTranslatef (win.d_xoff -  75, win.d_yoff + 125, win.d_zoff);
+      glLineWidth (2.0);
+      glPointSize (1.5);
+      glColor4f  (0.0, 0.0, 0.0, 1.0);
+      yCOLOR_opengl (YCOLOR_BAS, YCOLOR_MIN, 1.00);
+      /*> glColor4f(0.0f, 0.0f, 0.7f, 1.0f);                                             <*/
+      /*> glBegin(GL_LINE_STRIP);                                                        <*/
+      DEBUG_GRAF   yLOG_value   ("nraw"      , o.nraw);
+      DEBUG_GRAF   yLOG_value   ("time_point", my.time_point);
+      if (my.time_point > o.nraw)  x_end = o.nraw;
+      else                         x_end = my.time_point;
+      DEBUG_GRAF   yLOG_value   ("x_end"     , x_end);
+      glBegin(GL_POINTS);
+      for (i = 0; i < x_end; ++i) {
+         if (o.raw[i].x_pos == 999 && o.raw[i].y_pos == 999) {
+            glEnd();
+            glBegin(GL_POINTS);
+            continue;
+         }
+         glVertex3f( o.raw[i].x_pos * my.zoom, o.raw[i].y_pos * my.zoom, z);
+         DEBUG_GRAF   yLOG_complex ("point"     , "%4dx, %4dy, %4dz", o.raw[i].x_pos * my.zoom, o.raw[i].y_pos * my.zoom, z);
       }
-      glVertex3f( o.raw[i].x_pos * my.zoom, o.raw[i].y_pos * my.zoom, z);
-   }
-   glEnd();
-   if (my.time_point < o.nraw) {
-      glPointSize (3.0);
-      glColor4f   (1.0f, 0.0f, 0.0f, 1.0f);
-      glBegin     (GL_POINTS);
-      glVertex3f  (o.raw [my.time_point].x_pos * my.zoom, o.raw [my.time_point].y_pos * my.zoom, z);
       glEnd();
-   }
-   glLineWidth(0.8);
-   if (my.time_point >= o.nraw) {
-      my.time_lapse = '-';
-      my.time_point = 9999;
-   } else {
-      my.time_point += 2;
-   }
+      if (my.time_point < o.nraw) {
+         glPointSize (3.0);
+         glColor4f   (1.0f, 0.0f, 0.0f, 1.0f);
+         glBegin     (GL_POINTS);
+         glVertex3f  (o.raw [my.time_point].x_pos * my.zoom, o.raw [my.time_point].y_pos * my.zoom, z);
+         glEnd();
+      }
+      glLineWidth(0.8);
+      if (my.time_point >= o.nraw) {
+         my.time_lapse = '-';
+         my.time_point = 9999;
+      } else {
+         my.time_point += 2;
+      }
+   } glPopMatrix ();
+   /*---(complete)-----------------------*/
+   DEBUG_GRAF   yLOG_exit    (__FUNCTION__);
    return 0;
 }
 
@@ -611,45 +635,47 @@ LAYER_base          (void)
    /*---(locals)-------------------------*/
    float   z     =    5.25;
    int     i;
-   for (i = 0; i < o.navg; ++i) {
-      /*---(draw the point)--------------*/
-      if      (o.avg[i].sharp == 'x') glColor4f(1.0f, 0.0f, 0.0f, 1.0f);
-      else if (o.avg[i].type  == 'm') glColor4f(1.0f, 0.0f, 1.0f, 1.0f);
-      else if (o.bas[i].fake  == 'y') glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
-      else                            glColor4f(0.7f, 0.7f, 0.0f, 1.0f);
-      if (o.bas[i].fake  == 'y')      glPointSize (4.0);
-      else if (my.zoom <= 2)          glPointSize (1.0);
-      else                            glPointSize (2.0);
-      glBegin     (GL_POINTS); {
-         glVertex3f( o.avg[i].x_pos * my.zoom, o.avg[i].y_pos * my.zoom, z);
-         /*> glVertex3f( o.avg [i].x_pos + 125, o.avg [i].y_pos + 225, z);            <*/
-      } glEnd();
-      /*---(draw the S extension)--------*/
-      if (o.avg [i].type == POINT_START) {
-         glEnable      (GL_LINE_STIPPLE);
-         glLineStipple (1, 0x3333);
-         glColor4f     (0.0f, 0.0f, 0.0f, 0.5f);
-         glLineWidth   (2.0);
-         glBegin (GL_LINES); {
-            glVertex3f (o.avg [i    ].x_pos * my.zoom, o.avg [i    ].y_pos * my.zoom, z - 1.50);
-            glVertex3f (o.avg [i + 1].x_pos * my.zoom, o.avg [i + 1].y_pos * my.zoom, z - 1.50);
+   glPushMatrix (); {
+      glTranslatef (win.d_xoff -  75, win.d_yoff + 125, win.d_zoff);
+      yCOLOR_opengl (YCOLOR_SPE, YCOLOR_INP, 1.00);
+      for (i = 0; i < o.navg; ++i) {
+         /*---(draw the point)--------------*/
+         /*> if      (o.avg[i].sharp == 'x') glColor4f(1.0f, 0.0f, 0.0f, 1.0f);       <* 
+          *> else if (o.avg[i].type  == 'm') glColor4f(1.0f, 0.0f, 1.0f, 1.0f);       <* 
+          *> else if (o.bas[i].fake  == 'y') glColor4f(0.0f, 0.0f, 0.0f, 1.0f);       <* 
+          *> else                            glColor4f(0.7f, 0.7f, 0.0f, 1.0f);       <*/
+         if (o.bas[i].fake  == 'y')      glPointSize (4.0);
+         else if (my.zoom <= 2)          glPointSize (1.0);
+         else                            glPointSize (2.0);
+         glBegin     (GL_POINTS); {
+            glVertex3f( o.avg[i].x_pos * my.zoom, o.avg[i].y_pos * my.zoom, z);
+            /*> glVertex3f( o.avg [i].x_pos + 125, o.avg [i].y_pos + 225, z);            <*/
          } glEnd();
-         glDisable     (GL_LINE_STIPPLE);
+         /*---(draw the S extension)--------*/
+         if (o.avg [i].type == POINT_START) {
+            glEnable      (GL_LINE_STIPPLE);
+            glLineStipple (1, 0x3333);
+            glLineWidth   (2.0);
+            glBegin (GL_LINES); {
+               glVertex3f (o.avg [i    ].x_pos * my.zoom, o.avg [i    ].y_pos * my.zoom, z - 1.50);
+               glVertex3f (o.avg [i + 1].x_pos * my.zoom, o.avg [i + 1].y_pos * my.zoom, z - 1.50);
+            } glEnd();
+            glDisable     (GL_LINE_STIPPLE);
+         }
+         /*---(draw the F extension)--------*/
+         if (o.avg [i].type == POINT_FINISH) {
+            glEnable      (GL_LINE_STIPPLE);
+            glLineStipple (1, 0x3333);
+            glLineWidth   (2.0);
+            glBegin (GL_LINES); {
+               glVertex3f (o.avg [i    ].x_pos * my.zoom, o.avg [i    ].y_pos * my.zoom, z - 1.50);
+               glVertex3f (o.avg [i - 1].x_pos * my.zoom, o.avg [i - 1].y_pos * my.zoom, z - 1.50);
+            } glEnd();
+            glDisable     (GL_LINE_STIPPLE);
+         }
       }
-      /*---(draw the F extension)--------*/
-      if (o.avg [i].type == POINT_FINISH) {
-         glEnable      (GL_LINE_STIPPLE);
-         glLineStipple (1, 0x3333);
-         glColor4f     (0.0f, 0.0f, 0.0f, 0.5f);
-         glLineWidth   (2.0);
-         glBegin (GL_LINES); {
-            glVertex3f (o.avg [i    ].x_pos * my.zoom, o.avg [i    ].y_pos * my.zoom, z - 1.50);
-            glVertex3f (o.avg [i - 1].x_pos * my.zoom, o.avg [i - 1].y_pos * my.zoom, z - 1.50);
-         } glEnd();
-         glDisable     (GL_LINE_STIPPLE);
-      }
-   }
-   glLineWidth (0.8);
+      glLineWidth (0.8);
+   } glPopMatrix ();
    return 0;
 }
 
@@ -668,69 +694,71 @@ LAYER_keys          (void)
    if      (my.zoom < 2)   r1 =  2.0;
    else if (my.zoom < 4)   r1 =  3.0;
    else                    r1 =  4.0;
-   for (i = 0; i < o.nkey; ++i) {
-      /*---(draw the point)--------------*/
-      glPushMatrix (); {
-         glTranslatef  (o.key[i].x_pos * my.zoom, o.key[i].y_pos * my.zoom,    0.0);
-         glColor4f     (1.0f, 1.0f, 1.0f, 0.5f);
-         if (o.key[i].fake  == 'y') glColor4f (0.0f, 1.0f, 1.0f, 0.5f);
-         glBegin (GL_POLYGON); {
-            for (d = 0; d <= 360; d += 10) {
-               rad = d * DEG2RAD;
-               x   = r1 * cos (rad);
-               y   = r1 * sin (rad);
-               glVertex3f (x, y, z);
-            }
-         } glEnd ();
-      } glPopMatrix ();
-      /*---(draw the segment)------------*/
-      if (o.key[i].type != '>') {
-         glColor4f     (1.0f, 1.0f, 1.0f, 1.0f);
-         glEnable      (GL_LINE_STIPPLE);
-         glLineStipple (1, 0x3333);
-         glLineWidth   (1.0);
-         glBegin       (GL_LINES); {
-            glVertex3f(o.key[i - 1].x_pos * my.zoom, o.key[i - 1].y_pos * my.zoom, z + 0.25);
-            glVertex3f(o.key[i].x_pos * my.zoom,     o.key[i].y_pos * my.zoom,     z + 0.25);
-         } glEnd();
-         glDisable     (GL_LINE_STIPPLE);
+   glPushMatrix (); {
+      yCOLOR_opengl (YCOLOR_SPE, YCOLOR_ERR, 1.00);
+      glTranslatef (win.d_xoff -  75, win.d_yoff + 125, win.d_zoff);
+      for (i = 0; i < o.nkey; ++i) {
+         /*---(draw the point)--------------*/
+         glPushMatrix (); {
+            glTranslatef  (o.key[i].x_pos * my.zoom, o.key[i].y_pos * my.zoom,    0.0);
+            if (o.key[i].fake  == 'y') glColor4f (0.0f, 1.0f, 1.0f, 0.5f);
+            glBegin (GL_POLYGON); {
+               for (d = 0; d <= 360; d += 10) {
+                  rad = d * DEG2RAD;
+                  x   = r1 * cos (rad);
+                  y   = r1 * sin (rad);
+                  glVertex3f (x, y, z);
+               }
+            } glEnd ();
+         } glPopMatrix ();
+         /*---(draw the segment)------------*/
+         if (o.key[i].type != '>') {
+            glEnable      (GL_LINE_STIPPLE);
+            glLineStipple (1, 0x3333);
+            glLineWidth   (1.0);
+            glBegin       (GL_LINES); {
+               glVertex3f(o.key[i - 1].x_pos * my.zoom, o.key[i - 1].y_pos * my.zoom, z + 0.25);
+               glVertex3f(o.key[i].x_pos * my.zoom,     o.key[i].y_pos * my.zoom,     z + 0.25);
+            } glEnd();
+            glDisable     (GL_LINE_STIPPLE);
+         }
+         /*---(draw the hidden lines)-------*/
+         /*> if (i > 0 && o.key[i].type == '>') {                                                      <* 
+          *>    glColor4f(0.5f, 0.5f, 0.5f, 1.0f);                                                     <* 
+          *>    glLineWidth(2.0);                                                                      <* 
+          *>    glBegin(GL_LINES); {                                                                   <* 
+          *>       glVertex3f(o.key[i - 1].x_pos * my.zoom, o.key[i - 1].y_pos * my.zoom, z - 1.00);   <* 
+          *>       glVertex3f(o.key[i].x_pos * my.zoom,     o.key[i].y_pos * my.zoom,     z - 1.00);   <* 
+          *>    } glEnd();                                                                             <* 
+          *> }                                                                                         <*/
+         /*---(draw the S extension)--------*/
+         /*> if (o.key[i].type == POINT_HEAD) {                                                        <* 
+          *>    pt = o.key[i].p_bas - 1;                                                               <* 
+          *>    glEnable      (GL_LINE_STIPPLE);                                                       <* 
+          *>    glLineStipple (1, 0x3333);                                                             <* 
+          *>    glColor4f     (0.2f, 0.2f, 0.2f, 1.0f);                                                <* 
+          *>    glLineWidth   (2.0);                                                                   <* 
+          *>    glBegin (GL_LINES); {                                                                  <* 
+          *>       glVertex3f(o.bas[pt].x_pos * my.zoom    , o.bas[pt].y_pos * my.zoom  , z - 1.50);   <* 
+          *>       glVertex3f(o.key[i].x_pos * my.zoom     , o.key[i].y_pos * my.zoom   , z - 1.50);   <* 
+          *>    } glEnd();                                                                             <* 
+          *>    glDisable     (GL_LINE_STIPPLE);                                                       <* 
+          *> }                                                                                         <*/
+         /*---(draw the F extension)--------*/
+         /*> if (o.key[i + 1].type == '>' || i + 1 == o.nkey) {                                        <* 
+          *>    pt = o.key[i].p_bas + 1;                                                               <* 
+          *>    glEnable      (GL_LINE_STIPPLE);                                                       <* 
+          *>    glLineStipple (1, 0x3333);                                                             <* 
+          *>    glColor4f     (0.2f, 0.2f, 0.2f, 1.0f);                                                <* 
+          *>    glLineWidth   (2.0);                                                                   <* 
+          *>    glBegin (GL_LINES); {                                                                  <* 
+          *>       glVertex3f(o.bas[pt].x_pos * my.zoom    , o.bas[pt].y_pos * my.zoom  , z - 1.50);   <* 
+          *>       glVertex3f(o.key[i].x_pos * my.zoom     , o.key[i].y_pos * my.zoom   , z - 1.50);   <* 
+          *>    } glEnd();                                                                             <* 
+          *>    glDisable     (GL_LINE_STIPPLE);                                                       <* 
+          *> }                                                                                         <*/
       }
-      /*---(draw the hidden lines)-------*/
-      /*> if (i > 0 && o.key[i].type == '>') {                                                      <* 
-       *>    glColor4f(0.5f, 0.5f, 0.5f, 1.0f);                                                     <* 
-       *>    glLineWidth(2.0);                                                                      <* 
-       *>    glBegin(GL_LINES); {                                                                   <* 
-       *>       glVertex3f(o.key[i - 1].x_pos * my.zoom, o.key[i - 1].y_pos * my.zoom, z - 1.00);   <* 
-       *>       glVertex3f(o.key[i].x_pos * my.zoom,     o.key[i].y_pos * my.zoom,     z - 1.00);   <* 
-       *>    } glEnd();                                                                             <* 
-       *> }                                                                                         <*/
-      /*---(draw the S extension)--------*/
-      /*> if (o.key[i].type == POINT_HEAD) {                                                        <* 
-       *>    pt = o.key[i].p_bas - 1;                                                               <* 
-       *>    glEnable      (GL_LINE_STIPPLE);                                                       <* 
-       *>    glLineStipple (1, 0x3333);                                                             <* 
-       *>    glColor4f     (0.2f, 0.2f, 0.2f, 1.0f);                                                <* 
-       *>    glLineWidth   (2.0);                                                                   <* 
-       *>    glBegin (GL_LINES); {                                                                  <* 
-       *>       glVertex3f(o.bas[pt].x_pos * my.zoom    , o.bas[pt].y_pos * my.zoom  , z - 1.50);   <* 
-       *>       glVertex3f(o.key[i].x_pos * my.zoom     , o.key[i].y_pos * my.zoom   , z - 1.50);   <* 
-       *>    } glEnd();                                                                             <* 
-       *>    glDisable     (GL_LINE_STIPPLE);                                                       <* 
-       *> }                                                                                         <*/
-      /*---(draw the F extension)--------*/
-      /*> if (o.key[i + 1].type == '>' || i + 1 == o.nkey) {                                        <* 
-       *>    pt = o.key[i].p_bas + 1;                                                               <* 
-       *>    glEnable      (GL_LINE_STIPPLE);                                                       <* 
-       *>    glLineStipple (1, 0x3333);                                                             <* 
-       *>    glColor4f     (0.2f, 0.2f, 0.2f, 1.0f);                                                <* 
-       *>    glLineWidth   (2.0);                                                                   <* 
-       *>    glBegin (GL_LINES); {                                                                  <* 
-       *>       glVertex3f(o.bas[pt].x_pos * my.zoom    , o.bas[pt].y_pos * my.zoom  , z - 1.50);   <* 
-       *>       glVertex3f(o.key[i].x_pos * my.zoom     , o.key[i].y_pos * my.zoom   , z - 1.50);   <* 
-       *>    } glEnd();                                                                             <* 
-       *>    glDisable     (GL_LINE_STIPPLE);                                                       <* 
-       *> }                                                                                         <*/
-   }
+   } glPopMatrix ();
    /*---(complete)-----------------------*/
    return 0;
 }
@@ -1096,7 +1124,6 @@ char       /*----: draw the writing samples to the texture -------------------*/
 OVERLAY_samples        (void)
 {
    int i = 0;
-   glColor4f             (0.0f, 0.0f, 0.0f, 1.0f);
    /*---(title)--------------------------*/
    /*> glPushMatrix(); {                                                              <* 
     *>    glScalef              (1.0, 1.0, 1.0);                                      <* 
@@ -1106,11 +1133,12 @@ OVERLAY_samples        (void)
    /*---(cycle samples)------------------*/
    glPushMatrix(); {
       /*> glTranslatef (win.d_xoff - 50, win.d_yoff + 30, win.d_zoff);                <*/
-      glTranslatef (win.d_xoff +  50, win.d_yoff + 60, win.d_zoff);
+      glTranslatef (win.d_xoff + 100, win.d_yoff + 250, win.d_zoff);
       glScalef              (1.5, 1.5, 1.5);
       for (i = 1; i < MAX_LETTERS && strncmp(g_loc[i].label, "EOF", 5) != 0; ++i) {
          if (g_loc [i].x_show == 0 && g_loc [i].y_show == 0)  continue;
          glPushMatrix();
+         yCOLOR_opengl (YCOLOR_BAS, YCOLOR_MIN, 1.0);
          glTranslatef(g_loc [i].x_show, g_loc [i].y_show,  0.0);
          yFONT_print (win.font_fixed,  5, g_loc [i].align, g_loc [i].label);
          glCallList(dl_dotted + i);

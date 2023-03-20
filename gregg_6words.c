@@ -1176,7 +1176,7 @@ words_translate    (int a_word)
       letters[i] = 0;
    }
    /*---(get the first letter, always ">")------*/
-   DEBUG__WRITING  printf("OUTSTRING = %s\n", a_outstring);
+   /*> DEBUG__WRITING  printf("OUTSTRING = %s\n", a_outstring);                       <*/
    p = strtok(a_outstring, q);
    if (p == NULL || strncmp(p, "", MAX_LEN) == 0) {
       return -1;
@@ -1201,14 +1201,14 @@ words_translate    (int a_word)
       /*---(handle letter)---------------*/
       strlcpy (x_ltr, p, 5);
       for (i = 0; i < 5; ++i)  x_ltr[i] = tolower(x_ltr[i]);
-      DEBUG__WRITING  printf("   letter = <<%s>>\n", x_ltr);
+      /*> DEBUG__WRITING  printf("   letter = <<%s>>\n", x_ltr);                      <*/
       for (i = 0; i < MAX_LETTERS; ++i) {
          if (strncmp(x_ltr, g_loc[i].label, 5) != 0) continue;
          letters[count]  = i;
          break;
       }
       if (letters[count] == 0) continue;
-      DEBUG__WRITING  printf("      ind = <<%d>>\n", letters[count]);
+      /*> DEBUG__WRITING  printf("      ind = <<%d>>\n", letters[count]);             <*/
       ++count;
    }
    for (i = 0; i < count; ++i) {
@@ -1217,9 +1217,9 @@ words_translate    (int a_word)
          /*> offset = words_vowel(i, count);                                          <*/
          letters[i] += offset;
       }
-      DEBUG__WRITING  printf("%d, ", letters[i]);
+      /*> DEBUG__WRITING  printf("%d, ", letters[i]);                                 <*/
    }
-   DEBUG__WRITING  printf("\n");
+   /*> DEBUG__WRITING  printf("\n");                                                  <*/
    /*---(complete)-----------------------*/
    return count;
 }
@@ -1341,8 +1341,6 @@ words_translate    (int a_word)
 /*===----                         unit testing                         ----===*/
 /*============================--------------------============================*/
 static void o___UNIT_TEST_________________o (void) {;}
-
-char        unit_answer  [LEN_STR];
 
 char*        /*-> unit test accessor -----------------[ light  [us.D90.241.L0]*/ /*-[03.0000.00#.#]-*/ /*-[--.---.---.--]-*/
 WORDS__unit          (char *a_question, int a_num)

@@ -373,11 +373,12 @@ POINT_raw_add           (char a_type, int x, int y)
    }
    DEBUG_DATA    yLOG_value   ("x"         , x);
    DEBUG_DATA    yLOG_value   ("y"         , y);
-   --rce;  if (x < 0 || y < 0) {
-      DEBUG_DATA    yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
+   /*> --rce;  if (x < 0 || y < 0) {                                                  <* 
+    *>    DEBUG_DATA    yLOG_exitr   (__FUNCTION__, rce);                             <* 
+    *>    return rce;                                                                 <* 
+    *> }                                                                              <*/
    /*---(base values)--------------------*/
+   DEBUG_DATA    yLOG_complex ("args"      , "%c, %4dx, %4dy", a_type, x, y);
    o.raw [o.nraw].series  = POINTS_RAW;
    o.raw [o.nraw].seq     = o.nraw;
    o.raw [o.nraw].p_raw   = o.nraw;
@@ -387,18 +388,23 @@ POINT_raw_add           (char a_type, int x, int y)
    /*---(label fakes)--------------------*/
    switch (a_type) {
    case POINT_START   :
+      DEBUG_DATA    yLOG_note    ("add start");
       o.raw [o.nraw].fake = POINT_FAKE;
       break;
    case POINT_HEAD    :
+      DEBUG_DATA    yLOG_note    ("add head");
       o.raw [o.nraw].fake = POINT_NORMAL;
       break;
    case POINT_NORMAL  :
+      DEBUG_DATA    yLOG_note    ("add normal");
       o.raw [o.nraw].fake = POINT_NORMAL;
       break;
    case POINT_TAIL    :
+      DEBUG_DATA    yLOG_note    ("add tail");
       o.raw [o.nraw].fake = POINT_NORMAL;
       break;
    case POINT_FINISH  :
+      DEBUG_DATA    yLOG_note    ("add finish");
       o.raw [o.nraw].fake = POINT_FAKE;
       break;
    }
@@ -1276,18 +1282,22 @@ POINT_list         (FILE *a_file, char a_style, tPOINT *a_series, int a_count)
    int         i;
    char        x_label     [LEN_TERSE] = "";
    /*---(header)-------------------------*/
+   DEBUG_DATA   yLOG_senter  (__FUNCTION__);
+   DEBUG_DATA   yLOG_schar   (a_style);
    if (a_style == 'd') {
       if      (a_series == &(o.raw))   strlcpy (x_label, "RAW", LEN_TERSE);
       else if (a_series == &(o.bas))   strlcpy (x_label, "BAS", LEN_TERSE);
       else if (a_series == &(o.avg))   strlcpy (x_label, "AVG", LEN_TERSE);
       else if (a_series == &(o.key))   strlcpy (x_label, "KEY", LEN_TERSE);
       fprintf (a_file, "\n");
-      fprintf (a_file, "%-3.3s point inventory---------------------------------------------------------------------------------------------------------------------\n", x_label);
+      fprintf (a_file, "%-3.3s point inventory (%3d) --------------------------------------------------------------------------------------------------------------\n", x_label, a_count);
       fprintf (a_file, "seq# key bas raw- a | --xx-- --yy-- -xd- -yd- | -len -slope-- b-cept -rad- deg | t k m s q r depth ratio c use | -xrel- -yrel- xpos ypos\n");
    } else if (a_style == 'g') {
       fprintf (a_file, "###  key  bas  raw  a  --xx--  --yy--  -xd-  -yd-  -len  -slope--  b-cept  -rad-  deg  q  r  curve-  cc  c  t  u  --xrel  --yrel  xpos  ypos \n");
    }
+   DEBUG_DATA   yLOG_snote   (x_label);
    /*---(points)-------------------------*/
+   DEBUG_DATA   yLOG_sint    (a_count);
    for (i = 0; i < a_count; ++i) {
       POINT_show (a_file, a_style, a_series + i, i);
    }
@@ -1298,6 +1308,7 @@ POINT_list         (FILE *a_file, char a_style, tPOINT *a_series, int a_count)
       fprintf (a_file, "\n");
    }
    /*---(complete)-----------------------*/
+   DEBUG_DATA   yLOG_sexit   (__FUNCTION__);
    return 0;
 }
 

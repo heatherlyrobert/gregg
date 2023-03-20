@@ -11,6 +11,7 @@ static int    s_len  =    0;
 static char   s_fields    [20][LEN_RECD];
 static int    s_nfield    =   0;
 
+tOUTLINE  o;
 
 char
 OUT_init             (void)

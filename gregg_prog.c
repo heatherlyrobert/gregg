@@ -4,6 +4,7 @@
 
 
 
+tMY  my;
 
 
 int       out_start       = 0;
@@ -45,7 +46,7 @@ PROG__header            (void)
    /*---(header)----------------------*/
    DEBUG_PROG   yLOG_enter (__FUNCTION__);
    /*---(versioning)------------------*/
-   DEBUG_PROG   yLOG_info     ("arachne" , PROG_version      ());
+   DEBUG_PROG   yLOG_info     ("gregg"   , PROG_version      ());
    DEBUG_PROG   yLOG_info     ("purpose" , P_PURPOSE);
    DEBUG_PROG   yLOG_info     ("namesake", P_NAMESAKE);
    DEBUG_PROG   yLOG_info     ("heritage", P_HERITAGE);
@@ -72,7 +73,6 @@ PROG__header            (void)
    DEBUG_PROG   yLOG_info     ("yCOLOR"  , yCOLOR_version    ());
    DEBUG_PROG   yLOG_info     ("yGLTEX"  , yGLTEX_version    ());
    DEBUG_PROG   yLOG_note     ("custom other");
-   DEBUG_PROG   yLOG_info     ("yVAR"    , yVAR_version      ());
    DEBUG_PROG   yLOG_info     ("yPARSE"  , yPARSE_version    ());
    /*---(complete)-----------------------*/
    DEBUG_PROG   yLOG_exit  (__FUNCTION__);
@@ -129,12 +129,13 @@ PROG__init              (int a_argc, char *a_argv[])
    DEBUG_PROG   yLOG_enter (__FUNCTION__);
    /*---(fonts)-----------------------*/
    strcpy (win.face_pretty, "comfortaa");
-   strcpy (win.face_fixed, "hack");
+   /*> strcpy (win.face_fixed, "hack");                                               <*/
+   strcpy (win.face_fixed, "shrike");
    /*---(reporting flags)-------------*/
    my.run_mode     = RUN_NORMAL;
    my.time_lapse   = '-';
    my.time_point   = 9999;
-   my.zoom         =    1;
+   my.zoom         =   1;
    my.dict         = 'y';
    my.rptg_touch   = '-';
    my.rptg_raw     = '-';
@@ -257,6 +258,8 @@ PROG__begin             (void)
 {
    char        rc          =    0;
    DEBUG_PROG   yLOG_enter   (__FUNCTION__);
+   WORDS_table_ae ();
+   if (my.dict   == 'y')  WORDS_import ();
    DEBUG_PROG   yLOG_exit    (__FUNCTION__);
    return 0;
 }
@@ -319,8 +322,7 @@ PROG_dawn          (void)
       DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   WORDS_table_ae ();
-   if (my.dict   == 'y')  WORDS_import ();
+   yCMD_direct (":layout min");
    DRAW_init  ();
    TOUCH_init ();
    /*> yVIKEYS_view_option (YVIKEYS_BUFFER, "file" , OUT_status, "current file name and stats");   <*/
@@ -338,6 +340,7 @@ PROG_dawn          (void)
    /*---(key mapping)--------------------*/
    /*> yVIKEYS_map_config  (YVIKEYS_RIGHT, YVIKEYS_map_update, MAP_locator, MAP_addresser);   <*/
    REVERSE_report ();
+   REVERSE_english_text ("rob"               , SHAPE_LOAD, 1, 'y');
    /*> yVIKEYS_cmds_direct (":overlay sample");                                       <*/
    DEBUG_PROG   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -385,7 +388,7 @@ PROG__end               (void)
       DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   TOUCH_wrap   ();
+   
    DRAW_wrap    ();
    /*> yXINIT_end  ();                                                                <*/
    /*---(complete)-----------------------*/

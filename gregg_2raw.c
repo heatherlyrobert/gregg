@@ -230,24 +230,40 @@ RAW_lift             (int a_xpad, int a_ypad)
    }
    /*---(process)------------------------*/
    if (rc == 0)  rc = RAW_equalize  ();
+   if (rc == 0)  rc = RAW_driver    ();
+   /*---(complete)-----------------------*/
+   DEBUG_RAW    yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+RAW_driver            (void)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rc          =    0;
+   /*---(header)-------------------------*/
+   DEBUG_RAW    yLOG_enter   (__FUNCTION__);
    POINT_list (stdout, 'd', o.raw, o.nraw);
    if (rc == 0)  rc = BASE_filter   ();
-   POINT_list (stdout, 'd', o.bas, o.nbas);
-   POINT_list (stdout, 'd', o.avg, o.navg);
+   /*> POINT_list (stdout, 'd', o.bas, o.nbas);                                       <*/
+   /*> POINT_list (stdout, 'd', o.avg, o.navg);                                       <*/
    if (rc == 0)  rc = BASE_add_extremes ();
    if (rc == 0)  rc = BASE_extend_ends  ();
-   POINT_list (stdout, 'd', o.bas, o.nbas);
-   POINT_list (stdout, 'd', o.avg, o.navg);
+   /*> POINT_list (stdout, 'd', o.bas, o.nbas);                                       <*/
+   /*> POINT_list (stdout, 'd', o.avg, o.navg);                                       <*/
    if (rc == 0)  rc = BASE_mark_sharps  ();
    if (rc == 0)  rc = CIRCLE_driver     ();
    if (rc == 0)  rc = KEY_driver        ();
+
    /*> if (rc == 0)  rc = KEY_filter    ();                                           <* 
     *> if (rc == 0)  rc = KEY_flatten   ();                                           <* 
     *> if (rc == 0)  rc = KEY_squeeze   ();                                           <* 
     *> if (rc == 0)  rc = KEY_sharps    ();                                           <*/
    /*> if (rc == 0)  rc = CIRCLE_driver_OLD ();                                       <*/
-   if (rc == 0)  rc = MATCH_driver      ();
+   /*> if (rc == 0)  rc = MATCH_driver      ();                                       <*/
+
    POINT_list (stdout, 'd', o.bas, o.nbas);
+   POINT_list (stdout, 'd', o.avg, o.navg);
    POINT_list (stdout, 'd', o.key, o.nkey);
    if (rc <  0) {
       printf ("dropped out early\n");
@@ -285,18 +301,20 @@ RAW_load           (char *a_points)
       DEBUG_RAW    yLOG_info    ("first"     , p);
       /*> printf ("[%s]\n", p);                                                       <*/
       switch (p[0]) {
-      case 'T' :
+      case 'Õ' :
          DEBUG_RAW    yLOG_note    ("TOUCH");
          /*> printf ("   touch type\n");                                              <*/
-         x_type = 'T';
-         p = strtok_r (NULL, q, &r);
+         x_type = 'Õ';
+         /*> p = strtok_r (NULL, q, &r);                                              <*/
+         ++p;
          DEBUG_RAW    yLOG_info    ("TOUCH"     , p);
          break;
-      case 'L' :
+      case 'Ô' :
          DEBUG_RAW    yLOG_note    ("LIFT");
          /*> printf ("   lift type\n");                                               <*/
-         x_type = 'L';
-         p = strtok_r (NULL, q, &r);
+         x_type = 'Ô';
+         ++p;
+         /*> p = strtok_r (NULL, q, &r);                                              <*/
          DEBUG_RAW    yLOG_info    ("LIFT"      , p);
          break;
       default :
@@ -313,11 +331,11 @@ RAW_load           (char *a_points)
       y = atoi (p);
       DEBUG_RAW    yLOG_complex ("y-pos"     , "%s, %dy", p, y);
       switch (x_type) {
-      case 'T' :
+      case 'Õ' :
          RAW_touch  (x, y);
          o.saved = 'y';
          break;
-      case 'L' :
+      case 'Ô' :
          RAW_lift   (x, y);
          break;
       default  :
@@ -373,8 +391,6 @@ RAW_equalize        (void)
 /*===----                         unit testing                         ----===*/
 /*============================--------------------============================*/
 static void o___UNIT_TEST_________________o (void) {;}
-
-char        unit_answer  [LEN_STR];
 
 char*        /*-> unit test accessor -----------------[ light  [us.D90.241.L0]*/ /*-[03.0000.00#.#]-*/ /*-[--.---.---.--]-*/
 RAW__unit            (char *a_question, int a_num)

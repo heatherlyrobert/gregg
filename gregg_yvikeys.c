@@ -235,7 +235,7 @@ USER_load            (char *a_words)
    my.time_lapse = '-';
    my.time_point = 9999;
    REVERSE_english_text (a_words, SHAPE_LOAD, 1, 'y');
-   REVERSE_out_load     ();
+   REV_load_raw  ();
    o.cavg = 0;
    DEBUG_USER   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -248,7 +248,7 @@ USER_timelapse       (char *a_words)
    my.time_lapse = 'y';
    my.time_point =   0;
    REVERSE_english_text (a_words, SHAPE_LOAD, 1, 'y');
-   REVERSE_out_load     ();
+   REV_load_raw  ();
    DEBUG_USER   yLOG_exit    (__FUNCTION__);
 }
 
@@ -273,6 +273,24 @@ USER_zoom             (float a_zoom)
 }
 
 char
+USER_points           (char *a_opt)
+{
+   DEBUG_USER   yLOG_enter   (__FUNCTION__);
+   if      (a_opt == NULL)                  strcpy (my.points, "·····");
+   else if (strchr (a_opt, "raw"    ) == 0) my.points [0] = 'y';
+   else if (strchr (a_opt, "noraw"  ) == 0) my.points [0] = '·';
+   else if (strchr (a_opt, "bas"    ) == 0) my.points [1] = 'y';
+   else if (strchr (a_opt, "nobas"  ) == 0) my.points [1] = '·';
+   else if (strchr (a_opt, "avg"    ) == 0) my.points [1] = 'y';
+   else if (strchr (a_opt, "noavg"  ) == 0) my.points [1] = '·';
+   else if (strchr (a_opt, "key"    ) == 0) my.points [1] = 'y';
+   else if (strchr (a_opt, "nokey"  ) == 0) my.points [1] = '·';
+   else if (strchr (a_opt, "none"   ) == 0) strcpy (my.points, "·····");
+   DEBUG_USER   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
 USER_guide           (char *a_guide)
 {
    strlcpy (my.guide, a_guide, LEN_DESC);
@@ -292,18 +310,12 @@ USER_init            (void)
    /*---(modes)--------------------------*/
    /*> yVIKEYS_mode_change (MODE_MAP, ":9" , "horz=0HhlL$");                          <*/
    /*---(file)---------------------------*/
-   /*> rc = yVIKEYS_cmds_add ('f', "file"        , "f"   , "s"    , FILE_rename          , "change the current spreadsheet file name"                    );   <* 
-    *> rc = yVIKEYS_cmds_add ('f', "write"       , "w"   , ""     , OUT_append           , "write the current spreadsheet to file"                       );   <* 
-    *> rc = yVIKEYS_cmds_add ('f', "quit"        , "q"   , ""     , USER_quit            , "quit current file (if no changes), exit if the only file"    );   <* 
-    *> rc = yVIKEYS_cmds_add ('f', "quitall"     , "qa"  , ""     , USER_quit            , "quit all files (if no changes), and exit"                    );   <* 
-    *> rc = yVIKEYS_cmds_add ('f', "writequit"   , "wq"  , ""     , USER_writequit       , ""                                                            );   <* 
-    *> rc = yVIKEYS_cmds_add ('f', "writequitall", "wqa" , ""     , USER_writequit       , ""                                                            );   <* 
-    *> rc = yVIKEYS_cmds_add ('f', "word"        , ""    , "a"    , USER_words           , ""                                                            );   <* 
-    *> rc = yVIKEYS_cmds_add ('f', "guide"       , ""    , "s"    , USER_guide           , ""                                                            );   <* 
-    *> rc = yVIKEYS_cmds_add ('f', "load"        , ""    , "a"    , USER_load            , ""                                                            );   <* 
-    *> rc = yVIKEYS_cmds_add ('f', "unload"      , ""    , "a"    , USER_unload          , ""                                                            );   <* 
-    *> rc = yVIKEYS_cmds_add ('f', "timelapse"   , ""    , "a"    , USER_timelapse       , ""                                                            );   <* 
-    *> rc = yVIKEYS_cmds_add ('f', "zoom"        , ""    , "f"    , USER_zoom            , ""                                                            );   <*/
+   /*> rc = yVIKEYS_cmds_add ('f', "word"        , ""    , "a"    , USER_words           , ""                                                            );   <*/
+   /*> rc = yVIKEYS_cmds_add ('f', "guide"       , ""    , "s"    , USER_guide           , ""                                                            );   <*/
+   /*> rc = yVIKEYS_cmds_add ('f', "load"        , ""    , "a"    , USER_load            , ""                                                            );   <*/
+   /*> rc = yVIKEYS_cmds_add ('f', "unload"      , ""    , "a"    , USER_unload          , ""                                                            );   <*/
+   /*> rc = yVIKEYS_cmds_add ('f', "timelapse"   , ""    , "a"    , USER_timelapse       , ""                                                            );   <*/
+   rc = yCMD_add ('f', "zoom"        , ""    , "f"    , USER_zoom            , ""                                                            );
    /*---(complete)-----------------------*/
    DEBUG_USER   yLOG_exit    (__FUNCTION__);
    return 0;

@@ -4,6 +4,12 @@
 
 
 
+GLuint    dl_solid;
+GLuint    dl_dotted;
+GLuint    dl_undo;
+GLuint    dl_redo;
+GLuint    dl_clear;
+GLuint    dl_back;
 
 
 PRIV char  dlist_letters    (void);
@@ -82,63 +88,6 @@ dlist_letters(void)
          glNewList (dl_dotted + i,  GL_COMPILE);  REVERSE_make_letter (g_loc [i].label, SHAPE_SAMPLE, 1);   glEndList();
       }
    }
-
-   /*---(draw lines)-----------------------*/
-   /*> DLIST__title ("lines");                                                                                              <* 
-    *> for (i = 0; i < MAX_LETTERS; ++i) {                                                                                  <* 
-    *>    if (strncmp(g_loc[i].label, "EOF", 5) == 0) break;                                                                <* 
-    *>    if (g_loc[i].type != SHAPE_LINE)                 continue;                                                        <* 
-    *>    glNewList (dl_solid  + i,  GL_COMPILE);  REVERSE_make_letter (g_loc [i].label, SHAPE_SAMPLE, 1);   glEndList();   <* 
-    *>    glNewList (dl_dotted + i,  GL_COMPILE);  REVERSE_make_letter (g_loc [i].label, SHAPE_SAMPLE, 1);   glEndList();   <* 
-    *> }                                                                                                                    <*/
-   /*---(draw circles)---------------------*/
-   /*> DLIST__title ("circles");                                                                           <* 
-    *> for (i = 0; i < MAX_LETTERS; ++i) {                                                                 <* 
-    *>    if (strncmp(g_loc[i].label, "EOF", 5) == 0) break;                                               <* 
-    *>    if (g_loc[i].type != SHAPE_CIRCLE)                 continue;                                     <* 
-    *>    glNewList (dl_solid  + i,  GL_COMPILE);  REVERSE_circle   (i, SHAPE_SAMPLE, 1);   glEndList();   <* 
-    *>    glNewList (dl_dotted + i,  GL_COMPILE);  REVERSE_circle   (i, SHAPE_SAMPLE, 1);   glEndList();   <* 
-    *> }                                                                                                   <*/
-   /*---(draw ellipses)--------------------*/
-   /*> DLIST__title ("ellipses");                                                                          <* 
-    *> for (i = 0; i < MAX_LETTERS; ++i) {                                                                 <* 
-    *>    if (strncmp(g_loc[i].label, "EOF", 5) == 0) break;                                               <* 
-    *>    if (g_loc[i].type != SHAPE_ELLIPSE)                 continue;                                    <* 
-    *>    glNewList (dl_solid  + i,  GL_COMPILE);  REVERSE_ellipse  (i, SHAPE_SAMPLE, 1);   glEndList();   <* 
-    *>    glNewList (dl_dotted + i,  GL_COMPILE);  REVERSE_ellipse  (i, SHAPE_SAMPLE, 1);   glEndList();   <* 
-    *> }                                                                                                   <*/
-   /*---(draw pie wedges)------------------*/
-   /*> DLIST__title ("wedges");                                                                            <* 
-    *> for (i = 0; i < MAX_LETTERS; ++i) {                                                                 <* 
-    *>    if (strncmp(g_loc[i].label, "EOF", 5) == 0) break;                                               <* 
-    *>    if (g_loc[i].type != SHAPE_TEARDROP)                continue;                                    <* 
-    *>    glNewList (dl_solid  + i,  GL_COMPILE);  REVERSE_teardrop (i, SHAPE_SAMPLE, 1);   glEndList();   <* 
-    *>    glNewList (dl_dotted + i,  GL_COMPILE);  REVERSE_teardrop (i, SHAPE_SAMPLE, 1);   glEndList();   <* 
-    *> }                                                                                                   <*/
-   /*---(draw dots)------------------------*/
-   /*> DLIST__title ("dots");                                                                                             <* 
-    *> for (i = 0; i < MAX_LETTERS; ++i) {                                                                                <* 
-    *>    if (strncmp(g_loc[i].label, "EOF", 5) == 0) break;                                                              <* 
-    *>    if (g_loc[i].type != SHAPE_DOT)                 continue;                                                       <* 
-    *>    glNewList (dl_solid  + i,  GL_COMPILE);  REVERSE_dot      (i, SHAPE_SAMPLE, 1);   draw_dot(i);   glEndList();   <* 
-    *>    glNewList (dl_dotted + i,  GL_COMPILE);  REVERSE_dot      (i, SHAPE_SAMPLE, 1);   draw_dot(i);   glEndList();   <* 
-    *> }                                                                                                                  <*/
-   /*---(draw whitespace)------------------*/
-   /*> DLIST__title ("spaces");                                                                            <* 
-    *> for (i = 0; i < MAX_LETTERS; ++i) {                                                                 <* 
-    *>    if (strncmp(g_loc[i].label, "EOF", 5) == 0) break;                                               <* 
-    *>    if (g_loc[i].type != SHAPE_SPACE)         continue;                                              <* 
-    *>    glNewList (dl_solid  + i,  GL_COMPILE);  REVERSE_space    (i, SHAPE_SAMPLE, 1);   glEndList();   <* 
-    *>    glNewList (dl_dotted + i,  GL_COMPILE);  REVERSE_space    (i, SHAPE_SAMPLE, 1);   glEndList();   <* 
-    *> }                                                                                                   <*/
-   /*---(draw accents)---------------------*/
-   /*> DLIST__title ("accents");                                                        <* 
-    *> for (i = 0; i < MAX_LETTERS; ++i) {                                              <* 
-    *>    if (strncmp(g_loc[i].label, "EOF", 5) == 0) break;                            <* 
-    *>    if (g_loc[i].type != 'a')                 continue;                           <* 
-    *>    glNewList(dl_solid  + i,  GL_COMPILE);   draw_whitespace(i);   glEndList();   <* 
-    *>    glNewList(dl_dotted + i,  GL_COMPILE);   draw_whitespace(i);   glEndList();   <* 
-    *> }                                                                                <*/
    /*---(complete)--------------------------*/
    return 0;
 }

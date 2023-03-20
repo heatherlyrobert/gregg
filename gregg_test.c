@@ -2,6 +2,7 @@
 #include "gregg.h"
 
 
+char unit_answer  [LEN_STR];
 
 /*============================--------------------============================*/
 /*===----                         unit testing                         ----===*/
@@ -25,11 +26,11 @@ PROG__unit_loud     (void)
    char        x_narg  = 2;
    char       *x_args [2]  = { "gregg_unit", "@@kitchen"    };
    PROG_urgents (x_narg, x_args);
-   yURG_name  ("raw"          , YURG_ON);
-   yURG_name  ("avg"          , YURG_ON);
-   yURG_name  ("calc"         , YURG_ON);
-   yURG_name  ("match"        , YURG_ON);
-   yURG_name  ("data"         , YURG_ON);
+   yURG_by_name  ("raw"          , YURG_ON);
+   yURG_by_name  ("avg"          , YURG_ON);
+   yURG_by_name  ("calc"         , YURG_ON);
+   yURG_by_name  ("match"        , YURG_ON);
+   yURG_by_name  ("data"         , YURG_ON);
    PROG_startup (x_narg, x_args);
    my.dict = '-';
    return 0;
