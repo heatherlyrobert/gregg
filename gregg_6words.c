@@ -131,16 +131,7 @@ WORDS__wipe             (tWORD *a_word)
    /*---(ysort)----------------*/
    a_word->ysort_e   = NULL;
    a_word->ysort_g   = NULL;
-   /*---(english tree)---------*/
-   a_word->e_next    = NULL;
-   a_word->e_prev    = NULL;
-   a_word->e_left    = NULL;
-   a_word->e_right   = NULL;
-   /*---(gregg tree)-----------*/
-   a_word->g_next    = NULL;
-   a_word->g_prev    = NULL;
-   a_word->g_left    = NULL;
-   a_word->g_right   = NULL;
+   /*---(complete)-------------*/
    return 1;
 }
 
@@ -1145,46 +1136,46 @@ WORDS__unit          (char *a_question, int a_num)
       /*> snprintf (unit_answer, LEN_STR, "WORDS parsing    : %-24.24s  %-24.24s  %c  %c  %3d  %c    %c  %c  %c  %c  %c", s, t, s_ver, s_book, s_page, s_type, s_diff, s_simp, s_3rd, s_4th, s_top);   <*/
    }
    else if (strcmp(a_question, "e_count"       ) == 0) {
-      x_curr = e_hword; while (x_curr != NULL) { ++x_fore; x_curr = x_curr->e_next; }
-      x_curr = e_tword; while (x_curr != NULL) { ++x_back; x_curr = x_curr->e_prev; }
+      /*> x_curr = e_hword; while (x_curr != NULL) { ++x_fore; x_curr = x_curr->e_next; }   <* 
+       *> x_curr = e_tword; while (x_curr != NULL) { ++x_back; x_curr = x_curr->e_prev; }   <*/
       snprintf (unit_answer, LEN_FULL, "WORDS e_count    : %4dn, %4df, %4db", e_nword, x_fore, x_back);
    }
    else if (strcmp(a_question, "g_count"       ) == 0) {
-      x_curr = g_hword; while (x_curr != NULL) { ++x_fore; x_curr = x_curr->g_next; }
-      x_curr = g_tword; while (x_curr != NULL) { ++x_back; x_curr = x_curr->g_prev; }
+      /*> x_curr = g_hword; while (x_curr != NULL) { ++x_fore; x_curr = x_curr->g_next; }   <* 
+       *> x_curr = g_tword; while (x_curr != NULL) { ++x_back; x_curr = x_curr->g_prev; }   <*/
       snprintf (unit_answer, LEN_FULL, "WORDS g_count    : %4dn, %4df, %4db", g_nword, x_fore, x_back);
    }
    else if   (strncmp (a_question, "e_entry"   , 20)  == 0) {
-      x_curr = e_hword;
-      while (x_curr != NULL) {
-         if (c == a_num)   break;
-         x_curr = x_curr->e_next;
-         ++c;
-      }
-      if (x_curr == NULL)  snprintf (unit_answer, LEN_FULL, "WORDS eng   (%2d) :  -[]                       -[]                      []", a_num);
-      else {
-         sprintf  (s, "%2d[%.20s]", x_curr->e_len, x_curr->english);
-         sprintf  (t, "%2d[%.20s]", x_curr->g_len, x_curr->gregg);
-         WORDS_drawn_show (x_curr->drawn, x_show);
-         sprintf  (u, "[%.20s]"   , x_show);
-         snprintf (unit_answer, LEN_STR, "WORDS eng   (%2d) : %-24.24s  %-24.24s  %s", a_num, s, t, u);
-      }
+      /*> x_curr = e_hword;                                                                                                                             <* 
+       *> while (x_curr != NULL) {                                                                                                                      <* 
+       *>    if (c == a_num)   break;                                                                                                                   <* 
+       *>    x_curr = x_curr->e_next;                                                                                                                   <* 
+       *>    ++c;                                                                                                                                       <* 
+       *> }                                                                                                                                             <* 
+       *> if (x_curr == NULL)  snprintf (unit_answer, LEN_FULL, "WORDS eng   (%2d) :  -[]                       -[]                      []", a_num);   <* 
+       *> else {                                                                                                                                        <* 
+       *>    sprintf  (s, "%2d[%.20s]", x_curr->e_len, x_curr->english);                                                                                <* 
+       *>    sprintf  (t, "%2d[%.20s]", x_curr->g_len, x_curr->gregg);                                                                                  <* 
+       *>    WORDS_drawn_show (x_curr->drawn, x_show);                                                                                                  <* 
+       *>    sprintf  (u, "[%.20s]"   , x_show);                                                                                                        <* 
+       *>    snprintf (unit_answer, LEN_STR, "WORDS eng   (%2d) : %-24.24s  %-24.24s  %s", a_num, s, t, u);                                             <* 
+       *> }                                                                                                                                             <*/
    }
    else if   (strncmp (a_question, "g_entry"   , 20)  == 0) {
-      x_curr = g_hword;
-      while (x_curr != NULL) {
-         if (c == a_num)   break;
-         x_curr = x_curr->g_next;
-         ++c;
-      }
-      if (x_curr == NULL)  snprintf (unit_answer, LEN_FULL, "WORDS gregg (%2d) :  -[]                       -[]                      []", a_num);
-      else {
-         sprintf  (s, "%2d[%.20s]", x_curr->e_len, x_curr->english);
-         sprintf  (t, "%2d[%.20s]", x_curr->g_len, x_curr->gregg);
-         WORDS_drawn_show (x_curr->drawn, x_show);
-         sprintf  (u, "[%.20s]"   , x_show);
-         snprintf (unit_answer, LEN_STR, "WORDS gregg (%2d) : %-24.24s  %-24.24s  %s", a_num, s, t, u);
-      }
+      /*> x_curr = g_hword;                                                                                                                             <* 
+       *> while (x_curr != NULL) {                                                                                                                      <* 
+       *>    if (c == a_num)   break;                                                                                                                   <* 
+       *>    x_curr = x_curr->g_next;                                                                                                                   <* 
+       *>    ++c;                                                                                                                                       <* 
+       *> }                                                                                                                                             <* 
+       *> if (x_curr == NULL)  snprintf (unit_answer, LEN_FULL, "WORDS gregg (%2d) :  -[]                       -[]                      []", a_num);   <* 
+       *> else {                                                                                                                                        <* 
+       *>    sprintf  (s, "%2d[%.20s]", x_curr->e_len, x_curr->english);                                                                                <* 
+       *>    sprintf  (t, "%2d[%.20s]", x_curr->g_len, x_curr->gregg);                                                                                  <* 
+       *>    WORDS_drawn_show (x_curr->drawn, x_show);                                                                                                  <* 
+       *>    sprintf  (u, "[%.20s]"   , x_show);                                                                                                        <* 
+       *>    snprintf (unit_answer, LEN_STR, "WORDS gregg (%2d) : %-24.24s  %-24.24s  %s", a_num, s, t, u);                                             <* 
+       *> }                                                                                                                                             <*/
    }
    /*---(complete)-----------------------*/
    return unit_answer;

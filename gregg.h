@@ -37,8 +37,8 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "5.--= generalization for broader use"
 #define     P_VERMINOR  "5.4 = update for use as coding example"
-#define     P_VERNUM    "5.4c"
-#define     P_VERTXT    "dictionary format is coming to a nice state"
+#define     P_VERNUM    "5.4d"
+#define     P_VERTXT    "completely transitioned to ySORT for sort/search (very nice)"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -826,16 +826,6 @@ struct cWORD {
    /*---(btree)-------------*/
    tSORT      *ysort_e;
    tSORT      *ysort_g;
-   /*---(btree)----------------*/
-   tWORD     *e_prev;
-   tWORD     *e_next;
-   tWORD     *e_left;
-   tWORD     *e_right;
-   /*---(btree)----------------*/
-   tWORD     *g_prev;
-   tWORD     *g_next;
-   tWORD     *g_left;
-   tWORD     *g_right;
    /*---(done)-----------------*/
 };
 
