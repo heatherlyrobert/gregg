@@ -5,6 +5,7 @@
 
 
 tMY  my;
+char      g_print     [LEN_RECD];
 
 
 int       out_start       = 0;
@@ -74,6 +75,7 @@ PROG__header            (void)
    DEBUG_PROG   yLOG_info     ("yGLTEX"  , yGLTEX_version    ());
    DEBUG_PROG   yLOG_note     ("custom other");
    DEBUG_PROG   yLOG_info     ("yPARSE"  , yPARSE_version    ());
+   DEBUG_PROG   yLOG_info     ("ySORT"   , ySORT_version     ());
    /*---(complete)-----------------------*/
    DEBUG_PROG   yLOG_exit  (__FUNCTION__);
    return 0;
@@ -150,6 +152,8 @@ PROG__init              (int a_argc, char *a_argv[])
    /*> my.ratio        = GREGG_WACOM;                                                 <*/
    my.ratio        = 10;
    BASE_config     (10.0, 2.0, 70.0);
+   WORDS_init      ();
+   DICT_init       ();
    /*---(other)-----------------------*/
    strlcpy (my.words, "", LEN_RECD);
    strlcpy (my.guide, "", LEN_RECD);
@@ -259,7 +263,6 @@ PROG__begin             (void)
    char        rc          =    0;
    DEBUG_PROG   yLOG_enter   (__FUNCTION__);
    WORDS_table_ae ();
-   if (my.dict   == 'y')  WORDS_import ();
    DEBUG_PROG   yLOG_exit    (__FUNCTION__);
    return 0;
 }
@@ -334,6 +337,8 @@ PROG_dawn          (void)
    /*> yVIKEYS_cmds_add    ('f', "write"       , ""    , ""     , OUT_append           , "save outline to stroke file");   <*/
    USER_init     ();
    /*---(final program)------------------*/
+   /*> if (my.dict   == 'y')  WORDS_import (NAME_DICT);                               <*/
+   WORDS_import ("/var/lib/gregg/gregg_verb.dict");
    OUT_init      ();
    /*> FILE_rename   ("");                                                            <*/
    if (out_start > 0) o.curr = out_start;

@@ -31,6 +31,9 @@ PROG__unit_loud     (void)
    yURG_by_name  ("calc"         , YURG_ON);
    yURG_by_name  ("match"        , YURG_ON);
    yURG_by_name  ("data"         , YURG_ON);
+   yURG_by_name  ("ymode"        , YURG_ON);
+   yURG_by_name  ("ykeys"        , YURG_ON);
+   yURG_by_name  ("yview"        , YURG_ON);
    PROG_startup (x_narg, x_args);
    my.dict = '-';
    return 0;

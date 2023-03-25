@@ -1,6 +1,12 @@
 /*============================---(source-start)---============================*/
-
 #include "gregg.h"
+
+/*
+ * metis § dn4·· § add A, E, I for backside a, e, i (5th, pg 50)                          § N2O3cE §  · §
+ *
+ *
+ */
+
 
 
 #define      NN            3

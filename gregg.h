@@ -37,8 +37,8 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "5.--= generalization for broader use"
 #define     P_VERMINOR  "5.4 = update for use as coding example"
-#define     P_VERNUM    "5.4b"
-#define     P_VERTXT    "updated to latest vi-keys for opengl"
+#define     P_VERNUM    "5.4c"
+#define     P_VERTXT    "dictionary format is coming to a nice state"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -115,6 +115,7 @@
  *      - cursive      :   23   wpm
  *      - typing       :   35   wpm
  *      - keyboading   :   50+  wpm
+ *      - speaking     :   100+ wpm (100-130wpm) not prepared speech/lecture
  *      - gregg        :   150+ wpm (better in non-transcription mode)
  *      - max gregg    :   285  wpm (world class with 98% accuracy)
  *
@@ -262,40 +263,21 @@
 #include    <make_opengl.h>             /* heatherly opengl standard headers     */
 
 
-/*===[[ CUSTOM LIBRARIES ]]===================================================*/
-/*---(custom core)-----------------------*/
-/*> #include    <yURG.h>              /+ heatherly urgent processing              +/   <* 
- *> #include    <yLOG.h>              /+ heatherly program logging                +/   <* 
- *> #include    <ySTR.h>              /+ heatherly string processing              +/   <*/
-/*---(vi-keys foundation)----------------*/
-/*> #include    <yMODE.h>             /+ heatherly vikeys mode tracking           +/   <* 
- *> #include    <yKEYS.h>             /+ heatherly vikeys key handling            +/   <* 
- *> #include    <yFILE.h>             /+ heatherly vikeys content file handling   +/   <* 
- *> #include    <yVIEW.h>             /+ heatherly vikeys view management         +/   <*/
-/*---(vi-keys major)---------------------*/
-/*> #include    <yMAP.h>              /+ heatherly vikeys location management     +/   <* 
- *> #include    <yCMD.h>              /+ heatherly vikeys command processing      +/   <* 
- *> #include    <yMACRO.h>            /+ heatherly vikeys macro processing        +/   <* 
- *> #include    <ySRC.h>              /+ heatherly vikeys source editing          +/   <* 
- *> #include    <yMARK.h>             /+ heatherly vikeys search and marking      +/   <*/
-/*---(custom opengl)---------------------*/
-/*> #include    <yVIOPENGL.h>    /+ heatherly vikeys curses handler          +/        <* 
- *> #include    <yX11.h>         /+ CUSTOM  heatherly xlib/glx setup/teardown     +/   <* 
- *> #include    <yFONT.h>        /+ CUSTOM  heatherly texture-mapped fonts        +/   <* 
- *> #include    <yCOLOR.h>       /+ CUSTOM  heatherly opengl color handling       +/   <* 
- *> #include    <yGLTEX.h>       /+ CUSTOM  heatherly texture handling            +/   <*/
-/*---(custom other)----------------------*/
-/*> #include    <yVAR.h>         /+ CUSTOM : heatherly variable testing           +/   <*/
 #include    <yPARSE.h>       /* heatherly file reading and writing      */
 #include    <ySORT.h>        /* CUSTOM  heatherly sort and search             */
+#include    <yDLST_solo.h>   /* heatherly                                     */
 
 
+#define     B_ENGLISH      'e'
+#define     B_GREGG        'g'
 
 #define     LEN_HUGE     10000
 #define     LEN_RECD      2000
 #define     LEN_STR        200
 #define     LEN_DESC       100
 #define     LEN_LABEL       20
+
+#define     NAME_DICT    "/var/lib/gregg/gregg.dict"
 
 typedef     const char          cchar;
 typedef     const int           cint;
@@ -768,15 +750,59 @@ extern tOUTLINE  o;
 #define     COLOR_WARN          'W'
 
 
-#define     PARTS_OF_SPEECH     "-npvjdeci"
 
+typedef struct cPARTS  tPARTS;
+struct cPARTS {
+   char        abbr;
+   char        sub;  
+   char        name        [LEN_LABEL];
+   int         count;
+   int         scount;
+};
+extern tPARTS  g_parts  [LEN_HUND];
+extern char    PARTS_OF_SPEECH [LEN_LABEL];
+
+typedef struct cSOURCE  tSOURCE;
+struct cSOURCE {
+   char        abbr;
+   char        source      [LEN_TITLE];
+   int         count;
+};
+extern tSOURCE  g_source   [LEN_LABEL];
+
+typedef struct cGRPS  tGRPS;
+struct cGRPS {
+   char        abbr;
+   char        grp;  
+   char        name        [LEN_TITLE];
+   int         count;
+};
+extern tGRPS  g_grps  [LEN_HUND];
+
+typedef struct cTYPES    tTYPES;
+struct cTYPES {
+   char        abbr;
+   char        source      [LEN_TITLE];
+   int         count;
+};
+extern tTYPES  g_types  [LEN_TERSE];
+
+typedef struct cVARY   tVARY;
+struct cVARY {
+   char        name        [LEN_SHORT];
+   char        suffix      [LEN_TERSE];
+   char        meaning     [LEN_LABEL];
+   char        endings     [LEN_DESC];
+   char        example     [LEN_HUND];
+};
+extern tVARY  g_varies [LEN_DESC];
 
 
 /*---(words structure)--------------------------*/
 #define  MAX_WORDS      5000
 #define  MAX_LEN          30
-typedef struct cWORDS  tWORDS;
-struct cWORDS {
+typedef struct cWORD  tWORD;
+struct cWORD {
    /*---(header)---------------*/
    char       *english;                     /* english word                   */
    char        e_len;
@@ -785,50 +811,52 @@ struct cWORDS {
    char        g_len;
    llong       g_key;
    short       drawn       [LEN_LABEL];     /* gregg as drawn                 */
-   /*---(info)-----------------*/
-   char        part;                        /* primary part of speech         */
    /*---(source)---------------*/
-   /*> uchar       ver;                                                               <* 
-    *> uchar       book;                                                              <* 
-    *> short       page;                                                              <* 
-    *> uchar       type;                                                              <*/
-   /*---(difficulty)-----------*/
-   /*> uchar       diff;                                                              <* 
-    *> uchar       simp;                                                              <* 
-    *> uchar       x3rd;                                                              <* 
-    *> uchar       x4th;                                                              <* 
-    *> uchar       top;                                                               <*/
-   /*---(other)----------------*/
-   /*> int         num;                                                                <* 
-    *> char        version;                     /+ version of gregg shorthand     +/   <* 
-    *> char        source;                      /+ type of source text            +/   <* 
-    *> tWORDS     *nextg;                                                              <* 
-    *> tWORDS     *nexte;                                                              <* 
-    *> int         count;                                                              <*/
+   short       line;
+   char        vary        [LEN_SHORT];     /* variation                      */
+   tWORD      *base;
+   tWORD      *next;
+   /*---(categories)-----------*/
+   char        part;                        /* primary part of speech         */
+   char        sub;                         /* sub-part                       */
+   char        grp;                         /* grouping by frequency          */
+   char        src;                         /* source version of gregg        */
+   char        cat;                         /* word-sign, normal, custom, ... */
+   short       page;                        /* location within source         */
+   /*---(btree)-------------*/
+   tSORT      *ysort_e;
+   tSORT      *ysort_g;
    /*---(btree)----------------*/
-   tWORDS     *e_prev;
-   tWORDS     *e_next;
-   tWORDS     *e_left;
-   tWORDS     *e_right;
+   tWORD     *e_prev;
+   tWORD     *e_next;
+   tWORD     *e_left;
+   tWORD     *e_right;
    /*---(btree)----------------*/
-   tWORDS     *g_prev;
-   tWORDS     *g_next;
-   tWORDS     *g_left;
-   tWORDS     *g_right;
+   tWORD     *g_prev;
+   tWORD     *g_next;
+   tWORD     *g_left;
+   tWORD     *g_right;
    /*---(done)-----------------*/
 };
 
-extern tWORDS *e_hword;
-extern tWORDS *e_tword;
-extern tWORDS *e_cword;
+extern tWORD *e_hword;
+extern tWORD *e_tword;
+extern tWORD *e_cword;
 extern int     e_nword;
 extern int     e_iword;
 
-extern tWORDS *g_hword;
-extern tWORDS *g_tword;
-extern tWORDS *g_cword;
+extern tWORD *g_hword;
+extern tWORD *g_tword;
+extern tWORD *g_cword;
 extern int     g_nword;
 extern int     g_iword;
+
+extern     char      g_print     [LEN_RECD];
+
+
+#define    MAX_FIELD    20
+extern char   s_fields  [MAX_FIELD][LEN_TITLE];
+extern char   s_nfield;
 
 
 /*============================--------------------============================*/
@@ -1043,13 +1071,23 @@ char        CIRCLE_config           (int a_min, int a_max);
 char        CIRCLE_driver_OLD       (void);
 char        CIRCLE_driver           (void);
 
+/*===[[ gregg_6words.c ]]=====================================================*/
 /*345678901-12345678901-12345678901-12345678901-12345678901-12345678901-123456*/
-char        WORDS__new              (tWORDS **a_word, char *a_english, char *a_gregg);
-/*> char        WORDS_dict_source       (tWORDS *a_new, uchar *a_source);             <*/
-/*> char        WORDS_dict_notes        (tWORDS *a_new, uchar *a_notes);              <*/
-char        WORDS_dict_parse        (uchar *a_recd);
-char        WORDS_import            (void);
-char        WORDS_dict_list         (void);
+/*---(program)--------------*/
+char        WORDS_init              (void);
+/*---(memory)---------------*/
+char        WORDS__new              (char *a_english, char *a_gregg, tWORD **r_word);
+char        WORDS__free             (tWORD **b_word);
+char        WORDS_purge             (void);
+/*---(find)-----------------*/
+int         WORDS_eng_count         (void);
+char        WORDS_eng_by_name       (uchar *a_text, tWORD **r_word);
+char        WORDS_eng_by_index      (int n, tWORD **r_word);
+char        WORDS_eng_by_cursor     (char a_dir, tWORD **r_word);
+char        WORDS_detail            (tWORD *a_word, char a_out [LEN_HUND]);
+char*       WORDS_entry             (int n);
+/*> char        WORDS_dict_source       (tWORD *a_new, uchar *a_source);             <*/
+/*> char        WORDS_dict_notes        (tWORD *a_new, uchar *a_notes);              <*/
 char        WORDS_table_ae          (void);
 char        WORDS_drawn_show        (short a_drawn [], uchar *a_out);
 char        WORDS_drawn_fix         (uchar *a_index, short a_drawn []);
@@ -1130,18 +1168,18 @@ char*       REV__unit           (char *a_question, int a_num);
 
 
 /*---(generate keys)--------*/
-llong       BTREE_english2key       (uchar *a_word);
-llong       BTREE_gregg2key         (uchar *a_word, uchar *a_index);
+/*> llong       BTREE_english2key       (uchar *a_word);                              <*/
+/*> llong       BTREE_gregg2key         (uchar *a_word, uchar *a_index);              <*/
 /*---(sort)-----------------*/
-char        BTREE_dgnome            (char a_type);
+/*> char        BTREE_dgnome            (char a_type);                                <*/
 /*---(build)----------------*/
-char        BTREE_build             (char a_type);
-char        BTREE_list              (char a_type);
+/*> char        BTREE_build             (char a_type);                                <*/
+/*> char        BTREE_list              (char a_type);                                <*/
 /*---(search)---------------*/
-char        BTREE_by_english        (tWORDS **a_found, char *a_word);
-char        BTREE_by_gregg          (tWORDS **a_found, char *a_word);
+/*> char        BTREE_by_english        (tWORD **a_found, char *a_word);              <*/
+/*> char        BTREE_by_gregg          (tWORD **a_found, char *a_word);              <*/
 /*---(unit_test)------------*/
-char*       BTREE__unit             (char *a_question, int n);
+/*> char*       BTREE__unit             (char *a_question, int n);                    <*/
 /*---(done)-----------------*/
 
 char        STDIN_handler           (void);
@@ -1163,6 +1201,24 @@ char        api_ymap_entry          (char a_axis, ushort a_pos, short *r_ref, uc
 char        api_ymap_placer         (char a_axis, ushort b, ushort c, ushort e);
 char        api_ymap_done           (void);
 /*---(done)-----------------*/
+
+
+char        DICT_init               (void);
+char        DICT__find_speech       (char a_abbr);
+char        DICT__find_sub          (char a_abbr, char a_sub);
+char        DICT__find_grp          (char a_abbr, char a_grp);
+char        DICT__find_source       (char a_source);
+char        DICT__find_type         (char a_type);
+char        DICT__open              (char a_name [LEN_PATH], FILE **r_file);
+char        DICT__close             (FILE **b_file);
+char        DICT__read              (FILE *a_file, short *r_line, char r_recd [LEN_RECD]);
+char        DICT__split             (uchar *a_recd);
+char        DICT__primary           (short a_line, cchar a_english [LEN_TITLE], cchar a_gregg [LEN_TITLE], tWORD **r_word);
+char        DICT__category          (tWORD *a_new, cchar *a_cats);
+char        DICT__variation         (tWORD *a_base, tWORD *a_last, cchar *a_vary, tWORD **r_new);
+char        DICT__parse             (short a_line, uchar *a_recd);
+char        DICT_import             (char a_name [LEN_PATH]);
+char        DICT_list               (void);
 
 
 

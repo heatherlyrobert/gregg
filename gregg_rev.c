@@ -1080,7 +1080,7 @@ REVERSE_english_word    (uchar *a_word, char a_type, char a_skip)
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
    char        rc          =    0;
-   tWORDS     *x_word      = NULL;
+   tWORD     *x_word      = NULL;
    /*---(header)-------------------------*/
    DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
    /*---(defense)------------------------*/
@@ -1091,7 +1091,7 @@ REVERSE_english_word    (uchar *a_word, char a_type, char a_skip)
    }
    DEBUG_OUTP   yLOG_info    ("a_word"    , a_word);
    /*---(look it up)---------------------*/
-   rc = BTREE_by_english (&x_word, a_word);
+   /*> rc = BTREE_by_english (&x_word, a_word);                                       <*/
    DEBUG_OUTP   yLOG_value   ("btree"     , rc);
    DEBUG_OUTP   yLOG_point   ("x_word"    , x_word);
    --rce;  if (rc < 0 || x_word == NULL) {

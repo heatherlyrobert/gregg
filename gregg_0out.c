@@ -8,8 +8,7 @@
 static FILE  *s_file = NULL;
 static char   s_recd [LEN_HUGE] = "";
 static int    s_len  =    0;
-static char   s_fields    [20][LEN_RECD];
-static int    s_nfield    =   0;
+
 
 tOUTLINE  o;
 

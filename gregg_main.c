@@ -43,7 +43,9 @@ main                    (int a_argc, char *a_argv [])
       rc = STDIN_handler ();
       break;
    case RUN_WORDS   :
-      WORDS_dict_list ();
+      /*> WORDS_import ("/var/lib/gregg/gregg_verb.dict");                            <*/
+      WORDS_import ("/var/lib/gregg/gregg_wordsign.dict");
+      DICT_list ();
       break;
    }
    /*---(wrap-up)------------------------*/
