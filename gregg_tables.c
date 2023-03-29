@@ -3,7 +3,7 @@
 
 /*
  * metis § dn4·· § add A, E, I for backside a, e, i (5th, pg 50)                          § N2O3cE §  · §
- *
+ * metis § ····· § letters and combinations should lock into ranges for beg-end dir       § N2P2Od §  · §
  *
  */
 

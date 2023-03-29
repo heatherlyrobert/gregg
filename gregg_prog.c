@@ -2,6 +2,13 @@
 #include    "gregg.h"
 
 
+/*
+ * metis § dc8·· § add yJOBS for gathering, world, etc                                    § N2O4tO §  · §
+ * metis § dc8·· § work from dictionary database for normal runs                          § N2O4ti §  · §
+ *
+ *
+ *
+ */
 
 
 tMY  my;
@@ -32,6 +39,16 @@ PROG_version         (void)
 #endif
    snprintf (verstring, 100, "%s   %s : %s", t, P_VERNUM, P_VERTXT);
    return verstring;
+}
+
+char
+PROG_reset_yjobs        (void)
+{
+   yJOBS_reset  (&(my.run_as), &(my.run_mode), &(my.run_file));
+   my.run_as   = IAM_GREGG;
+   my.run_mode = ACT_NONE;
+   strcpy (my.run_file, "");
+   return 0;
 }
 
 
@@ -76,6 +93,7 @@ PROG__header            (void)
    DEBUG_PROG   yLOG_note     ("custom other");
    DEBUG_PROG   yLOG_info     ("yPARSE"  , yPARSE_version    ());
    DEBUG_PROG   yLOG_info     ("ySORT"   , ySORT_version     ());
+   DEBUG_PROG   yLOG_info     ("yJOBS"   , yJOBS_version     ());
    /*---(complete)-----------------------*/
    DEBUG_PROG   yLOG_exit  (__FUNCTION__);
    return 0;
@@ -133,6 +151,13 @@ PROG__init              (int a_argc, char *a_argv[])
    strcpy (win.face_pretty, "comfortaa");
    /*> strcpy (win.face_fixed, "hack");                                               <*/
    strcpy (win.face_fixed, "shrike");
+   /*---(yJOB config)--------------------*/
+   PROG_reset_yjobs ();
+   my.run_uid     = getuid ();
+   my.run_pid     = getpid ();
+   my.run_time    = time (NULL);
+   yEXEC_heartbeat (my.run_pid, my.run_time, NULL, NULL, my.heartbeat);
+   DEBUG_PROG  yLOG_char    ("run_as"    , my.run_as);
    /*---(reporting flags)-------------*/
    my.run_mode     = RUN_NORMAL;
    my.time_lapse   = '-';
@@ -172,49 +197,53 @@ PROG__init              (int a_argc, char *a_argv[])
       DEBUG_PROG   yLOG_exitr    (__FUNCTION__, rce);
       return rce;
    }
-   /*> rc = FILE_init      ();                                                        <* 
-    *> DEBUG_PROG   yLOG_value    ("yFILE"     , rc);                                 <* 
-    *> --rce;  if (rc < 0) {                                                          <* 
-    *>    DEBUG_PROG   yLOG_exitr    (__FUNCTION__, rce);                             <* 
-    *>    return rce;                                                                 <* 
-    *> }                                                                              <*/
-   /*---(setup yVIKEYS)------------------*/
-   DEBUG_PROG   yLOG_note  ("prepare modes");
-   /*> yVIKEYS_init   (MODE_GOD);                                                     <*/
-   /*> yGOLEM_init    ();                                                             <*/
-   /*> yVIKEYS_mode_init    ();                                                       <* 
-    *> yVIKEYS_mode_enter   (MODE_GOD);                                               <*/
+   /*---(yJOBS config)-------------------*/
+   rc = yJOBS_runas (a_argv [0], &(my.run_as), P_HEADERS, NULL);
+   DEBUG_PROG  yLOG_char    ("run_as"    , my.run_as);
    /*---(complete)-----------------------*/
    DEBUG_PROG   yLOG_exit  (__FUNCTION__);
    return 0;
 }
 
+#define  TWOARG  if (++i >= a_argc)  yURG_err (YURG_FATAL, "%s argument requires an additional string", a, --rc); else 
+
 char
 PROG__args              (int a_argc, char *a_argv[])
 {
    /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
    char        rc          =    0;
    int         i           =    0;
    char       *a           = NULL;
    char       *b           = NULL;
+   int         l           =    0;
    int         x_total     =    0;
    int         x_args      =    0;
    uchar       x_name      [LEN_FULL]  = "";
    uchar       t           [LEN_FULL]  = "";
    /*---(header)-------------------------*/
-   /*> printf ("entering PROG_args\n");                                               <*/
    DEBUG_ARGS  yLOG_enter   (__FUNCTION__);
    /*---(process)------------------------*/
    for (i = 1; i < a_argc; ++i) {
       /*---(set up args)-----------------*/
-      DEBUG_ARGS  yLOG_value   ("check----" , i);
       a = a_argv [i];
-      if (i + 1 < a_argc)  b = a_argv [i + 1];
-      else                 b = NULL;
-      DEBUG_ARGS  yLOG_info    ("a"         , a);
-      DEBUG_ARGS  yLOG_info    ("b"         , b);
+      if (a == NULL) {
+         yURG_err ('f', "arg %d is NULL", i);
+         DEBUG_PROG   yLOG_note    ("FATAL, found a null argument, really bad news");
+         DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+         return rce;
+      }
       ++x_total;
-      /*---(check vikeys)----------------*/
+      /*---(screen urgents)--------------*/
+      if (a [0] == '@')  continue;
+      /*---(prepare)---------------------*/
+      DEBUG_ARGS  yLOG_info    ("cli arg", a);
+      ++x_args;
+      if (i < a_argc - 1)  b = a_argv [i + 1];
+      else                 b = NULL;
+      DEBUG_ARGS  yLOG_info    ("two arg", b);
+      l = strlen(a);
+      /*---(yKEYS arguments)------------*/
       rc = yKEYS_arg_handle (&i, a, b);
       DEBUG_ARGS  yLOG_value   ("ykeys"     , rc);
       if (rc == 1) {
@@ -222,13 +251,30 @@ PROG__args              (int a_argc, char *a_argv[])
          DEBUG_ARGS  yLOG_value   ("bumped i"  , i);
          continue;
       }
-      /*---(filter)----------------------*/
-      if (a[0] == '@') {
-         DEBUG_ARGS  yLOG_note    ("skipped urgent");
+      if (rc < 0) {
+         DEBUG_ARGS  yLOG_note    ("yKEYS_arg_handle found trouble");
+         DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+         return rce;
+      }
+      /*---(yJOBS arguments)-------------*/
+      ++x_args;
+      DEBUG_ARGS  yLOG_info     ("argument"  , a);
+      rc = yJOBS_argument (&i, a, b, &(my.run_as), &(my.run_mode), my.run_file);
+      DEBUG_ARGS  yLOG_value    ("rc"        , rc);
+      if (rc >= 1) {
+         DEBUG_ARGS  yLOG_note    ("handled by yJOBS_argument");
+         DEBUG_ARGS  yLOG_value   ("bumped i"  , i);
          continue;
+      }
+      if (rc < 0) {
+         DEBUG_ARGS  yLOG_note    ("yJOBS_argument found trouble");
+         DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
+         return rce;
       }
       /*---(local)-----------------------*/
       DEBUG_ARGS  yLOG_note    ("check for local argument handling");
+      --rce;
+      rc = 0;
       ++x_args;
       if      (strcmp (a, "--rptg-touch"        ) == 0)   my.rptg_touch   = 'y';
       else if (strcmp (a, "--rptg-raw"          ) == 0)   my.rptg_raw     = 'y';
@@ -245,6 +291,13 @@ PROG__args              (int a_argc, char *a_argv[])
       else if (strcmp (a, "--exact"             ) == 0)   my.run_mode     = RUN_EXACT;
       else if (strcmp (a, "--reverse"           ) == 0)   my.run_mode     = RUN_REVERSE;
       else if (strcmp (a, "--words"             ) == 0)   my.run_mode     = RUN_WORDS;
+      /*---(catch two-arg errors)--------*/
+      if (rc < 0)  {
+         DEBUG_PROG  yLOG_note  ("two arg test failed");
+         DEBUG_PROG  yLOG_exitr (__FUNCTION__, rce);
+         return rce;
+      }
+      /*---(done)------------------------*/
    }
    DEBUG_ARGS  yLOG_value  ("entries"   , x_total);
    DEBUG_ARGS  yLOG_value  ("arguments" , x_args);
@@ -337,8 +390,8 @@ PROG_dawn          (void)
    /*> yVIKEYS_cmds_add    ('f', "write"       , ""    , ""     , OUT_append           , "save outline to stroke file");   <*/
    USER_init     ();
    /*---(final program)------------------*/
-   /*> if (my.dict   == 'y')  WORDS_import (NAME_DICT);                               <*/
-   WORDS_import ("/var/lib/gregg/gregg_verb.dict");
+   /*> if (my.dict   == 'y')  DICT_import  (NAME_DICT);                               <*/
+   DICT_import  ("/var/lib/gregg/gregg_verb.dict");
    OUT_init      ();
    /*> FILE_rename   ("");                                                            <*/
    if (out_start > 0) o.curr = out_start;

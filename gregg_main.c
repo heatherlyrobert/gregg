@@ -9,6 +9,7 @@ main                    (int a_argc, char *a_argv [])
    /*---(locals)-----------+-----------+-*/
    char        rc          = 0;
    char        t           [LEN_HUGE]  = "";
+   char        x_show      =  '-';
    /*---(debugging)----------------------*/
    rc = PROG_urgents (a_argc, a_argv);
    DEBUG_PROG   yLOG_value    ("urgents"   , rc);
@@ -17,7 +18,10 @@ main                    (int a_argc, char *a_argv [])
    rc = PROG_startup (a_argc, a_argv);
    DEBUG_PROG   yLOG_value    ("startup"   , rc);
    if (rc <  0) { PROG_shutdown (); return -2; }
-   /*---(main-loop)----------------------*/
+   /*---(driver)-------------------------*/
+   rc = yJOBS_driver (P_ONELINE, gregg_yjobs);
+   DEBUG_PROG   yLOG_value    ("driver"    , rc);
+   IF_RUNNING   x_show = 'y';
 
    /*> strlcpy  (t, ""                                      , LEN_HUGE);              <* 
     *> strlcat  (t, "o ox·r ok·g k·o·k r·ok·k "             , LEN_HUGE);              <* 
@@ -28,26 +32,44 @@ main                    (int a_argc, char *a_argv [])
     *> REVERSE_page    (t, SHAPE_DRAW, 1, 'y');                                       <*/
 
 
-   switch (my.run_mode) {
-   case RUN_NORMAL  :
+   /*---(main-loop)----------------------*/
+   if (x_show == 'y') {
+      /*---(header)-------------------------*/
+      DEBUG_DATA   yLOG_enter    (__FUNCTION__);
+      /*---(visual setup)-------------------*/
       rc = PROG_dawn    ();
       DEBUG_PROG   yLOG_value    ("dawn"      , rc);
       if (rc <  0) { PROG_shutdown (); return -3; }
-      rc = yVIOPENGL_main ("500us", "10ms", NULL);
+      /*---(main-loop)----------------------*/
+      rc = yVIOPENGL_main  ("keys", "every", NULL);
       DEBUG_PROG   yLOG_value    ("main"      , rc);
+      /*---(visual teardown)----------------*/
       rc = PROG_dusk     ();
       DEBUG_PROG   yLOG_value    ("dusk"      , rc);
-      break;
-   case RUN_CONVERT : case RUN_EXACT   : case RUN_REVERSE :
-   case RUN_ENGLISH : case RUN_GREGG   :
-      rc = STDIN_handler ();
-      break;
-   case RUN_WORDS   :
-      /*> WORDS_import ("/var/lib/gregg/gregg_verb.dict");                            <*/
-      WORDS_import ("/var/lib/gregg/gregg_wordsign.dict");
-      DICT_list ();
-      break;
+      /*---(footer)-------------------------*/
+      DEBUG_DATA   yLOG_exit     (__FUNCTION__);
+      /*---(done)---------------------------*/
    }
+   /*> switch (my.run_mode) {                                                                   <* 
+    *> case RUN_NORMAL  :                                                                       <* 
+    *>    rc = PROG_dawn    ();                                                                 <* 
+    *>    DEBUG_PROG   yLOG_value    ("dawn"      , rc);                                        <* 
+    *>    if (rc <  0) { PROG_shutdown (); return -3; }                                         <* 
+    *>    rc = yVIOPENGL_main ("500us", "10ms", NULL);                                          <* 
+    *>    DEBUG_PROG   yLOG_value    ("main"      , rc);                                        <* 
+    *>    rc = PROG_dusk     ();                                                                <* 
+    *>    DEBUG_PROG   yLOG_value    ("dusk"      , rc);                                        <* 
+    *>    break;                                                                                <* 
+    *> /+> case RUN_CONVERT : case RUN_EXACT   : case RUN_REVERSE :                       <*    <* 
+    *>  *> case RUN_ENGLISH : case RUN_GREGG   :                                          <*    <* 
+    *>  *>    rc = STDIN_handler ();                                                      <*    <* 
+    *>  *>    break;                                                                      <+/   <* 
+    *> case RUN_WORDS   :                                                                       <* 
+    *>    /+> DICT_import  ("/var/lib/gregg/gregg_verb.dict");                            <+/   <* 
+    *>    DICT_import  ("/var/lib/gregg/gregg_wordsign.dict");                                  <* 
+    *>    DICT_list ();                                                                         <* 
+    *>    break;                                                                                <* 
+    *> }                                                                                        <*/
    /*---(wrap-up)------------------------*/
    rc = PROG_shutdown ();
    /*---(complete)-----------------------*/

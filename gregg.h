@@ -10,18 +10,18 @@
 #define     P_SUBJECT   "hyper-efficient shorthand"
 #define     P_PURPOSE   "hyper-efficient, effective pen-based english input"
 /*········· ··········· ´·····························´········································*/
-#define     P_NAMESAKE  "xenophon-strategos (greek general)"
-#define     P_PRONOUNCE ""
-#define     P_HERITAGE  "xenophon was a ancient greek general, mercenary, philosopher, and historian"
+#define     P_NAMESAKE  "athene-makhanitis (skilled inventor)"
+#define     P_PRONOUNCE "uh·thee·nay"
+#define     P_HERITAGE  "athene is the virgin goddess of protection, civilization, and craft"
 #define     P_BRIEFLY   ""
-#define     P_IMAGERY   "brilliant, hardened, and practical military man who found fame as a historian"
-#define     P_REASON    "xenephon invented the earliest known western shorthand system"
+#define     P_IMAGERY   "stately woman armed with sheild, spear, crested helm, and aigis cloak"
+#define     P_REASON    "goddess of wisdom, strength, invention, and learning"
 /*········· ··········· ´·····························´········································*/
 #define     P_ONELINE   P_NAMESAKE " " P_SUBJECT
 /*········· ··········· ´·····························´········································*/
-#define     P_HOMEDIR   "/home/system/gregg.shorthand_interpreter;
+#define     P_HOMEDIR   "/home/system/gregg.shorthand_interpreter"
 #define     P_BASENAME  "gregg"
-#define     P_FULLPATH  "/usr/local/bin/gregg""
+#define     P_FULLPATH  "/usr/local/bin/gregg"
 #define     P_SUFFIX    "···"
 #define     P_CONTENT   "···"
 /*········· ··········· ´·····························´········································*/
@@ -37,8 +37,8 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "5.--= generalization for broader use"
 #define     P_VERMINOR  "5.4 = update for use as coding example"
-#define     P_VERNUM    "5.4d"
-#define     P_VERTXT    "completely transitioned to ySORT for sort/search (very nice)"
+#define     P_VERNUM    "5.4e"
+#define     P_VERTXT    "captured 98pct of gregg suffix categories, may rationalize later"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -265,11 +265,14 @@
 
 #include    <yPARSE.h>       /* heatherly file reading and writing      */
 #include    <ySORT.h>        /* CUSTOM  heatherly sort and search             */
+#include    <yJOBS.h>             /* heatherly job execution and control      */
+#include    <yEXEC.h>             /* heatherly job execution and control      */
 #include    <yDLST_solo.h>   /* heatherly                                     */
 
 
 #define     B_ENGLISH      'e'
 #define     B_GREGG        'g'
+#define     B_UNIQUE       'q'
 
 #define     LEN_HUGE     10000
 #define     LEN_RECD      2000
@@ -333,7 +336,15 @@ extern tWIN  win;
 typedef     struct      cMY   tMY;
 struct cMY {
    /*---(mode)-----------------*/
+   char        run_as;                      /* khronos, eos, heracles, ...    */
    char        run_mode;
+   char        run_file    [LEN_PATH];      /* file to act on                 */
+   int         run_uid;                     /* uid of person who launched     */
+   int         run_pid;                     /* current process id             */
+   long        run_time;                    /* time of program launch         */
+   char        cwd         [LEN_PATH];      /* current working directory      */
+   char        heartbeat   [LEN_HUND];      /* latest heartbeat               */
+   /*---(other)----------------*/
    char        time_lapse;
    short       time_point;
    float       zoom;
@@ -772,12 +783,11 @@ extern tSOURCE  g_source   [LEN_LABEL];
 
 typedef struct cGRPS  tGRPS;
 struct cGRPS {
-   char        abbr;
    char        grp;  
    char        name        [LEN_TITLE];
    int         count;
 };
-extern tGRPS  g_grps  [LEN_HUND];
+extern tGRPS  g_grps  [LEN_LABEL];
 
 typedef struct cTYPES    tTYPES;
 struct cTYPES {
@@ -789,13 +799,21 @@ extern tTYPES  g_types  [LEN_TERSE];
 
 typedef struct cVARY   tVARY;
 struct cVARY {
+   /*---(working)--------------*/
    char        name        [LEN_SHORT];
    char        suffix      [LEN_TERSE];
-   char        meaning     [LEN_LABEL];
-   char        endings     [LEN_DESC];
+   char        also        [LEN_SHORT];
+   /*---(source)---------------*/
+   char        src;                         /* source version of gregg        */
+   short       page;                        /* location within source         */
+   /*---(real)-----------------*/
+   char        endings     [LEN_HUND];
    char        example     [LEN_HUND];
+   int         count;
+   /*---(done)-----------------*/
 };
-extern tVARY  g_varies [LEN_DESC];
+extern tVARY  g_varies [LEN_HUND];
+extern char    VARIATIONS      [LEN_RECD];
 
 
 /*---(words structure)--------------------------*/
@@ -806,40 +824,33 @@ struct cWORD {
    /*---(header)---------------*/
    char       *english;                     /* english word                   */
    char        e_len;
-   llong       e_key;
    uchar      *gregg;                       /* gregg translation              */
    char        g_len;
-   llong       g_key;
+   uchar      *unique;                      /* unique word key                */
    short       drawn       [LEN_LABEL];     /* gregg as drawn                 */
    /*---(source)---------------*/
    short       line;
    char        vary        [LEN_SHORT];     /* variation                      */
    tWORD      *base;
    tWORD      *next;
-   /*---(categories)-----------*/
+   /*---(part-of-speech)-------*/
    char        part;                        /* primary part of speech         */
    char        sub;                         /* sub-part                       */
-   char        grp;                         /* grouping by frequency          */
+   /*---(source)---------------*/
    char        src;                         /* source version of gregg        */
    char        cat;                         /* word-sign, normal, custom, ... */
    short       page;                        /* location within source         */
+   /*---(frequency)------------*/
+   char        grp;                         /* grouping by frequency          */
+   short       freq;                        /* google frequency               */
    /*---(btree)-------------*/
    tSORT      *ysort_e;
    tSORT      *ysort_g;
+   tSORT      *ysort_f;
    /*---(done)-----------------*/
 };
 
-extern tWORD *e_hword;
-extern tWORD *e_tword;
-extern tWORD *e_cword;
-extern int     e_nword;
-extern int     e_iword;
 
-extern tWORD *g_hword;
-extern tWORD *g_tword;
-extern tWORD *g_cword;
-extern int     g_nword;
-extern int     g_iword;
 
 extern     char      g_print     [LEN_RECD];
 
@@ -858,6 +869,7 @@ extern char   s_nfield;
 /*345678901-12345678901-12345678901-12345678901-12345678901-12345678901-123456*/
 /*---(support)---------------------------*/
 char*       PROG_version            (void);
+char        PROG_reset_yjobs        (void);
 /*---(startup)---------------------------*/
 char        PROG__init              (int argc, char *argv[]);
 char        PROG__args              (int argc, char *argv[]);
@@ -1066,7 +1078,7 @@ char        CIRCLE_driver           (void);
 /*---(program)--------------*/
 char        WORDS_init              (void);
 /*---(memory)---------------*/
-char        WORDS__new              (char *a_english, char *a_gregg, tWORD **r_word);
+char        WORDS__new              (char *a_english, char *a_gregg, char a_part, tWORD **r_word);
 char        WORDS__free             (tWORD **b_word);
 char        WORDS_purge             (void);
 /*---(find)-----------------*/
@@ -1196,19 +1208,28 @@ char        api_ymap_done           (void);
 char        DICT_init               (void);
 char        DICT__find_speech       (char a_abbr);
 char        DICT__find_sub          (char a_abbr, char a_sub);
-char        DICT__find_grp          (char a_abbr, char a_grp);
+char        DICT__find_grp          (char a_grp);
 char        DICT__find_source       (char a_source);
 char        DICT__find_type         (char a_type);
+char        DICT__find_variation    (char a_name [LEN_SHORT], char r_suffix [LEN_TERSE], char r_also [LEN_SHORT], char r_alsos [LEN_TERSE]);
 char        DICT__open              (char a_name [LEN_PATH], FILE **r_file);
 char        DICT__close             (FILE **b_file);
 char        DICT__read              (FILE *a_file, short *r_line, char r_recd [LEN_RECD]);
 char        DICT__split             (uchar *a_recd);
-char        DICT__primary           (short a_line, cchar a_english [LEN_TITLE], cchar a_gregg [LEN_TITLE], tWORD **r_word);
+char        DICT__primary           (short a_line, cchar a_english [LEN_TITLE], cchar a_gregg [LEN_TITLE], cchar a_cats [LEN_TITLE], tWORD **r_word);
+char        DICT__category_five     (tWORD *a_new, char l, cchar *a_cats);
+char        DICT__category_six      (tWORD *a_new, char l, cchar *a_cats);
+char        DICT__category_preview  (cchar *a_cats);
 char        DICT__category          (tWORD *a_new, cchar *a_cats);
+char        DICT__variation_quick   (tWORD *a_base, tWORD *a_last, char a_english [LEN_TITLE], char a_vary [LEN_SHORT], char a_suffix [LEN_TERSE], tWORD **r_new);
 char        DICT__variation         (tWORD *a_base, tWORD *a_last, cchar *a_vary, tWORD **r_new);
 char        DICT__parse             (short a_line, uchar *a_recd);
 char        DICT_import             (char a_name [LEN_PATH]);
 char        DICT_list               (void);
+char        DICT_list_all           (void);
+
+
+char        gregg_yjobs             (cchar a_req, cchar *a_data);
 
 
 
