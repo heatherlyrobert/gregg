@@ -156,6 +156,9 @@ DRAW_primary         (float a_mag)
    char     x_on = 'y';
    short    x_xmin, x_xmax, x_wide;
    short    x_ymin, x_ymax, x_tall;
+   int      x = 0, y = 0;
+   float    i = 0, j = 0;
+   char     t      [LEN_LABEL] = "";
    /*---(header)-------------------------*/
    DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
    yVIEW_bounds  (YVIEW_MAIN, NULL, NULL, &x_xmin, &x_xmax, &x_wide, &x_ymin, &x_ymax, &x_tall);
@@ -184,6 +187,207 @@ DRAW_primary         (float a_mag)
    /*---(parts)--------------------------*/
    /*> DRAW_cursor ();                                                                <*/
    OVERLAY_samples ();
+   glEnable      (GL_LINE_STIPPLE);
+   glLineStipple (1, 0x3333);
+   glLineWidth   (0.8);
+   yCOLOR_opengl (YCOLOR_BAS, YCOLOR_MOR, 0.40);
+   for  (x = -500; x <= 500; x += 100) {
+      glPushMatrix    (); {
+         glBegin(GL_LINES); {
+            glVertex3f( x,  500, 250);
+            glVertex3f( x, -500, 250);
+         } glEnd();
+         glTranslatef ( x,    5, 250);
+         sprintf (t, "%4dx", x);
+         yFONT_print(win.font_pretty,   8, YF_BOTLEF, t);
+      } glPopMatrix   ();
+   }
+   for  (y = -500; y <= 500; y += 100) {
+      glPushMatrix    (); {
+         glBegin(GL_LINES); {
+            glVertex3f(  0, y, 250);
+            glVertex3f(500, y, 250);
+         } glEnd();
+         glTranslatef (490, y + 5, 250);
+         sprintf (t, "%4dy", y);
+         yFONT_print(win.font_pretty,   8, YF_BOTRIG, t);
+      } glPopMatrix   ();
+   }
+   glDisable(GL_LINE_STIPPLE);
+   /*> for  (x = -500; x <= 500; x += 100) {                                          <* 
+    *>    for  (y = -500; y <= 500; y += 100) {                                       <* 
+    *>       i = j = 0;                                                               <* 
+    *>       glPushMatrix    (); {                                                    <* 
+    *>          glTranslatef (x, y, 250);                                             <* 
+    *>          sprintf (t, "%4dx, %4dy", x, y);                                      <* 
+    *>          yFONT_print(win.font_pretty,   8, YF_BOTLEF, t);                      <* 
+    *>          CREATE_draw_init  ();                                                 <* 
+    *>          yCOLOR_opengl (YCOLOR_BAS, YCOLOR_MOR, 0.65);                         <* 
+    *>          CREATE_line (SHAPE_DRAW, 0, 20,  1, &i, &j);                          <* 
+    *>          CREATE_draw_wrap  (i, j);                                                <* 
+    *>       } glPopMatrix   ();                                                      <* 
+    *>    }                                                                           <* 
+    *> }                                                                              <*/
+   glPushMatrix    (); {
+      yCOLOR_opengl (YCOLOR_BAS, YCOLOR_MOR, 0.65);
+      glTranslatef (350, 50 , 250);
+      i = j = 0;
+      CREATE_line (0, SHAPE_DRAW,  0, 20, &i, &j);
+      glTranslatef (  0, 15 ,   0);
+      i = j = 0;
+      CREATE_line (0, SHAPE_DRAW, 30, 20, &i, &j);
+      glTranslatef (  0, 15 ,   0);
+      i = j = 0;
+      CREATE_line (0, SHAPE_DRAW, 60, 20, &i, &j);
+      glTranslatef (  0, 15 ,   0);
+      i = j = 0;
+      CREATE_line (0, SHAPE_DRAW, 90, 20, &i, &j);
+   } glPopMatrix   ();
+   glPushMatrix    (); {
+      yCOLOR_opengl (YCOLOR_BAS, YCOLOR_MOR, 0.65);
+      glTranslatef (325, 50 , 250);
+      i = j = 0;
+      CREATE_circle (0, SHAPE_DRAW,  5,  0, &i, &j);
+      glTranslatef (  5, 30 ,   0);
+      i = j = 0;
+      CREATE_circle (0, SHAPE_DRAW, 10,  0, &i, &j);
+   } glPopMatrix   ();
+   glPushMatrix    (); {
+      yCOLOR_opengl (YCOLOR_BAS, YCOLOR_MOR, 0.65);
+      glTranslatef (225, 25, 250);
+      i = j = 0;
+      CREATE_letter (SHAPE_DRAW  , "l", &i, &j);
+      glTranslatef (  7,  4,   0);
+      i = j = 0;
+      CREATE_letter (SHAPE_DRAW  , "r", &i, &j);
+      glTranslatef (  6,  3,   0);
+      i = j = 0;
+      CREATE_letter (SHAPE_DRAW  , "o", &i, &j);
+      glTranslatef ( 20, 20,   0);
+      i = j = 0;
+      CREATE_letter (SHAPE_DRAW  , "g", &i, &j);
+      glTranslatef ( 13, -3,   0);
+      i = j = 0;
+      CREATE_letter (SHAPE_DRAW  , "k", &i, &j);
+      glTranslatef ( 10, -3,   0);
+      i = j = 0;
+      CREATE_letter (SHAPE_DRAW  , "u", &i, &j);
+      /*> i = j = 0;                                                                  <* 
+       *> CREATE_ellipse (SHAPE_CHECK,   0, 20,  10,  0, 180, 1, &i, &j);             <* 
+       *> glTranslatef (  0, 30 ,   0);                                               <* 
+       *> i = j = 0;                                                                  <* 
+       *> CREATE_ellipse (SHAPE_CHECK,  30, 20,  10,  0, 360, 1, &i, &j);             <*/
+   } glPopMatrix   ();
+   glPushMatrix    (); {
+      yCOLOR_opengl (YCOLOR_BAS, YCOLOR_MOR, 0.65);
+      glTranslatef (150,  25, 250);
+      g_fake.c = i = j = 0;
+      CREATE_letter (SHAPE_DRAW  , "ag"   , &i, &j);
+      CREATE_letter (SHAPE_DRAW  , "g"    , &i, &j);
+      CREATE_letter (SHAPE_DRAW  , "n"    , &i, &j);
+      glTranslatef (-50,  0,   0);
+      g_fake.c = i = j = 0;
+      CREATE_letter (SHAPE_DRAW  , "ag"   , &i, &j);
+      CREATE_letter (SHAPE_DRAW  , "k"    , &i, &j);
+      CREATE_letter (SHAPE_DRAW  , "t"    , &i, &j);
+   } glPopMatrix   ();
+   glPushMatrix    (); {
+      yCOLOR_opengl (YCOLOR_BAS, YCOLOR_MOR, 0.65);
+      glTranslatef (150,  50, 250);
+      g_fake.c = i = j = 0;
+      CREATE_letter (SHAPE_DRAW  , "al"   , &i, &j);
+      CREATE_letter (SHAPE_DRAW  , "l"    , &i, &j);
+      glTranslatef (-50,  0,   0);
+      g_fake.c = i = j = 0;
+      CREATE_letter (SHAPE_DRAW  , "al"   , &i, &j);
+      CREATE_letter (SHAPE_DRAW  , "r"    , &i, &j);
+   } glPopMatrix   ();
+   glPushMatrix    (); {
+      yCOLOR_opengl (YCOLOR_BAS, YCOLOR_MOR, 0.65);
+      glTranslatef (175, 100, 250);
+      g_fake.c = i = j = 0;
+      CREATE_letter (SHAPE_DRAW  , "av"   , &i, &j);
+      CREATE_letter (SHAPE_DRAW  , "v"    , &i, &j);
+      glTranslatef (-50,  0,   0);
+      g_fake.c = i = j = 0;
+      CREATE_letter (SHAPE_DRAW  , "av"   , &i, &j);
+      CREATE_letter (SHAPE_DRAW  , "f"    , &i, &j);
+      glTranslatef (-25,  0,   0);
+      g_fake.c = i = j = 0;
+      CREATE_letter (SHAPE_DRAW  , "as"   , &i, &j);
+      CREATE_letter (SHAPE_DRAW  , "s"    , &i, &j);
+   } glPopMatrix   ();
+   glPushMatrix    (); {
+      yCOLOR_opengl (YCOLOR_BAS, YCOLOR_MOR, 0.65);
+      glTranslatef (175, 150, 250);
+      g_fake.c = i = j = 0;
+      CREATE_letter (SHAPE_DRAW  , "ab"   , &i, &j);
+      CREATE_letter (SHAPE_DRAW  , "b"    , &i, &j);
+      glTranslatef (-50,  0,   0);
+      g_fake.c = i = j = 0;
+      CREATE_letter (SHAPE_DRAW  , "ab"   , &i, &j);
+      CREATE_letter (SHAPE_DRAW  , "p"    , &i, &j);
+      glTranslatef (-25,  0,   0);
+      g_fake.c = i = j = 0;
+      CREATE_letter (SHAPE_DRAW  , "az"   , &i, &j);
+      CREATE_letter (SHAPE_DRAW  , "z"    , &i, &j);
+   } glPopMatrix   ();
+   glPushMatrix    (); {
+      yCOLOR_opengl (YCOLOR_BAS, YCOLOR_MOR, 0.65);
+      glTranslatef (175, 175, 250);
+      g_fake.c = i = j = 0;
+      CREATE_letter (SHAPE_DRAW  , "axm"  , &i, &j);
+      CREATE_letter (SHAPE_DRAW  , "mm"   , &i, &j);
+      glTranslatef (-50,  0,   0);
+      g_fake.c = i = j = 0;
+      CREATE_letter (SHAPE_DRAW  , "axm"  , &i, &j);
+      CREATE_letter (SHAPE_DRAW  , "m"    , &i, &j);
+      glTranslatef (-25,  0,   0);
+      g_fake.c = i = j = 0;
+      CREATE_letter (SHAPE_DRAW  , "axm"  , &i, &j);
+      CREATE_letter (SHAPE_DRAW  , "n"    , &i, &j);
+   } glPopMatrix   ();
+   glPushMatrix    (); {
+      yCOLOR_opengl (YCOLOR_BAS, YCOLOR_MOR, 0.65);
+      glTranslatef (175, 200, 250);
+      g_fake.c = i = j = 0;
+      CREATE_letter (SHAPE_DRAW  , "ad"   , &i, &j);
+      CREATE_letter (SHAPE_DRAW  , "dd"   , &i, &j);
+      glTranslatef (-25,  0,   0);
+      g_fake.c = i = j = 0;
+      CREATE_letter (SHAPE_DRAW  , "ad"   , &i, &j);
+      CREATE_letter (SHAPE_DRAW  , "d"    , &i, &j);
+      glTranslatef (-25,  0,   0);
+      g_fake.c = i = j = 0;
+      CREATE_letter (SHAPE_DRAW  , "ad"   , &i, &j);
+      CREATE_letter (SHAPE_DRAW  , "t"    , &i, &j);
+   } glPopMatrix   ();
+   glPushMatrix    (); {
+      yCOLOR_opengl (YCOLOR_BAS, YCOLOR_MOR, 0.65);
+      glTranslatef (175, 250, 250);
+      g_fake.c = i = j = 0;
+      CREATE_letter (SHAPE_DRAW  , "aj"   , &i, &j);
+      CREATE_letter (SHAPE_DRAW  , "j"    , &i, &j);
+      glTranslatef (-25,  0,   0);
+      g_fake.c = i = j = 0;
+      CREATE_letter (SHAPE_DRAW  , "aj"   , &i, &j);
+      CREATE_letter (SHAPE_DRAW  , "ch"   , &i, &j);
+      glTranslatef (-25,  0,   0);
+      g_fake.c = i = j = 0;
+      CREATE_letter (SHAPE_DRAW  , "aj"   , &i, &j);
+      CREATE_letter (SHAPE_DRAW  , "sh"   , &i, &j);
+   } glPopMatrix   ();
+   glPushMatrix    (); {
+      yCOLOR_opengl (YCOLOR_BAS, YCOLOR_MOR, 0.65);
+      glTranslatef (175, 300, 250);
+      g_fake.c = i = j = 0;
+      CREATE_letter (SHAPE_DRAW  , "angk" , &i, &j);
+      CREATE_letter (SHAPE_DRAW  , "ngk"  , &i, &j);
+      glTranslatef (-50,  0,   0);
+      g_fake.c = i = j = 0;
+      CREATE_letter (SHAPE_DRAW  , "angk" , &i, &j);
+      CREATE_letter (SHAPE_DRAW  , "ng"   , &i, &j);
+   } glPopMatrix   ();
    /*> REVERSE_outline ("s·l·o2·b", SHAPE_DRAW, 1);                                   <*/
    /*> REVERSE_outline ("r·o2·b", SHAPE_DRAW, 1);                                     <*/
    /*> REVERSE_outline ("k·a·r"   , SHAPE_DRAW, 1);                                   <*/

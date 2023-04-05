@@ -23,148 +23,14 @@
  */
 
 #define    SCR2RAW     10
-#define    LEN_OUT     100000
 #define    SCALING     1.3
-
-static char   s_load       [LEN_OUT] = "";
-static short  s_count      = 0;
-
-static float  s_xpage      = 0;
-static float  s_ypage      = 0;
-
-static float  s_xpos       = 0;
-static float  s_ypos       = 0;
-
-static float  s_lef        = 0;
-static float  s_rig        = 0;
-static float  s_top        = 0;
-static float  s_bot        = 0;
-
-static float  s_push       = 0;
-
-
-
-static short  s_index      =    0;
-static char   s_label      [LEN_TERSE];
-static char   s_type       =  '-';
-static float  s_rot        =    0;
-static float  s_beg        =    0;
-static float  s_arc        =    0;
-static float  s_xradius    =    0;
-static float  s_yradius    =    0;
-
-
-
-/*============================--------------------============================*/
-/*===----                    loading for raw points                    ----===*/
-/*============================--------------------============================*/
-static void o___LOAD_RAW_______________o (void) {;}
-
-/*
- *  loading assumes perfect conditions for start 0,0, which mirrors data
- *  filtering in touch points which use the start point as an offset for
- *  correcting all coordinates.
- *
- */
-
-static  int   s_xload = 0;
-static  int   s_yload = 0;
-
-char
-REV_load_start          (void)
-{
-   DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
-   strlcpy (s_load, ""         , LEN_OUT);
-   s_count = 0;
-   s_xpos  = s_ypos  = 0;
-   s_xload = s_yload = 0;
-   REV_load_touch  (0, 0);
-   DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
-   return 0;
-}
-
-char
-REV_load_touch       (int x, int y)
-{
-   char        t           [LEN_LABEL] = "";
-   DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
-   sprintf (t, ";Õ%d,%d", x, y);
-   strlcat (s_load, t, LEN_OUT);
-   s_xpos = s_xload = x;
-   s_ypos = s_yload = y;
-   ++s_count;
-   DEBUG_OUTP   yLOG_complex ("point"     , "%3dc, %4dx, %4dy", s_count, x, y);
-   /*> REV_load__show_tail ();                                                        <*/
-   DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
-   return 0;
-}
-
-char
-REV_load_point      (int x, int y)
-{
-   char        t           [LEN_LABEL] = "";
-   if (x == s_xload && y == s_yload)  return 0;
-   DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
-   sprintf (t, ";%d,%d", x, y);
-   strlcat (s_load, t, LEN_OUT);
-   s_xload = x;
-   s_yload = y;
-   ++s_count;
-   DEBUG_OUTP   yLOG_complex ("point"     , "%3dc, %4dx, %4dy", s_count, x, y);
-   /*> REV_load__show_tail ();                                                        <*/
-   DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
-   return 0;
-}
-
-char
-REV_load_lift       (int x, int y)
-{
-   char       *p           = NULL;
-   char        t           [LEN_LABEL] = "";
-   DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
-   if (x == s_xload && y == s_yload) {
-      p = strrchr (s_load, ';');
-      if (p != NULL) {
-         p [0] = '\0';
-         --s_count;
-      }
-   }
-   sprintf (t, ";Ô%d,%d", x, y);
-   strlcat (s_load, t, LEN_OUT);
-   s_xload = x;
-   s_yload = y;
-   ++s_count;
-   DEBUG_OUTP   yLOG_complex ("point"     , "%3dc, %4dx, %4dy", s_count, x, y);
-   /*> REV_load__show_tail ();                                                        <*/
-   DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
-   return 0;
-}
-
-char
-REV_load_done       (int x, int y)
-{
-   DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
-   REV_load_lift (x, y);
-   strlcat (s_load, ";"        , LEN_OUT);
-   DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
-   return 0;
-}
-
-char
-REV_load_raw        (void)
-{
-   DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
-   RAW_load (s_load);
-   DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
-   return 0;
-}
 
 char
 REV_load__show_tail  (void)
 {
    int         x_len       =    0;
-   x_len = strlen (s_load);
-   DEBUG_OUTP   yLOG_info    ("tail"      , s_load + x_len - 50);
+   x_len = strlen (g_fake.load);
+   DEBUG_OUTP   yLOG_info    ("tail"      , g_fake.load + x_len - 50);
    return 0;
 }
 
@@ -172,191 +38,24 @@ char          /*----: list all points of a particular type -------------------*/
 REV_load_report    (void)
 {
    int         i;
-   char        t           [LEN_OUT] = "";
+   char        t           [LEN_MASS] = "";
    char       *p           = NULL;
    char       *s           = NULL;
    /*---(header)-------------------------*/
-   printf ("load points inventory (%d)\n", s_count);
-   strlcpy (t, s_load, LEN_OUT);
+   printf ("load points inventory (%d)\n", g_fake.count);
+   strlcpy (t, g_fake.load, LEN_MASS);
    p = strtok_r (t, ";", &s);
    if (p == NULL) {
       printf ("   zero points\n");
    }
    /*---(points)-------------------------*/
-   for (i = 0; i < s_count; ++i) {
+   for (i = 0; i < g_fake.count; ++i) {
       if      (p [0] == 'Õ')  printf ("%3d %c %s\n", i, p[0], p + 1);
       else if (p [0] == 'Ô')  printf ("%3d %c %s\n", i, p[0], p + 1);
       else                    printf ("%3d · %s\n", i, p);
       p = strtok_r (NULL, ";", &s);
    }
    /*---(complete)-----------------------*/
-   return 0;
-}
-
-
-
-/*============================--------------------============================*/
-/*===----                    loading for raw points                    ----===*/
-/*============================--------------------============================*/
-static void o___DRAW_RAW_______________o (void) {;}
-
-char
-REV_draw_reset  (void)
-{
-   s_xpos    = 0;
-   s_ypos    = 0;
-   s_lef     = 0;
-   s_rig     = 0;
-   s_top     = 0;
-   s_bot     = 0;
-   return 0;
-}
-
-char
-REV_draw_init   (void)
-{
-   /*---(initialize)---------------------*/
-   s_lef     = 0;
-   s_rig     = 0;
-   s_top     = 0;
-   s_bot     = 0;
-   s_push    = 0;
-   /*---(complete)-----------------------*/
-   return 0;
-}
-
-char
-REV_draw_begin          (void)
-{
-   /*---(start drawing)------------------*/
-   glLineWidth (2.0);
-   glBegin (GL_LINE_STRIP);
-   /*---(complete)-----------------------*/
-   return 0;
-}
-
-char
-REV_draw_point          (float x, float y)
-{
-   /*---(draw)---------------------------*/
-   glVertex3f ( x, y, 5.0);
-   /*---(bounds)-------------------------*/
-   if (x < s_lef)   s_lef  = x;
-   if (x > s_rig)   s_rig  = x;
-   if (y < s_bot)   s_bot  = y;
-   if (y > s_top)   s_top  = y;
-   if (x > s_push)  s_push = x;
-   /*---(complete)-----------------------*/
-   return 0;
-}
-
-char
-REV_draw_end            (void)
-{
-   /*---(stop drawing)-------------------*/
-   glEnd();
-   glLineWidth (0.8);
-   /*---(complete)-----------------------*/
-   return 0;
-}
-
-char
-REV_draw_wrap   (float x, float y)
-{
-   /*---(get overall calcs)--------------*/
-   o.tmp [0].p_bas  = 0;
-   o.tmp [0].x_raw  = 0;
-   o.tmp [0].y_raw  = 0;
-   o.tmp [1].p_bas  = 1;
-   o.tmp [1].x_raw  = x * 100.0;
-   o.tmp [1].y_raw  = y * 100.0;
-   POINT_calc (POINTS_TMP, o.tmp + 1, 'n');
-   /*---(trending)-----------------------*/
-   if (s_index > 0)  {
-      g_loc [s_index].x_end  = x;
-      g_loc [s_index].y_end  = y;
-      g_loc [s_index].deg    = o.tmp [1].degs;
-      g_loc [s_index].xy_len = o.tmp [1].len / 100.0;
-      DEBUG_OUTP   yLOG_complex ("trend"     , "%5.1fd, %5.1fl, %5.1fx, %5.1fy", g_loc [s_index].deg, g_loc [s_index].xy_len, g_loc [s_index].x_end, g_loc [s_index].y_end);
-   }
-   /*---(bounds)-------------------------*/
-   if (s_index > 0)  {
-      g_loc [s_index].x_rig  = s_rig;
-      g_loc [s_index].x_lef  = s_lef;
-      g_loc [s_index].y_top  = s_top;
-      g_loc [s_index].y_bot  = s_bot;
-      DEBUG_OUTP   yLOG_complex ("bounds"    , "%5.1fl, %5.1fr, %5.1ft, %5.1fb", g_loc [s_index].x_lef, g_loc [s_index].x_rig, g_loc [s_index].y_top, g_loc [s_index].y_bot);
-   }
-   /*---(complete)-----------------------*/
-   return 0;
-}
-
-
-
-/*============================--------------------============================*/
-/*===----                         helper functions                     ----===*/
-/*============================--------------------============================*/
-static void o___COMBO__________________o (void) {;}
-
-char
-REV_head                (char a_type)
-{
-   switch (a_type) {
-   case SHAPE_SAMPLE :
-      DEBUG_OUTP   yLOG_note    ("REV_head for SAMPLE, reset and begin");
-      REV_draw_reset  ();
-      REV_draw_begin  ();
-      break;
-   case SHAPE_LOAD   :
-      DEBUG_OUTP   yLOG_note    ("REV_head for LOAD, nothing to do");
-      break;
-   case SHAPE_DRAW   :
-      DEBUG_OUTP   yLOG_note    ("REV_head for DRAW, begin");
-      REV_draw_begin  ();
-      break;
-   }
-   return 0;
-}
-
-char
-REV_point               (char a_type, float x, float y)
-{
-   switch (a_type) {
-   case SHAPE_SAMPLE :
-      DEBUG_OUTP   yLOG_note    ("REV_point for SAMPLE, draw");
-      REV_draw_point  (x, y);
-      break;
-   case SHAPE_LOAD   :
-      DEBUG_OUTP   yLOG_note    ("REV_point for LOAD, load");
-      REV_load_point  (x, y);
-      break;
-   case SHAPE_DRAW   :
-      DEBUG_OUTP   yLOG_note    ("REV_point for DRAW, draw");
-      REV_draw_point  (x, y);
-      break;
-   }
-   return 0;
-}
-
-char
-REV_tail                (char a_type, float x, float y)
-{
-   switch (a_type) {
-   case SHAPE_SAMPLE :
-      DEBUG_OUTP   yLOG_note    ("REV_tail for SAMPLE, draw and wrap");
-      REV_draw_point  (x, y);
-      REV_draw_end    ();
-      REV_draw_wrap   (x, y);
-      break;
-   case SHAPE_LOAD   :
-      DEBUG_OUTP   yLOG_note    ("REV_tail for LOAD, nothing to do");
-      break;
-   case SHAPE_DRAW   :
-      DEBUG_OUTP   yLOG_note    ("REV_tail for DRAW, draw");
-      REV_draw_point  (x, y);
-      REV_draw_end    ();
-      break;
-   }
    return 0;
 }
 
@@ -399,17 +98,17 @@ REVERSE_make_current    (char *a_ltr)
    char        x_name      [LEN_TERSE] = "";
    char        x_flip      =  '-';
    /*---(clear values)-------------------*/
-   s_index      = 0;
-   s_type       = '-';
-   s_rot        = 0.0;
-   s_beg        = 0.0;
-   s_arc        = 0.0;
-   s_xradius    = 0.0;
-   s_yradius    = 0.0;
+   g_fake.n      = 0;
+   g_fake.type       = '-';
+   g_fake.rot        = 0.0;
+   g_fake.beg        = 0.0;
+   g_fake.arc        = 0.0;
+   g_fake.xradius    = 0.0;
+   g_fake.yradius    = 0.0;
    /*---(defense)------------------------*/
    --rce;  if (a_ltr == NULL)  return rce;
    /*---(prepare)------------------------*/
-   strlcpy (s_label, a_ltr, LEN_TERSE);
+   strlcpy (g_fake.label, a_ltr, LEN_TERSE);
    strlcpy (x_name, a_ltr, LEN_TERSE);
    if (x_name [0] == 'e') {
       x_name [0] = 'a';
@@ -419,25 +118,25 @@ REVERSE_make_current    (char *a_ltr)
    n  = REVERSE_find_letter (x_name, LTRS_ALL);
    --rce;  if (n <= 0)         return rce;
    /*---(save values)--------------------*/
-   s_index      = n;
-   s_type       = g_loc [n].type;
-   s_rot        = g_loc [n].r_ellipse;
-   s_beg        = g_loc [n].b_arc;
-   s_arc        = g_loc [n].l_arc;
-   s_xradius    = g_loc [n].x_ellipse;
-   s_yradius    = g_loc [n].y_ellipse;
+   g_fake.n      = n;
+   g_fake.type       = g_loc [n].type;
+   g_fake.rot        = g_loc [n].r_ellipse;
+   g_fake.beg        = g_loc [n].b_arc;
+   g_fake.arc        = g_loc [n].l_arc;
+   g_fake.xradius    = g_loc [n].x_ellipse;
+   g_fake.yradius    = g_loc [n].y_ellipse;
    /*---(adjust for ae)------------------*/
    if (x_flip == 'y') {
-      if      (s_xradius <=  8)  s_xradius = 3;
-      else if (s_xradius <= 11)  s_xradius = 4;
-      else                       s_xradius = 5;
-      if      (s_yradius <=  8)  s_yradius = 3;
-      else if (s_yradius <= 11)  s_yradius = 4;
-      else                       s_yradius = 5;
+      if      (g_fake.xradius <=  8)  g_fake.xradius = 3;
+      else if (g_fake.xradius <= 11)  g_fake.xradius = 4;
+      else                       g_fake.xradius = 5;
+      if      (g_fake.yradius <=  8)  g_fake.yradius = 3;
+      else if (g_fake.yradius <= 11)  g_fake.yradius = 4;
+      else                       g_fake.yradius = 5;
    }
    /*---(scale)--------------------------*/
-   s_xradius   *= SCALING;
-   s_yradius   *= SCALING;
+   g_fake.xradius   *= SCALING;
+   g_fake.yradius   *= SCALING;
    /*---(complete)-----------------------*/
    return 0;
 }
@@ -445,53 +144,15 @@ REVERSE_make_current    (char *a_ltr)
 char
 REVERSE_begin           (int x, int y)
 {
-   REV_load_start   ();
-   /*> REV_load_touch   (x, y);                                                    <*/
+   FAKE_start   ();
    return 0;
 }
 
 char
 REVERSE_end             (void)
 {
-   /*> REV_load_lift    (s_xpos, s_ypos);                                                <*/
-   /*> REV_load_done    ();                                                           <*/
-   return 0;
-}
-
-
-
-/*============================--------------------============================*/
-/*===----                         display lists                        ----===*/
-/*============================--------------------============================*/
-static void o___DRAWING________________o (void) {;}
-
-char
-REVERSE_dots_begin  (void)
-{
-   /*---(initialize)---------------------*/
-   s_xpos    = 0;
-   s_ypos    = 0;
-   /*---(start drawing)------------------*/
-   glLineWidth (1.0);
-   glPointSize (1.0);
-   /*> yCOLOR_opengl (YCOLOR_BAS, YCOLOR_MIN, 0.50);                                  <*/
-   glBegin(GL_POINTS);
-   /*---(complete)-----------------------*/
-   return 0;
-}
-
-char
-REVERSE_dots_point  (float x, float y)
-{
-   glVertex3f ( x, y, 5.0);
-   return 0;
-}
-
-char
-REVERSE_dots_end    (void)
-{
-   glEnd();
-   glLineWidth (0.8);
+   /*> FAKE_lift     (g_fake.sx  , g_fake.sy  );                                                <*/
+   /*> FAKE_done    ();                                                           <*/
    return 0;
 }
 
@@ -515,38 +176,32 @@ REVERSE_line            (char a_type, char a_skip)
    float       x, y, px, py;
    int         x_sizer     =    1;
    /*---(defense)------------------------*/
-   --rce;  if (s_type != SHAPE_LINE)    return rce;
+   --rce;  if (g_fake.type != SHAPE_LINE)    return rce;
    /*---(header)-------------------------*/
    DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
    /*---(prepare)------------------------*/
    if (a_type == SHAPE_LOAD)  x_sizer = SCR2RAW;
-   d     = s_rot;
+   d     = g_fake.rot;
    r     = d * DEG2RAD;
-   l     = s_arc * x_sizer;
+   l     = g_fake.arc * x_sizer;
    x_sin = sin (r);
    x_cos = cos (r);
    /*---(rationalize)--------------------*/
    a_skip *= 2;
    if (a_skip <=  0)          a_skip = 1;
    if (a_skip >= 25)          a_skip = 25;
-   DEBUG_OUTP   yLOG_complex ("basics"    , "%2d# %-5.5s  %6.1fd, %8.3fr, %4.1fl, %2ds", s_index, s_label, d, r, l, a_skip);
+   DEBUG_OUTP   yLOG_complex ("basics"    , "%2d# %-5.5s  %6.1fd, %8.3fr, %4.1fl, %2ds", g_fake.n, g_fake.label, d, r, l, a_skip);
    /*---(create points)------------------*/
-   /*> if (a_type == SHAPE_SAMPLE)   REV_draw_reset ();                           <* 
-    *> if (a_type != SHAPE_LOAD)     REV_draw_begin ();                               <*/
-   REV_head (a_type);
+   CREATE_head (0, a_type);
    for (i = 0; i <= l; i += a_skip) {
-      x = s_xpos + (i * x_cos);
-      y = s_ypos + (i * x_sin);
-      /*> DEBUG_OUTP   yLOG_complex ("point"     , "%3#, %4.1fx, %4.1fy", i, x, y);   <*/
-      /*> if (a_type != SHAPE_LOAD)     REV_draw_point (x, y);                    <* 
-       *> else                          REV_load_point (x, y);                   <*/
-      REV_point     (a_type, x, y);
+      x = g_fake.sx   + (i * x_cos);
+      y = g_fake.sy   + (i * x_sin);
+      CREATE_single     (0, a_type, x, y);
    }
-   REV_tail (a_type, x, y);
-   /*> if (a_type == SHAPE_SAMPLE)   REV_draw_wrap  (x, y);                           <*/
+   CREATE_tail (0, a_type, x, y);
    /*---(save)---------------------------*/
-   s_xpos = x;
-   s_ypos = y;
+   g_fake.sx   = x;
+   g_fake.sy   = y;
    /*---(complete)-----------------------*/
    DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -566,38 +221,33 @@ REVERSE_circle          (char a_type, char a_skip)
    /*---(header)-------------------------*/
    DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
    /*---(defense)------------------------*/
-   --rce;  if (s_type != SHAPE_CIRCLE) {
+   --rce;  if (g_fake.type != SHAPE_CIRCLE) {
       DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
    /*---(tables)-------------------------*/
    if (a_type == SHAPE_LOAD)  x_sizer = SCR2RAW;
-   l        = s_xradius * x_sizer;
-   x_rot    = s_rot * DEG2RAD;
+   l        = g_fake.xradius * x_sizer;
+   x_rot    = g_fake.rot * DEG2RAD;
    /*---(determine adjustment)-----------*/
    x_adj  = l * cos (x_rot);
    y_adj  = l * sin (x_rot);
    /*---(rationalize)--------------------*/
-   if (s_xradius < 6) a_skip *= 2;
+   if (g_fake.xradius < 6) a_skip *= 2;
    if (a_skip <=  0)  a_skip = 1;
    if (a_skip >= 25)  a_skip = 25;
-   DEBUG_OUTP   yLOG_complex ("basics"    , "%2d# %-5.5s  %5.1fl %5.1fr %5.1fxa %5.1fya %2ds", s_index, s_label, l, x_rot, x_adj, y_adj, a_skip);
+   DEBUG_OUTP   yLOG_complex ("basics"    , "%2d# %-5.5s  %5.1fl %5.1fr %5.1fxa %5.1fya %2ds", g_fake.n, g_fake.label, l, x_rot, x_adj, y_adj, a_skip);
    /*---(start)--------------------------*/
-   /*> if (a_type == SHAPE_SAMPLE)   REV_draw_reset ();                           <* 
-    *> if (a_type != SHAPE_LOAD)     REV_draw_begin ();                               <*/
-   REV_head (a_type);
+   CREATE_head (0, a_type);
    /*---(create points)------------------*/
    for (i = 0; i <= 360; i += a_skip) {
       r     = i * DEG2RAD;
-      x     = s_xpos + (l * cos (r)) - x_adj;
-      y     = s_ypos + (l * sin (r)) - y_adj;
-      /*> DEBUG_OUTP   yLOG_complex ("point"     , "%3#, %4.1fx, %4.1fy", i, x, y);   <*/
-      /*> if (a_type != SHAPE_LOAD)     REV_draw_point (x, y);                    <* 
-       *> else                          REV_load_point (x, y);                   <*/
-      REV_point     (a_type, x, y);
+      x     = g_fake.sx   + (l * cos (r)) - x_adj;
+      y     = g_fake.sy   + (l * sin (r)) - y_adj;
+      CREATE_single     (0, a_type, x, y);
    }
    /*---(save)---------------------------*/
-   REV_tail (a_type, x, y);
+   CREATE_tail (0, a_type, x, y);
    /*---(complete)-----------------------*/
    DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -619,26 +269,26 @@ REVERSE_ellipse         (char a_type, char a_skip)
    int         x_dots      =    5;
    float       x_1st, y_1st;
    /*---(defense)------------------------*/
-   --rce;  if (s_type != SHAPE_ELLIPSE) return rce;
+   --rce;  if (g_fake.type != SHAPE_ELLIPSE) return rce;
    /*---(header)-------------------------*/
    DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
    /*---(tables)-------------------------*/
    if (a_type == SHAPE_LOAD)  x_sizer = SCR2RAW;
-   x_len  = s_xradius * x_sizer;
-   y_len  = s_yradius * x_sizer;
-   x_beg  = s_beg;
-   x_arc  = s_arc;
+   x_len  = g_fake.xradius * x_sizer;
+   y_len  = g_fake.yradius * x_sizer;
+   x_beg  = g_fake.beg;
+   x_arc  = g_fake.arc;
    x_dots = 10;
    /*---(rationalize)--------------------*/
-   if (s_xradius < 6) a_skip *= 4;
+   if (g_fake.xradius < 6) a_skip *= 4;
    if (a_skip <=  0)  a_skip = 1;
    if (a_skip >= 25)  a_skip = 25;
-   DEBUG_OUTP   yLOG_complex ("basics"    , "%2d# %-5.5s  %5.1fxl %5.1dyl %5.1fb %5.1fa  %2ds", s_index, s_label, x_len, y_len, x_beg, x_arc, a_skip);
+   DEBUG_OUTP   yLOG_complex ("basics"    , "%2d# %-5.5s  %5.1fxl %5.1dyl %5.1fb %5.1fa  %2ds", g_fake.n, g_fake.label, x_len, y_len, x_beg, x_arc, a_skip);
    /*---(angles)-------------------------*/
    a      = x_beg * DEG2RAD;
    a_sin  = sin(a);
    a_cos  = cos(a);
-   b      = s_rot * DEG2RAD;
+   b      = g_fake.rot * DEG2RAD;
    b_sin  = sin (b);
    b_cos  = cos (b);
    /*---(determine adjustment)-----------*/
@@ -646,34 +296,31 @@ REVERSE_ellipse         (char a_type, char a_skip)
    y_adj  = (x_len * a_cos * b_sin) + (y_len * a_sin * b_cos);
    /*---(draw dotted outline)------------*/
    DEBUG_OUTP   yLOG_note    ("before dots");
-   if (a_type == SHAPE_SAMPLE)   REV_draw_reset ();
+   if (a_type == SHAPE_SAMPLE)   CREATE_draw_reset (0, a_type);
    if (a_type == SHAPE_SAMPLE) {
-      REVERSE_dots_begin ();
+      CREATE_dots_begin ();
       for (i = 0; i <= 360; i += x_dots) {
          a     = i * DEG2RAD;
          a_sin = sin (a);
          a_cos = cos (a);
-         x     = s_xpos + (x_len * a_cos * b_cos) - (y_len * a_sin * b_sin) - x_adj;
-         y     = s_ypos + (x_len * a_cos * b_sin) + (y_len * a_sin * b_cos) - y_adj;
-         REVERSE_dots_point (x, y);
+         x     = g_fake.sx   + (x_len * a_cos * b_cos) - (y_len * a_sin * b_sin) - x_adj;
+         y     = g_fake.sy   + (x_len * a_cos * b_sin) + (y_len * a_sin * b_cos) - y_adj;
+         CREATE_dots_point (x, y);
       }
-      REVERSE_dots_end   ();
+      CREATE_dots_end   ();
    }
    DEBUG_OUTP   yLOG_note    ("after dots");
    /*---(create points)------------------*/
-   if (a_type != SHAPE_LOAD)     REV_draw_begin ();
+   if (a_type != SHAPE_LOAD)     CREATE_draw_begin ();
    if (x_arc >= 0) {
       DEBUG_OUTP   yLOG_note    ("draw positive");
       for (i = x_beg; i <= x_beg + x_arc; i += a_skip) {
          a     = i * DEG2RAD;
          a_sin = sin (a);
          a_cos = cos (a);
-         x     = s_xpos + (x_len * a_cos * b_cos) - (y_len * a_sin * b_sin) - x_adj;
-         y     = s_ypos + (x_len * a_cos * b_sin) + (y_len * a_sin * b_cos) - y_adj;
-         /*> DEBUG_OUTP   yLOG_complex ("point"     , "%3#, %4.1fx, %4.1fy", i, x, y);   <*/
-         /*> if (a_type != SHAPE_LOAD)     REV_draw_point (x, y);                 <* 
-          *> else                          REV_load_point (x, y);                <*/
-         REV_point     (a_type, x, y);
+         x     = g_fake.sx   + (x_len * a_cos * b_cos) - (y_len * a_sin * b_sin) - x_adj;
+         y     = g_fake.sy   + (x_len * a_cos * b_sin) + (y_len * a_sin * b_cos) - y_adj;
+         CREATE_single     (0, a_type, x, y);
          if (i == x_beg) {  x_1st = x; y_1st = y; }
       }
    } else {
@@ -682,21 +329,18 @@ REVERSE_ellipse         (char a_type, char a_skip)
          a     = i * DEG2RAD;
          a_sin = sin (a);
          a_cos = cos (a);
-         x     = s_xpos + (x_len * a_cos * b_cos) - (y_len * a_sin * b_sin) - x_adj;
-         y     = s_ypos + (x_len * a_cos * b_sin) + (y_len * a_sin * b_cos) - y_adj;
-         /*> DEBUG_OUTP   yLOG_complex ("point"     , "%3#, %4.1fx, %4.1fy", i, x, y);   <*/
-         /*> if (a_type != SHAPE_LOAD)     REV_draw_point (x, y);                 <* 
-          *> else                          REV_load_point (x, y);                <*/
-         REV_point     (a_type, x, y);
+         x     = g_fake.sx   + (x_len * a_cos * b_cos) - (y_len * a_sin * b_sin) - x_adj;
+         y     = g_fake.sy   + (x_len * a_cos * b_sin) + (y_len * a_sin * b_cos) - y_adj;
+         CREATE_single     (0, a_type, x, y);
          if (i == x_beg) {  x_1st = x; y_1st = y; }
       }
    }
    DEBUG_OUTP   yLOG_note    ("after draw");
    /*---(save)---------------------------*/
-   REV_tail (a_type, x, y);
-   /*> if (a_type == SHAPE_SAMPLE)   REV_draw_wrap  (x, y);                           <*/
-   s_xpos = x;
-   s_ypos = y;
+   CREATE_tail (0, a_type, x, y);
+   /*> if (a_type == SHAPE_SAMPLE)   CREATE_draw_wrap  (x, y);                           <*/
+   g_fake.sx   = x;
+   g_fake.sy   = y;
    /*---(complete)-----------------------*/
    DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -719,62 +363,52 @@ REVERSE_teardrop        (char a_type, char a_skip)
    /*---(header)-------------------------*/
    DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
    /*---(defense)------------------------*/
-   --rce;  if (s_type != SHAPE_TEARDROP) {
+   --rce;  if (g_fake.type != SHAPE_TEARDROP) {
       DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
    /*---(table values)-------------------*/
    if (a_type == SHAPE_LOAD)  x_sizer = SCR2RAW;
-   x_len  = s_xradius * x_sizer * 1.8;
-   y_len  = s_yradius * x_sizer * 1.8;
-   x_rot  = s_rot;
-   x_arc  = s_arc;
+   x_len  = g_fake.xradius * x_sizer * 1.8;
+   y_len  = g_fake.yradius * x_sizer * 1.8;
+   x_rot  = g_fake.rot;
+   x_arc  = g_fake.arc;
    /*---(determine adjustment)-----------*/
    /*> x_adj  = l * cos (x_rot * DEG2RAD);                                            <* 
     *> y_adj  = l * sin (x_rot * DEG2RAD);                                            <*/
    /*---(rationalize)--------------------*/
-   if (s_xradius < 6) a_skip *= 2;
+   if (g_fake.xradius < 6) a_skip *= 2;
    if (a_skip <=  0)  a_skip = 1;
    if (a_skip >= 25)  a_skip = 25;
-   DEBUG_OUTP   yLOG_complex ("basics"    , "%2d# %-5.5s  %5.1fxl  %5.1fyl %5.1fr", s_index, s_label, x_len, y_len, x_rot);
+   DEBUG_OUTP   yLOG_complex ("basics"    , "%2d# %-5.5s  %5.1fxl  %5.1fyl %5.1fr", g_fake.n, g_fake.label, x_len, y_len, x_rot);
    /*---(start drawing)------------------*/
-   /*> if (a_type == SHAPE_SAMPLE)   REV_draw_reset ();                           <* 
-    *> if (a_type != SHAPE_LOAD)     REV_draw_begin ();                               <*/
-   REV_head (a_type);
-   /*> if (a_type != SHAPE_LOAD)     REV_draw_point (s_xpos, s_ypos);             <* 
-    *> else                          REV_load_point (s_xpos, s_ypos);            <*/
-   REV_point     (a_type, s_xpos, s_ypos);
+   CREATE_head (0, a_type);
+   CREATE_single     (0, a_type, g_fake.sx  , g_fake.sy  );
    /*---(draw points)--------------------*/
    if (x_arc >= 0) {
       for (s = -1.915;  s <= 1.915; s += 0.01) {
          a    = x_len * ((2.0 / cosh (s)) - 0.577);
          b    = y_len * (s - 2.0 * tanh (s));
-         x    = s_xpos + a * cos (x_rot * DEG2RAD) + b * sin (x_rot * DEG2RAD);
-         y    = s_ypos - a * sin (x_rot * DEG2RAD) + b * cos (x_rot * DEG2RAD);
-         /*> if (a_type != SHAPE_LOAD)     REV_draw_point (x, y);                 <* 
-          *> else                          REV_load_point (x, y);                <*/
-         REV_point     (a_type, x, y);
+         x    = g_fake.sx   + a * cos (x_rot * DEG2RAD) + b * sin (x_rot * DEG2RAD);
+         y    = g_fake.sy   - a * sin (x_rot * DEG2RAD) + b * cos (x_rot * DEG2RAD);
+         CREATE_single     (0, a_type, x, y);
          DEBUG_OUTP_M yLOG_complex ("point"     , "%5.1fs, %5.1fa, %5.1fb, %5.1fx, %5.1fy", s, a, b, x, y);
       }
    } else {
       for (s = 1.915;  s >= -1.915; s -= 0.01) {
          a    = x_len * ((2.0 / cosh (s)) - 0.577);
          b    = y_len * (s - 2.0 * tanh (s));
-         x    = s_xpos + a * cos (x_rot * DEG2RAD) + b * sin (x_rot * DEG2RAD);
-         y    = s_ypos - a * sin (x_rot * DEG2RAD) + b * cos (x_rot * DEG2RAD);
-         /*> if (a_type != SHAPE_LOAD)     REV_draw_point (x, y);                 <* 
-          *> else                          REV_load_point (x, y);                <*/
-         REV_point     (a_type, x, y);
+         x    = g_fake.sx   + a * cos (x_rot * DEG2RAD) + b * sin (x_rot * DEG2RAD);
+         y    = g_fake.sy   - a * sin (x_rot * DEG2RAD) + b * cos (x_rot * DEG2RAD);
+         CREATE_single     (0, a_type, x, y);
          DEBUG_OUTP_M yLOG_complex ("point"     , "%5.1fs, %5.1fa, %5.1fb, %5.1fx, %5.1fy", s, a, b, x, y);
       }
    }
    /*---(end drawing)--------------------*/
-   /*> if (a_type != SHAPE_LOAD)     REV_draw_point (s_xpos, s_ypos);             <* 
-    *> else                          REV_load_point (s_xpos, s_ypos);            <*/
-   REV_point     (a_type, s_xpos, s_ypos);
-   REV_tail (a_type, x, y);
-   /*> REV_draw_end   (s_xpos, s_ypos);                                               <* 
-    *> if (a_type == SHAPE_SAMPLE)   REV_draw_wrap  (s_xpos, s_ypos);                 <*/
+   /*> CREATE_single     (0, a_type, g_fake.sx  , g_fake.sy  );                       <*/
+   CREATE_tail (0, a_type, x, y);
+   /*> CREATE_draw_end   (g_fake.sx  , g_fake.sy  );                                               <* 
+    *> if (a_type == SHAPE_SAMPLE)   CREATE_draw_wrap  (g_fake.sx  , g_fake.sy  );                 <*/
    /*---(complete)-----------------------*/
    DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -792,28 +426,22 @@ REVERSE_dot             (char a_type, char a_skip)
    /*---(header)-------------------------*/
    DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
    /*---(defense)------------------------*/
-   --rce;  if (s_type != SHAPE_DOT   ) {
+   --rce;  if (g_fake.type != SHAPE_DOT   ) {
       DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
    /*---(tables)-------------------------*/
    if (a_type == SHAPE_LOAD)  x_sizer = SCR2RAW;
-   l  = s_xradius * x_sizer * 0.5;
+   l  = g_fake.xradius * x_sizer * 0.5;
    /*---(draw)---------------------------*/
-   /*> if (a_type == SHAPE_SAMPLE)   REV_draw_reset ();                           <* 
-    *> if (a_type != SHAPE_LOAD)     REV_draw_begin ();                               <*/
-   REV_head (a_type);
+   CREATE_head (0, a_type);
    for (i = 0; i <= 360; i += a_skip) {
       r  = i * DEG2RAD;
-      x = s_xpos + l * sin (r);
-      y = s_ypos + l * cos (r);
-      /*> if (a_type != SHAPE_LOAD)     REV_draw_point (x, y);                    <* 
-       *> else                          REV_load_point (x, y);                   <*/
-      REV_point     (a_type, x, y);
+      x = g_fake.sx   + l * sin (r);
+      y = g_fake.sy   + l * cos (r);
+      CREATE_single     (0, a_type, x, y);
    }
-   /*> REV_draw_end   (x, y);                                                         <* 
-    *> if (a_type == SHAPE_SAMPLE)   REV_draw_wrap  (x, y);                           <*/
-   REV_tail (a_type, x, y);
+   CREATE_tail (0, a_type, x, y);
    /*---(complete)-----------------------*/
    DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -827,19 +455,15 @@ REVERSE_space           (char a_type, char a_skip)
    float       x, y;
    int         x_sizer     =    1;
    /*---(defense)------------------------*/
-   --rce;  if (s_type != SHAPE_SPACE)   return rce;
+   --rce;  if (g_fake.type != SHAPE_SPACE)   return rce;
    /*---(header)-------------------------*/
    DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
    /*---(tables)-------------------------*/
    if (a_type == SHAPE_LOAD)  x_sizer = SCR2RAW;
-   x  = s_xradius * x_sizer;
-   y  = s_yradius * x_sizer;
-   REV_head (a_type);
-   /*> if (a_type == SHAPE_SAMPLE)   REV_draw_reset ();                           <* 
-    *> if (a_type != SHAPE_LOAD)     REV_draw_begin ();                               <*/
-   REV_tail (a_type, x, y);
-   /*> if (a_type != SHAPE_LOAD)     REV_draw_end   (x, y);                           <* 
-    *> if (a_type == SHAPE_SAMPLE)   REV_draw_wrap  (x, y);                           <*/
+   x  = g_fake.xradius * x_sizer;
+   y  = g_fake.yradius * x_sizer;
+   CREATE_head (0, a_type);
+   CREATE_tail (0, a_type, x, y);
    /*---(complete)-----------------------*/
    DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -868,13 +492,11 @@ REVERSE_draw_exit      (float x_beg, float y_beg, float x_end, float y_end, char
    for (i = 0; i <= l; i += a_skip) {
       x = x_beg + (i * sx);
       y = y_beg + (i * sy);
-      REV_point     (a_type, x, y);
-      /*> if (a_type != SHAPE_LOAD)     REV_draw_point (x, y);                    <* 
-       *> else                          REV_load_point (x, y);                   <*/
+      CREATE_single     (0, a_type, x, y);
    }
    /*---(save)---------------------------*/
-   s_xpos = x;
-   s_ypos = y;
+   g_fake.sx   = x;
+   g_fake.sy   = y;
    /*---(complete)-----------------------*/
    return 0;
 }
@@ -892,6 +514,7 @@ REVERSE_make_letter     (uchar *a_ltr, char a_type, char a_skip)
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
    char        rc          =    0;
+   short       i = 0, j = 0;
    /*---(header)-------------------------*/
    DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
    rc = REVERSE_make_current (a_ltr);
@@ -900,8 +523,11 @@ REVERSE_make_letter     (uchar *a_ltr, char a_type, char a_skip)
       DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   switch (s_type) {
-   case SHAPE_LINE     :  REVERSE_line     (a_type, a_skip);  break;
+   switch (g_fake.type) {
+      /*> case SHAPE_LINE     :  REVERSE_line     (a_type, a_skip);  break;              <*/
+   case SHAPE_LINE     :
+      CREATE_line (0, SHAPE_DRAW,  g_fake.rot, g_fake.arc, &(g_fake.sx), &(g_fake.sy));
+      break;
    case SHAPE_ELLIPSE  :  REVERSE_ellipse  (a_type, a_skip);  break;
    case SHAPE_CIRCLE   :  REVERSE_circle   (a_type, a_skip);  break;
    case SHAPE_TEARDROP :  REVERSE_teardrop (a_type, a_skip);  break;
@@ -916,8 +542,8 @@ REVERSE_make_letter     (uchar *a_ltr, char a_type, char a_skip)
 char
 REVERSE_make_offset     (int a_sizer)
 {
-   s_xpos +=  0.0 * a_sizer * SCALING;
-   s_ypos -= 10.0 * a_sizer * SCALING;
+   g_fake.sx   +=  0.0 * a_sizer * SCALING;
+   g_fake.sy   -= 10.0 * a_sizer * SCALING;
    return 0;
 }
 
@@ -926,18 +552,18 @@ REVERSE_make_next       (void)
 {
    /*---(header)-------------------------*/
    DEBUG_OUTP   yLOG_senter  (__FUNCTION__);
-   DEBUG_OUTP   yLOG_svalue  ("x", s_xpos);
-   DEBUG_OUTP   yLOG_svalue  ("y", s_ypos);
-   DEBUG_OUTP   yLOG_svalue  ("p", s_push);
+   DEBUG_OUTP   yLOG_svalue  ("x", g_fake.sx  );
+   DEBUG_OUTP   yLOG_svalue  ("y", g_fake.sy  );
+   DEBUG_OUTP   yLOG_svalue  ("p", g_fake.push);
    DEBUG_OUTP   yLOG_svalue  ("s", SCALING);
-   s_xpos = s_push + 10.0 * SCALING;
-   DEBUG_OUTP   yLOG_svalue  ("x", s_xpos);
-   if (s_xpos > 750)  {
+   g_fake.sx   = g_fake.push + 10.0 * SCALING;
+   DEBUG_OUTP   yLOG_svalue  ("x", g_fake.sx  );
+   if (g_fake.sx   > 750)  {
       DEBUG_OUTP   yLOG_snote   ("hit right");
-      s_xpos  = 30.0;
-      s_ypos -= 60.0 * SCALING;
-      DEBUG_OUTP   yLOG_svalue  ("x", s_xpos);
-      DEBUG_OUTP   yLOG_svalue  ("y", s_ypos);
+      g_fake.sx    = 30.0;
+      g_fake.sy   -= 60.0 * SCALING;
+      DEBUG_OUTP   yLOG_svalue  ("x", g_fake.sx  );
+      DEBUG_OUTP   yLOG_svalue  ("y", g_fake.sy  );
    }
    /*---(complete)-----------------------*/
    DEBUG_OUTP   yLOG_sexit   (__FUNCTION__);
@@ -968,21 +594,21 @@ REVERSE_gregg_word      (uchar *a_outline, char a_type, char a_skip)
    DEBUG_OUTP   yLOG_info    ("a_outline" , a_outline);
    /*---(prepare)------------------------*/
    DEBUG_OUTP   yLOG_char    ("a_type"    , a_type);
-   DEBUG_OUTP   yLOG_complex ("big_pos "  , "%5.1fsx, %5.1fsy", s_xpos, s_ypos);
-   --rce;  if (a_type == SHAPE_DRAW)     REV_draw_init  ();
-   else if    (a_type == SHAPE_LOAD)     REV_load_start  ();
+   DEBUG_OUTP   yLOG_complex ("big_pos "  , "%5.1fsx, %5.1fsy", g_fake.sx  , g_fake.sy  );
+   --rce;  if (a_type == SHAPE_DRAW)     CREATE_draw_init  ();
+   else if    (a_type == SHAPE_LOAD)     FAKE_start  ();
    else   {
       DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
    if (a_type == SHAPE_LOAD)  x_sizer = SCR2RAW;
    /*---(start parsing)------------------*/
-   DEBUG_OUTP   yLOG_complex ("big_pos "  , "%5.1fsx, %5.1fsy", s_xpos, s_ypos);
+   DEBUG_OUTP   yLOG_complex ("big_pos "  , "%5.1fsx, %5.1fsy", g_fake.sx  , g_fake.sy  );
    strlcpy  (t, a_outline, LEN_HUND);
    strltrim (t, ySTR_BOTH, LEN_HUND);
    p = strtok_r (t, q, &r);
-   if (p != NULL && p [0] == 'a')  s_xpos += 20;
-   if (p != NULL && p [0] == 'e')  s_xpos += 10;
+   if (p != NULL && p [0] == 'a')  g_fake.sx   += 20;
+   if (p != NULL && p [0] == 'e')  g_fake.sx   += 10;
    /*> REVERSE_make_letter  (">", a_type, a_skip);                           <*/
    /*---(walk)---------------------------*/
    while (p != NULL) {
@@ -991,9 +617,9 @@ REVERSE_gregg_word      (uchar *a_outline, char a_type, char a_skip)
       if (strcmp (">", p) == 0) {
          DEBUG_OUTP   yLOG_note    ("found a multipart indicator");
          if      (a_type == SHAPE_LOAD) {
-            REV_load_lift   (s_xpos, s_ypos);
+            FAKE_lift   (g_fake.sx  , g_fake.sy  );
             REVERSE_make_offset (x_sizer);
-            REV_load_touch  (s_xpos, s_ypos);
+            FAKE_touch  (g_fake.sx  , g_fake.sy  );
          } else {
             REVERSE_make_offset (x_sizer);
          }
@@ -1001,7 +627,7 @@ REVERSE_gregg_word      (uchar *a_outline, char a_type, char a_skip)
          DEBUG_OUTP   yLOG_note    ("normal letter");
          /*> REVERSE_make_letter  ("dot", a_type, a_skip);                            <*/
          REVERSE_make_letter  (p, a_type, a_skip);
-         /*> switch (s_type) {                                                        <* 
+         /*> switch (g_fake.type) {                                                        <* 
           *> case SHAPE_LINE     :  REVERSE_line     (a_type, a_skip);  break;        <* 
           *> case SHAPE_ELLIPSE  :  REVERSE_ellipse  (n, a_type, a_skip);  break;     <* 
           *> case SHAPE_CIRCLE   :  REVERSE_circle   (n, a_type, a_skip);  break;     <* 
@@ -1012,12 +638,12 @@ REVERSE_gregg_word      (uchar *a_outline, char a_type, char a_skip)
       }
       p = strtok_r (NULL, q, &r);
    }
-   if (x_last != NULL && x_last [0] == 'a')  s_xpos += 20;
-   if (x_last != NULL && x_last [0] == 'e')  s_xpos += 10;
+   if (x_last != NULL && x_last [0] == 'a')  g_fake.sx   += 20;
+   if (x_last != NULL && x_last [0] == 'e')  g_fake.sx   += 10;
    /*---(wrap-up)------------------------*/
-   s_index = 0;
-   if      (a_type == SHAPE_DRAW)     REV_draw_wrap  (s_xpos, s_ypos);
-   else                               REV_load_done  (s_xpos, s_ypos);
+   g_fake.n = 0;
+   if      (a_type == SHAPE_DRAW)     CREATE_draw_wrap  (0, a_type, g_fake.sx  , g_fake.sy  );
+   else                               FAKE_done  (g_fake.sx  , g_fake.sy  );
    /*---(complete)-----------------------*/
    DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -1043,21 +669,21 @@ REVERSE_gregg_text      (uchar *a_text, char a_type, char a_skip, char a_reset)
    }
    DEBUG_OUTP   yLOG_info    ("a_text"    , a_text);
    /*---(start parsing)------------------*/
-   if (a_reset == 'y')  REV_draw_reset  ();
+   if (a_reset == 'y')  CREATE_draw_reset  (0, a_type);
    strlcpy  (t, a_text, LEN_HUGE);
    p = strtok_r (t, q, &r);
    /*---(walk)---------------------------*/
    while (p != NULL) {
       x_len = strlen (p);
       DEBUG_OUTP   yLOG_complex ("parsed"    , "%2d[%s]", x_len, p);
-      if (x_len == 1 && p [0] == (uchar) '¦')   s_xpos = 9999;
+      if (x_len == 1 && p [0] == (uchar) '¦')   g_fake.sx   = 9999;
       else                                      REVERSE_gregg_word (p, a_type, a_skip);
-      s_xpos = s_push + 10.0 * SCALING;
-      DEBUG_OUTP   yLOG_value   ("s_rig"     , s_rig);
-      DEBUG_OUTP   yLOG_value   ("s_push"    , s_push);
+      g_fake.sx   = g_fake.push + 10.0 * SCALING;
+      DEBUG_OUTP   yLOG_value   ("g_fake.rig"     , g_fake.rig);
+      DEBUG_OUTP   yLOG_value   ("g_fake.push"    , g_fake.push);
       /*---(prepare next)----------------*/
       REVERSE_make_next    ();
-      DEBUG_OUTP   yLOG_complex ("big_pos "  , "%5.1fsx, %5.1fsy", s_xpos, s_ypos);
+      DEBUG_OUTP   yLOG_complex ("big_pos "  , "%5.1fsx, %5.1fsy", g_fake.sx  , g_fake.sy  );
       p = strtok_r (NULL, q, &r);
    }
    /*---(done)---------------------------*/
@@ -1141,21 +767,21 @@ REVERSE_english_text    (uchar *a_text, char a_type, char a_skip, char a_reset)
    }
    DEBUG_OUTP   yLOG_info    ("a_text"    , a_text);
    /*---(start parsing)------------------*/
-   if (a_reset == 'y')  REV_draw_reset  ();
+   if (a_reset == 'y')  CREATE_draw_reset  (0, a_type);
    strlcpy  (t, a_text, LEN_HUGE);
    p = strtok_r (t, q, &r);
    /*---(walk)---------------------------*/
    while (p != NULL) {
       x_len = strlen (p);
       DEBUG_OUTP   yLOG_complex ("parsed"    , "%2d[%s]", x_len, p);
-      if (x_len == 1 && p [0] == (uchar) '¦')   s_xpos = 9999;
+      if (x_len == 1 && p [0] == (uchar) '¦')   g_fake.sx   = 9999;
       else                                      REVERSE_english_word (p, a_type, a_skip);
-      s_xpos = s_push + 10.0 * SCALING;
-      DEBUG_OUTP   yLOG_value   ("s_rig"     , s_rig);
-      DEBUG_OUTP   yLOG_value   ("s_push"    , s_push);
+      g_fake.sx   = g_fake.push + 10.0 * SCALING;
+      DEBUG_OUTP   yLOG_value   ("g_fake.rig"     , g_fake.rig);
+      DEBUG_OUTP   yLOG_value   ("g_fake.push"    , g_fake.push);
       /*---(prepare next)----------------*/
       REVERSE_make_next    ();
-      DEBUG_OUTP   yLOG_complex ("big_pos "  , "%5.1fsx, %5.1fsy", s_xpos, s_ypos);
+      DEBUG_OUTP   yLOG_complex ("big_pos "  , "%5.1fsx, %5.1fsy", g_fake.sx  , g_fake.sy  );
       p = strtok_r (NULL, q, &r);
    }
    /*---(done)---------------------------*/
@@ -1187,11 +813,11 @@ REVERSE_page_beg        (void)
    /*---(header)-------------------------*/
    DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
    /*---(prepare)------------------------*/
-   REV_draw_reset  ();
-   s_xpos =  30.0;
-   s_ypos = -50.0;
+   CREATE_draw_reset  (0, SHAPE_DRAW);
+   g_fake.sx   =  30.0;
+   g_fake.sy   = -50.0;
    /*---(create texture)-----------------*/
-   yCOLOR_opengl_clear (YVIEW_MAIN, YCOLOR_MED);
+   yCOLOR_opengl_clear (YCOLOR_BAS, YCOLOR_MAX);
    rc = yGLTEX_new (&s_tex, &s_fbo, &s_depth, 850, 1100);
    rc = yGLTEX_draw         (s_fbo, YGLTEX_TOPLEF, 850, 1100, 1.0);
    /*> glColor4f (1.00f, 1.00f, 1.00f, 1.0f);                                         <*/
@@ -1257,16 +883,16 @@ REV__unit        (char *a_question, int a_num)
    strlcpy (unit_answer, "REVERSE unit     : unknownn request", 100);
    /*---(core data)----------------------*/
    if      (strncmp (a_question, "load"      , 20)  == 0) {
-      snprintf (t, 80, "%s", s_load);
-      if (strlen (s_load) > 80)  sprintf (s, "å%s>", t);
+      snprintf (t, 80, "%s", g_fake.load);
+      if (strlen (g_fake.load) > 80)  sprintf (s, "å%s>", t);
       else                      sprintf (s, "å%sæ", t);
-      snprintf (unit_answer, LEN_STR, "REVERSE load %3d : %s", s_count, s);
+      snprintf (unit_answer, LEN_STR, "REVERSE load %3d : %s", g_fake.count, s);
    }
    else if (strncmp (a_question, "box"       , 20)  == 0) {
-      snprintf (t, 80, "%s", s_load);
-      if (strlen (s_load) > 80)  sprintf (s, "[%s>", t);
+      snprintf (t, 80, "%s", g_fake.load);
+      if (strlen (g_fake.load) > 80)  sprintf (s, "[%s>", t);
       else                      sprintf (s, "[%s]", t);
-      snprintf (unit_answer, LEN_STR, "REVERSE box  %3d : %s", s_count, s);
+      snprintf (unit_answer, LEN_STR, "REVERSE box  %3d : %s", g_fake.count, s);
    }
    /*---(complete)-----------------------*/
    return unit_answer;

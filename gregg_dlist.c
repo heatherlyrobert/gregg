@@ -27,7 +27,7 @@ dlist_init         (void)
    return 0;
 }
 
-int  s_count = 0;
+static int  s_count = 0;
 
 char
 DLIST__title         (char *a_name)
@@ -70,22 +70,23 @@ DLIST__show          (int a_who, char a_dotted)
 }
 
 char
-dlist_letters(void)
+dlist_letters      (void)
 {
    /*---(locals)-----------+-----+-----+-*/
    int         x_len       =    0;
    int         x_type      =    0;
    int         i           =    0;
    /*---(begin)-----------------------------*/
-   dl_dotted = glGenLists(MAX_LETTERS);
-   dl_solid  = glGenLists(MAX_LETTERS);
+   dl_solid  = glGenLists (MAX_LETTERS);
+   dl_dotted = glGenLists (MAX_LETTERS);
    x_len = strlen (SHAPES_ALL);
    for (x_type = 0; x_type < x_len; ++x_type) {
       for (i = 0; i < MAX_LETTERS; ++i) {
-         if (strcmp (g_loc [i].label, "END") == 0)   break;
+         if (strcmp (g_loc [i].label, "EOF") == 0)   break;
          if (g_loc [i].type != SHAPES_ALL [x_type])  continue;
-         glNewList (dl_solid  + i,  GL_COMPILE);  REVERSE_make_letter (g_loc [i].label, SHAPE_SAMPLE, 1);   glEndList();
-         glNewList (dl_dotted + i,  GL_COMPILE);  REVERSE_make_letter (g_loc [i].label, SHAPE_SAMPLE, 1);   glEndList();
+         CREATE_letter_data (g_loc [i].label);
+         glNewList (dl_solid  + i,  GL_COMPILE);  CREATE_letter_easy (SHAPE_DRAW  , g_loc [i].label);  glEndList ();
+         glNewList (dl_dotted + i,  GL_COMPILE);  CREATE_letter_easy (SHAPE_SAMPLE, g_loc [i].label);  glEndList ();
       }
    }
    /*---(complete)--------------------------*/

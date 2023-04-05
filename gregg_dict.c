@@ -7,7 +7,8 @@
  * metis § sn2<· § handle newer categories field format                                   § N2O46u §  · §
  * metis § tn4<· § verbose dictionary parsing mode to find mistakes                       § N2O4rp §  · §
  * metis § tn2<· § use table of suffixes to check variation request                       § N2P1kq §  · §
- *
+ * metis § dc4·· § add verification of arpabet entry                                      § N2U1OE §  · §
+ * metis § dc4·· § add verification of gregg letters entry                                § N2U1OS §  · §
  */
 
 
@@ -55,9 +56,9 @@ tSOURCE  g_source   [LEN_LABEL] = {
    { '·', "tbd"                      , 0 },
    /*---(assiged)---------------------*/
    { '1', "pamplet         1st 1888" , 0 },
-   { '2', "pamplet         2nd 1888" , 0 },
-   { '3', "booklet         3rd 1888" , 0 },
-   { '4', "booklet         4th 1888" , 0 },
+   { '2', "revised         2nd 1893" , 0 },
+   { '3', "revised         3rd 1898" , 0 },
+   { '4', "revised         4th 1908" , 0 },
    { '5', "pre-anniversary 5th 1916" , 0 },
    { '6', "anniversary     6th 1929" , 0 },
    { '7', "simplified      7th 1949" , 0 },
@@ -137,7 +138,7 @@ tTYPES  g_types    [LEN_TERSE] = {
  *>    { "---", "---"     , "---", "---"                , "---"                                                , "---"                                                                    , 0 },   <* 
  *>    /+-done------------ -auto- ---description-------- ---true-endings--------------------------------------- ---examples---------------------------------------------------------------+/       <* 
  *> };                                                                                                                                                                                             <*/
-tVARY  g_varies [LEN_HUND] = {
+tVARY  g_varies [LEN_FULL] = {
    /*--name-- --suffix---- --also-- ---source-- ---true-endings----------------------------------------- ---examples------------------------------------------------------------ cnt */
    { "·"     , ""         , ""     , '·',  -1  , ""                                                     , "observe, care, drink, know, like, use, forget"                       , 0 },
    /*--name-- --suffix---- --also-- ---source-- ---true-endings----------------------------------------- ---examples------------------------------------------------------------ cnt */
@@ -145,19 +146,20 @@ tVARY  g_varies [LEN_HUND] = {
    { "Ï"     , ">·z"      , ""     , '5',  29  , "-ings"                                                , "sayings, readings, writings"                                         , 0 },
    {   "ze"  , ">·z·e"    , ""     , '5', 117  , "-ingly"                                               , "sayings, readings, writings"                                         , 0 },
    /*--name-- --suffix---- --also-- ---source-- ---true-endings----------------------------------------- ---examples------------------------------------------------------------ cnt */
-   { "t"     , ">·t"      , "ts"   , '·',  -1  , "-ate, -ite"                                           , "certificate, demonstrate, appointment"                               , 0 },
-   {   "tsh" , ">·t·sh"   , ""     , '5',  82  ,  "-tition, -tation"                                    , "repitition, station"                                                 , 0 },
+   { "t"     , ">·t"      , "ts"   , '·',  -1  , "-ate, -ite, -iate"                                    , "certificate, demonstrate, appointment, initiate"                     , 0 },
+   {   "tsh" , ">·t·sh"   , ""     , '5',  82  ,  "-tition, -tation, -tiation"                          , "repitition, station, initiation"                                     , 0 },
    {   "ts"  , ">·t·s"    , ""     , '5', 118  ,  "-itis"                                               , "appendicitis"                                                        , 0 },
    {   "tn"  , ">·t·n"    , ""     , '5', 111  ,  "-ington"                                             , "washington"                                                          , 0 },
-   {   "t"   , ">·t"      , ""     , '5',  43  ,  "-ted, -ded"                                          , "invited, divided, demanded, printed"                                 , 0 },
+   {   "tt"  , ">·t"      , ""     , '5',  43  ,  "-ted, -ded"                                          , "invited, divided, demanded, printed"                                 , 0 },
    /*--name-- --suffix---- --also-- ---source-- ---true-endings----------------------------------------- ---examples------------------------------------------------------------ cnt */
    { "d"     , ">·d"      , ""     , '·',  -1  ,  "-d, -ed, -ied"                                       , "observed, cared, drank, knew, liked, used, forgot"                   , 0 },
    {   "dsh" , ">·d·sh"   , ""     , '5',  82  ,  "-dation"                                             , "addition, gradation"                                                 , 0 },
-   {   "d"   , ">·d"      , ""     , '5', 118  ,  "-hood, -ward"                                        , "childhood, likelihood, homeward, downward, forward, toward"          , 0 },
+   {   "dd"  , ">·d"      , ""     , '5', 118  ,  "-hood, -ward"                                        , "childhood, likelihood, homeward, downward, forward, toward"          , 0 },
    /*--name-- --suffix---- --also-- ---source-- ---true-endings----------------------------------------- ---examples------------------------------------------------------------ cnt */
    { "th"    , ">·th"     , ""     , '5', 111  , "-worthy"                                              , "praiseworthy, trustworthy"                                           , 0 },
    /*--name-- --suffix---- --also-- ---source-- ---true-endings----------------------------------------- ---examples------------------------------------------------------------ cnt */
    { "s"     , ">·s"      , ""     , '·',  -1  , "-s, -es, -ies"                                        , "observes, cares, drinks, knows, likes, uses, forgets"                , 0 },
+   {   "st"  , ">·s·t"    , ""     , '·',  -1  , "-est, -iest"                                          , "longest, strongest, greatest"                                        , 0 },
    {   "sf"  , ">·s·f"    , ""     , '5', 111  , "-self"                                                , "himself, yourself"                                                   , 0 },
    {   "se"  , ">·s·e"    , ""     , '5', 123  , "-city, -acity, -ecity"                                , "tenacity, felicity, pomposity"                                       , 0 },
    {   "su"  , ">·s·u"    , ""     , '5', 111  , "-sult"                                                , "result, insult, consult"                                             , 0 },
@@ -165,6 +167,7 @@ tVARY  g_varies [LEN_HUND] = {
    /*--name-- --suffix---- --also-- ---source-- ---true-endings----------------------------------------- ---examples------------------------------------------------------------ cnt */
    { "f"     , ">·f"      , ""     , '5', 109  , "-ful, -fil"                                           , "careful, beautiful, useful, thoughtful"                              , 0 },
    {   "fe"  , ">·f·e"    , ""     , '5', 109  , "-fully, -filly"                                       , "carefully, beautifully, usefully, thoughtfully"                      , 0 },
+   {   "fn"  , ">·f·n"    , ""     , '´', -1   , "-fulness"                                             , "hopefulness, carefulness, thoughfulness"                             , 0 },
    {   "fsh" , ">·f·sh"   , ""     , '5', 109  , "-ification"                                           , "specification, modification"                                         , 0 },
    {   "fl"  , ">·f·l"    , ""     , '5', 109  , "-flect, -flict"                                       , "afflict, reflect"                                                    , 0 },
    {   "flsh", ">·f·l·sh" , ""     , '5', 109  , "-flection, -fliction"                                 , "affliction, reflection"                                              , 0 },
@@ -210,26 +213,37 @@ tVARY  g_varies [LEN_HUND] = {
    {   "mt"  , ">·m·l"    , ""     , '5', 117  , "-mental, -imental, -amental, -mentality"              , "experimental, fundamental"                                           , 0 },
    {   "msh" , ">·m·sh"   , ""     , '5',  82  , "-mission, -mation"                                    , "ommission, formation"                                                , 0 },
    {   "me"  , ">·m·e"    , ""     , '5', 123  , "-mity, -amity, -emity"                                , "calamity, sublimity, proximity"                                      , 0 },
-   {   "m"   , ">·m"      , ""     , '5', 117  , "-ingham"                                              , "birmingham, dillingham"                                              , 0 },
+   {   "mm"  , ">·m"      , ""     , '5', 117  , "-ingham"                                              , "birmingham, dillingham"                                              , 0 },
    /*--name-- --suffix---- --also-- ---source-- ---true-endings----------------------------------------- ---examples------------------------------------------------------------ cnt */
    { "sh"    , ">·sh"     , "shs"  , '5',  30  , "-tion, -sion"                                         , "observation, nation, session, action, motion, fashion"               , 0 },
    {   "shu" , ">·sh·u"   , ""     , '5', 111  , "-sure"                                                , "assure, measure, pressure"                                           , 0 },
+   {   "shus", ">·sh·u·s" , ""     , '5', 111  , "-cious"                                               , "audacious, vicious"                                                  , 0 },
    {   "sht" , ">·sh·t"   , ""     , '5', 111  , "-tient, -cient"                                       , "patient, ancient, efficient, sufficient"                             , 0 },
    {   "shte", ">·sh·t·e" , ""     , '5', 111  , "-tiently, -ciently"                                   , "efficiently, sufficiently"                                           , 0 },
    {   "sh"  , ">·sh"     , ""     , '5', 117  , "-ship"                                                , "partnership, ownership, hardship, friendship"                        , 0 },
-   { "j"     , ">·j"      , ""     , '5',  30  , "-jure"                                                , "injure, purjure"                                                     , 0 },
    /*--name-- --suffix---- --also-- ---source-- ---true-endings----------------------------------------- ---examples------------------------------------------------------------ cnt */
-   { "e"     , ">·e"      , ""     , '·',  -1  , "-ry, -ory, -ery, -ary, -ium"                          , "observatory, aviary"                                                 , 0 },
-   {   "e"   , ">·e"      , ""     , '5',  30  , "-ly, -ily, -ally"                                     , "only, calmly, totally, early, readity"                               , 0 },
+   { "j"     , ">·j"      , ""     , '5',  30  , "-jure"                                                , "injure, purjure"                                                     , 0 },
+   {    "je" , ">·j·e"    , ""     , '·',  -1  , "-jury"                                                , "injury, purjury"                                                     , 0 },
+   {    "js" , ">·j·s"    , ""     , '·',  -1  , "-juries"                                              , "injuries"                                                            , 0 },
+   /*--name-- --suffix---- --also-- ---source-- ---true-endings----------------------------------------- ---examples------------------------------------------------------------ cnt */
+   { "a"     , ">·a"      , ""     , '5', 123  , "-tic, -atic, -etic, -itic, -otic"                     , "politic, hymnotic, systematic"                                       , 0 },
+   {    "as" , ">·a·s"    , ""     , '5', 123  , "-tics, -atics, -etics, -itics, -otics"                , "politics, hymnotics, systematics"                                    , 0 },
+   {    "ae" , ">·a·e"    , ""     , '5', 123  , "-ticly, -aticly, -eticly, -iticly, -oticly"           , "politicly, hymnoticly, systematicly"                                 , 0 },
+   { "e"     , ">·e"      , ""     , '5',  30  , "-ly, -ily, -ally"                                     , "only, calmly, totally, early, readity"                               , 0 },
    {   "esh" , ">·e·sh"   , ""     , '5',  30  , "-ish"                                                 , "only, calmly, totally, early, readity"                               , 0 },
    {   "ez"  , ">·e·z"    , ""     , '5', 117  , "-ize, -ise, -itize"                                   , "prioritize, rationalize, sympathize"                                 , 0 },
+   {   "er"  , ">·r"      , ""     , '·',  -1  , "-er, -ier"                                            , "longer, stronger, greater"                                           , 0 },
    { "o"     , ">·o"      , ""     , '5', 123  , "-alogy, -elogy, -ilogy"                               , "geology, analogy, psychology"                                        , 0 },
    {   "ol"  , ">·o·l"    , ""     , '5', 123  , "-alogical, -elogical, -ilogical"                      , "geological, psychological"                                           , 0 },
-   { "u"     , ">·u"      , ""     , '5', 118  , "-ulate"                                               , "modulate, insulate, emulate, speculate"                              , 0 },
-   {    "ul" , ">·u·l"    , ""     , '5', 118  , "-il, -al, -ile, -ial"                                 , "observational"                                                       , 0 },
+   {   "or"  , ">·o·r"    , ""     , '·',  -1  , "-ry, -ory, -ery, -ary, -ium, -itory, -atory"          , "observatory, aviary"                                                 , 0 },
+   { "u"     , ">·u"      , ""     , '·',  -1  , "-ul, -al, -il, -ile, -ial"                            , "additonal, observational"                                            , 0 },
+   {    "ut" , ">·u·t"    , ""     , '5', 118  , "-ulate"                                               , "modulate, insulate, emulate, speculate"                              , 0 },
+   {    "ud" , ">·u·d"    , ""     , '5', 118  , "-ulated"                                              , "modulated, insulated, emulated, speculated"                          , 0 },
+   {    "uv" , ">·u·v"    , ""     , '5', 118  , "-ulative"                                             , "speculative"                                                         , 0 },
+   {    "ush", ">·u·sh"   , ""     , '5', 118  , "-ulation"                                             , "modulation, insulation, emulation, speculation"                      , 0 },
+   {    "ur" , ">·u·r"    , ""     , '5', 118  , "-ulator"                                              , "modulator, insulator, emulator, speculator"                          , 0 },
    /*--name-- --suffix---- --also-- ---source-- ---true-endings----------------------------------------- ---examples------------------------------------------------------------ cnt */
-   { "er"    , ">·r"      , ""     , '·',  -1  , "-er, -ier"                                            , "longer, stronger, greater"                                           , 0 },
-   { "st"    , ">·s·t"    , ""     , '·',  -1  , "-est, -iest"                                          , "longest, strongest, greatest"                                        , 0 },
+   { "y"     , "·e"       , ""     , '5', 123  , "-y, -ish"                                             , "hasty, tasty, nasty, rougish"                                        , 0 },
    /*--name-- --suffix---- --also-- ---source-- ---true-endings----------------------------------------- ---examples------------------------------------------------------------ cnt */
    { "---"   , "---"      , "---"  , '·',  -1  , "---"                                                  , "---"                                                                 , 0 },
    /*--name-- --suffix---- --also-- ---source-- ---true-endings----------------------------------------- ---examples------------------------------------------------------------ cnt */
@@ -296,11 +310,11 @@ char    VARIATIONS      [LEN_RECD] = "";
  * Ï 5    118    d     -hood, -ward          childhood, likelihood, homeward, downward, forward, towards
  * Ï ´    ´      k     -acle, -ical, -icle   tentacle, medical, classical, chronicle
  * Ï ´    ´      ts    -itis                 appendicitis
- *   ´    ´      u     -ulate                modulate, insulate, emulate
- *   ´    ´      ut    -ulated               modulated, insulated, emulated
- *   ´    ´      uv    -ulative              speculative, emulative
- *   ´    ´      ush   -ulation              speculation, emulation
- *   ´    ´      ur    -ulator               speculator, emulator
+ * Ï ´    ´      u     -ulate                modulate, insulate, emulate
+ * Ï ´    ´      ut    -ulated               modulated, insulated, emulated
+ * Ï ´    ´      uv    -ulative              speculative, emulative
+ * Ï ´    ´      ush   -ulation              speculation, emulation
+ * Ï ´    ´      ur    -ulator               speculator, emulator
  * Ï 5    123    r     -´rity, -arity, -erity    popularity, prosperity, majority
  * Ï ´    ´      l     -´lity, -ality, -elity    brutality, utility frivolity
  * Ï ´    ´      s     -´city, -acity, -ecity    tenactiy, felicty, pomposity  
@@ -425,7 +439,7 @@ DICT__find_variation    (char a_name [LEN_SHORT], char r_suffix [LEN_TERSE], cha
    /*---(defense)------------------------*/
    --rce;  if (a_name == NULL)  return rce;
    /*---(search)-------------------------*/
-   for (i = 0; i < LEN_HUND; ++i) {
+   for (i = 0; i < LEN_FULL; ++i) {
       if (g_varies [i].name [0] == '-')              break;
       if (strcmp (g_varies [i].name, a_name) != 0)   continue;
       /*---(suffix)----------------------*/
@@ -467,7 +481,7 @@ DICT_init          (void)
    }
    DEBUG_CONF   yLOG_info    ("PARTS_OF..", PARTS_OF_SPEECH);
    strcpy (VARIATIONS     , " ");
-   for (i = 0; i < LEN_HUND; ++i) {
+   for (i = 0; i < LEN_FULL; ++i) {
       if (strcmp (g_varies [i].name, "---") == 0)   break;
       if (strcmp (g_varies [i].name, ""   ) == 0)   continue;
       if (strcmp (g_varies [i].name, "·"  ) == 0)   continue;
@@ -923,15 +937,19 @@ DICT__parse             (short a_line, uchar *a_recd)
       return rce;
    }
    /*---(primary)------------------------*/
-   rc = DICT__primary (a_line, s_fields [0], s_fields [1], s_fields [2], &x_new);
+   rc = DICT__primary (a_line, s_fields [0], s_fields [2], s_fields [3], &x_new);
    DEBUG_CONF   yLOG_value   ("primary"   , rc);
    --rce;  if (rc < 0) {
       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
+   /*---(arpabet)------------------------*/
+   if (s_nfield > 3) {
+      x_new->arpabet   = strdup (s_fields [1]);
+   }
    /*---(categories)---------------------*/
-   if (s_nfield > 2) {
-      rc = DICT__category (x_new, s_fields [2]);
+   if (s_nfield > 3) {
+      rc = DICT__category (x_new, s_fields [3]);
       DEBUG_CONF   yLOG_value   ("primary"   , rc);
       --rce;  if (rc < 0) {
          DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
@@ -940,7 +958,7 @@ DICT__parse             (short a_line, uchar *a_recd)
    }
    /*---(variations)---------------------*/
    x_last = x_new;
-   for (i = 3; i < s_nfield; ++i) {
+   for (i = 4; i < s_nfield; ++i) {
       if (strlen (s_fields [i]) == 0)  continue;
       rc = DICT__variation (x_new, x_last, s_fields [i], &x_vary);
       DEBUG_CONF   yLOG_value   ("variation" , rc);
@@ -1107,7 +1125,7 @@ DICT_list          (void)
       ++a;
       WORDS_eng_by_index (a, &x_curr);
    }
-   printf ("## found %d primaries and %d total words\n", c, a);
+   printf ("## found %d primaries and %d total words (%4.2fx)\n", c, a, (float) a / (float) c);
    /*---(complete)-----------------------*/
    return 0;
 }

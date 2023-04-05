@@ -37,8 +37,8 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "5.--= generalization for broader use"
 #define     P_VERMINOR  "5.4 = update for use as coding example"
-#define     P_VERNUM    "5.4e"
-#define     P_VERTXT    "captured 98pct of gregg suffix categories, may rationalize later"
+#define     P_VERNUM    "5.4f"
+#define     P_VERTXT    "can display rudamentary output pages again"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -430,27 +430,28 @@ extern char unit_answer  [LEN_STR];
 
 
 
-#define    MAX_LETTERS   200
+#define    MAX_LETTERS   300
 typedef struct cLOCATION tLOCATION;
 struct cLOCATION
 {
    /*---(header)------------*/
-   char      label         [LEN_TERSE];          /* name                      */
+   char      label         [LEN_TERSE];          /* name              */
    /*---(creation)----------*/
-   char      type;                               /* function type to draw     */
+   char      type;                               /* draw function     */
    short     x_ellipse;                          /* ellipse x-radius  */
    short     y_ellipse;                          /* ellipse y-radius  */
    short     r_ellipse;                          /* ellipse rotation  */
    short     b_arc;                              /* arc begin         */
    short     l_arc;                              /* arc length        */
    /*---(grouping)----------*/
-   uchar     lcat;                               /* letter group              */
-   char      range;                              /* range of letter           */
-   char      size;                               /* size category             */
+   uchar     lcat;                               /* letter group      */
+   char      range;                              /* range of letter   */
+   char      size;                               /* size category     */
    /*---(display)-----------*/
    short     x_show;                             /* teaching x        */
-   short     y_show                        ;     /* teaching y        */
-   char      align;                              /* alignment for text label  */
+   short     y_show;                             /* teaching y        */
+   char      align;                              /* label alignment   */
+   char      dots;                               /* spacing for dots  */
    /*---(trend)-------------*/
    float     x_end;                              /* ending x          */
    float     y_end;                              /* ending y          */
@@ -461,6 +462,8 @@ struct cLOCATION
    float     x_rig;                              /* rightmost         */
    float     y_top;                              /* topmost           */
    float     y_bot;                              /* bottommost        */
+   /*---(count)-------------*/
+   short     count;                              /* number of points  */
    /*---(done)--------------*/
 };
 extern tLOCATION   g_loc [MAX_LETTERS];
@@ -563,6 +566,7 @@ extern int   vowels[16][16];
 /*> GLuint    dl_arrow;                                                               <*/
 extern GLuint    dl_solid;
 extern GLuint    dl_dotted;
+
 /*> GLuint    dl_arrowed;                                                             <*/
 extern GLuint    dl_undo;
 extern GLuint    dl_redo;
@@ -648,10 +652,51 @@ typedef struct timespec  tTSPEC;
 #define     SHAPES_ALL     "lcetdwa"
 
 
+/*
+ *   LOAD    point output that can be loaded into recognizer
+ *   DRAW    exactly what appears in the textbooks
+ *   SAMPLE  pretty version to show on side of screen
+ *   CHECK   more auditable version for screen
+ *   TRAIN   adds dot at beginning of letters
+ *
+ */
 #define     SHAPE_LOAD     'L'
 #define     SHAPE_DRAW     'D'
 #define     SHAPE_SAMPLE   'S'
+#define     SHAPE_CHECK    'C'
+#define     SHAPE_TRAIN    'T'
+#define     SHAPE_DATA     '+'
+#define     SHAPE_DOTTED   "SC"
 
+
+#define     POINT_SML      0.8
+#define     POINT_MED      2.0
+#define     POINT_BIG      5.0
+
+typedef  struct cFAKE tFAKE;
+struct cFAKE {
+   short       c;
+   char        load       [LEN_HUGE];
+   short       count;
+   short       xpage;
+   short       ypage;
+   short       lef;
+   short       rig;
+   short       top;
+   short       bot;
+   short       push;
+   short       n;
+   char        label      [LEN_TERSE];
+   char        type;
+   short       rot;
+   short       beg;
+   short       arc;
+   short       xradius;
+   short       yradius;
+   short       sx, sy;
+   short       px, py;
+};
+extern tFAKE g_fake;
 
 typedef struct cPOINT tPOINT;
 struct cPOINT
@@ -812,7 +857,7 @@ struct cVARY {
    int         count;
    /*---(done)-----------------*/
 };
-extern tVARY  g_varies [LEN_HUND];
+extern tVARY  g_varies [LEN_FULL];
 extern char    VARIATIONS      [LEN_RECD];
 
 
@@ -824,6 +869,7 @@ struct cWORD {
    /*---(header)---------------*/
    char       *english;                     /* english word                   */
    char        e_len;
+   uchar      *arpabet;                     /* pronouce in arpabet            */
    uchar      *gregg;                       /* gregg translation              */
    char        g_len;
    uchar      *unique;                      /* unique word key                */
@@ -1092,7 +1138,8 @@ char*       WORDS_entry             (int n);
 /*> char        WORDS_dict_notes        (tWORD *a_new, uchar *a_notes);              <*/
 char        WORDS_table_ae          (void);
 char        WORDS_drawn_show        (short a_drawn [], uchar *a_out);
-char        WORDS_drawn_fix         (uchar *a_index, short a_drawn []);
+char        WORDS_drawn_fix_OLD     (uchar *a_index, short a_drawn []);
+char        WORDS_fix_ae            (short a_pcat, short a_ncat, char r_name [LEN_TERSE], short *r_use);
 int         words_outstring         (char *);
 
 int         WORDS_find             (char* a_word);
@@ -1137,11 +1184,6 @@ ushort      REVERSE_find_letter     (char *a_ltr, char a_scope);
 char        REVERSE_begin           (int x, int y);
 char        REVERSE_end             (void);
 /*---(loading)--------------*/
-char        REV_load_start          (void);
-char        REV_load_touch          (int x, int y);
-char        REV_load_point          (int x, int y);
-char        REV_load_lift           (int x, int y);
-char        REV_load_done           (int x, int y);
 char        REV_load_raw            (void);
 char        REV_load__show_tail     (void);
 /*---(shapes)---------------*/
@@ -1232,6 +1274,65 @@ char        DICT_list_all           (void);
 char        gregg_yjobs             (cchar a_req, cchar *a_data);
 
 
+/*===[[ gregg_create.c ]]=====================================================*/
+/*··········Ï·······················Ï·········································*/
+/*---(sample dots)----------*/
+char        CREATE_dots_begin       (void);
+char        CREATE_dots_point       (float x, float y);
+char        CREATE_dots_end         (void);
+/*---(drawing)--------------*/
+char        CREATE_draw_init        (void);
+char        CREATE_draw_reset       (short n, char a_act);
+char        CREATE_draw_begin       (void);
+char        CREATE_draw_point       (short n, char a_act, float x, float y);
+char        CREATE_draw_end         (void);
+char        CREATE_draw_wrap        (short n, char a_act, float x, float y);
+/*---(helpers)--------------*/
+char        CREATE_head             (short n, char a_act);
+char        CREATE_single           (short n, char a_act, float x, float y);
+char        CREATE_tail             (short n, char a_act, float x, float y);
+/*---(shapes)---------------*/
+char        CREATE_line             (short n, char a_act, short a_rot, short a_len, float *b_xpos, float *b_ypos);
+char        CREATE_circle           (short n, char a_act, short a_radius, short a_rot, float *b_xpos, float *b_ypos);
+char        CREATE_ellipse_point    (char a_act, short i, short sx, short sy, float a_xlen, float a_ylen, float a_bsin, float a_bcos, float a_xadj, float a_yadj, float *r_xpos, float *r_ypos);
+char        CREATE_ellipse          (short n, char a_act, short a_xradius, short a_yradius, short a_rot, short a_beg, short a_arc, char a_dots, float *b_xpos, float *b_ypos);
+char        CREATE_teardrop_point   (char a_act, float s, float sx, float sy, short a_rot, short a_xlen, short a_ylen, float *r_xpos, float *r_ypos);
+char        CREATE_teardrop         (short n, char a_act, short a_xradius, short a_yradius, short a_rot, short a_beg, short a_arc, float *b_xpos, float *b_ypos);
+char        CREATE_dot              (short n, char a_act, short a_xradius, float *b_xpos, float *b_ypos);
+char        CREATE_space            (short n, char a_act, short a_xradius, short a_yradius, float *b_xpos, float *b_ypos);
+/*---(letters)--------------*/
+short       CREATE_find_by_name     (char *a_ltr, char a_scope, char *r_type, char *r_lcat, char r_label [LEN_TERSE], short *r_xradius, short *r_yradius, short *r_rot, short *r_beg, short *r_arc, char *r_dots);
+char        CREATE_letter           (char a_act, uchar *a_ltr, float *b_xpos, float *b_ypos);
+char        CREATE_letter_easy      (char a_act, uchar *a_ltr);
+char        CREATE_letter_data      (uchar *a_ltr);
+/*---(audit)----------------*/
+char        CREATE_detail           (short n, char a_out [LEN_FULL]);
+char        CREATE_dump             (void);
+/*---(done)-----------------*/
+
+
+/*===[[ gregg_page.c ]]=======================================================*/
+/*··········Ï·······················Ï·········································*/
+/*---(writing)--------------*/
+char        PAGE_letter             (char a_act, uchar *a_ltr);
+char        PAGE_gregg              (char a_act, char a_gregg [LEN_TITLE]);
+/*---(organizing)-----------*/
+char        PAGE_new                (char a_style, short a_wide, short a_tall, short a_left, short a_right, short a_top, short a_bottom, short a_ascent, short a_descent, short a_spacing);
+char        PAGE_default            (void);
+char        PAGE_sized              (short a_wide, short a_tall);
+char        PAGE_screen             (void);
+char        PAGE_end                (void);
+/*---(done)-----------------*/
+
+
+
+
+
+char        FAKE_start              (void);
+char        FAKE_touch              (short x, short y);
+char        FAKE_point              (short x, short y);
+char        FAKE_lift               (short x, short y);
+char        FAKE_done               (short x, short y);
 
 #endif
 /*============================----(source-end)----============================*/
