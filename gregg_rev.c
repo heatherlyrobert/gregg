@@ -526,7 +526,7 @@ REVERSE_make_letter     (uchar *a_ltr, char a_type, char a_skip)
    switch (g_fake.type) {
       /*> case SHAPE_LINE     :  REVERSE_line     (a_type, a_skip);  break;              <*/
    case SHAPE_LINE     :
-      CREATE_line (0, SHAPE_DRAW,  g_fake.rot, g_fake.arc, &(g_fake.sx), &(g_fake.sy));
+      CREATE_line (0, SHAPE_DRAW, g_fake.arc, g_fake.rot, &(g_fake.sx), &(g_fake.sy));
       break;
    case SHAPE_ELLIPSE  :  REVERSE_ellipse  (a_type, a_skip);  break;
    case SHAPE_CIRCLE   :  REVERSE_circle   (a_type, a_skip);  break;

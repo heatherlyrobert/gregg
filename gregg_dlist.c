@@ -4,15 +4,14 @@
 
 
 
-GLuint    dl_solid;
-GLuint    dl_dotted;
+GLuint    dl_solid   = -1;
+GLuint    dl_dotted  = -1;
 GLuint    dl_undo;
 GLuint    dl_redo;
 GLuint    dl_clear;
 GLuint    dl_back;
 
 
-PRIV char  dlist_letters    (void);
 PRIV char  DLIST_back       (void);
 
 char
@@ -21,7 +20,7 @@ dlist_init         (void)
    /*> DEBUG_GRAF  printf("dlist_init() -- drive loading\n");                         <*/
    /*> DEBUG_GRAF  printf("   - clear letters\n\n");                                  <*/
    /*> DEBUG_GRAF  printf("   - create buttons\n\n");                                 <*/
-   dlist_letters();
+   DLIST_letters_make (1.0);
    DLIST_back();
    /*> DEBUG_GRAF  printf("   - done\n\n");                                           <*/
    return 0;
@@ -70,26 +69,38 @@ DLIST__show          (int a_who, char a_dotted)
 }
 
 char
-dlist_letters      (void)
+DLIST_letters_make      (float a_scale)
 {
    /*---(locals)-----------+-----+-----+-*/
    int         x_len       =    0;
    int         x_type      =    0;
    int         i           =    0;
-   /*---(begin)-----------------------------*/
+   /*---(verify free)-----------------------*/
+   if (dl_solid < 0)   DLIST_letters_free ();
+   /*---(allocate)--------------------------*/
    dl_solid  = glGenLists (MAX_LETTERS);
    dl_dotted = glGenLists (MAX_LETTERS);
+   /*---(begin)-----------------------------*/
    x_len = strlen (SHAPES_ALL);
    for (x_type = 0; x_type < x_len; ++x_type) {
       for (i = 0; i < MAX_LETTERS; ++i) {
          if (strcmp (g_loc [i].label, "EOF") == 0)   break;
          if (g_loc [i].type != SHAPES_ALL [x_type])  continue;
-         CREATE_letter_data (g_loc [i].label);
-         glNewList (dl_solid  + i,  GL_COMPILE);  CREATE_letter_easy (SHAPE_DRAW  , g_loc [i].label);  glEndList ();
-         glNewList (dl_dotted + i,  GL_COMPILE);  CREATE_letter_easy (SHAPE_SAMPLE, g_loc [i].label);  glEndList ();
+         CREATE_letter_data (g_loc [i].label, a_scale);
+         glNewList (dl_solid  + i,  GL_COMPILE);  CREATE_letter_dlist (SHAPE_DRAW  , g_loc [i].label, a_scale);  glEndList ();
+         glNewList (dl_dotted + i,  GL_COMPILE);  CREATE_letter_dlist (SHAPE_SAMPLE, g_loc [i].label, a_scale);  glEndList ();
       }
    }
    /*---(complete)--------------------------*/
+   return 0;
+}
+
+char
+DLIST_letters_free      (void)
+{
+   glDeleteLists (dl_solid , MAX_LETTERS);
+   glDeleteLists (dl_dotted, MAX_LETTERS);
+   dl_solid = dl_dotted = -1;
    return 0;
 }
 

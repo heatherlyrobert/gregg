@@ -3,10 +3,7 @@
 
 /*
  *
- * metis § dc2·· § allow for blank/empty varitions in source files                        § N2O468 §  · §
- * metis § sn2<· § handle newer categories field format                                   § N2O46u §  · §
- * metis § tn4<· § verbose dictionary parsing mode to find mistakes                       § N2O4rp §  · §
- * metis § tn2<· § use table of suffixes to check variation request                       § N2P1kq §  · §
+ * metis § tn4·· § verbose dictionary parsing mode to find mistakes                       § N2O4rp §  · §
  * metis § dc4·· § add verification of arpabet entry                                      § N2U1OE §  · §
  * metis § dc4·· § add verification of gregg letters entry                                § N2U1OS §  · §
  */
@@ -153,7 +150,7 @@ tVARY  g_varies [LEN_FULL] = {
    {   "tt"  , ">·t"      , ""     , '5',  43  ,  "-ted, -ded"                                          , "invited, divided, demanded, printed"                                 , 0 },
    /*--name-- --suffix---- --also-- ---source-- ---true-endings----------------------------------------- ---examples------------------------------------------------------------ cnt */
    { "d"     , ">·d"      , ""     , '·',  -1  ,  "-d, -ed, -ied"                                       , "observed, cared, drank, knew, liked, used, forgot"                   , 0 },
-   {   "dsh" , ">·d·sh"   , ""     , '5',  82  ,  "-dation"                                             , "addition, gradation"                                                 , 0 },
+   {   "dsh" , ">·d·sh"   , ""     , '5',  82  ,  "-dation, -dition"                                    , "addition, gradation"                                                 , 0 },
    {   "dd"  , ">·d"      , ""     , '5', 118  ,  "-hood, -ward"                                        , "childhood, likelihood, homeward, downward, forward, toward"          , 0 },
    /*--name-- --suffix---- --also-- ---source-- ---true-endings----------------------------------------- ---examples------------------------------------------------------------ cnt */
    { "th"    , ">·th"     , ""     , '5', 111  , "-worthy"                                              , "praiseworthy, trustworthy"                                           , 0 },
@@ -215,12 +212,13 @@ tVARY  g_varies [LEN_FULL] = {
    {   "me"  , ">·m·e"    , ""     , '5', 123  , "-mity, -amity, -emity"                                , "calamity, sublimity, proximity"                                      , 0 },
    {   "mm"  , ">·m"      , ""     , '5', 117  , "-ingham"                                              , "birmingham, dillingham"                                              , 0 },
    /*--name-- --suffix---- --also-- ---source-- ---true-endings----------------------------------------- ---examples------------------------------------------------------------ cnt */
-   { "sh"    , ">·sh"     , "shs"  , '5',  30  , "-tion, -sion"                                         , "observation, nation, session, action, motion, fashion"               , 0 },
+   { "sh"    , ">·sh"     , "shs"  , '5',  30  , "-tion, -sion, -ation, -ition"                         , "observation, nation, session, action, motion, fashion"               , 0 },
    {   "shu" , ">·sh·u"   , ""     , '5', 111  , "-sure"                                                , "assure, measure, pressure"                                           , 0 },
    {   "shus", ">·sh·u·s" , ""     , '5', 111  , "-cious"                                               , "audacious, vicious"                                                  , 0 },
    {   "sht" , ">·sh·t"   , ""     , '5', 111  , "-tient, -cient"                                       , "patient, ancient, efficient, sufficient"                             , 0 },
    {   "shte", ">·sh·t·e" , ""     , '5', 111  , "-tiently, -ciently"                                   , "efficiently, sufficiently"                                           , 0 },
    {   "sh"  , ">·sh"     , ""     , '5', 117  , "-ship"                                                , "partnership, ownership, hardship, friendship"                        , 0 },
+   {   "shl" , ">·sh·l"   , ""     , '5', 117  , "-tional"                                              , "devotional"                                                          , 0 },
    /*--name-- --suffix---- --also-- ---source-- ---true-endings----------------------------------------- ---examples------------------------------------------------------------ cnt */
    { "j"     , ">·j"      , ""     , '5',  30  , "-jure"                                                , "injure, purjure"                                                     , 0 },
    {    "je" , ">·j·e"    , ""     , '·',  -1  , "-jury"                                                , "injury, purjury"                                                     , 0 },
@@ -237,6 +235,7 @@ tVARY  g_varies [LEN_FULL] = {
    {   "ol"  , ">·o·l"    , ""     , '5', 123  , "-alogical, -elogical, -ilogical"                      , "geological, psychological"                                           , 0 },
    {   "or"  , ">·o·r"    , ""     , '·',  -1  , "-ry, -ory, -ery, -ary, -ium, -itory, -atory"          , "observatory, aviary"                                                 , 0 },
    { "u"     , ">·u"      , ""     , '·',  -1  , "-ul, -al, -il, -ile, -ial"                            , "additonal, observational"                                            , 0 },
+   {    "us" , ">·u·s"    , ""     , '5', 118  , "-ulus, -elus, -ilus, -alus"                           , "modulus"                                                             , 0 },
    {    "ut" , ">·u·t"    , ""     , '5', 118  , "-ulate"                                               , "modulate, insulate, emulate, speculate"                              , 0 },
    {    "ud" , ">·u·d"    , ""     , '5', 118  , "-ulated"                                              , "modulated, insulated, emulated, speculated"                          , 0 },
    {    "uv" , ">·u·v"    , ""     , '5', 118  , "-ulative"                                             , "speculative"                                                         , 0 },

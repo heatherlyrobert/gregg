@@ -264,7 +264,7 @@ CREATE_tail             (short n, char a_act, float x, float y)
 static void o___SHAPES_________________o (void) {;}
 
 char
-CREATE_line             (short n, char a_act, short a_rot, short a_len, float *b_xpos, float *b_ypos)
+CREATE_line             (short n, char a_act, float a_len, float a_rot, float *b_xpos, float *b_ypos)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
@@ -315,7 +315,7 @@ CREATE_line             (short n, char a_act, short a_rot, short a_len, float *b
 }
 
 char
-CREATE_circle           (short n, char a_act, short a_radius, short a_rot, float *b_xpos, float *b_ypos)
+CREATE_circle           (short n, char a_act, float a_radius, float a_rot, float *b_xpos, float *b_ypos)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
@@ -325,6 +325,8 @@ CREATE_circle           (short n, char a_act, short a_radius, short a_rot, float
    float       x_adj, y_adj;
    float       cx, cy;
    short       x_sizer     =    1;
+   short       x_beg       =    0;
+   short       x_end       =  360;
    /*---(header)-------------------------*/
    DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
    /*---(defense)------------------------*/
@@ -347,12 +349,14 @@ CREATE_circle           (short n, char a_act, short a_radius, short a_rot, float
    /*---(determine adjustment)-----------*/
    x_adj  = a_radius * cos (r);
    y_adj  = a_radius * sin (r);
+   x_beg  = a_rot;
+   x_end  = x_beg + 360;
    /*---(rationalize)--------------------*/
    DEBUG_OUTP   yLOG_complex ("basics"    , "%5.1fl %5.1fr %5.1fxa %5.1fya", a_radius, r, x_adj, y_adj);
    /*---(start)--------------------------*/
    CREATE_head (n, a_act);
    /*---(create points)------------------*/
-   for (i = 0; i <= 360; ++i) {
+   for (i = x_beg; i <= x_end; ++i) {
       r     = i * DEG2RAD;
       cx     = sx   + (a_radius * cos (r)) - x_adj;
       cy     = sy   + (a_radius * sin (r)) - y_adj;
@@ -360,14 +364,14 @@ CREATE_circle           (short n, char a_act, short a_radius, short a_rot, float
       CREATE_single     (n, a_act, cx, cy);
    }
    /*---(save)---------------------------*/
-   CREATE_tail (n, a_act, cx, cy);
+   CREATE_tail (n, a_act, sx, sy);
    /*---(complete)-----------------------*/
    DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
    return 0;
 }
 
 char
-CREATE_ellipse_point    (char a_act, short i, short sx, short sy, float a_xlen, float a_ylen, float a_bsin, float a_bcos, float a_xadj, float a_yadj, float *r_xpos, float *r_ypos)
+CREATE_ellipse_point    (char a_act, short i, float sx, float sy, float a_xlen, float a_ylen, float a_bsin, float a_bcos, float a_xadj, float a_yadj, float *r_xpos, float *r_ypos)
 {
    float       a, x_asin, x_acos;
    float       cx, cy;
@@ -380,7 +384,7 @@ CREATE_ellipse_point    (char a_act, short i, short sx, short sy, float a_xlen, 
 }
 
 char
-CREATE_ellipse          (short n, char a_act, short a_xradius, short a_yradius, short a_rot, short a_beg, short a_arc, char a_dots, float *b_xpos, float *b_ypos)
+CREATE_ellipse          (short n, char a_act, float a_xradius, float a_yradius, float a_rot, float a_beg, float a_arc, char a_dots, float *b_xpos, float *b_ypos)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
@@ -394,7 +398,7 @@ CREATE_ellipse          (short n, char a_act, short a_xradius, short a_yradius, 
    int         x_sizer     =    1;
    /*---(header)-------------------------*/
    DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
-   DEBUG_OUTP   yLOG_complex ("ellipse"   , "%3dxr, %3dyx, %3dr, %3db, %3da", a_xradius, a_yradius, a_rot, a_beg, a_arc);
+   DEBUG_OUTP   yLOG_complex ("ellipse"   , "%6.1fxr, %6.1fyx, %6.1fr, %6.1fb, %6.1fa", a_xradius, a_yradius, a_rot, a_beg, a_arc);
    /*---(defense)------------------------*/
    DEBUG_OUTP   yLOG_point   ("b_xpos"    , b_xpos);
    --rce;  if (b_xpos == NULL) {
@@ -465,7 +469,7 @@ CREATE_ellipse          (short n, char a_act, short a_xradius, short a_yradius, 
 }
 
 char
-CREATE_teardrop_point   (char a_act, float s, float sx, float sy, short a_rot, short a_xlen, short a_ylen, float *r_xpos, float *r_ypos)
+CREATE_teardrop_point   (char a_act, float s, float sx, float sy, float a_rot, float a_xlen, float a_ylen, float *r_xpos, float *r_ypos)
 {
    float       a, b;
    a   = a_xlen * ((2.0 / cosh (s)) - 0.577);
@@ -477,7 +481,7 @@ CREATE_teardrop_point   (char a_act, float s, float sx, float sy, short a_rot, s
 
 
 char
-CREATE_teardrop         (short n, char a_act, short a_xradius, short a_yradius, short a_rot, short a_beg, short a_arc, float *b_xpos, float *b_ypos)
+CREATE_teardrop         (short n, char a_act, float a_xradius, float a_yradius, float a_rot, float a_beg, float a_arc, float *b_xpos, float *b_ypos)
 { /* uses the syntractrix of poleni, also called the convict's curve */
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
@@ -533,8 +537,7 @@ CREATE_teardrop         (short n, char a_act, short a_xradius, short a_yradius, 
       }
    }
    /*---(save)---------------------------*/
-   /*> CREATE_single     (n, a_act, sx, sy);                                          <*/
-   CREATE_tail  (n, a_act, cx, cy);
+   CREATE_tail  (n, a_act, sx, sy);
    *b_xpos     = cx;
    *b_ypos     = cy;
    /*---(complete)-----------------------*/
@@ -543,7 +546,7 @@ CREATE_teardrop         (short n, char a_act, short a_xradius, short a_yradius, 
 }
 
 char
-CREATE_dot              (short n, char a_act, short a_xradius, float *b_xpos, float *b_ypos)
+CREATE_dot              (short n, char a_act, float a_xradius, float *b_xpos, float *b_ypos)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
@@ -580,14 +583,14 @@ CREATE_dot              (short n, char a_act, short a_xradius, float *b_xpos, fl
       CREATE_single     (n, a_act, cx, cy);
    }
    /*---(save)---------------------------*/
-   CREATE_tail (n, a_act, cx, cy);
+   CREATE_tail (n, a_act, sx, sy);
    /*---(complete)-----------------------*/
    DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
    return 0;
 }
 
 char
-CREATE_space            (short n, char a_act, short a_xradius, short a_yradius, float *b_xpos, float *b_ypos)
+CREATE_space            (short n, char a_act, float a_xradius, float a_yradius, float *b_xpos, float *b_ypos)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
@@ -631,7 +634,7 @@ CREATE_space            (short n, char a_act, short a_xradius, short a_yradius, 
 static void o___LETTERS________________o (void) {;}
 
 short 
-CREATE_find_by_name     (char *a_ltr, char a_scope, char *r_type, char *r_lcat, char r_label [LEN_TERSE], short *r_xradius, short *r_yradius, short *r_rot, short *r_beg, short *r_arc, char *r_dots)
+CREATE_find_by_name     (char *a_ltr, char a_scope, char *r_type, char *r_lcat, char r_label [LEN_TERSE], float *r_xradius, float *r_yradius, float *r_rot, float *r_beg, float *r_arc, char *r_dots)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
@@ -672,7 +675,7 @@ CREATE_find_by_name     (char *a_ltr, char a_scope, char *r_type, char *r_lcat, 
 }
 
 char
-CREATE_letter           (char a_act, uchar *a_ltr, float *b_xpos, float *b_ypos)
+CREATE_letter           (char a_act, uchar *a_ltr, float a_scale, float *b_xpos, float *b_ypos)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
@@ -680,7 +683,7 @@ CREATE_letter           (char a_act, uchar *a_ltr, float *b_xpos, float *b_ypos)
    short       n           =    0;
    char        x_type, x_dots;
    char        x_label     [LEN_SHORT] = "";
-   short       x_rot, x_beg, x_arc, x_xradius, x_yradius;
+   float       x_rot, x_beg, x_arc, x_xradius, x_yradius;
    /*---(header)-------------------------*/
    DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
    n = CREATE_find_by_name (a_ltr, LTRS_ALL, &x_type, NULL, x_label, &x_xradius, &x_yradius, &x_rot, &x_beg, &x_arc, &x_dots);
@@ -689,17 +692,13 @@ CREATE_letter           (char a_act, uchar *a_ltr, float *b_xpos, float *b_ypos)
       DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   DEBUG_OUTP   yLOG_complex (x_label     , "%c, %3dxr, %3dyx, %3dr, %3db, %3da, %d", x_type, x_xradius, x_yradius, x_rot, x_beg, x_arc, x_dots);
-   /*---(training dot)-------------------*/
-   /*> if (a_act == SHAPE_TRAIN) {                                                    <* 
-    *>    glColor4f (1.0, 0.0, 0.0, 1.0);                                             <* 
-    *>    CREATE_dot (n, a_act, 1, b_xpos, b_ypos);                                   <* 
-    *>    yCOLOR_opengl (YCOLOR_BAS, YCOLOR_MOR, 0.65);                               <* 
-    *> }                                                                              <*/
+   DEBUG_OUTP   yLOG_complex (x_label     , "%c, %6.1fxr, %6.1fyx, %6.1fr, %6.1fb, %6.1fa, %d", x_type, x_xradius, x_yradius, x_rot, x_beg, x_arc, x_dots);
+   x_xradius *= a_scale;
+   x_yradius *= a_scale;
    /*---(first point)--------------------*/
    switch (x_type) {
    case SHAPE_LINE     :
-      CREATE_line     (n, a_act,  x_rot, x_arc, b_xpos, b_ypos);
+      CREATE_line     (n, a_act, x_xradius, x_rot, b_xpos, b_ypos);
       break;
    case SHAPE_CIRCLE   :
       CREATE_circle   (n, a_act, x_xradius, x_rot, b_xpos, b_ypos);
@@ -723,17 +722,17 @@ CREATE_letter           (char a_act, uchar *a_ltr, float *b_xpos, float *b_ypos)
 }
 
 char
-CREATE_letter_easy      (char a_act, uchar *a_ltr)
+CREATE_letter_dlist     (char a_act, uchar *a_ltr, float a_scale)
 {
    float       x = 0, y = 0;
-   return CREATE_letter (a_act, a_ltr, &x, &y);
+   return CREATE_letter (a_act, a_ltr, a_scale, &x, &y);
 }
 
 char
-CREATE_letter_data      (uchar *a_ltr)
+CREATE_letter_data      (uchar *a_ltr, float a_scale)
 {
    float       x = 0, y = 0;
-   return CREATE_letter (SHAPE_DATA, a_ltr, &x, &y);
+   return CREATE_letter (SHAPE_DATA, a_ltr, a_scale, &x, &y);
 }
 
 
@@ -749,7 +748,7 @@ CREATE_detail           (short n, char a_out [LEN_FULL])
    char        rce         =   -10;
    --rce;  if (a_out  == NULL)  return rce;
    --rce;  if (n < 0)           return rce;
-   sprintf (a_out, "%-3d %-5.5s %c  %4d %4d %4d %4d %4d  %2d %1d %1d  %4d %4d %2d %2d  %6.1f %6.1f %6.1f %6.1f  %6.1f %6.1f %6.1f %6.1f  %3d",
+   sprintf (a_out, "%-3d %-5.5s %c  %6.1f %6.1f %6.1f %6.1f %6.1f  %2d %1d %1d  %4d %4d %2d %2d  %6.1f %6.1f %6.1f %6.1f  %6.1f %6.1f %6.1f %6.1f  %3d",
          n, g_loc [n].label, g_loc [n].type,
          g_loc [n].x_ellipse, g_loc [n].y_ellipse, g_loc [n].r_ellipse, g_loc [n].b_arc, g_loc [n].l_arc,
          g_loc [n].lcat, g_loc [n].range, g_loc [n].size,

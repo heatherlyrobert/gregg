@@ -37,8 +37,8 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "5.--= generalization for broader use"
 #define     P_VERMINOR  "5.4 = update for use as coding example"
-#define     P_VERNUM    "5.4f"
-#define     P_VERTXT    "can display rudamentary output pages again"
+#define     P_VERNUM    "5.4g"
+#define     P_VERTXT    "pages coming in nicely, a/e variables loosely configured"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -428,6 +428,8 @@ extern char unit_answer  [LEN_STR];
 /*> #define   DEBUG__WRITING    if (debug_old.writing  == 'y')                        <*/
 
 
+extern char  g_vows  [LEN_HUND];
+extern char  g_cons  [LEN_HUND];
 
 
 #define    MAX_LETTERS   300
@@ -438,11 +440,11 @@ struct cLOCATION
    char      label         [LEN_TERSE];          /* name              */
    /*---(creation)----------*/
    char      type;                               /* draw function     */
-   short     x_ellipse;                          /* ellipse x-radius  */
-   short     y_ellipse;                          /* ellipse y-radius  */
-   short     r_ellipse;                          /* ellipse rotation  */
-   short     b_arc;                              /* arc begin         */
-   short     l_arc;                              /* arc length        */
+   float     x_ellipse;                          /* ellipse x-radius  */
+   float     y_ellipse;                          /* ellipse y-radius  */
+   float     r_ellipse;                          /* ellipse rotation  */
+   float     b_arc;                              /* arc begin         */
+   float     l_arc;                              /* arc length        */
    /*---(grouping)----------*/
    uchar     lcat;                               /* letter group      */
    char      range;                              /* range of letter   */
@@ -538,6 +540,12 @@ extern tCOMBOS g_combos [MAX_COMBOS];
 #define    CAT_F      11
 #define    CAT_P      12
 #define    CAT_PT     13
+
+#define    CAT_S      14
+#define    CAT_Z      15
+
+#define    CAT_XS     16
+#define    CAT_XZ     17
 
 #define    CAT_A      20
 #define    CAT_E      21
@@ -791,20 +799,6 @@ struct cOUTLINE
 extern tOUTLINE  o;
 
 
-#define     COLOR_BASE          'b'
-#define     COLOR_DARK          '-'
-#define     COLOR_LIGHT         '+'
-#define     COLOR_MUTED         'm'
-#define     COLOR_ACC_L         '1'
-#define     COLOR_ACC_D         '2'
-#define     COLOR_ACC_O         'o'
-#define     COLOR_TXT_L         'w'
-#define     COLOR_TXT_D         'k'
-#define     COLOR_GRID_L        'g'
-#define     COLOR_GRID_D        'G'
-#define     COLOR_BLACK         'K'
-#define     COLOR_WARN          'W'
-
 
 
 typedef struct cPARTS  tPARTS;
@@ -873,7 +867,8 @@ struct cWORD {
    uchar      *gregg;                       /* gregg translation              */
    char        g_len;
    uchar      *unique;                      /* unique word key                */
-   short       drawn       [LEN_LABEL];     /* gregg as drawn                 */
+   uchar       shown       [LEN_HUND];      /* gregg as needed to draw        */
+   short       drawn       [LEN_LABEL];     /* gregg letter indexes           */
    /*---(source)---------------*/
    short       line;
    char        vary        [LEN_SHORT];     /* variation                      */
@@ -987,7 +982,9 @@ char       sample_free       (void);
 
 
 
-char       dlist_init        (void);
+char       dlist_init            (void);
+char       DLIST_letters_make    (float a_scale);
+char       DLIST_letters_free    (void);
 
 /*---(outline)--------------*/
 char       OUT_status         (char *a_list);
@@ -1139,7 +1136,10 @@ char*       WORDS_entry             (int n);
 char        WORDS_table_ae          (void);
 char        WORDS_drawn_show        (short a_drawn [], uchar *a_out);
 char        WORDS_drawn_fix_OLD     (uchar *a_index, short a_drawn []);
-char        WORDS_fix_ae            (short a_pcat, short a_ncat, char r_name [LEN_TERSE], short *r_use);
+char        WORDS_fix_ae            (char i, char a_pcat, char a_name [LEN_TERSE], char a_ncat, uchar a_show [LEN_HUND], short a_drawn [LEN_LABEL]);
+char        WORDS_fix_ou            (char i, char a_pcat, char a_name [LEN_TERSE], char a_ncat, uchar a_show [LEN_HUND], short a_drawn [LEN_LABEL]);
+char        WORDS_fix_consonant     (char i, char a_pcat, char a_ccat, char a_name [LEN_TERSE], uchar a_show [LEN_HUND], short a_drawn [LEN_LABEL]);
+char        WORDS_fix_gregg         (uchar a_gregg [LEN_TITLE], uchar a_shown [LEN_HUND], short a_drawn [LEN_LABEL]);
 int         words_outstring         (char *);
 
 int         WORDS_find             (char* a_word);
@@ -1292,19 +1292,19 @@ char        CREATE_head             (short n, char a_act);
 char        CREATE_single           (short n, char a_act, float x, float y);
 char        CREATE_tail             (short n, char a_act, float x, float y);
 /*---(shapes)---------------*/
-char        CREATE_line             (short n, char a_act, short a_rot, short a_len, float *b_xpos, float *b_ypos);
-char        CREATE_circle           (short n, char a_act, short a_radius, short a_rot, float *b_xpos, float *b_ypos);
-char        CREATE_ellipse_point    (char a_act, short i, short sx, short sy, float a_xlen, float a_ylen, float a_bsin, float a_bcos, float a_xadj, float a_yadj, float *r_xpos, float *r_ypos);
-char        CREATE_ellipse          (short n, char a_act, short a_xradius, short a_yradius, short a_rot, short a_beg, short a_arc, char a_dots, float *b_xpos, float *b_ypos);
-char        CREATE_teardrop_point   (char a_act, float s, float sx, float sy, short a_rot, short a_xlen, short a_ylen, float *r_xpos, float *r_ypos);
-char        CREATE_teardrop         (short n, char a_act, short a_xradius, short a_yradius, short a_rot, short a_beg, short a_arc, float *b_xpos, float *b_ypos);
-char        CREATE_dot              (short n, char a_act, short a_xradius, float *b_xpos, float *b_ypos);
-char        CREATE_space            (short n, char a_act, short a_xradius, short a_yradius, float *b_xpos, float *b_ypos);
+char        CREATE_line             (short n, char a_act, float a_len, float a_rot, float *b_xpos, float *b_ypos);
+char        CREATE_circle           (short n, char a_act, float a_radius, float a_rot, float *b_xpos, float *b_ypos);
+char        CREATE_ellipse_point    (char a_act, short i, float sx, float sy, float a_xlen, float a_ylen, float a_bsin, float a_bcos, float a_xadj, float a_yadj, float *r_xpos, float *r_ypos);
+char        CREATE_ellipse          (short n, char a_act, float a_xradius, float a_yradius, float a_rot, float a_beg, float a_arc, char a_dots, float *b_xpos, float *b_ypos);
+char        CREATE_teardrop_point   (char a_act, float s, float sx, float sy, float a_rot, float a_xlen, float a_ylen, float *r_xpos, float *r_ypos);
+char        CREATE_teardrop         (short n, char a_act, float a_xradius, float a_yradius, float a_rot, float a_beg, float a_arc, float *b_xpos, float *b_ypos);
+char        CREATE_dot              (short n, char a_act, float a_xradius, float *b_xpos, float *b_ypos);
+char        CREATE_space            (short n, char a_act, float a_xradius, float a_yradius, float *b_xpos, float *b_ypos);
 /*---(letters)--------------*/
-short       CREATE_find_by_name     (char *a_ltr, char a_scope, char *r_type, char *r_lcat, char r_label [LEN_TERSE], short *r_xradius, short *r_yradius, short *r_rot, short *r_beg, short *r_arc, char *r_dots);
-char        CREATE_letter           (char a_act, uchar *a_ltr, float *b_xpos, float *b_ypos);
-char        CREATE_letter_easy      (char a_act, uchar *a_ltr);
-char        CREATE_letter_data      (uchar *a_ltr);
+short       CREATE_find_by_name     (char *a_ltr, char a_scope, char *r_type, char *r_lcat, char r_label [LEN_TERSE], float *r_xradius, float *r_yradius, float *r_rot, float *r_beg, float *r_arc, char *r_dots);
+char        CREATE_letter           (char a_act, uchar *a_ltr, float a_scale, float *b_xpos, float *b_ypos);
+char        CREATE_letter_dlist     (char a_act, uchar *a_ltr, float a_scale);
+char        CREATE_letter_data      (uchar *a_ltr, float a_scale);
 /*---(audit)----------------*/
 char        CREATE_detail           (short n, char a_out [LEN_FULL]);
 char        CREATE_dump             (void);
@@ -1313,18 +1313,34 @@ char        CREATE_dump             (void);
 
 /*===[[ gregg_page.c ]]=======================================================*/
 /*··········Ï·······················Ï·········································*/
+/*---(program)--------------*/
+char        PAGE_init               (void);
 /*---(writing)--------------*/
-char        PAGE_letter             (char a_act, uchar *a_ltr);
-char        PAGE_gregg              (char a_act, char a_gregg [LEN_TITLE]);
+char        PAGE_gregg_letter       (char a_act, uchar *a_ltr);
+char        PAGE_gregg_size         (char a_gregg [LEN_TITLE], char *r_count, short *r_points, float *r_xmin, float *r_xmax, float *r_wide, float *r_ymin, float *r_ymax, float *r_tall, short r_list [LEN_LABEL]);
+char        PAGE_gregg_word         (char a_act, char a_gregg [LEN_TITLE], float *b_xpos, float *b_ypos);
+char        PAGE_gregg              (char a_act, char a_gregg [LEN_RECD], float *b_xpos, float *b_ypos);
 /*---(organizing)-----------*/
-char        PAGE_new                (char a_style, short a_wide, short a_tall, short a_left, short a_right, short a_top, short a_bottom, short a_ascent, short a_descent, short a_spacing);
+char        PAGE_config             (char a_style, short a_wide, short a_tall, float a_scale, short a_left, short a_right, short a_top, short a_bottom, float a_sizing, char a_align, short a_ascent, short a_descent, short a_spacing, char a_gapping);
+char        PAGE_new                (char a_style, short a_wide, short a_tall, float a_scale, short a_left, short a_right, short a_top, short a_bottom, float a_sizing, char a_align, short a_ascent, short a_descent, short a_spacing, char a_gapping);
 char        PAGE_default            (void);
 char        PAGE_sized              (short a_wide, short a_tall);
 char        PAGE_screen             (void);
+char*       PAGE_detail             (void);
 char        PAGE_end                (void);
 /*---(done)-----------------*/
+char        PAGE_demo_cat_none      (void);
+char        PAGE_demo_cat_d         (void);
+char        PAGE_demo_cat_m         (void);
+char        PAGE_demo_cat_k         (void);
+char        PAGE_demo_cat_r         (void);
+char        PAGE_demo_cat_j         (void);
+char        PAGE_demo_cat_f         (void);
+char        PAGE_demo_cat_p         (void);
 
 
+char        TABLE_init              (void);
+char        TABLE_letters_data      (float a_scale);
 
 
 

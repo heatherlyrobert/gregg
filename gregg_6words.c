@@ -7,7 +7,6 @@
 
 
 /*
- * metis § dn2<· § new words are unique for english plus part-of-speech                   § N2K47s §  · §
  *
  *    saying - a oft repeated set of words
  *    saying - the act of talking
@@ -211,7 +210,7 @@ WORDS__new         (char *a_english, char *a_gregg, char a_part, tWORD **r_word)
    x_new->unique    = strdup (x_full);
    x_new->part      = a_part;
    /*---(drawn)-------------------------*/
-   WORDS_drawn_fix_OLD (x_index, x_new->drawn);
+   WORDS_fix_gregg     (x_new->gregg, x_new->shown, x_new->drawn);
    /*---(hook)---------------------------*/
    rc = ySORT_hook (B_ENGLISH, x_new, x_new->english, &(x_new->ysort_e));
    DEBUG_DATA   yLOG_value   ("hook eng"  , rc);
@@ -346,8 +345,8 @@ WORDS_detail            (tWORD *a_word, char a_out [LEN_HUND])
    sprintf  (s, "%2då%.20sæ", a_word->e_len, a_word->english);
    sprintf  (t, "%2då%.20sæ", a_word->g_len, a_word->gregg);
    if (a_word->line >= 0)  sprintf (v, "%4d", a_word->line);
-   WORDS_drawn_show (a_word->drawn, x_show);
-   sprintf  (u, "å%.20sæ"   , x_show);
+   /*> WORDS_drawn_show (a_word->drawn, x_show);                                      <*/
+   sprintf  (u, "å%.20sæ"   , a_word->shown);
    sprintf (a_out, "%-24.24s  %s %-2.2s  %c %c  %c %c %-3d  %c %-4d  %-24.24s  %s", s, v, a_word->vary, a_word->part, a_word->sub, a_word->src, a_word->cat, a_word->page, a_word->grp, a_word->freq, t, u);
    return 0;
 }
@@ -545,28 +544,67 @@ WORDS_drawn_show        (short a_drawn [], uchar *a_out)
    return 0;
 }
 
-uchar  s_ae  [16] [16] [LEN_TERSE] = {
-   /* prev/next ----  , d---  , oth-  , uth-  , -df-  , -m--  , -k--  , -r--  , -rd-  , -or-  , -ng-  , -ch-  , -f--  , -p--  , -pt-   */
-   /*   -  */ { "-"    , "xd"   , "aT"   , "am"   , "aT"   ,"axm"  ,"axk"  ,"axr"  ,"axr"  ,"-"    ,"a"    ,"a"    ,"axf"  ,"axp"  ,"-"     },
-   /*           ----  , d---  , uth-  , oth-  , -df-  , -m--  , -k--  , -r--  , -rd-  , -or-  , -ng-  , -ch-  , -f--  , -p--  , -pt-   */
-   /*   d  */ { "dx"   , "dd"   , "add"  , "adH"  , "add"  ,"amd"  ,"a"    ,"a"    ,"a"    ,"-"    ,"a"    ,"a"    ,"a"    ,"a"    ,"-"     },
-   /* oth  */ { "a"    , "a"    , "a"    , "a"    , "a"    ,"am"   ,"a"    ,"a"    ,"a"    ,"-"    ,"a"    ,"a"    ,"a"    ,"a"    ,"-"     },
-   /* uth  */ { "a"    , "a"    , "a"    , "a"    , "a"    ,"aHm"  ,"a"    ,"a"    ,"a"    ,"-"    ,"a"    ,"a"    ,"a"    ,"a"    ,"-"     },
-   /*  df  */ { "a"    , "a"    , "a"    , "a"    , "a"    ,"aDm"  ,"a"    ,"a"    ,"a"    ,"-"    ,"a"    ,"a"    ,"a"    ,"a"    ,"-"     },
-   /*           ----  , d---  , uth-  , oth-  , -df-  , -m--  , -k--  , -r--  , -rd-  , -or-  , -ng-  , -ch-  , -f--  , -p--  , -pt-   */
-   /*   m  */ { "amx"  , "adm"  , "amT"  , "amH"  , "afm"  ,"amm"  ,"amk"  ,"amr"  ,"amr"  ,"-"    ,"amN"  ,"amj"  ,"amf"  ,"amp"  ,"-"     },
-   /*   k  */ { "a"    , "a"    , "a"    , "a"    , "a"    ,"akm"  ,"a"    ,"ar"   ,"a"    ,"-"    ,"a"    ,"a"    ,"a"    ,"a"    ,"-"     },
-   /*   r  */ { "a"    , "a"    , "a"    , "a"    , "a"    ,"arm"  ,"a"    ,"a"    ,"a"    ,"-"    ,"a"    ,"a"    ,"a"    ,"a"    ,"-"     },
-   /*  rd  */ { "a"    , "a"    , "a"    , "a"    , "a"    ,"aRm"  ,"a"    ,"a"    ,"a"    ,"-"    ,"a"    ,"a"    ,"a"    ,"a"    ,"-"     },
-   /*> /+  or  +/ {"a"  ,"a"  ,"a"  ,"a"  ,"a"  ,"arm","a"  ,"a"  ,"a"  ,"-"  ,"a"  ,"a"  ,"a"  ,"a"  ,"-"   },   <*/
-   /*           ----  , d---  , uth-  , oth-  , -df-  , -m--  , -k--  , -r--  , -rd-  , -or-  , -ng-  , -ch-  , -f--  , -p--  , -pt-   */
-   /*  ng  */ { "a"    , "a"    , "a"    , "a"    , "a"    ,"aNm"  ,"a"    ,"a"    ,"a"    ,"-"    ,"a"    ,"a"    ,"a"    ,"a"    ,"-"     },
-   /*           ----  , d---  , uth-  , oth-  , -df-  , -m--  , -k--  , -r--  , -rd-  , -or-  , -ng-  , -ch-  , -f--  , -p--  , -pt-   */
-   /*  ch  */ { "a"    , "a"    , "a"    , "a"    , "a"    ,"ajm"  ,"a"    ,"a"    ,"a"    ,"-"    ,"a"    ,"a"    ,"a"    ,"a"    ,"-"     },
-   /*   f  */ { "a"    , "a"    , "a"    , "a"    , "a"    ,"afm"  ,"a"    ,"a"    ,"a"    ,"-"    ,"a"    ,"a"    ,"a"    ,"a"    ,"-"     },
-   /*   p  */ { "a"    , "a"    , "a"    , "a"    , "a"    ,"apm"  ,"a"    ,"a"    ,"a"    ,"-"    ,"a"    ,"a"    ,"a"    ,"a"    ,"-"     },
-   /*  pt  */ { "-"    , "-"    , "-"    , "-"    , "-"    ,"-"    ,"-"    ,"-"    ,"-"    ,"-"    ,"-"    ,"-"    ,"-"    ,"-"    ,"-"     },
-   /*           ----  , d---  , uth-  , oth-  , -df-  , -m--  , -k--  , -r--  , -rd-  , -or-  , -ng-  , -ch-  , -f--  , -p--  , -pt-   */
+/*> static struct {                                                                   <* 
+ *>    char        prev        [LEN_SHORT];                                           <* 
+ *>    char        next        [LEN_SHORT];                                           <* 
+ *>    char        shape;                                                             <* 
+ *>    float       rot;                                                               <* 
+ *> } static s_loops [LEN_HUND] {                                                     <* 
+ *>    {  CAT_NONE, CAT_D   , '1',  100  },                                           <* 
+ *>    {  CAT_NONE, CAT_M   , '1',  100  },                                           <* 
+ *>    {  CAT_NONE, CAT_K   , '1',  100  },                                           <* 
+ *>    {  CAT_NONE, CAT_R   , '1',  100  },                                           <* 
+ *> }                                                                                 <*/
+
+/*> uchar  s_ae_OLD  [16] [16] [LEN_TERSE] = {                                                                                                       <* 
+ *>    /+ prev/next ----  , d---  , oth-  , uth-  , -df-  , -m--  , -k--  , -r--  , -rd-  , -or-  , -ng-  , -ch-  , -f--  , -p--  , -pt-   +/        <* 
+ *>    /+   -  +/ { "-"    , "1d"   , "aT"   , "am"   , "aT"   ,"axm"  ,"axk"  ,"axr"  ,"axr"  ,"-"    ,"a"    ,"a"    ,"axf"  ,"axp"  ,"-"     },   <* 
+ *>    /+           ----  , d---  , uth-  , oth-  , -df-  , -m--  , -k--  , -r--  , -rd-  , -or-  , -ng-  , -ch-  , -f--  , -p--  , -pt-   +/        <* 
+ *>    /+   d  +/ { "dx"   , "dd"   , "add"  , "adH"  , "add"  ,"amd"  ,"a"    ,"a"    ,"a"    ,"-"    ,"a"    ,"a"    ,"a"    ,"a"    ,"-"     },   <* 
+ *>    /+ oth  +/ { "a"    , "a"    , "a"    , "a"    , "a"    ,"am"   ,"a"    ,"a"    ,"a"    ,"-"    ,"a"    ,"a"    ,"a"    ,"a"    ,"-"     },   <* 
+ *>    /+ uth  +/ { "a"    , "a"    , "a"    , "a"    , "a"    ,"aHm"  ,"a"    ,"a"    ,"a"    ,"-"    ,"a"    ,"a"    ,"a"    ,"a"    ,"-"     },   <* 
+ *>    /+  df  +/ { "a"    , "a"    , "a"    , "a"    , "a"    ,"aDm"  ,"a"    ,"a"    ,"a"    ,"-"    ,"a"    ,"a"    ,"a"    ,"a"    ,"-"     },   <* 
+ *>    /+           ----  , d---  , uth-  , oth-  , -df-  , -m--  , -k--  , -r--  , -rd-  , -or-  , -ng-  , -ch-  , -f--  , -p--  , -pt-   +/        <* 
+ *>    /+   m  +/ { "amx"  , "adm"  , "amT"  , "amH"  , "afm"  ,"amm"  ,"amk"  ,"amr"  ,"amr"  ,"-"    ,"amN"  ,"amj"  ,"amf"  ,"amp"  ,"-"     },   <* 
+ *>    /+   k  +/ { "a"    , "a"    , "a"    , "a"    , "a"    ,"akm"  ,"a"    ,"ar"   ,"a"    ,"-"    ,"a"    ,"a"    ,"a"    ,"a"    ,"-"     },   <* 
+ *>    /+   r  +/ { "a"    , "a"    , "a"    , "a"    , "a"    ,"arm"  ,"a"    ,"a"    ,"a"    ,"-"    ,"a"    ,"a"    ,"a"    ,"a"    ,"-"     },   <* 
+ *>    /+  rd  +/ { "a"    , "a"    , "a"    , "a"    , "a"    ,"aRm"  ,"a"    ,"a"    ,"a"    ,"-"    ,"a"    ,"a"    ,"a"    ,"a"    ,"-"     },   <* 
+ *>    /+> /+  or  +/ {"a"  ,"a"  ,"a"  ,"a"  ,"a"  ,"arm","a"  ,"a"  ,"a"  ,"-"  ,"a"  ,"a"  ,"a"  ,"a"  ,"-"   },   <+/                            <* 
+ *>    /+           ----  , d---  , uth-  , oth-  , -df-  , -m--  , -k--  , -r--  , -rd-  , -or-  , -ng-  , -ch-  , -f--  , -p--  , -pt-   +/        <* 
+ *>    /+  ng  +/ { "a"    , "a"    , "a"    , "a"    , "a"    ,"aNm"  ,"a"    ,"a"    ,"a"    ,"-"    ,"a"    ,"a"    ,"a"    ,"a"    ,"-"     },   <* 
+ *>    /+           ----  , d---  , uth-  , oth-  , -df-  , -m--  , -k--  , -r--  , -rd-  , -or-  , -ng-  , -ch-  , -f--  , -p--  , -pt-   +/        <* 
+ *>    /+  ch  +/ { "a"    , "a"    , "a"    , "a"    , "a"    ,"ajm"  ,"a"    ,"a"    ,"a"    ,"-"    ,"a"    ,"a"    ,"a"    ,"a"    ,"-"     },   <* 
+ *>    /+   f  +/ { "a"    , "a"    , "a"    , "a"    , "a"    ,"afm"  ,"a"    ,"a"    ,"a"    ,"-"    ,"a"    ,"a"    ,"a"    ,"a"    ,"-"     },   <* 
+ *>    /+   p  +/ { "a"    , "a"    , "a"    , "a"    , "a"    ,"apm"  ,"a"    ,"a"    ,"a"    ,"-"    ,"a"    ,"a"    ,"a"    ,"a"    ,"-"     },   <* 
+ *>    /+  pt  +/ { "-"    , "-"    , "-"    , "-"    , "-"    ,"-"    ,"-"    ,"-"    ,"-"    ,"-"    ,"-"    ,"-"    ,"-"    ,"-"    ,"-"     },   <* 
+ *>    /+           ----  , d---  , uth-  , oth-  , -df-  , -m--  , -k--  , -r--  , -rd-  , -or-  , -ng-  , -ch-  , -f--  , -p--  , -pt-   +/        <* 
+ *> };                                                                                                                                               <*/
+
+
+uchar  s_ae  [20] [20] [LEN_TERSE] = {
+   /* prev/next -none- , d----- , -uth-- , -oth-- , -df--- , -m---- , -k---- , -r---- , -rd--- , -ng--- , -j---- , -f---- , -p---- , -pt--- , -s---- , -z---- , -xs--- , -xz---  */
+   /* none */ { "xx"   , "xd"   , "xH"   , "xT"   , "xD"   , "xm"   , "xk"   , "xr"   , "xR"   , "xN"   , "xj"   , "xf"   , "xp"   , "xP"   , "xs"   , "xz"    },
+   /*           ------ , d----- , -uth-- , -oth-- , -df--- , -m---- , -k---- , -r---- , -rd--- , -ng--- , -ch--- , -f---- , -p---- , -pt--- , -s---- , -z----  */
+   /*   d  */ { "dx"   , "dd"   , "dH"   , "dT"   , "dD"   , "dm"   , "dk"   , "dr"   , "dR"   , "dN"   , "dj"   , "df"   , "dp"   , "dP"   , "ds"   , "dz"    },
+   /* oth  */ { "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"     },
+   /* uth  */ { "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"     },
+   /*  df  */ { "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"     },
+   /*           ------ , d----- , -uth-- , -oth-- , -df--- , -m---- , -k---- , -r---- , -rd--- , -ng--- , -ch--- , -f---- , -p---- , -pt--- , -s---- , -z----  */
+   /*   m  */ { "mx"   , "md"   , "mH"   , "mT"   , "mD"   , "mm"   , "mk"   , "mr"   , "mR"   , "mN"   , "mj"   , "mf"   , "mp"   , "mP"   , "ms"   , "mz"    },
+   /*   k  */ { "kx"   , "kd"   , "kH"   , "kT"   , "kD"   , "km"   , "kk"   , "kr"   , "kR"   , "kN"   , "kj"   , "kf"   , "kp"   , "kP"   , "ks"   , "kz"    },
+   /*   r  */ { "rx"   , "rd"   , "rH"   , "rT"   , "rD"   , "rm"   , "rk"   , "rr"   , "rR"   , "rN"   , "rj"   , "rf"   , "rp"   , "rP"   , "rs"   , "rz"    },
+   /*  rd  */ { "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"     },
+   /*           ------ , d----- , -uth-- , -oth-- , -df--- , -m---- , -k---- , -r---- , -rd--- , -ng--- , -ch--- , -f---- , -p---- , -pt--- , -s---- , -z----  */
+   /*  ng  */ { "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"     },
+   /*           ------ , d----- , -uth-- , -oth-- , -df--- , -m---- , -k---- , -r---- , -rd--- , -ng--- , -ch--- , -f---- , -p---- , -pt--- , -s---- , -z----  */
+   /*  ch  */ { "jx"   , "jd"   , "jH"   , "jT"   , "jD"   , "jm"   , "jk"   , "jr"   , "jR"   , "jN"   , "jj"   , "jf"   , "jp"   , "jP"   , "js"   , "jz"    },
+   /*   f  */ { "fx"   , "fd"   , "fH"   , "fT"   , "fD"   , "fm"   , "fk"   , "fr"   , "fR"   , "fN"   , "fj"   , "ff"   , "fp"   , "fP"   , "fs"   , "fz"    },
+   /*   p  */ { "px"   , "pd"   , "pH"   , "pT"   , "pD"   , "pm"   , "pk"   , "pr"   , "pR"   , "pN"   , "pj"   , "pf"   , "pp"   , "pP"   , "ps"   , "pz"    },
+   /*  pt  */ { "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"     },
+   /*           ------ , d----- , -uth-- , -oth-- , -df--- , -m---- , -k---- , -r---- , -rd--- , -ng--- , -ch--- , -f---- , -p---- , -pt--- , -s---- , -z----  */
+   /*   s  */ { "sx"   , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"     },
+   /*   z  */ { "zx"   , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"    , "-"     },
+   /*           ------ , d----- , -uth-- , -oth-- , -df--- , -m---- , -k---- , -r---- , -rd--- , -ng--- , -ch--- , -f---- , -p---- , -pt--- , -s---- , -z----  */
 };
 
 uchar  s_ou   [16] [LEN_LABEL] = {
@@ -748,52 +786,132 @@ WORDS_drawn_fix_OLD        (uchar *a_index, short a_drawn [])
 }
 
 char
-WORDS_fix_ae            (short a_pcat, short a_ncat, char r_name [LEN_TERSE], short *r_use)
+WORDS_fix_ae            (char i, char a_pcat, char a_name [LEN_TERSE], char a_ncat, uchar a_shown [LEN_HUND], short a_drawn [LEN_LABEL])
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
-   short       x_new       =    0;
-   uchar       x_suffix    [LEN_TERSE] = "";
    uchar       x_name      [LEN_TERSE] = "";
+   short       x_new       =    0;
    /*---(header)-------------------------*/
    DEBUG_CONF   yLOG_enter   (__FUNCTION__);
-   /*---(default)------------------------*/
-   if (r_use  != NULL)   *r_use = 0;
-   if (r_name != NULL)   strcpy (r_name, "");
-   /*---(get entry)----------------------*/
-   DEBUG_CONF   yLOG_complex ("table"     , "prev %2d, next %2d, %s", a_pcat, a_ncat, s_ae [a_pcat][a_ncat]);
-   /*> DEBUG_CONF   yLOG_complex ("p-less"    , "prev %2d, next %2d, %s", a_pcat-1, a_ncat, s_ae [a_pcat-1][a_ncat]);   <*/
-   /*> DEBUG_CONF   yLOG_complex ("p-more"    , "prev %2d, next %2d, %s", a_pcat+1, a_ncat, s_ae [a_pcat+1][a_ncat]);   <*/
-   /*> DEBUG_CONF   yLOG_complex ("n-less"    , "prev %2d, next %2d, %s", a_pcat, a_ncat-1, s_ae [a_pcat][a_ncat-1]);   <*/
-   /*> DEBUG_CONF   yLOG_complex ("n-more"    , "prev %2d, next %2d, %s", a_pcat, a_ncat+1, s_ae [a_pcat][a_ncat+1]);   <*/
-   strlcpy (x_suffix, s_ae [a_pcat][a_ncat], LEN_TERSE);
-   DEBUG_CONF   yLOG_info    ("x_suffix"  , x_suffix);
-   if (strcmp (x_suffix, "-") != 0)  sprintf (x_name, "a(%s)", x_suffix);
-   else                              strcpy  (x_name, "a");
-   DEBUG_CONF   yLOG_info    ("x_name"    , x_name);
-   /*---(save-back)----------------------*/
-   if (r_name != NULL)   strlcpy (r_name, x_name, LEN_TERSE);
-   /*---(find new vowel)-----------------*/
+   /*---(defense)------------------------*/
+   DEBUG_CONF   yLOG_point   ("a_name"    , a_name);
+   --rce;  if (a_name  == NULL) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_CONF   yLOG_info    ("a_name"    , a_name);
+   DEBUG_CONF   yLOG_point   ("a_shown"   , a_shown);
+   --rce;  if (a_shown  == NULL) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_CONF   yLOG_info    ("a_shown"   , a_shown);
+   /*---(create names)-------------------*/
+   sprintf (x_name , "%s%s", a_name, s_ae [a_pcat][a_ncat]);
+   DEBUG_CONF   yLOG_complex ("table"     , "prev %2d, next %2d, %s name", a_pcat, a_ncat, x_name);
+   /*---(verify vowel)-------------------*/
    x_new = CREATE_find_by_name (x_name, LTRS_ALL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
    DEBUG_CONF   yLOG_value   ("x_new"     , x_new);
    --rce;  if (x_new < 0) {
       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   /*> if (a_pcat == CAT_E)   x_new *= -1;                                            <*/
-   DEBUG_CONF   yLOG_complex ("update"    , "%-5.5s %4d", x_name, x_new);
-   /*---(save-back)----------------------*/
-   if (r_use  != NULL)   *r_use = x_new;
+   /*---(append to output)---------------*/
+   if (strlen (a_shown) > 0)   strlcat (a_shown, "·", LEN_HUND);
+   strlcat (a_shown, x_name, LEN_HUND);
+   DEBUG_CONF   yLOG_info    ("a_shown"   , a_shown);
+   a_drawn [i] = x_new;
    /*---(complete)-----------------------*/
    DEBUG_CONF   yLOG_exit    (__FUNCTION__);
    return 0;
 }
 
 char
-WORDS_fix_vowels        (uchar a_gregg [LEN_TITLE], uchar a_show [LEN_TITLE], short a_drawn [LEN_LABEL])
+WORDS_fix_ou            (char i, char a_pcat, char a_name [LEN_TERSE], char a_ncat, uchar a_shown [LEN_HUND], short a_drawn [LEN_LABEL])
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
+   uchar       x_name      [LEN_TERSE] = "";
+   short       x_new       =    0;
+   uchar       x_var       =  '·';
+   /*---(header)-------------------------*/
+   DEBUG_CONF   yLOG_enter   (__FUNCTION__);
+   /*---(defense)------------------------*/
+   DEBUG_CONF   yLOG_point   ("a_name"    , a_name);
+   --rce;  if (a_name  == NULL) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_CONF   yLOG_info    ("a_name"    , a_name);
+   DEBUG_CONF   yLOG_point   ("a_shown"   , a_shown);
+   --rce;  if (a_shown  == NULL) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_CONF   yLOG_info    ("a_shown"   , a_shown);
+   /*---(create names)-------------------*/
+   x_var = s_ou [a_pcat][a_ncat];
+   DEBUG_CONF   yLOG_char    ("x_var"     , x_var);
+   if (x_var != (uchar) '·')   sprintf (x_name , "%s%c", a_name, s_ou [a_pcat][a_ncat]);
+   else                        strlcpy (x_name , a_name, LEN_TERSE);
+   DEBUG_CONF   yLOG_complex ("table"     , "prev %2d, next %2d, %s name", a_pcat, a_ncat, x_name);
+   /*---(verify vowel)-------------------*/
+   x_new = CREATE_find_by_name (x_name, LTRS_ALL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+   DEBUG_CONF   yLOG_value   ("x_new"     , x_new);
+   --rce;  if (x_new < 0) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(append to output)---------------*/
+   if (strlen (a_shown) > 0)   strlcat (a_shown, "·", LEN_HUND);
+   strlcat (a_shown, x_name, LEN_HUND);
+   DEBUG_CONF   yLOG_info    ("a_shown"   , a_shown);
+   a_drawn [i] = x_new;
+   /*---(complete)-----------------------*/
+   DEBUG_CONF   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+WORDS_fix_consonant     (char i, char a_pcat, char a_ccat, char a_name [LEN_TERSE], uchar a_shown [LEN_HUND], short a_drawn [LEN_LABEL])
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   uchar       x_name      [LEN_TERSE] = "";
+   uchar       x_short     [LEN_TERSE] = "";
+   short       x_new       =    0;
+   /*---(header)-------------------------*/
+   DEBUG_CONF   yLOG_enter   (__FUNCTION__);
+   /*---(defense)------------------------*/
+   DEBUG_CONF   yLOG_point   ("a_name"    , a_name);
+   --rce;  if (a_name  == NULL) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_CONF   yLOG_info    ("a_name"    , a_name);
+   DEBUG_CONF   yLOG_point   ("a_shown"   , a_shown);
+   --rce;  if (a_shown  == NULL) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_CONF   yLOG_info    ("a_shown"   , a_shown);
+   /*---(append to output)---------------*/
+   if (strlen (a_shown) > 0)   strlcat (a_shown, "·", LEN_HUND);
+   strlcat (a_shown, a_name, LEN_HUND);
+   DEBUG_CONF   yLOG_info    ("a_shown"   , a_shown);
+   a_drawn [i] = x_new;
+   /*---(complete)-----------------------*/
+   DEBUG_CONF   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+WORDS_fix_gregg         (uchar a_gregg [LEN_TITLE], uchar a_shown [LEN_HUND], short a_drawn [LEN_LABEL])
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
    int         i           =    0;
    uchar       x_gregg     [LEN_TITLE] = "";
    char       *n           = NULL;
@@ -809,11 +927,6 @@ WORDS_fix_vowels        (uchar a_gregg [LEN_TITLE], uchar a_show [LEN_TITLE], sh
    short       x_next      =   -1;
    uchar         x_lnext   [LEN_TERSE] = "";
    uchar         x_ncat    =    0;
-
-
-   uchar       x_answer    =  '-';
-   uchar       x_name      [LEN_TERSE] = "";
-   short       x_new       =    0;
    /*---(header)-------------------------*/
    DEBUG_CONF   yLOG_enter   (__FUNCTION__);
    /*---(defense)------------------------*/
@@ -822,20 +935,20 @@ WORDS_fix_vowels        (uchar a_gregg [LEN_TITLE], uchar a_show [LEN_TITLE], sh
       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   DEBUG_CONF   yLOG_point   ("a_show"    , a_show);
-   --rce;  if (a_show  == NULL) {
+   DEBUG_CONF   yLOG_point   ("a_shown"   , a_shown);
+   --rce;  if (a_shown  == NULL) {
       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
    DEBUG_CONF   yLOG_point   ("a_drawn"   , a_drawn);
-   --rce;  if (a_drawn == NULL) {
+   --rce;  if (a_drawn  == NULL) {
       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
    /*---(prepare)------------------------*/
    strlcpy (x_gregg, a_gregg, LEN_TITLE);
-   for (i = 0; i < LEN_TITLE; ++i)  a_show  [i] = '\0';
-   for (i = 0; i < LEN_LABEL; ++i)  a_drawn [i] = 0;
+   for (i = 0; i < LEN_HUND;  ++i)  a_shown  [i] = '\0';
+   for (i = 0; i < LEN_LABEL; ++i)  a_drawn  [i] = -1;
    /*---(begin parse)--------------------*/
    p = strtok_r (x_gregg, q, &r);
    DEBUG_CONF   yLOG_point   ("p"         , x_curr);
@@ -859,39 +972,9 @@ WORDS_fix_vowels        (uchar a_gregg [LEN_TITLE], uchar a_show [LEN_TITLE], sh
    i = 0;
    --rce;  while (x_curr >= 0) {
       DEBUG_CONF   yLOG_complex ("LOOP"      , "#%2d, prev %3d/%s/%2d, curr %3d/%s/%2d, next %3d/%s/%2d", i, x_prev, x_lprev, x_pcat, x_curr, x_lcurr, x_ccat, x_next, x_lnext, x_ncat);
-      /*---(handle A and E)--------------*/
-      if (x_ccat == CAT_A || x_ccat == CAT_E) {
-         DEBUG_CONF   yLOG_note    ("adjusting a/e vowels");
-         strlcpy (x_name, s_ae [x_pcat][x_ncat], LEN_TERSE);
-         DEBUG_CONF   yLOG_complex ("table"     , "prev %2d, next %2d, %s", x_pcat, x_ncat, x_name);
-         x_new = CREATE_find_by_name (x_name, LTRS_ALL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
-         DEBUG_CONF   yLOG_value   ("x_new"     , x_new);
-         if (x_new < 0) {
-            DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
-            return rce;
-         }
-         a_drawn [i] = x_new;
-         if (x_pcat == CAT_E)   a_drawn [i] = -x_new;
-         DEBUG_CONF   yLOG_complex ("update"    , "%-5.5s %4d %4d", x_name, x_new, a_drawn [i]);
-      }
-      /*---(handle O and U)--------------*/
-      if (x_ccat == CAT_O || x_ccat == CAT_U) {
-         sprintf (x_name, "o%c", s_ou [x_pcat][x_ncat]);
-         if (x_ccat == CAT_U)  x_name [0] = 'u';
-         x_new = CREATE_find_by_name (x_name, LTRS_ALL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
-         DEBUG_CONF   yLOG_value   ("x_new"     , x_new);
-         if (x_new < 0) {
-            DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
-            return rce;
-         }
-         if (x_new <= 0) {
-            x_name [1] = '\0';
-            x_new = CREATE_find_by_name (x_name, LTRS_ALL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
-            DEBUG_CONF   yLOG_value   ("x_new"     , x_new);
-         }
-         a_drawn [i] = x_new;
-         DEBUG_CONF   yLOG_complex ("update"    , "%-5.5s %4d %4d", x_name, x_new, a_drawn [i]);
-      }
+      if      (x_ccat == CAT_A || x_ccat == CAT_E)    rc = WORDS_fix_ae        (i, x_pcat, x_lcurr, x_ncat, a_shown, a_drawn);
+      else if (x_ccat == CAT_O || x_ccat == CAT_U)    rc = WORDS_fix_ou        (i, x_pcat, x_lcurr, x_ncat, a_shown, a_drawn);
+      else                                            rc = WORDS_fix_consonant (i, x_pcat, x_ccat, x_lcurr, a_shown, a_drawn);
       /*---(next)------------------------*/
       x_prev = x_curr;
       x_pcat = x_ccat;
@@ -899,6 +982,9 @@ WORDS_fix_vowels        (uchar a_gregg [LEN_TITLE], uchar a_show [LEN_TITLE], sh
       x_curr = x_next;
       x_ccat = x_ncat;
       strlcpy (x_lcurr, x_lnext, LEN_TERSE);
+      x_next = -1;
+      x_ncat = CAT_NONE;
+      strlcpy (x_lnext, "", LEN_TERSE);
       if (x_curr >= 0) {
          n = strtok_r (NULL   , q, &r);
          DEBUG_CONF   yLOG_point   ("n"         , x_curr);

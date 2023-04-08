@@ -3,7 +3,6 @@
 
 
 /*
- * metis § dc8·· § add yJOBS for gathering, world, etc                                    § N2O4tO §  · §
  * metis § dc8·· § work from dictionary database for normal runs                          § N2O4ti §  · §
  *
  *
@@ -176,9 +175,12 @@ PROG__init              (int a_argc, char *a_argv[])
    my.quit         = '-';
    /*> my.ratio        = GREGG_WACOM;                                                 <*/
    my.ratio        = 10;
+   TABLE_init      ();
    BASE_config     (10.0, 2.0, 70.0);
    WORDS_init      ();
    DICT_init       ();
+   PAGE_init       ();
+   TABLE_letters_data (1.0);
    /*---(other)-----------------------*/
    strlcpy (my.words, "", LEN_RECD);
    strlcpy (my.guide, "", LEN_RECD);

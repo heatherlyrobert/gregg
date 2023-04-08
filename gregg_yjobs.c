@@ -3,9 +3,8 @@
 
 
 /*
- *
- * metis § !a4<· § get yJOBS up and working in very basic mode                            § N2OMUe §  · §
- *
+ * metis § ····· § create a binary database for normal use                                § N33N0F §  · §
+ * metis § ····· § add gather for pulling dictionaries and and making database            § N33N0c §  · §
  *
  *
  */

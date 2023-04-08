@@ -1,6 +1,10 @@
 /*=================================(beg-code)=================================*/
 #include "gregg.h"
 
+/*
+ * metis § ····· § mode to create page and exit, with no window                           § N33NUY §  · §
+ *
+ */
 
 
 int
@@ -46,7 +50,8 @@ main                    (int a_argc, char *a_argv [])
       /*---(visual setup)-------------------*/
       rc = PROG_dawn    ();
       DEBUG_PROG   yLOG_value    ("dawn"      , rc);
-      rc = PAGE_demo ();
+      rc = PAGE_demo_cat_none    ();
+      /*> rc = PAGE_demo ();                                                          <*/
       DEBUG_PROG   yLOG_value    ("demo"      , rc);
       /*> if (rc <  0) { PROG_shutdown (); return -3; }                               <*/
       /*---(main-loop)----------------------*/
