@@ -546,7 +546,7 @@ CREATE_teardrop         (short n, char a_act, float a_xradius, float a_yradius, 
 }
 
 char
-CREATE_dot              (short n, char a_act, float a_xradius, float *b_xpos, float *b_ypos)
+CREATE_dot              (short n, char a_act, float a_xradius, float a_yradius, float *b_xpos, float *b_ypos)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
@@ -573,7 +573,7 @@ CREATE_dot              (short n, char a_act, float a_xradius, float *b_xpos, fl
    DEBUG_OUTP   yLOG_value   ("sy"        , sy);
    /*---(tables)-------------------------*/
    /*> l  = a_xradius * 0.5;                                                          <*/
-   l = a_xradius;
+   l = 1.0;
    /*---(draw)---------------------------*/
    CREATE_head (n, a_act);
    for (i = 0; i <= 360; ++i) {
@@ -584,6 +584,16 @@ CREATE_dot              (short n, char a_act, float a_xradius, float *b_xpos, fl
    }
    /*---(save)---------------------------*/
    CREATE_tail (n, a_act, sx, sy);
+   /*---(space)--------------------------*/
+   if (a_xradius != 0 || a_yradius != 0) {
+      cx  = sx + a_xradius;
+      cy  = sy + a_yradius;
+      CREATE_head (n, a_act);
+      CREATE_tail (n, a_act, cx, cy);
+   }
+   /*---(save)---------------------------*/
+   *b_xpos     = cx;
+   *b_ypos     = cy;
    /*---(complete)-----------------------*/
    DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -617,8 +627,8 @@ CREATE_space            (short n, char a_act, float a_xradius, float a_yradius, 
    cx  = sx + a_xradius;
    cy  = sy + a_yradius;
    CREATE_head (n, a_act);
-   /*---(save)---------------------------*/
    CREATE_tail (n, a_act, cx, cy);
+   /*---(save)---------------------------*/
    *b_xpos     = cx;
    *b_ypos     = cy;
    /*---(complete)-----------------------*/
@@ -710,7 +720,7 @@ CREATE_letter           (char a_act, uchar *a_ltr, float a_scale, float *b_xpos,
       CREATE_teardrop (n, a_act, x_xradius, x_yradius, x_rot, x_beg, x_arc, b_xpos, b_ypos);
       break;
    case SHAPE_DOT      :
-      CREATE_dot      (n, a_act, x_xradius, b_xpos, b_ypos);
+      CREATE_dot      (n, a_act, x_xradius, x_yradius, b_xpos, b_ypos);
       break;
    case SHAPE_SPACE    :
       CREATE_space    (n, a_act, x_xradius, x_yradius, b_xpos, b_ypos);

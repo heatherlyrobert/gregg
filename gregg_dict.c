@@ -6,10 +6,12 @@
  * metis § tn4·· § verbose dictionary parsing mode to find mistakes                       § N2O4rp §  · §
  * metis § dc4·· § add verification of arpabet entry                                      § N2U1OE §  · §
  * metis § dc4·· § add verification of gregg letters entry                                § N2U1OS §  · §
+ * metis § dc2<· § dump all word details to clipboard                                     § N380YD §  · §
+ * metis § dc2<· § dump all varations to clipboard                                        § N380Yv §  · §
  */
 
 
-static char    s_name   [LEN_PATH]  = "/var/lib/gregg/gregg.dict";
+static char    s_name   [LEN_PATH]  = "/var/lib/gregg/gregg_manual.dict";
 
 char   s_fields  [MAX_FIELD][LEN_TITLE];
 char   s_nfield  = 0;
@@ -145,7 +147,7 @@ tVARY  g_varies [LEN_FULL] = {
    /*--name-- --suffix---- --also-- ---source-- ---true-endings----------------------------------------- ---examples------------------------------------------------------------ cnt */
    { "t"     , ">·t"      , "ts"   , '·',  -1  , "-ate, -ite, -iate"                                    , "certificate, demonstrate, appointment, initiate"                     , 0 },
    {   "tsh" , ">·t·sh"   , ""     , '5',  82  ,  "-tition, -tation, -tiation"                          , "repitition, station, initiation"                                     , 0 },
-   {   "ts"  , ">·t·s"    , ""     , '5', 118  ,  "-itis"                                               , "appendicitis"                                                        , 0 },
+   {   "ts"  , ">·t·z"    , ""     , '5', 118  ,  "-itis"                                               , "appendicitis"                                                        , 0 },
    {   "tn"  , ">·t·n"    , ""     , '5', 111  ,  "-ington"                                             , "washington"                                                          , 0 },
    {   "tt"  , ">·t"      , ""     , '5',  43  ,  "-ted, -ded"                                          , "invited, divided, demanded, printed"                                 , 0 },
    /*--name-- --suffix---- --also-- ---source-- ---true-endings----------------------------------------- ---examples------------------------------------------------------------ cnt */
@@ -320,27 +322,27 @@ char    VARIATIONS      [LEN_RECD] = "";
  * Ï ´    ´      v     -´vity, -avity, -evity    depravity, nativity, brevity
  * Ï ´    ´      nt    -´nity, -anity, -enity    urbanity, trinity, affinity
  * Ï ´    ´      mt    -´mity, -amity, -emity    calamity, sublimity, proximity
- * Ï ´    ´      st    -´stic, -estic, -istic    elastic, domestic, artistic, atheistic
- * Ï ´    ´      a     -´tic                     politic, hypnotic, systematic
- * Ï ´    ´      as    -tics                     politics
- *   ´    ´      ae    -ticly, -tical            systemtically, 
- * Ï ´    ´      n     -´ntic                    gigantic, authentic, frantic
- * Ï ´    ´      ne    -´nticly                  franticly
- *   ´    ´      Ôe    -´graph                   telegraph, autograph, photograph
- *   ´    ´      Ôa    -´graphy                  telegraphy, autography, photography
- *   ´    ´      Ôer   -´grapher                 telegrapher, autographer, photographer
- * Ï ´    ´      o     -´logy, -´logical         analogy, geological
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- */
+* Ï ´    ´      st    -´stic, -estic, -istic    elastic, domestic, artistic, atheistic
+* Ï ´    ´      a     -´tic                     politic, hypnotic, systematic
+* Ï ´    ´      as    -tics                     politics
+*   ´    ´      ae    -ticly, -tical            systemtically, 
+   * Ï ´    ´      n     -´ntic                    gigantic, authentic, frantic
+   * Ï ´    ´      ne    -´nticly                  franticly
+   *   ´    ´      Ôe    -´graph                   telegraph, autograph, photograph
+   *   ´    ´      Ôa    -´graphy                  telegraphy, autography, photography
+   *   ´    ´      Ôer   -´grapher                 telegrapher, autographer, photographer
+   * Ï ´    ´      o     -´logy, -´logical         analogy, geological
+   *
+   *
+   *
+   *
+   *
+   *
+   *
+   *
+   *
+   *
+   */
 
 char
 DICT__find_speech       (char a_abbr)
@@ -1099,7 +1101,7 @@ DICT_list          (void)
    int         i           =    0;
    int         a           =    0;
    int         c           =    0;
-   char        t           [LEN_HUND]  = "";
+   char        t           [LEN_FULL]  = "";
    char        n           [LEN_SHORT] = "";
    char        e           [LEN_TITLE] = "";
    char        g           [LEN_TITLE] = "";
@@ -1136,7 +1138,7 @@ DICT_list_all      (void)
    int         i           =    0;
    int         a           =    0;
    int         c           =    0;
-   char        t           [LEN_HUND]  = "";
+   char        t           [LEN_FULL]  = "";
    char        n           [LEN_SHORT] = "";
    char        e           [LEN_TITLE] = "";
    char        g           [LEN_TITLE] = "";
@@ -1152,3 +1154,78 @@ DICT_list_all      (void)
    /*---(complete)-----------------------*/
    return 0;
 }
+
+char
+DICT_dump_suffix        (FILE *f)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   int         i           =    0;
+   /*---(search)-------------------------*/
+   for (i = 0; i < LEN_FULL; ++i) {
+      if (g_varies [i].name [0] == '-')              break;
+      fprintf (f, "%-5.5s\n", g_varies [i].name);
+   }
+   /*---(done)------------------------*/
+   return 0;
+}
+
+char
+DICT_dump_words         (FILE *f)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   int         i           =    0;
+   int         a           =    0;
+   int         c           =    0;
+   char        t           [LEN_FULL]  = "";
+   char        n           [LEN_SHORT] = "";
+   char        e           [LEN_TITLE] = "";
+   char        g           [LEN_TITLE] = "";
+   char        x_col       =    0;
+   tWORD      *x_curr      = NULL;
+   tWORD      *x_sub       = NULL;
+   /*---(header)---------------------------*/
+   DEBUG_CONF   yLOG_enter   (__FUNCTION__);
+   fprintf (f, "##   %s %s\n", P_NAMESAKE, P_HERITAGE);
+   fprintf (f, "##   version %s, %s\n", P_VERNUM, P_VERTXT);
+   fprintf (f, "##   inventory of dictionary words\n");
+   fprintf (f, "\n");
+   fprintf (f, "#@ style     V = printable columnar values\n");
+   fprintf (f, "#@ x-parse  14åÏ---···Ï-----------------------··Ï---·Ï---·Ï·Ï··Ï·Ï·Ï--··Ï·Ï---··Ï-----------------------··Ï----------------------------------··Ï-----------------------·æ\n");
+   fprintf (f, "#@ titles     åref····english···················line·var··p·s··s·c·pg···g·freq··gregg·····················shown································arpabet··················æ\n");
+   fprintf (f, "\n");
+   WORDS_eng_by_index  (a, &x_curr);
+   while (x_curr != NULL) {
+      if (strcmp (x_curr->vary, "<") == 0) {
+         DEBUG_CONF   yLOG_info    ("base"      , x_curr->english);
+         WORDS_detail (x_curr, t);
+         DEBUG_CONF   yLOG_info    ("t"         , t);
+         strlpadn (++c, n, '.', '<', 5);
+         if (i %  5 == 0)  fprintf (f, "\n");
+         if (i % 25 == 0)  fprintf (f, "##-····---english--------------··line·var··p·s··s·c·pg···g·freq··---gregg----------------··---shown---------------------------··---arpabet--------------\n\n");
+         i++;
+         fprintf (f, "%5.5s··%s\n", n, t);
+         x_sub = x_curr->next;
+         x_col = 0;
+         while (x_sub != NULL) {
+            DEBUG_CONF   yLOG_info    ("vary"      , x_sub->english);
+            WORDS_detail (x_sub, t);
+            DEBUG_CONF   yLOG_info    ("t"         , t);
+            if (i %  5 == 0)  fprintf (f, "\n");
+            if (i % 25 == 0)  fprintf (f, "##-····---english--------------··line·var··p·s··s·c·pg···g·freq··---gregg----------------··---shown---------------------------··---arpabet--------------\n\n");
+            i++;
+            fprintf (f, "    %c  %s\n", ++x_col + 'a', t);
+            x_sub  = x_sub->next;
+         }
+      }
+      ++a;
+      WORDS_eng_by_index (a, &x_curr);
+   }
+   fprintf (f, "\n");
+   fprintf (f, "##-····---english--------------··line·var··p·s··s·c·pg···g·freq··---gregg----------------··---shown---------------------------··---arpabet--------------\n\n");
+   fprintf (f, "## found %d primaries and %d total words (%4.2fx)\n", c, a, (float) a / (float) c);
+   /*---(complete)-------------------------*/
+   DEBUG_CONF   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+

@@ -3,6 +3,11 @@
 
 
 
+/*
+ * metis § dc4<· § page draws to and resizes gregg windo                                  § N380X7 §  · §
+ *
+ */
+
 #define          STYLE_HINTS   'g'
 static char      s_style    =  '-';
 static short     s_wide     =  850;
@@ -470,12 +475,14 @@ PAGE_gregg_word         (char a_act, char a_gregg [LEN_TITLE], float *b_xpos, fl
          } glEnd       ();
       }
       /*---(back to defaults)------------*/
-      glColor4f     (0.0, 0.0, 0.0, 1.0);
+      if (strldcnt (a_gregg, '<', LEN_TITLE) > 0)  glColor4f (0.7, 0.0, 0.0, 1.0);
+      else                                         glColor4f (0.0, 0.0, 0.0, 1.0);
       /*---(walk letters)----------------*/
       /*> glScalef              (s_sizing, s_sizing, s_sizing);                       <*/
       for (i = 0; i < x_count; ++i)  {
          strlcpy (x_label, g_loc [x_list [i]].label, LEN_TERSE);
          DEBUG_CONF   yLOG_info    ("x_label"   , x_label);
+         if (strcmp (x_label, "<") == 0)   glColor4f (0.0, 0.0, 0.0, 1.0);
          if (strcmp (x_label, ">") == 0)   glColor4f (0.7, 0.0, 0.0, 1.0);
          rc =  PAGE_gregg_letter (a_act, x_label);
       }
@@ -526,6 +533,10 @@ PAGE_gregg              (char a_act, char a_gregg [LEN_RECD], float *b_xpos, flo
    char       *q           =  " ";
    char       *r           = NULL;
    int         l           =    0;
+   short       n           =    0;
+   tWORD      *x_word      = NULL;
+   uchar       x_shown     [LEN_HUND] = "";
+   short       x_drawn     [LEN_LABEL];
    /*---(header)-------------------------*/
    DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
    /*---(defense)------------------------*/
@@ -554,7 +565,10 @@ PAGE_gregg              (char a_act, char a_gregg [LEN_RECD], float *b_xpos, flo
          DEBUG_CONF   yLOG_note    ("found empty grid");
          PAGE_next_grid (b_xpos, b_ypos);
       } else {
-         rc =  PAGE_gregg_word (a_act, p, b_xpos, b_ypos);
+         n = WORDS_by_gregg (p, &x_word);
+         if (n >= 0)  strlcpy (x_shown, x_word->shown, LEN_HUND);
+         else         WORDS_fix_gregg  (p, x_shown, x_drawn);
+         rc =  PAGE_gregg_word (a_act, x_shown, b_xpos, b_ypos);
          DEBUG_CONF   yLOG_value   ("word"      , rc);
       }
       DEBUG_OUTP   yLOG_complex ("new pos"   , "%6.1fx, %6.1fy", *b_xpos, *b_ypos);
@@ -652,7 +666,7 @@ PAGE_demo_cat_d         (void)
    /*---(header)-------------------------*/
    DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
    /*---(page)---------------------------*/
-   rc = PAGE_new ('-'        , 1366   , 768  , 2.0,   -1, -1, -1, -1,   3.0, YF_MIDCEN, 10, 10, 50, GAP_GRID);
+   rc = PAGE_new (STYLE_HINTS, 1366   , 768  , 2.0,   -1, -1, -1, -1,   2.0, YF_MIDCEN, 10, 10, 50, GAP_GRID);
    DEBUG_OUTP   yLOG_value   ("default"   , rc);
    --rce;  if (rc < 0) {
       DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);
@@ -662,9 +676,13 @@ PAGE_demo_cat_d         (void)
    glPushMatrix    (); {
       s_xpos = s_left + (s_spacing * 0.5);
       s_ypos = s_ybase;
-      PAGE_gregg (SHAPE_DRAW, "axd·d  t·add·t   t·add·d   t·add·dd   t·adm·n   t·adm·m   t·adm·mm   t·adj·sh  t·adj·ch  t·adj·j   t·adN·ng  t·adN·ngk          ¦" , &s_xpos, &s_ypos);
-      PAGE_gregg (SHAPE_DRAW, "t·adf·f   t·adf·v   t·adp·p    t·adp·b   t·adk·k   t·adk·g    t·adr·r   t·adr·l   t·adR·rd  t·adR·ld  t·ads·s     t·adz·z  ¦"       , &s_xpos, &s_ypos);
-      PAGE_gregg (SHAPE_DRAW, "t·adH·ht  t·adH·nt  t·adH·nd  t·adT·th  t·adT·tn  t·adT·tm    t·adD·df  t·adP·bd   ¦"       , &s_xpos, &s_ypos);
+      PAGE_gregg (SHAPE_DRAW, "a·d  t·a·t   t·a·d   t·a·dd   t·a·n   t·a·m   t·a·mm   t·a·sh  t·a·ch  t·a·j   t·a·ng  t·a·ngk          ¦" , &s_xpos, &s_ypos);
+      PAGE_gregg (SHAPE_DRAW, "t·a·f   t·a·v   t·a·p    t·a·b   t·a·k   t·a·g    t·a·r   t·a·l   t·a·rd  t·a·ld  t·a·s     t·a·z  ¦"       , &s_xpos, &s_ypos);
+      PAGE_gregg (SHAPE_DRAW, "t·a·ht  t·a·nt  t·a·nd  t·a·th  t·a·tn  t·a·tm    t·a·df  t·a·bd   ¦"       , &s_xpos, &s_ypos);
+      PAGE_gregg (SHAPE_DRAW, "e·d  t·e·t   t·e·d   t·e·dd   t·e·n   t·e·m   t·e·mm   t·e·sh  t·e·ch  t·e·j   t·e·ng  t·e·ngk          ¦" , &s_xpos, &s_ypos);
+      PAGE_gregg (SHAPE_DRAW, "t·e·f   t·e·v   t·e·p    t·e·b   t·e·k   t·e·g    t·e·r   t·e·l   t·e·rd  t·e·ld  t·e·s·t   t·e·z·t  ¦"       , &s_xpos, &s_ypos);
+      PAGE_gregg (SHAPE_DRAW, "t·e·ht  t·e·nt  t·e·nd  t·e·th  t·e·tn  t·e·tm    t·e·df  t·e·bd   ¦"       , &s_xpos, &s_ypos);
+      PAGE_gregg (SHAPE_DRAW, "t·e·z·t  t·e·z·t·>·´  t·e·z·t·>·r  t·e·z·t·>·b    /·<·e·d   /·<·a·d ¦"       , &s_xpos, &s_ypos);
    } glPopMatrix   ();
    /*---(page)---------------------------*/
    rc = PAGE_end     ();
@@ -875,6 +893,48 @@ PAGE_demo_cat_p         (void)
       PAGE_gregg (SHAPE_DRAW, "axp·p  p·apd·t   p·apd·d   p·apd·dd   p·apm·n   p·apm·m   p·apm·mm   p·apj·sh  p·apj·ch  p·apj·j   p·apN·ng  p·apN·ngk          ¦" , &s_xpos, &s_ypos);
       PAGE_gregg (SHAPE_DRAW, "p·apf·f   p·apf·v   p·app·p    p·app·b   p·apk·k   p·apk·g    p·apr·r   p·apr·l   p·apR·rd  p·apR·ld  p·aps·s     p·apz·z  ¦"       , &s_xpos, &s_ypos);
       PAGE_gregg (SHAPE_DRAW, "p·apH·ht  p·apH·nt  p·apH·nd  p·apT·th  p·apT·tn  p·apT·tm    p·apD·df  p·apP·bd   ¦"       , &s_xpos, &s_ypos);
+   } glPopMatrix   ();
+   /*---(page)---------------------------*/
+   rc = PAGE_end     ();
+   DEBUG_OUTP   yLOG_value   ("default"   , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(complete)-----------------------*/
+   DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+PAGE_demo_dict          (void)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
+   tWORD      *x_word      = NULL;
+   int         i           =    0;
+   /*---(header)-------------------------*/
+   DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
+   /*---(page)---------------------------*/
+   rc = PAGE_new (STYLE_HINTS, 1366   , 768  , 2.0,   -1, -1, -1, -1,   1.0, YF_MIDCEN, 20, 20, 50, GAP_GRID);
+   DEBUG_OUTP   yLOG_value   ("default"   , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(page)---------------------------*/
+   glPushMatrix    (); {
+      s_xpos = s_left + (s_spacing * 0.5);
+      s_ypos = s_ybase;
+      WORDS_eng_by_index (i, &x_word);
+      while (x_word != NULL) {
+         printf ("%3d, %s, %s\n", i, x_word->english, x_word->gregg);
+         PAGE_gregg (SHAPE_DRAW, x_word->gregg, &s_xpos, &s_ypos);
+         WORDS_eng_by_index (++i, &x_word);
+         if (i % 10 == 0)  PAGE_gregg (SHAPE_DRAW, "¦", &s_xpos, &s_ypos);
+         if (i > 50)  break;
+      }
    } glPopMatrix   ();
    /*---(page)---------------------------*/
    rc = PAGE_end     ();

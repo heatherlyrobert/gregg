@@ -37,8 +37,8 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "5.--= generalization for broader use"
 #define     P_VERMINOR  "5.4 = update for use as coding example"
-#define     P_VERNUM    "5.4g"
-#define     P_VERTXT    "pages coming in nicely, a/e variables loosely configured"
+#define     P_VERNUM    "5.4h"
+#define     P_VERTXT    "metis : dc2<  : dump all word details to clipboard"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -280,7 +280,7 @@
 #define     LEN_DESC       100
 #define     LEN_LABEL       20
 
-#define     NAME_DICT    "/var/lib/gregg/gregg.dict"
+#define     NAME_DICT    "/var/lib/gregg/gregg_manual.dict"
 
 typedef     const char          cchar;
 typedef     const int           cint;
@@ -1129,7 +1129,8 @@ int         WORDS_eng_count         (void);
 char        WORDS_eng_by_name       (uchar *a_text, tWORD **r_word);
 char        WORDS_eng_by_index      (int n, tWORD **r_word);
 char        WORDS_eng_by_cursor     (char a_dir, tWORD **r_word);
-char        WORDS_detail            (tWORD *a_word, char a_out [LEN_HUND]);
+char        WORDS_by_gregg          (uchar *a_text, tWORD **r_word);
+char        WORDS_detail            (tWORD *a_word, char a_out [LEN_FULL]);
 char*       WORDS_entry             (int n);
 /*> char        WORDS_dict_source       (tWORD *a_new, uchar *a_source);             <*/
 /*> char        WORDS_dict_notes        (tWORD *a_new, uchar *a_notes);              <*/
@@ -1138,7 +1139,7 @@ char        WORDS_drawn_show        (short a_drawn [], uchar *a_out);
 char        WORDS_drawn_fix_OLD     (uchar *a_index, short a_drawn []);
 char        WORDS_fix_ae            (char i, char a_pcat, char a_name [LEN_TERSE], char a_ncat, uchar a_show [LEN_HUND], short a_drawn [LEN_LABEL]);
 char        WORDS_fix_ou            (char i, char a_pcat, char a_name [LEN_TERSE], char a_ncat, uchar a_show [LEN_HUND], short a_drawn [LEN_LABEL]);
-char        WORDS_fix_consonant     (char i, char a_pcat, char a_ccat, char a_name [LEN_TERSE], uchar a_show [LEN_HUND], short a_drawn [LEN_LABEL]);
+char        WORDS_fix_other         (char i, char a_pcat, char a_ccat, char a_name [LEN_TERSE], char a_ncat, uchar a_shown [LEN_HUND], short a_drawn [LEN_LABEL]);
 char        WORDS_fix_gregg         (uchar a_gregg [LEN_TITLE], uchar a_shown [LEN_HUND], short a_drawn [LEN_LABEL]);
 int         words_outstring         (char *);
 
@@ -1269,6 +1270,8 @@ char        DICT__parse             (short a_line, uchar *a_recd);
 char        DICT_import             (char a_name [LEN_PATH]);
 char        DICT_list               (void);
 char        DICT_list_all           (void);
+char        DICT_dump_suffix        (FILE *f);
+char        DICT_dump_words         (FILE *f);
 
 
 char        gregg_yjobs             (cchar a_req, cchar *a_data);
@@ -1298,7 +1301,7 @@ char        CREATE_ellipse_point    (char a_act, short i, float sx, float sy, fl
 char        CREATE_ellipse          (short n, char a_act, float a_xradius, float a_yradius, float a_rot, float a_beg, float a_arc, char a_dots, float *b_xpos, float *b_ypos);
 char        CREATE_teardrop_point   (char a_act, float s, float sx, float sy, float a_rot, float a_xlen, float a_ylen, float *r_xpos, float *r_ypos);
 char        CREATE_teardrop         (short n, char a_act, float a_xradius, float a_yradius, float a_rot, float a_beg, float a_arc, float *b_xpos, float *b_ypos);
-char        CREATE_dot              (short n, char a_act, float a_xradius, float *b_xpos, float *b_ypos);
+char        CREATE_dot              (short n, char a_act, float a_xradius, float a_yradius, float *b_xpos, float *b_ypos);
 char        CREATE_space            (short n, char a_act, float a_xradius, float a_yradius, float *b_xpos, float *b_ypos);
 /*---(letters)--------------*/
 short       CREATE_find_by_name     (char *a_ltr, char a_scope, char *r_type, char *r_lcat, char r_label [LEN_TERSE], float *r_xradius, float *r_yradius, float *r_rot, float *r_beg, float *r_arc, char *r_dots);
@@ -1337,6 +1340,7 @@ char        PAGE_demo_cat_r         (void);
 char        PAGE_demo_cat_j         (void);
 char        PAGE_demo_cat_f         (void);
 char        PAGE_demo_cat_p         (void);
+char        PAGE_demo_dict          (void);
 
 
 char        TABLE_init              (void);

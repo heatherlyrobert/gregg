@@ -380,6 +380,8 @@ PROG_dawn          (void)
       DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
+   rc = yFILE_dump_add  ("suffix", "", "inventory of all allowed word suffixes", DICT_dump_suffix);
+   rc = yFILE_dump_add  ("words" , "", "all words in dictionary"               , DICT_dump_words);
    yCMD_direct (":layout min");
    DRAW_init  ();
    TOUCH_init ();
@@ -393,7 +395,7 @@ PROG_dawn          (void)
    USER_init     ();
    /*---(final program)------------------*/
    /*> if (my.dict   == 'y')  DICT_import  (NAME_DICT);                               <*/
-   DICT_import  ("/var/lib/gregg/gregg_verb.dict");
+   DICT_import  ("/var/lib/gregg/gregg_manual.dict");
    OUT_init      ();
    /*> FILE_rename   ("");                                                            <*/
    if (out_start > 0) o.curr = out_start;

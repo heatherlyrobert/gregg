@@ -330,24 +330,26 @@ char WORDS_eng_by_name       (uchar *a_text, tWORD **r_word)   { return ySORT_by
 char WORDS_eng_by_index      (int n, tWORD **r_word)           { return ySORT_by_index  (B_ENGLISH, n, r_word); }
 char WORDS_eng_by_cursor     (char a_dir, tWORD **r_word)      { return ySORT_by_cursor (B_ENGLISH, a_dir, r_word); }
 
+char WORDS_by_gregg          (uchar *a_text, tWORD **r_word)   { return ySORT_by_name   (B_GREGG  , a_text, r_word); }
+
 char
-WORDS_detail            (tWORD *a_word, char a_out [LEN_HUND])
+WORDS_detail            (tWORD *a_word, char a_out [LEN_FULL])
 {
    char        rce         =   -10;
-   char        x_show      [LEN_LABEL] = " -åæ";
-   char        s           [LEN_LABEL] = " -åæ";
-   char        t           [LEN_LABEL] = " -åæ";
-   char        u           [LEN_LABEL] = " -åæ";
+   char        s           [LEN_TITLE] = " ·åæ";
+   char        t           [LEN_TITLE] = " ·åæ";
+   char        u           [LEN_DESC]  = " ·åæ";
    char        v           [LEN_LABEL] = "   ·";
+   char        w           [LEN_TITLE] = " ···";
    --rce;  if (a_out  == NULL)  return rce;
    strcpy (a_out, "");
    if (a_word == NULL) return 0;
    sprintf  (s, "%2då%.20sæ", a_word->e_len, a_word->english);
    sprintf  (t, "%2då%.20sæ", a_word->g_len, a_word->gregg);
    if (a_word->line >= 0)  sprintf (v, "%4d", a_word->line);
-   /*> WORDS_drawn_show (a_word->drawn, x_show);                                      <*/
-   sprintf  (u, "å%.20sæ"   , a_word->shown);
-   sprintf (a_out, "%-24.24s  %s %-2.2s  %c %c  %c %c %-3d  %c %-4d  %-24.24s  %s", s, v, a_word->vary, a_word->part, a_word->sub, a_word->src, a_word->cat, a_word->page, a_word->grp, a_word->freq, t, u);
+   sprintf  (u, "%2då%.30sæ", strlen (a_word->shown), a_word->shown);
+   if (a_word->arpabet != NULL)   sprintf  (w, "%2då%.20sæ", strlen (a_word->arpabet), a_word->arpabet);
+   sprintf (a_out, "%-24.24s  %s %-4.4s  %c %c  %c %c %-3d  %c %-4d  %-24.24s  %-34.34s  %s", s, v, a_word->vary, a_word->part, a_word->sub, a_word->src, a_word->cat, a_word->page, a_word->grp, a_word->freq, t, u, w);
    return 0;
 }
 
@@ -355,7 +357,7 @@ char*
 WORDS_entry             (int n)
 {
    tWORD      *x_word      = NULL;
-   char        t           [LEN_HUND]  = "";
+   char        t           [LEN_FULL]  = "";
    WORDS_eng_by_index (n, &x_word);
    WORDS_detail (x_word, t);
    if (strcmp (t, "") == 0)  strcpy  (g_print, "n/a");
@@ -874,7 +876,7 @@ WORDS_fix_ou            (char i, char a_pcat, char a_name [LEN_TERSE], char a_nc
 }
 
 char
-WORDS_fix_consonant     (char i, char a_pcat, char a_ccat, char a_name [LEN_TERSE], uchar a_shown [LEN_HUND], short a_drawn [LEN_LABEL])
+WORDS_fix_other         (char i, char a_pcat, char a_ccat, char a_name [LEN_TERSE], char a_ncat, uchar a_shown [LEN_HUND], short a_drawn [LEN_LABEL])
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
@@ -972,9 +974,9 @@ WORDS_fix_gregg         (uchar a_gregg [LEN_TITLE], uchar a_shown [LEN_HUND], sh
    i = 0;
    --rce;  while (x_curr >= 0) {
       DEBUG_CONF   yLOG_complex ("LOOP"      , "#%2d, prev %3d/%s/%2d, curr %3d/%s/%2d, next %3d/%s/%2d", i, x_prev, x_lprev, x_pcat, x_curr, x_lcurr, x_ccat, x_next, x_lnext, x_ncat);
-      if      (x_ccat == CAT_A || x_ccat == CAT_E)    rc = WORDS_fix_ae        (i, x_pcat, x_lcurr, x_ncat, a_shown, a_drawn);
-      else if (x_ccat == CAT_O || x_ccat == CAT_U)    rc = WORDS_fix_ou        (i, x_pcat, x_lcurr, x_ncat, a_shown, a_drawn);
-      else                                            rc = WORDS_fix_consonant (i, x_pcat, x_ccat, x_lcurr, a_shown, a_drawn);
+      if      (x_ccat == CAT_A || x_ccat == CAT_E)    rc = WORDS_fix_ae    (i, x_pcat, x_lcurr, x_ncat, a_shown, a_drawn);
+      else if (x_ccat == CAT_O || x_ccat == CAT_U)    rc = WORDS_fix_ou    (i, x_pcat, x_lcurr, x_ncat, a_shown, a_drawn);
+      else                                            rc = WORDS_fix_other (i, x_pcat, x_ccat, x_lcurr, x_ncat, a_shown, a_drawn);
       /*---(next)------------------------*/
       x_prev = x_curr;
       x_pcat = x_ccat;
