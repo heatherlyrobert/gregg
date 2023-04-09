@@ -6,8 +6,6 @@
  * metis § tn4·· § verbose dictionary parsing mode to find mistakes                       § N2O4rp §  · §
  * metis § dc4·· § add verification of arpabet entry                                      § N2U1OE §  · §
  * metis § dc4·· § add verification of gregg letters entry                                § N2U1OS §  · §
- * metis § dc2<· § dump all word details to clipboard                                     § N380YD §  · §
- * metis § dc2<· § dump all varations to clipboard                                        § N380Yv §  · §
  */
 
 
@@ -143,7 +141,7 @@ tVARY  g_varies [LEN_FULL] = {
    /*--name-- --suffix---- --also-- ---source-- ---true-endings----------------------------------------- ---examples------------------------------------------------------------ cnt */
    { "´"     , ">·´"      , ""     , '5',  29  , "-ing, -thing"                                         , "observing, caring, drinking, knowing, liking, using, forgetting"     , 0 },
    { "Ï"     , ">·z"      , ""     , '5',  29  , "-ings"                                                , "sayings, readings, writings"                                         , 0 },
-   {   "ze"  , ">·z·e"    , ""     , '5', 117  , "-ingly"                                               , "sayings, readings, writings"                                         , 0 },
+   {   "ze"  , ">·z·e"    , ""     , '5', 117  , "-ingly"                                               , "swimmingly"                                                          , 0 },
    /*--name-- --suffix---- --also-- ---source-- ---true-endings----------------------------------------- ---examples------------------------------------------------------------ cnt */
    { "t"     , ">·t"      , "ts"   , '·',  -1  , "-ate, -ite, -iate"                                    , "certificate, demonstrate, appointment, initiate"                     , 0 },
    {   "tsh" , ">·t·sh"   , ""     , '5',  82  ,  "-tition, -tation, -tiation"                          , "repitition, station, initiation"                                     , 0 },
@@ -160,7 +158,7 @@ tVARY  g_varies [LEN_FULL] = {
    { "s"     , ">·s"      , ""     , '·',  -1  , "-s, -es, -ies"                                        , "observes, cares, drinks, knows, likes, uses, forgets"                , 0 },
    {   "st"  , ">·s·t"    , ""     , '·',  -1  , "-est, -iest"                                          , "longest, strongest, greatest"                                        , 0 },
    {   "sf"  , ">·s·f"    , ""     , '5', 111  , "-self"                                                , "himself, yourself"                                                   , 0 },
-   {   "se"  , ">·s·e"    , ""     , '5', 123  , "-city, -acity, -ecity"                                , "tenacity, felicity, pomposity"                                       , 0 },
+   {   "se"  , ">·s·e"    , ""     , '5', 123  , "-city, -acity, -ecity"                                , "tenacity, felicity, pomposity, ethnicity"                            , 0 },
    {   "su"  , ">·s·u"    , ""     , '5', 111  , "-sult"                                                , "result, insult, consult"                                             , 0 },
    {   "sm"  , ">·s·m"    , ""     , '5', 111  , "-sume"                                                , "assume, presume, resume"                                             , 0 },
    /*--name-- --suffix---- --also-- ---source-- ---true-endings----------------------------------------- ---examples------------------------------------------------------------ cnt */
@@ -201,8 +199,8 @@ tVARY  g_varies [LEN_FULL] = {
    /*--name-- --suffix---- --also-- ---source-- ---true-endings----------------------------------------- ---examples------------------------------------------------------------ cnt */
    { "g"     , ">·g"      , ""     , '5', 117  , "-gram, -grim"                                         , "monogram, program, telegram"                                         , 0 },
    /*--name-- --suffix---- --also-- ---source-- ---true-endings----------------------------------------- ---examples------------------------------------------------------------ cnt */
-   { "n"     , ">·n"      , ""     , '·',  -1  , "-ence, -ance, -ancy, -ency, -cy, -acy, -age, -ness"   , "observance"                                                          , 0 },
-   {   "n"   , ">·n"      , ""     , '5', 109  , "-ness"                                                , "lateness, fitness, awareness, witness"                               , 0 },
+   { "n"     , ">·n"      , ""     , '·',  -1  , "-ence, -ance, -ancy -ness -age"                       , "observance, lateness, fitness, awareness, witness"                   , 0 },
+   {   "ns"  , ">·n·z"    , ""     , '·',  -1  , "-ancy, -ency, -cy, -acy"                              , "observancy, latency, urgency, frequency, transparency"               , 0 },
    {   "ne"  , ">·n·e"    , ""     , '5', 123  , "-nity, -anity, -enity"                                , "humanity, community, affinity, profanity, opportunity, unity"        , 0 },
    {   "nk"  , ">·n·k"    , ""     , '5', 123  , "-ntic, -antic, -intic"                                , "gigangic, authentic, frantic"                                        , 0 },
    {   "nke" , ">·n·k·e"  , ""     , '5', 123  , "-nticly, -anticly, -inticly"                          , "franticly"                                                           , 0 },
@@ -1155,15 +1153,26 @@ DICT_list_all      (void)
    return 0;
 }
 
+/*>                                                                                                                                                                                           <* 
+ *>    /+--name-- --suffix---- --also-- ---source-- ---true-endings----------------------------------------- ---examples------------------------------------------------------------ cnt +/   <* 
+ *>    { "´"     , ">·´"      , ""     , '5',  29  , "-ing, -thing"                                         , "observing, caring, drinking, knowing, liking, using, forgetting"     , 0 },    <* 
+ *>                                                                                                                                                                                           <*/
+
 char
 DICT_dump_suffix        (FILE *f)
 {
    /*---(locals)-----------+-----+-----+-*/
    int         i           =    0;
+   char        x_save      =    0;
    /*---(search)-------------------------*/
    for (i = 0; i < LEN_FULL; ++i) {
       if (g_varies [i].name [0] == '-')              break;
-      fprintf (f, "%-5.5s\n", g_varies [i].name);
+      if (g_varies [i].suffix [2] != x_save)  fprintf (f, "\n");
+      fprintf (f, "%-5.5s %-10.10s %-5.5s  ", g_varies [i].name, g_varies [i].suffix, g_varies [i].also);
+      fprintf (f, "%c %-3d %4d  ", g_varies [i].src, g_varies [i].page, g_varies [i].count);
+      fprintf (f, "%-45.45s  %-70.70s", g_varies [i].endings, g_varies [i].example);
+      fprintf (f, "\n");
+      x_save = g_varies [i].suffix [2];
    }
    /*---(done)------------------------*/
    return 0;
