@@ -38,21 +38,11 @@ main                    (int a_argc, char *a_argv [])
 
    /*---(main-loop)----------------------*/
    if (x_show == 'y') {
-      /*---(DEBUGGING)----------------------*/
-      /*> yCOLOR_palette (190, "rcomp", "pale", "warm");                              <*/
-      /*> yGLTEX_config   ();                                                         <*/
-      /*> FONT__load      ();                                                         <*/
-      /*> dlist_init      ();                                                         <*/
-      /*> rc = PAGE_demo ();                                                          <*/
-      DEBUG_PROG   yLOG_value    ("demo"      , rc);
       /*---(header)-------------------------*/
-      /*> DEBUG_DATA   yLOG_enter    (__FUNCTION__);                                  <*/
+      DEBUG_DATA   yLOG_enter    (__FUNCTION__);
       /*---(visual setup)-------------------*/
       rc = PROG_dawn    ();
       DEBUG_PROG   yLOG_value    ("dawn"      , rc);
-      /*> rc = PAGE_demo_dict        ();                                              <*/
-      /*> rc = PAGE_demo ();                                                          <*/
-      /*> DEBUG_PROG   yLOG_value    ("demo"      , rc);                              <*/
       if (rc <  0) { PROG_shutdown (); return -3; }
       /*---(main-loop)----------------------*/
       rc = yVIOPENGL_main  ("keys", "every", NULL);

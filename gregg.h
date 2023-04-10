@@ -37,8 +37,8 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "5.--= generalization for broader use"
 #define     P_VERMINOR  "5.4 = update for use as coding example"
-#define     P_VERNUM    "5.4i"
-#define     P_VERTXT    "metis : dc2<  : dump all varations to clipboard"
+#define     P_VERNUM    "5.4j"
+#define     P_VERTXT    "metis : dc4<  : page draws to and resizes gregg window"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -331,6 +331,8 @@ extern tWIN  win;
 #define     RUN_WRITING    "eg"
 
 
+#define     LAYOUT_INTERPRET    'i'
+#define     LAYOUT_PAGEVIEW     'P'
 
 /*---(struct.re)--------+-----------+-*//*-+----------------------------------*/
 typedef     struct      cMY   tMY;
@@ -344,6 +346,33 @@ struct cMY {
    long        run_time;                    /* time of program launch         */
    char        cwd         [LEN_PATH];      /* current working directory      */
    char        heartbeat   [LEN_HUND];      /* latest heartbeat               */
+   /*---(x11 window)-----------*/
+   char        w_layout;                    /* current format                 */
+   short       w_wide;                      /* full window width              */
+   short       w_tall;                      /* full window height             */
+   char        w_title     [LEN_HUND];      /* current title                  */
+   char        w_anchor;                    /* window anchor position         */
+   float       w_scale;                     /* window vs texture size         */
+   /*---(texture)-----------*/
+   short       t_wide;                      /* texture width                  */
+   short       t_tall;                      /* texture height                 */
+   uint        t_tex;                       /* texture for image              */
+   uint        t_fbo;                       /* framebuffer                    */
+   uint        t_depth;                     /* depth buffer                   */
+   /*---(page margints)-----*/
+   short       p_left;                      /* margin left                    */
+   short       p_right;                     /* margin right                   */
+   short       p_top;                       /* margin top                     */
+   short       p_bottom;                    /* margin bottom                  */
+   /*---(outlines)----------*/
+   float       p_sizing;                    /* outline size vs normal         */
+   char        p_align;                     /* outline alignment to origin    */
+   short       p_ascent;                    /* expected space above baseline  */
+   short       p_descent;                   /* expected space below baseline  */
+   short       p_spacing;                   /* horizontal outline gap         */
+   char        p_gapping;                   /* method to figure spacing       */
+   short       p_linesize;                  /* space between vertical lines   */
+   char        p_hinting;                   /* embellishments on outlines     */
    /*---(other)----------------*/
    char        time_lapse;
    short       time_point;
@@ -432,7 +461,7 @@ extern char  g_vows  [LEN_HUND];
 extern char  g_cons  [LEN_HUND];
 
 
-#define    MAX_LETTERS   300
+#define    MAX_LETTERS   500
 typedef struct cLOCATION tLOCATION;
 struct cLOCATION
 {
@@ -576,9 +605,6 @@ extern GLuint    dl_solid;
 extern GLuint    dl_dotted;
 
 /*> GLuint    dl_arrowed;                                                             <*/
-extern GLuint    dl_undo;
-extern GLuint    dl_redo;
-extern GLuint    dl_clear;
 extern GLuint    dl_back;
 
 extern const float  DEG2RAD;
@@ -933,10 +959,12 @@ char        PROG__unit_end          (void);
 
 
 
-char       DRAW_init            (void);
-/*> char       DRAW__resize         (cchar a_format, cchar *a_title, cint a_wide, cint a_tall);   <*/
-char       DRAW_wrap            (void);
-/*> char       DRAW_set_color       (char a_color);                                   <*/
+char       DRAW_tex_new            (short a_wide, short a_tall, float a_scale, float s_sizing);
+char       DRAW_tex_ready          (void);
+char       DRAW_init               (void);
+char       DRAW_make_interpreter   (void);
+char       DRAW_make_pageview      (void);
+char       DRAW_wrap               (void);
 
 char       DRAW_primary         (float a_mag);
 /*> char       DRAW_main            (void);                                           <*/
@@ -982,9 +1010,12 @@ char       sample_free       (void);
 
 
 
-char       dlist_init            (void);
-char       DLIST_letters_make    (float a_scale);
-char       DLIST_letters_free    (void);
+char       DLIST_init              (void);
+char       DLIST_letters_make      (float a_scale);
+char       DLIST_letters_free      (void);
+char       DLIST__back_edging      (void);
+char       DLIST_interpreter       (void);
+char       DLIST_pageview          (void);
 
 /*---(outline)--------------*/
 char       OUT_status         (char *a_list);
@@ -1324,13 +1355,15 @@ char        PAGE_gregg_size         (char a_gregg [LEN_TITLE], char *r_count, sh
 char        PAGE_gregg_word         (char a_act, char a_gregg [LEN_TITLE], float *b_xpos, float *b_ypos);
 char        PAGE_gregg              (char a_act, char a_gregg [LEN_RECD], float *b_xpos, float *b_ypos);
 /*---(organizing)-----------*/
-char        PAGE_config             (char a_style, short a_wide, short a_tall, float a_scale, short a_left, short a_right, short a_top, short a_bottom, float a_sizing, char a_align, short a_ascent, short a_descent, short a_spacing, char a_gapping);
-char        PAGE_new                (char a_style, short a_wide, short a_tall, float a_scale, short a_left, short a_right, short a_top, short a_bottom, float a_sizing, char a_align, short a_ascent, short a_descent, short a_spacing, char a_gapping);
-char        PAGE_default            (void);
-char        PAGE_sized              (short a_wide, short a_tall);
-char        PAGE_screen             (void);
+char        PAGE_config             (char a_layout, short a_wide, short a_tall, char a_anchor, float a_scale, short a_left, short a_right, short a_top, short a_bottom, float a_sizing, char a_align, short a_ascent, short a_descent, short a_spacing, char a_gapping);
+char        PAGE_new                (char a_layout, short a_wide, short a_tall, char a_anchor, float a_scale, short a_left, short a_right, short a_top, short a_bottom, float a_sizing, char a_align, short a_ascent, short a_descent, short a_spacing, char a_gapping);
+char        PAGE_new_default        (void);
+char        PAGE_new_again          (void);
+char        PAGE_new_sized          (short a_wide, short a_tall, char a_anchor, float a_scale);
+char        PAGE_new_screen         (void);
 char*       PAGE_detail             (void);
-char        PAGE_end                (void);
+char        PAGE_ready              (char a_png [LEN_PATH]);
+char        PAGE_free               (void);
 /*---(done)-----------------*/
 char        PAGE_demo_cat_none      (void);
 char        PAGE_demo_cat_d         (void);
@@ -1340,6 +1373,7 @@ char        PAGE_demo_cat_r         (void);
 char        PAGE_demo_cat_j         (void);
 char        PAGE_demo_cat_f         (void);
 char        PAGE_demo_cat_p         (void);
+char        PAGE_demo_cat_u         (void);
 char        PAGE_demo_dict          (void);
 
 

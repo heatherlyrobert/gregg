@@ -574,6 +574,11 @@ CREATE_dot              (short n, char a_act, float a_xradius, float a_yradius, 
    /*---(tables)-------------------------*/
    /*> l  = a_xradius * 0.5;                                                          <*/
    l = 1.0;
+   /*---(space)--------------------------*/
+   if (a_xradius != 0 || a_yradius != 0) {
+      sx += a_xradius;
+      sy += a_yradius;
+   }
    /*---(draw)---------------------------*/
    CREATE_head (n, a_act);
    for (i = 0; i <= 360; ++i) {
@@ -586,8 +591,8 @@ CREATE_dot              (short n, char a_act, float a_xradius, float a_yradius, 
    CREATE_tail (n, a_act, sx, sy);
    /*---(space)--------------------------*/
    if (a_xradius != 0 || a_yradius != 0) {
-      cx  = sx + a_xradius;
-      cy  = sy + a_yradius;
+      cx  = sx - a_xradius;
+      cy  = sy - a_yradius;
       CREATE_head (n, a_act);
       CREATE_tail (n, a_act, cx, cy);
    }

@@ -175,17 +175,22 @@ PROG__init              (int a_argc, char *a_argv[])
    my.quit         = '-';
    /*> my.ratio        = GREGG_WACOM;                                                 <*/
    my.ratio        = 10;
-   TABLE_init      ();
-   BASE_config     (10.0, 2.0, 70.0);
-   WORDS_init      ();
-   DICT_init       ();
-   PAGE_init       ();
-   TABLE_letters_data (1.0);
+   /*> my.w_wide       = 500;                                                         <* 
+    *> my.w_tall       = 350;                                                         <* 
+    *> strlcpy (my.w_title, "gregg shorthand interpreter", LEN_HUND);                 <*/
    /*---(other)-----------------------*/
    strlcpy (my.words, "", LEN_RECD);
    strlcpy (my.guide, "", LEN_RECD);
+   /*---(get letters/sizing ready)----*/
+   WORDS_init      ();
+   DICT_init       ();
+   /*---(get letters/sizing ready)----*/
+   TABLE_init      ();
+   PAGE_init       ();
+   /*---(prep recognizer)-------------*/
+   BASE_config     (10.0, 2.0, 70.0);
    /*---(yvicurses config)---------------*/
-   rc = yVIOPENGL_init   ("gregg shorthand interpreter", P_VERNUM, MODE_MAP, 500, 350);
+   rc = yVIOPENGL_init   (my.w_title, P_VERNUM, MODE_MAP, my.w_wide, my.w_tall);
    DEBUG_PROG   yLOG_value    ("yVIOPENGL" , rc);
    --rce;  if (rc < 0) {
       DEBUG_PROG   yLOG_exitr    (__FUNCTION__, rce);
@@ -293,6 +298,7 @@ PROG__args              (int a_argc, char *a_argv[])
       else if (strcmp (a, "--exact"             ) == 0)   my.run_mode     = RUN_EXACT;
       else if (strcmp (a, "--reverse"           ) == 0)   my.run_mode     = RUN_REVERSE;
       else if (strcmp (a, "--words"             ) == 0)   my.run_mode     = RUN_WORDS;
+      else if (strcmp (a, "--page"              ) == 0)   DRAW_make_pageview ();
       /*---(catch two-arg errors)--------*/
       if (rc < 0)  {
          DEBUG_PROG  yLOG_note  ("two arg test failed");

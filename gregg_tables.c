@@ -282,7 +282,7 @@ tLOCATION   g_loc [MAX_LETTERS] = {
    /*-unde---,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- */
    { "ht"    ,  SHAPE_ELLIPSE ,   8,   4,  30, 220, 120,   CAT_UTH ,   1,   1,     95,  -24, YF_BOTRIG, 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
    { "nt"    ,  SHAPE_ELLIPSE ,  16,   8,  30, 220, 120,   CAT_UTH ,   1,   2,     87,  -32, YF_BOTRIG, 20,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
-   { "nd"    ,  SHAPE_ELLIPSE ,  24,  12,  30, 220, 120,   CAT_UTH ,   1,   3,     80,  -40, YF_BOTRIG, 10,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "nd"    ,  SHAPE_ELLIPSE ,  24,  12,  30, 200, 120,   CAT_UTH ,   1,   3,     80,  -40, YF_BOTRIG, 10,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
    /*-arc----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- */
    { "ts"    ,  SHAPE_ELLIPSE ,   8,   4,  50, 130,-220,   CAT_DF  ,   2,   1,      0,    0, YF_BOTRIG, 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
    { "df"    ,  SHAPE_ELLIPSE ,  18,   9,  50, 130,-220,   CAT_DF  ,   2,   2,      0,    0, YF_BOTRIG, 20,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
@@ -342,7 +342,7 @@ tLOCATION   g_loc [MAX_LETTERS] = {
 
    /*=====[[ SPECIAL ]]=================================   ====categories=====   =======display===========   ======================= */
    /*-poin---,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- */
-   { "/"     ,  SHAPE_DOT     ,   0,   0,   0,   0, 360,   CAT_NONE,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "/"     ,  SHAPE_DOT     ,   0,   6,   0,   0, 360,   CAT_NONE,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
    { "´"     ,  SHAPE_DOT     ,   0,   0,   0,   0, 360,   CAT_NONE,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
    { "dot"   ,  SHAPE_DOT     ,   0,   0,   0,   0, 360,   CAT_NONE,   0,   0,    119,  -75, YF_BOTCEN,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
    { "<"     ,  SHAPE_SPACE   ,   0,  -5,   0,   0, 360,   CAT_NONE,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
@@ -360,43 +360,6 @@ tLOCATION   g_loc [MAX_LETTERS] = {
    /*=====[[ header ]]==================================   ====categories=====   =======display===========   ======================= */
    /*-line---,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- */
    { "END"   ,  SHAPE_NONE    ,   0,   0,   0,   0,   0,   CAT_NONE,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
-
-   /*=====[[ VOWELS FIXES ]]============================   ====categories=====   =======display===========   ======================= */
-   /*-solo---,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- */
-   /*> { "aT"    ,  SHAPE_TEARDROP,   8,   8,  50,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> { "aH"    ,  SHAPE_TEARDROP,   8,   8, 230,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> { "ap"    ,  SHAPE_TEARDROP,  12,   7, -20,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> { "ek"    ,  SHAPE_ELLIPSE ,   4,   4, 110,   0, 360,   CAT_E   ,   0,   0,      0,    0, 0        , 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> { "ap"    ,  SHAPE_ELLIPSE ,   8,   8, 125,   0, 360,   CAT_A   ,   0,   0,      0,    0, 0        , 20,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> { "af"    ,  SHAPE_ELLIPSE ,   8,   8,  20,   0, 360,   CAT_A   ,   0,   0,      0,    0, 0        , 20,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <*/
-
-   /*> { "aa"    ,  SHAPE_CIRCLE  ,   5,   0,  90,   0,   0,   CAT_A   ,   0,   0,    108, -135, YF_BOTRIG,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },           <* 
-    *> { "am"    ,  SHAPE_TEARDROP,   5,   4, 120,   0,   0,   CAT_A   ,   0,   0,    108, -135, YF_BOTRIG,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 }, /+ 5 +/   <* 
-    *> { "ad"    ,  SHAPE_TEARDROP,   5,   4, 100,   0,   0,   CAT_A   ,   0,   0,    108, -135, YF_BOTRIG,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 }, /+ 6 +/   <* 
-    *> { "ag"    ,  SHAPE_TEARDROP,   5,   4,  95,   0,   0,   CAT_A   ,   0,   0,    108, -135, YF_BOTRIG,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 }, /+ 6 +/   <* 
-    *> { "al"    ,  SHAPE_TEARDROP,   5,   4, 285,   0,  -1,   CAT_A   ,   0,   0,    108, -135, YF_BOTRIG,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 }, /+ 6 +/   <* 
-    *> { "av"    ,  SHAPE_TEARDROP,   5,   4, 200,   0,   0,   CAT_A   ,   0,   0,    108, -135, YF_BOTRIG,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 }, /+ 5 +/   <* 
-    *> { "ab"    ,  SHAPE_TEARDROP,   5,   4,  10,   0,  -1,   CAT_A   ,   0,   0,    108, -135, YF_BOTRIG,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 }, /+ 5 +/   <* 
-    *> { "aj"    ,  SHAPE_TEARDROP,   5,   4, 245,   0,   0,   CAT_A   ,   0,   0,    108, -135, YF_BOTRIG,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 }, /+ 6 +/   <* 
-    *> { "angk"  ,  SHAPE_TEARDROP,   5,   4, 150,   0,   0,   CAT_A   ,   0,   0,    108, -135, YF_BOTRIG,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 }, /+ 6 +/   <* 
-    *> { "as"    ,  SHAPE_TEARDROP,   5,   4, 220,   0,   0,   CAT_A   ,   0,   0,    108, -135, YF_BOTRIG,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 }, /+ 5 +/   <* 
-    *> { "az"    ,  SHAPE_TEARDROP,   5,   4, -25,   0,  -1,   CAT_A   ,   0,   0,    108, -135, YF_BOTRIG,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 }, /+ 5 +/   <* 
-    *> { "ath"   ,  SHAPE_TEARDROP,   5,   4,  60,   0,  -1,   CAT_A   ,   0,   0,    108, -135, YF_BOTRIG,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 }, /+ 5 +/   <* 
-    *> { "aht"   ,  SHAPE_TEARDROP,   5,   4, 225,   0,  -1,   CAT_A   ,   0,   0,    108, -135, YF_BOTRIG,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 }, /+ 5 +/   <*/
-
-   /*> { "da"    ,  SHAPE_TEARDROP,   5,   4,  15,   0,   0,   CAT_A   ,   0,   0,    108, -135, YF_BOTRIG,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 }, /+ 6 +/   <* 
-    *> { "ma"    ,  SHAPE_TEARDROP,   5,   4,  45,   0,   0,   CAT_A   ,   0,   0,    108, -135, YF_BOTRIG,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 }, /+ 6 +/   <* 
-    *> { "ja"    ,  SHAPE_TEARDROP,   5,   4,  70,   0,   0,   CAT_A   ,   0,   0,    108, -135, YF_BOTRIG,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 }, /+ 6 +/   <* 
-    *> { "ngka"  ,  SHAPE_TEARDROP,   5,   4,  75,   0,   0,   CAT_A   ,   0,   0,    108, -135, YF_BOTRIG,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 }, /+ 6 +/   <* 
-    *> { "va"    ,  SHAPE_TEARDROP,   5,   4, 190,   0,   0,   CAT_A   ,   0,   0,    108, -135, YF_BOTRIG,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 }, /+ 5 +/   <* 
-    *> { "ba"    ,  SHAPE_TEARDROP,   5,   4,  10,   0,  -1,   CAT_A   ,   0,   0,    108, -135, YF_BOTRIG,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 }, /+ 5 +/   <* 
-    *> { "lda"   ,  SHAPE_TEARDROP,   5,   4, 200,   0,  -1,   CAT_A   ,   0,   0,    108, -135, YF_BOTRIG,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 }, /+ 5 +/   <* 
-    *> { "tha"   ,  SHAPE_TEARDROP,   5,   4,  45,   0,  -1,   CAT_A   ,   0,   0,    108, -135, YF_BOTRIG,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 }, /+ 5 +/   <* 
-    *> { "hta"   ,  SHAPE_TEARDROP,   5,   4, 225,   0,  -1,   CAT_A   ,   0,   0,    108, -135, YF_BOTRIG,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 }, /+ 5 +/   <* 
-    *> { "dfa"   ,  SHAPE_TEARDROP,   5,   4, 170,   0,  -1,   CAT_A   ,   0,   0,    108, -135, YF_BOTRIG,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 }, /+ 5 +/   <* 
-    *> { "bda"   ,  SHAPE_TEARDROP,   5,   4, 225,   0,  -1,   CAT_A   ,   0,   0,    108, -135, YF_BOTRIG,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 }, /+ 5 +/   <* 
-    *> { "sa"    ,  SHAPE_TEARDROP,   5,   4, 190,   0,  -1,   CAT_A   ,   0,   0,    108, -135, YF_BOTRIG,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 }, /+ 5 +/   <* 
-    *> { "za"    ,  SHAPE_TEARDROP,   5,   4, -25,   0,  -1,   CAT_A   ,   0,   0,    108, -135, YF_BOTRIG,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 }, /+ 5 +/   <*/
 
    /*=====[[ INITIAL H ]]===============================   ====categories=====   =======display===========   ======================= */
    { "/e"    ,  SHAPE_DOT     ,   1,   1,   0,   0, 360,   CAT_NONE,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
@@ -706,201 +669,22 @@ tLOCATION   g_loc [MAX_LETTERS] = {
    /*=====[[ CAT_Z ]]===================================   ====categories=====   =======display===========   ======================= */
    { "azx"   ,  SHAPE_TEARDROP,   5,   4, -25,   0,  -1,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
 
-
-
-   /*> /+=====[[ M FIXES ]]=================================   ====categories=====   =======display===========   ======================= +/      <* 
-    *> /+-ends---,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/      <* 
-    *> { "amx"   ,  SHAPE_TEARDROP,   5,   4,  70,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> /+-m-m----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/      <* 
-    *> { "amm"   ,  SHAPE_CIRCLE  ,   6,   6,  90,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> /+-m-d----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/      <* 
-    *> { "amd"   ,  SHAPE_TEARDROP,   8,  10,  70,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> { "adm"   ,  SHAPE_TEARDROP,   8,  10, 250,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> /+-m-T----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/      <* 
-    *> { "amT"   ,  SHAPE_TEARDROP,   9,   8,  55,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> /+-m-H----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/      <* 
-    *> { "amH"   ,  SHAPE_TEARDROP,   8,  12, 270,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> { "aHm"   ,  SHAPE_TEARDROP,   8,   9, 240,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> /+-m-D----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/      <* 
-    *> { "aDm"   ,  SHAPE_TEARDROP,  10,   5, 140,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> /+-m-k----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/      <* 
-    *> { "amk"   ,  SHAPE_TEARDROP,  10,  10,  70,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> { "akm"   ,  SHAPE_TEARDROP,  10,  10, 110,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> /+-m-r----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/      <* 
-    *> { "amr"   ,  SHAPE_TEARDROP,  10,  10, 290,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> { "arm"   ,  SHAPE_TEARDROP,  10,  10, 250,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> /+-m-rd---,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/      <* 
-    *> { "aRm"   ,  SHAPE_TEARDROP,   9,   5, 190,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> /+-m-ng---,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/      <* 
-    *> { "amN"   ,  SHAPE_TEARDROP,  10,  10, 270,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> { "aNm"   ,  SHAPE_TEARDROP,   8,  12, 100,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> /+-m-j----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/      <* 
-    *> { "amj"   ,  SHAPE_TEARDROP,  12,   7, 330,   0,  -1,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> { "ajm"   ,  SHAPE_TEARDROP,  12,   7, 150,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> /+-m-f----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/      <* 
-    *> { "amf"   ,  SHAPE_TEARDROP,  10,   8, 300,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> { "afm"   ,  SHAPE_TEARDROP,  12,   6, 160,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> /+-m-m----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/      <* 
-    *> { "amp"   ,  SHAPE_TEARDROP,  12,   6, 340,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> { "apm"   ,  SHAPE_TEARDROP,  10,   8, 140,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <*/
-
-   /*> /+=====[[ D FIXES ]]=================================   ====categories=====   =======display===========   ======================= +/      <* 
-    *> /+-ends---,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/      <* 
-    *> { "a(dx)" ,  SHAPE_TEARDROP,   8,  12,  45,   0,   0, CAT_A   ,     0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> { "a(xd)" ,  SHAPE_TEARDROP,   8,  12,  70,   0,   0, CAT_A   ,     0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> /+-d-d----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/      <* 
-    *> { "a(dd)" ,  SHAPE_TEARDROP,   8,  12,  45,   0,   0, CAT_A   ,     0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> /+-d-H----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/      <* 
-    *> { "aHd"   ,  SHAPE_TEARDROP,   8,  10, 200,   0,   0, CAT_A   ,     0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> /+-d-k----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/      <* 
-    *> { "adk"   ,  SHAPE_TEARDROP,   8,  12,  55,   0,   0, CAT_A   ,     0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> { "akd"   ,  SHAPE_TEARDROP,   9,   8,  90,   0,   0, CAT_A   ,     0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> /+-d-r----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/      <* 
-    *> { "adr"   ,  SHAPE_TEARDROP,   8,   8, 270,   0,   0, CAT_A   ,     0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> /+-d-N----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/      <* 
-    *> { "adN"   ,  SHAPE_TEARDROP,   8,   8, 280,   0,   0, CAT_A   ,     0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> { "aNd"   ,  SHAPE_TEARDROP,   8,   8,  90,   0,   0, CAT_A   ,     0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> /+-d-j----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/      <* 
-    *> { "adj"   ,  SHAPE_TEARDROP,  12,   6, 300,   0,   0, CAT_A   ,     0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> { "ajd"   ,  SHAPE_TEARDROP,  10,   4, 120,   0,   0, CAT_A   ,     0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> /+-d-f----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/      <* 
-    *> { "adf"   ,  SHAPE_TEARDROP,  12,   6, 300,   0,   0, CAT_A   ,     0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> { "afd"   ,  SHAPE_TEARDROP,  12,   6, 110,   0,   0, CAT_A   ,     0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> /+-d-p----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/      <* 
-    *> { "adp"   ,  SHAPE_TEARDROP,  12,   6, 300,   0,   0, CAT_A   ,     0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> { "apd"   ,  SHAPE_TEARDROP,  12,   6, 110,   0,   0, CAT_A   ,     0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <*/
-
-   /*> /+=====[[ K FIXES ]]=================================   ====categories=====   =======display===========   ======================= +/      <* 
-    *> /+-ends---,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/      <* 
-    *> { "axk"   ,  SHAPE_TEARDROP,  10,  10, 105,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> { "akx"   ,  SHAPE_TEARDROP,  10,  10,  80,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> /+-k-k----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/      <* 
-    *> { "akk"   ,  SHAPE_TEARDROP,  10,  10,  90,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> /+-k-r----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/      <* 
-    *> { "akr"   ,  SHAPE_TEARDROP,   8,  12, 290,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> { "ark"   ,  SHAPE_TEARDROP,   8,  12,  70,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> /+-k-T----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/      <* 
-    *> { "akT"   ,  SHAPE_TEARDROP,   9,   8,  65,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> { "aTk"   ,  SHAPE_TEARDROP,   8,  12,  90,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> /+-k-H----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/      <* 
-    *> { "akH"   ,  SHAPE_TEARDROP,  10,  10, 110,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> { "aHk"   ,  SHAPE_TEARDROP,   8,  12, 210,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> /+-k-N----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/      <* 
-    *> { "akN"   ,  SHAPE_TEARDROP,  10,  10, 130,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> { "aNk"   ,  SHAPE_TEARDROP,   8,  12, 100,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> /+-k-j----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/      <* 
-    *> { "akj"   ,  SHAPE_TEARDROP,  10,  10, 330,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> { "ajk"   ,  SHAPE_TEARDROP,  10,   6, 130,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> /+-k-f----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/      <* 
-    *> { "akf"   ,  SHAPE_TEARDROP,  10,  12, 320,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> { "afk"   ,  SHAPE_TEARDROP,  12,   6, 130,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> /+-k-p----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/      <* 
-    *> { "akp"   ,  SHAPE_TEARDROP,  10,   8, 350,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> { "apk"   ,  SHAPE_TEARDROP,  12,   6, 130,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <*/
-
-   /*> /+=====[[ R FIXES ]]=================================   ====categories=====   =======display===========   ======================= +/      <* 
-    *> /+-ends---,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/      <* 
-    *> { "axr"   ,  SHAPE_TEARDROP,  10,  10, 270,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> { "arx"   ,  SHAPE_TEARDROP,  10,  10, 270,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> /+-r-r----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/      <* 
-    *> { "arr"   ,  SHAPE_TEARDROP,  10,  10, 270,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> /+-r-T----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/      <* 
-    *> { "arT"   ,  SHAPE_TEARDROP,  10,  10,  45,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> { "aTr"   ,  SHAPE_TEARDROP,  10,  10, 290,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> /+-r-H----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/      <* 
-    *> { "arH"   ,  SHAPE_TEARDROP,  10,  12, 250,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> { "aHr"   ,  SHAPE_TEARDROP,  10,  10, 250,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> /+-r-N----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/      <* 
-    *> { "arN"   ,  SHAPE_TEARDROP,  10,  12, 260,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> { "aNr"   ,  SHAPE_TEARDROP,  10,  10, 310,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> /+-r-j----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/      <* 
-    *> { "arj"   ,  SHAPE_TEARDROP,  10,   6, 300,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> { "ajr"   ,  SHAPE_TEARDROP,  10,  10, 170,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> /+-r-f----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/      <* 
-    *> { "arf"   ,  SHAPE_TEARDROP,  10,   6, 300,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> { "afr"   ,  SHAPE_TEARDROP,  10,  10, 180,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> /+-r-p----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/      <* 
-    *> { "arp"   ,  SHAPE_TEARDROP,  10,   6, 300,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> { "apr"   ,  SHAPE_TEARDROP,  10,  10, 150,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <*/
-
-   /*> /+=====[[ RD FIXES ]]================================   ====categories=====   =======display===========   ======================= +/      <* 
-    *> /+-ends---,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/      <* 
-    *> { "axR"   ,  SHAPE_TEARDROP,  10,  10, 270,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> { "aRx"   ,  SHAPE_TEARDROP,  10,  10, 270,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <*/
-
-   /*> /+=====[[ F FIXES ]]=================================   ====categories=====   =======display===========   ======================= +/                <* 
-    *> /+-ends---,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/                <* 
-    *> { "axf"   ,  SHAPE_TEARDROP,  10,  10, 210,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },             <* 
-    *> /+> { "afx"   ,  SHAPE_TEARDROP,  10,  10, 170,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <+/   <* 
-    *> /+-f-f----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/                <* 
-    *> { "aff"   ,  SHAPE_TEARDROP,   8,  12, 190,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },             <* 
-    *> /+-f-T----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/                <* 
-    *> { "aTf"   ,  SHAPE_TEARDROP,  10,  10, 300,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },             <* 
-    *> { "afT"   ,  SHAPE_TEARDROP,  12,   6, 110,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },             <* 
-    *> /+-f-H----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/                <* 
-    *> { "aHf"   ,  SHAPE_TEARDROP,  10,   8, 260,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },             <* 
-    *> { "afH"   ,  SHAPE_TEARDROP,  12,   6, 160,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },             <* 
-    *> /+-f-N----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/                <* 
-    *> { "aNf"   ,  SHAPE_TEARDROP,  10,  10, 300,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },             <* 
-    *> { "afN"   ,  SHAPE_TEARDROP,  12,   6, 160,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },             <* 
-    *> /+-f-j----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/                <* 
-    *> { "ajf"   ,  SHAPE_TEARDROP,  10,  10, 180,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },             <* 
-    *> { "afj"   ,  SHAPE_TEARDROP,  10,  10, 210,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },             <* 
-    *> /+-f-p----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/                <* 
-    *> { "apf"   ,  SHAPE_TEARDROP,  10,  12, 160,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },             <* 
-    *> { "afp"   ,  SHAPE_TEARDROP,  10,  12, 220,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },             <*/
-
-   /*> /+=====[[ P FIXES ]]=================================   ====categories=====   =======display===========   ======================= +/                <* 
-    *> /+-ends---,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/                <* 
-    *> { "axp"   ,  SHAPE_TEARDROP,   9,   8,  15,   0,  -1,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },             <* 
-    *> /+> { "apx"   ,  SHAPE_TEARDROP,  10,  10,   0,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <+/   <* 
-    *> /+-p-r----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/                <* 
-    *> { "app"   ,  SHAPE_TEARDROP,  10,  10,  10,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },             <* 
-    *> /+-p-T----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/                <* 
-    *> { "aTp"   ,  SHAPE_TEARDROP,  12,   6, 300,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },             <* 
-    *> { "apT"   ,  SHAPE_TEARDROP,  12,   6, 110,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },             <* 
-    *> /+-p-H----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/                <* 
-    *> { "aHp"   ,  SHAPE_TEARDROP,  10,   8, 280,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },             <* 
-    *> { "apH"   ,  SHAPE_TEARDROP,  10,  10, 160,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },             <* 
-    *> /+-p-N----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/                <* 
-    *> { "aNp"   ,  SHAPE_TEARDROP,  10,   8, 350,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },             <* 
-    *> { "apN"   ,  SHAPE_TEARDROP,  10,  10, 160,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },             <* 
-    *> /+-p-j----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/                <* 
-    *> { "ajp"   ,  SHAPE_TEARDROP,  10,  12,  20,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },             <* 
-    *> { "apj"   ,  SHAPE_TEARDROP,  10,  12,   0,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },             <*/
-
-   /*> /+=====[[ OTH FIXES ]]===============================   ====categories=====   =======display===========   ======================= +/      <* 
-    *> /+-ends---,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/      <* 
-    *> { "axT"   ,  SHAPE_TEARDROP,  10,  10,  70,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> { "aTx"   ,  SHAPE_TEARDROP,  10,  10,  30,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> /+-T-T----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/      <* 
-    *> { "aTT"   ,  SHAPE_TEARDROP,  10,  10,  45,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <*/
-
-   /*> /+=====[[ UTH FIXES ]]===============================   ====categories=====   =======display===========   ======================= +/      <* 
-    *> /+-ends---,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/      <* 
-    *> { "axH"   ,  SHAPE_TEARDROP,  10,  10, 210,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> { "aHx"   ,  SHAPE_TEARDROP,  10,  10, 330,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> /+-T-T----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- +/      <* 
-    *> { "aHH"   ,  SHAPE_TEARDROP,  10,  10, 225,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <*/
-
-
-
-   /*> { "ard"   ,  SHAPE_TEARDROP,   8,  12, 235,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <*/
-
    /*=====[[ 2nd ZONE FIXES ]]==========================   ====categories=====   =======display===========   ======================= */
    /*-o------,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- */
-   { "o3"    ,  SHAPE_ELLIPSE ,   4,   4, 120,  90, 220,   CAT_O   ,   9,   1,      0,    0, 0        , 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
-   { "o4"    ,  SHAPE_ELLIPSE ,   4,   4, 105,  90, 220,   CAT_O   ,   9,   1,      0,    0, 0        , 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
-   { "o5"    ,  SHAPE_ELLIPSE ,   4,   4,  90,  90, 180,   CAT_O   ,   9,   1,      0,    0, 0        , 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
-   { "o7"    ,  SHAPE_ELLIPSE ,   4,   4,  40,  90, 180,   CAT_O   ,   9,   1,      0,    0, 0        , 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
-   { "o8"    ,  SHAPE_ELLIPSE ,   4,   4,  20,  90, 220,   CAT_O   ,   9,   1,      0,    0, 0        , 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
-   { "o9"    ,  SHAPE_ELLIPSE ,   4,   4,   0,  90, 180,   CAT_O   ,   9,   1,      0,    0, 0        , 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "o1"    ,  SHAPE_ELLIPSE ,   3,   3,   0, 160, 220,   CAT_O   ,   9,   1,      0,    0, 0        , 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "o2"    ,  SHAPE_ELLIPSE ,   3,   3,   0,  70, 220,   CAT_O   ,   9,   1,      0,    0, 0        , 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "o3"    ,  SHAPE_ELLIPSE ,   3,   3, 120,  90, 220,   CAT_O   ,   9,   1,      0,    0, 0        , 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "o4"    ,  SHAPE_ELLIPSE ,   3,   3, 105,  90, 220,   CAT_O   ,   9,   1,      0,    0, 0        , 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "o5"    ,  SHAPE_ELLIPSE ,   3,   3,  90,  90, 180,   CAT_O   ,   9,   1,      0,    0, 0        , 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "o7"    ,  SHAPE_ELLIPSE ,   3,   3,  40,  90, 180,   CAT_O   ,   9,   1,      0,    0, 0        , 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "o8"    ,  SHAPE_ELLIPSE ,   3,   3,  20,  90, 220,   CAT_O   ,   9,   1,      0,    0, 0        , 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "o9"    ,  SHAPE_ELLIPSE ,   3,   3,   0,  90,  90,   CAT_O   ,   9,   1,      0,    0, 0        , 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
    /*-u------,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- */
-   { "u3"    ,  SHAPE_ELLIPSE ,   4,   4, 120,  90,-180,   CAT_U   ,   2,   2,      0,    0, 0        , 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
-   { "u5"    ,  SHAPE_ELLIPSE ,   4,   4,  90,  90,-180,   CAT_U   ,   2,   2,      0,    0, 0        , 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
-   { "u7"    ,  SHAPE_ELLIPSE ,   4,   4,  70,  90,-180,   CAT_U   ,   2,   2,      0,    0, 0        , 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
-   { "u8"    ,  SHAPE_ELLIPSE ,   4,   4,  40,  90,-180,   CAT_U   ,   2,   2,      0,    0, 0        , 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
-   { "u9"    ,  SHAPE_ELLIPSE ,   4,   4,   0,  90,-180,   CAT_U   ,   2,   2,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "u3"    ,  SHAPE_ELLIPSE ,   3,   3, 120,  90,-180,   CAT_U   ,   2,   2,      0,    0, 0        , 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "u5"    ,  SHAPE_ELLIPSE ,   3,   3,  90,  90,-180,   CAT_U   ,   2,   2,      0,    0, 0        , 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "u7"    ,  SHAPE_ELLIPSE ,   3,   3,  70,  90,-180,   CAT_U   ,   2,   2,      0,    0, 0        , 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "u8"    ,  SHAPE_ELLIPSE ,   3,   3,  40,  90,-180,   CAT_U   ,   2,   2,      0,    0, 0        , 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "u9"    ,  SHAPE_ELLIPSE ,   3,   3,   0,  90,-180,   CAT_U   ,   2,   2,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
 
    /*-comb---z, ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- */
    { "ox"    ,  SHAPE_ELLIPSE ,   5,   3,  15,  80, 180,   CAT_R   ,   0,   0,      0,    0, 0        , 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },

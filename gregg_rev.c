@@ -799,10 +799,6 @@ REVERSE_english_text    (uchar *a_text, char a_type, char a_skip, char a_reset)
 /*============================--------------------============================*/
 static void o___PAGES_____________________o (void) {;}
 
-static uint      s_tex     =   0;
-static uint      s_fbo     =   0;
-static uint      s_depth   =   0;
-
 char
 REVERSE_page_beg        (void)
 {
@@ -818,8 +814,8 @@ REVERSE_page_beg        (void)
    g_fake.sy   = -50.0;
    /*---(create texture)-----------------*/
    yCOLOR_opengl_clear (YCOLOR_BAS, YCOLOR_MAX);
-   rc = yGLTEX_new (&s_tex, &s_fbo, &s_depth, 850, 1100);
-   rc = yGLTEX_draw         (s_fbo, YGLTEX_TOPLEF, 850, 1100, 1.0);
+   rc = yGLTEX_new (&my.t_tex, &my.t_fbo, &my.t_depth, 850, 1100);
+   rc = yGLTEX_draw         (my.t_fbo, YGLTEX_TOPLEF, 850, 1100, 1.0);
    /*> glColor4f (1.00f, 1.00f, 1.00f, 1.0f);                                         <*/
    /*---(complete)-----------------------*/
    DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
@@ -836,7 +832,7 @@ REVERSE_page_end        (void)
    /*---(write out image)----------------*/
    rc = yGLTEX_tex2png      ("/tmp/gregg.png", 850, 1100);
    /*---(close texture)------------------*/
-   rc = yGLTEX_done         (s_tex);
+   rc = yGLTEX_done         (my.t_tex);
    /*---(complete)-----------------------*/
    DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
    return 0;

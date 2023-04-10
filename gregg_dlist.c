@@ -6,23 +6,18 @@
 
 GLuint    dl_solid   = -1;
 GLuint    dl_dotted  = -1;
-GLuint    dl_undo;
-GLuint    dl_redo;
-GLuint    dl_clear;
-GLuint    dl_back;
+GLuint    dl_back    = -1;
 
-
-PRIV char  DLIST_back       (void);
 
 char
-dlist_init         (void)
+DLIST_init         (void)
 {
-   /*> DEBUG_GRAF  printf("dlist_init() -- drive loading\n");                         <*/
-   /*> DEBUG_GRAF  printf("   - clear letters\n\n");                                  <*/
-   /*> DEBUG_GRAF  printf("   - create buttons\n\n");                                 <*/
+   /*---(header)-------------------------*/
+   DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
    DLIST_letters_make (1.0);
-   DLIST_back();
-   /*> DEBUG_GRAF  printf("   - done\n\n");                                           <*/
+   DLIST_interpreter  ();
+   /*---(complete)-----------------------*/
+   DEBUG_GRAF   yLOG_exit    (__FUNCTION__);
    return 0;
 }
 
@@ -652,12 +647,15 @@ PRIV char     /*----: create display list for guide lines --------------------*/
 BACK__guidelines   (void)
 {
    /*---(locals)-------------------------*/
-   float     z;                        /* cartesian coordinates               */
-   short     x_max;
+   short     x_min, x_max, y_min, y_max;
+   float       z           = -10.0;
+   /*---(header)-------------------------*/
+   DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
    /*---(guides)----------------------------*/
-   yVIEW_bounds (YVIEW_MAIN, NULL, NULL, NULL, &x_max, NULL, NULL, NULL, NULL);
+   yVIEW_bounds (YVIEW_MAIN, NULL, NULL, &x_min, &x_max, NULL, &y_min, &y_max, NULL);
+   DEBUG_GRAF   yLOG_complex ("bounds"    , "%4d xmin, %4d xmax, %4d ymin %4d ymax", x_min, x_max, y_min, y_max);
+   /*---(guides)----------------------------*/
    glLineWidth(0.8);
-   z =  -10.0;
    yCOLOR_opengl (YCOLOR_BAS, YCOLOR_MAX, 0.65);
    /*---(90's)-----*/
    glBegin(GL_LINES); {
@@ -705,17 +703,21 @@ BACK__guidelines   (void)
       glVertex3f (-x_max, -x_max * 2.41, z);
    } glEnd();
    /*---(complete)-----------------------*/
+   DEBUG_GRAF   yLOG_exit    (__FUNCTION__);
    return 0;
 }
 
-PRIV char
-BACK__edging       (void)
+char
+DLIST__back_edging      (void)
 {
    /*---(locals)-------------------------*/
    float     z;                        /* cartesian coordinates               */
    short     x_min, x_max, y_min, y_max;
+   /*---(header)-------------------------*/
+   DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
    /*---(guides)----------------------------*/
    yVIEW_bounds (YVIEW_MAIN, NULL, NULL, &x_min, &x_max, NULL, &y_min, &y_max, NULL);
+   DEBUG_GRAF   yLOG_complex ("bounds"    , "%4d xmin, %4d xmax, %4d ymin %4d ymax", x_min, x_max, y_min, y_max);
    glLineWidth(0.8);
    z =  100.0;
    yCOLOR_opengl (YCOLOR_SPE, YCOLOR_BLK, 1.00);
@@ -751,35 +753,67 @@ BACK__edging       (void)
       glVertex3f ( x_max      , y_min + 2.0, z);
       glVertex3f ( x_min      , y_min + 2.0, z);
    } glEnd();
+   /*---(complete)-----------------------*/
+   DEBUG_GRAF   yLOG_exit    (__FUNCTION__);
    return 0;
 }
 
-PRIV char     /*----: create display list for entry background ---------------*/
-DLIST_back         (void)
+char
+DLIST_pageview          (void)
 {
+   /*---(header)-------------------------*/
+   DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
+   /*---(create list)-----------------------*/
+   DEBUG_GRAF   yLOG_point   ("dl_back"   , dl_back);
+   if ((int) dl_back >= 0) {
+      DEBUG_GRAF   yLOG_note    ("must delete existing list");
+      glDeleteLists (dl_back , 1);
+   } else {
+      DEBUG_GRAF   yLOG_note    ("list not yet created");
+   }
+   dl_back = glGenLists (1);
+   DEBUG_GRAF   yLOG_point   ("dl_back"   , dl_back);
    /*---(begin)-----------------------------*/
-   dl_back = glGenLists(1);
-   glNewList(dl_back, GL_COMPILE);
-   /*---(locals)----------------------------*/
-   float   r1 =  SIZE_SML_AVG;
-   float   r2 =  SIZE_MED_AVG;
-   float   r3 =  SIZE_LRG_AVG;
-   float   z  =  0.00;
-   float   d;
-   float   rad, min, beg, end, max;
-   float   x, y;
+   glNewList (dl_back, GL_COMPILE);
    /*---(draw peices)----------------------*/
-   glPushMatrix(); {
+   glPushMatrix (); {
+   } glPopMatrix ();
+   /*---(end)-------------------------------*/
+   glEndList ();
+   /*---(complete)-----------------------*/
+   DEBUG_GRAF   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+DLIST_interpreter       (void)
+{
+   /*---(header)-------------------------*/
+   DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
+   /*---(create list)-----------------------*/
+   DEBUG_GRAF   yLOG_point   ("dl_back"   , dl_back);
+   if ((int) dl_back >= 0) {
+      DEBUG_GRAF   yLOG_note    ("must delete existing list");
+      glDeleteLists (dl_back , 1);
+   } else {
+      DEBUG_GRAF   yLOG_note    ("list not yet created");
+   }
+   dl_back = glGenLists (1);
+   DEBUG_GRAF   yLOG_point   ("dl_back"   , dl_back);
+   /*---(begin)-----------------------------*/
+   glNewList (dl_back, GL_COMPILE);
+   /*---(draw peices)----------------------*/
+   glPushMatrix (); {
       BACK__degticks   ();
       BACK__rangefan   ();
       BACK__rangerings ();
       BACK__guidelines ();
-      BACK__edging     ();
-   } glPopMatrix();
+      DLIST__back_edging ();
+   } glPopMatrix ();
    /*---(end)-------------------------------*/
-   glEndList();
-   /*> DEBUG_PROG  printf("success\n");                                               <*/
-   /*---(complete)--------------------------*/
+   glEndList ();
+   /*---(complete)-----------------------*/
+   DEBUG_GRAF   yLOG_exit    (__FUNCTION__);
    return 0;
 }
 
