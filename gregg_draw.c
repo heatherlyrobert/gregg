@@ -1,6 +1,16 @@
 /*============================---(source-start)---============================*/
-
 #include "gregg.h"
+
+/*
+ * metis § wc4·· § create a big interpreter window for tablet                             § N395Bu §  · §
+ * metis § dc2<· § make a pretty pageview background image                                § N395Ci §  · §
+ * metis § wv2·· § create a texture for sample letters to speed drawing                   § N395EW §  · §
+ * metis § dn8<· § create scrollable dictionary view to audit outlines                    § N395Gh §  · §
+ *
+ */
+
+
+
 
 const float  DEG2RAD = 3.1415927 / 180.0;
 const float  RAD2DEG = 180.0 / 3.1415927;
@@ -83,7 +93,7 @@ DRAW_init            (void)
    my.t_fbo   = 0;
    my.t_depth = 0;
    /*---(window)-------------------------*/
-   yVIEW_full    (YVIEW_MAIN , YVIEW_FLAT, YVIEW_BOTLEF, YCOLOR_BAS, YCOLOR_MED, DRAW_primary);
+   /*> yVIEW_full    (YVIEW_MAIN , YVIEW_FLAT, YVIEW_BOTLEF, YCOLOR_BAS, YCOLOR_MED, DRAW_primary);   <*/
    DRAW__sizes   (my.w_wide, my.w_tall);
    /*---(colors)-------------------------*/
    /*> yCOLOR_palette (190, "rcomp", "pale", "earthy");                               <*/
@@ -92,8 +102,8 @@ DRAW_init            (void)
    /*---(custom drawing)-----------------*/
    yGLTEX_config   ();
    FONT__load      ();
-   DLIST_init      ();
    PAGE_new_again  ();
+   DLIST_init      ();
    DRAW_back       ();
    /*---(ribbon)-------------------------*/
    /*> yVIKEYS_view_ribbon ("play"    , "dj"          );                              <* 
@@ -121,16 +131,30 @@ DRAW_init            (void)
 char
 DRAW_make_interpreter   (void)
 {
+   /*---(header)-------------------------*/
+   DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
+   /*---(actions)------------------------*/
    PAGE_new (LAYOUT_INTERPRET,  500,  350, YF_GREGG , 2.0,   -1, -1, -1, -1,   -1, '-', -1, -1, -1, '-');
    yVIOPENGL_resize (my.w_title, my.w_wide, my.w_tall);
+   DLIST_interpreter ();
+   PAGE_ready      ("/tmp/gregg_back.png");
+   /*---(complete)-----------------------*/
+   DEBUG_GRAF   yLOG_exit    (__FUNCTION__);
    return 0;
 }
 
 char
 DRAW_make_pageview      (void)
 {
+   /*---(header)-------------------------*/
+   DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
+   /*---(actions)------------------------*/
    PAGE_new (LAYOUT_PAGEVIEW , 1000,  700, YF_TOPLEF, 2.0,   -1, -1, -1, -1,   -1, '-', -1, -1, -1, '-');
    yVIOPENGL_resize (my.w_title, my.w_wide, my.w_tall);
+   DLIST_pageview ();
+   PAGE_ready      ("/tmp/gregg_back.png");
+   /*---(complete)-----------------------*/
+   DEBUG_GRAF   yLOG_exit    (__FUNCTION__);
    return 0;
 }
 
@@ -160,18 +184,17 @@ char
 DRAW_primary         (float a_mag)
 {
    char     x_on = 'y';
-   short    x_min, x_max, x_wide;
-   short    y_min, y_max, x_tall;
    int      x = 0, y = 0;
    float    i = 0, j = 0;
    char     t      [LEN_LABEL] = "";
+   short    x_min, x_max, x_wide, y_min, y_max, y_tall;
    /*---(header)-------------------------*/
    DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
-   yVIEW_bounds  (YVIEW_MAIN, NULL, NULL, &x_min, &x_max, &x_wide, &y_min, &y_max, &x_tall);
+   yVIEW_bounds  (YVIEW_MAIN, NULL, NULL, &x_min, &x_max, &x_wide, &y_min, &y_max, &y_tall);
    DEBUG_GRAF   yLOG_complex ("bounds"    , "%4d xmin, %4d xmax, %4d ymin %4d ymax", x_min, x_max, y_min, y_max);
-   /*> printf ("t %c %3d %3d %3d %3d %s\n", x_on, x_left, x_bott, x_wide, x_tall, x_text);   <*/
+   /*> printf ("t %c %3d %3d %3d %3d %s\n", x_on, x_left, x_bott, x_wide, y_tall, x_text);   <*/
    /*---(setup view)---------------------*/
-   /*> glViewport      (x_left, x_bott, x_wide, x_tall);                              <* 
+   /*> glViewport      (x_left, x_bott, x_wide, y_tall);                              <* 
     *> glMatrixMode    (GL_PROJECTION);                                               <* 
     *> glLoadIdentity  ();                                                            <* 
     *> glOrtho         (x_min, x_max, y_min, y_max,  -500.0,   500.0);            <* 
@@ -191,36 +214,50 @@ DRAW_primary         (float a_mag)
       } glEnd   ();
       glBindTexture(GL_TEXTURE_2D, 0);
    } glPopMatrix   ();
+   /*---(title)--------------------------*/
+   if (my.w_layout == LAYOUT_INTERPRET) {
+      glPushMatrix    (); {
+         /*> my.p_hinting = 'y';                                                         <*/
+         glTranslatef (175.0, 60.0, 250.0);
+         PAGE_gregg (SHAPE_DRAW, "r·o·b" , &i, &j);
+         glTranslatef ( 30.0, -20.0,   0.0);
+         i = 0; j = 0;
+         PAGE_gregg (SHAPE_DRAW, "sh·t·/·nd" , &i, &j);
+         /*> my.p_hinting = '-';                                                         <*/
+      } glPopMatrix   ();
+   }
    /*---(parts)--------------------------*/
-   /*> DRAW_cursor ();                                                                <*/
-   OVERLAY_samples ();
-   glEnable      (GL_LINE_STIPPLE);
-   glLineStipple (1, 0x3333);
-   glLineWidth   (0.8);
-   yCOLOR_opengl (YCOLOR_BAS, YCOLOR_MOR, 0.40);
-   for  (x = -500; x <= 500; x += 100) {
-      glPushMatrix    (); {
-         glBegin(GL_LINES); {
-            glVertex3f( x,  500, 250);
-            glVertex3f( x, -500, 250);
-         } glEnd();
-         glTranslatef ( x,    5, 250);
-         sprintf (t, "%4dx", x);
-         yFONT_print(win.font_pretty,   8, YF_BOTLEF, t);
-      } glPopMatrix   ();
+   if (my.w_layout == LAYOUT_INTERPRET) {
+      /*> DRAW_cursor ();                                                                <*/
+      OVERLAY_samples ();
+      glEnable      (GL_LINE_STIPPLE);
+      glLineStipple (1, 0x3333);
+      glLineWidth   (0.8);
+      yCOLOR_opengl (YCOLOR_BAS, YCOLOR_MOR, 0.40);
+      for  (x = x_min; x <= x_max; x += 100) {
+         glPushMatrix    (); {
+            glBegin(GL_LINES); {
+               glVertex3f( x, y_max, 250);
+               glVertex3f( x, y_min, 250);
+            } glEnd();
+            glTranslatef ( x, y_min + 5, 250);
+            sprintf (t, "%4dx", x);
+            yFONT_print(win.font_pretty,   8, YF_BOTLEF, t);
+         } glPopMatrix   ();
+      }
+      for  (y = y_min; y <= y_max; y += 100) {
+         glPushMatrix    (); {
+            glBegin(GL_LINES); {
+               glVertex3f(x_min, y, 250);
+               glVertex3f(x_max, y, 250);
+            } glEnd();
+            glTranslatef (x_max - 10, y + 5, 250);
+            sprintf (t, "%4dy", y);
+            yFONT_print(win.font_pretty,   8, YF_BOTRIG, t);
+         } glPopMatrix   ();
+      }
+      glDisable(GL_LINE_STIPPLE);
    }
-   for  (y = -500; y <= 500; y += 100) {
-      glPushMatrix    (); {
-         glBegin(GL_LINES); {
-            glVertex3f(  0, y, 250);
-            glVertex3f(500, y, 250);
-         } glEnd();
-         glTranslatef (490, y + 5, 250);
-         sprintf (t, "%4dy", y);
-         yFONT_print(win.font_pretty,   8, YF_BOTRIG, t);
-      } glPopMatrix   ();
-   }
-   glDisable(GL_LINE_STIPPLE);
    /*> REVERSE_outline ("s·l·o2·b", SHAPE_DRAW, 1);                                   <*/
    /*> REVERSE_outline ("r·o2·b", SHAPE_DRAW, 1);                                     <*/
    /*> REVERSE_outline ("k·a·r"   , SHAPE_DRAW, 1);                                   <*/
@@ -257,7 +294,7 @@ DRAW_primary         (float a_mag)
        *> } glPopMatrix   ();                                                         <*/
       /*> glPushMatrix    (); {                                                       <* 
        *>    glColor4f    (0.00f, 0.00f, 0.00f, 1.0f);                                <* 
-       *>    glTranslatef (x_min +  3.0, y_min + 23.0,    0.0f);            <* 
+       *>    glTranslatef (my.t_lef +  3.0, y_min + 23.0,    0.0f);            <* 
        *>    yFONT_print  (win.font_pretty,  12, YF_BOTLEF, o.actual);                    <* 
        *>    glTranslatef (0.0              , -20.0            ,    0.0f);            <* 
        *>    yFONT_print  (win.font_pretty,  12, YF_BOTLEF, o.word);                      <* 
@@ -298,8 +335,8 @@ DRAW_back            (void)
    DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
    /*---(setup)--------------------------*/
    yVIEW_color_clear (YVIEW_MAIN);
-   yVIEW_bounds    (YVIEW_MAIN, NULL, NULL, &x_min, &x_max, NULL, &y_min, &y_max, NULL);
-   DEBUG_GRAF   yLOG_complex ("bounds"    , "%4d xmin, %4d xmax, %4d ymin %4d ymax", x_min, x_max, y_min, y_max);
+   /*> yVIEW_bounds    (YVIEW_MAIN, NULL, NULL, &x_min, &x_max, NULL, &y_min, &y_max, NULL);   <*/
+   /*> DEBUG_GRAF   yLOG_complex ("bounds"    , "%4d xmin, %4d xmax, %4d ymin %4d ymax", x_min, x_max, y_min, y_max);   <*/
    /*---(draw)---------------------------*/
    glCallList (dl_back);
    /*> draw_horz   ();                                                                <*/

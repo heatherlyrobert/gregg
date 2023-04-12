@@ -37,8 +37,8 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "5.--= generalization for broader use"
 #define     P_VERMINOR  "5.4 = update for use as coding example"
-#define     P_VERNUM    "5.4j"
-#define     P_VERTXT    "metis : dc4<  : page draws to and resizes gregg window"
+#define     P_VERNUM    "5.4k"
+#define     P_VERTXT    "dlists can handle resizing the main window properly now"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -334,6 +334,8 @@ extern tWIN  win;
 #define     LAYOUT_INTERPRET    'i'
 #define     LAYOUT_PAGEVIEW     'P'
 
+#define     STYLE_HINTS         'y'
+
 /*---(struct.re)--------+-----------+-*//*-+----------------------------------*/
 typedef     struct      cMY   tMY;
 struct cMY {
@@ -359,6 +361,12 @@ struct cMY {
    uint        t_tex;                       /* texture for image              */
    uint        t_fbo;                       /* framebuffer                    */
    uint        t_depth;                     /* depth buffer                   */
+   short       t_lef;
+   short       t_rig;
+   short       t_xlen;
+   short       t_bot;
+   short       t_top;
+   short       t_ylen;
    /*---(page margints)-----*/
    short       p_left;                      /* margin left                    */
    short       p_right;                     /* margin right                   */

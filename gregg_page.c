@@ -7,7 +7,6 @@
  *
  */
 
-#define          STYLE_HINTS   'g'
 
 
 
@@ -160,6 +159,8 @@ PAGE_new                (char a_layout, short a_wide, short a_tall, char a_ancho
       DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
+   yGLTEX_bounds       (NULL, &(my.t_lef), &(my.t_rig), &(my.t_xlen), &(my.t_bot), &(my.t_top), &(my.t_ylen));
+   DEBUG_OUTP   yLOG_complex ("bounds"    , "%4d lef, %4d rig, %4d xlen,  %4d bot, %4d top, %4d ylen", my.t_lef, my.t_rig, my.t_xlen, my.t_bot, my.t_top, my.t_ylen);
    /*---(complete)-----------------------*/
    DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -531,7 +532,7 @@ PAGE_next_line          (float *b_xpos, float *b_ypos)
 {
    if (b_xpos != NULL) {
       if (my.p_gapping == GAP_GRID)  *b_xpos = my.p_left + (my.p_spacing * 0.5);
-      else                        *b_xpos = my.p_left;
+      else                           *b_xpos = my.p_left;
    }
    if (b_ypos != NULL)  *b_ypos = s_ybase -= my.p_linesize;
    return 0;

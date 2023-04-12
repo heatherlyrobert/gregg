@@ -273,19 +273,16 @@ tLOCATION   g_loc [MAX_LETTERS] = {
    { "d"     ,  SHAPE_LINE    ,  24,   0,  30,   0,   0,   CAT_D   ,   1,   2,      0,  -30, YF_BOTRIG,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
    { "dd"    ,  SHAPE_LINE    ,  36,   0,  30,   0,   0,   CAT_D   ,   1,   3,      0,  -40, YF_BOTRIG,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
    /*-over---,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- */
-   /*> { "th"    ,  SHAPE_ELLIPSE ,   7,   5,  30, 160,-120,   CAT_OTH ,   1,   1,     55,  -28, YF_TOPRIG, 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> { "tn"    ,  SHAPE_ELLIPSE ,  15,   9,  30, 160,-120,   CAT_OTH ,   1,   2,     42,  -33, YF_TOPRIG, 20,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <* 
-    *> { "tm"    ,  SHAPE_ELLIPSE ,  22,  12,  30, 160,-120,   CAT_OTH ,   1,   3,     30,  -38, YF_TOPRIG, 10,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   <*/
-   { "th"    ,  SHAPE_ELLIPSE ,   8,   4,  30, 160,-120,   CAT_OTH ,   1,   1,     55,  -28, YF_TOPRIG, 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
-   { "tn"    ,  SHAPE_ELLIPSE ,  16,   8,  30, 160,-120,   CAT_OTH ,   1,   2,     42,  -33, YF_TOPRIG, 20,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
-   { "tm"    ,  SHAPE_ELLIPSE ,  24,  12,  30, 160,-120,   CAT_OTH ,   1,   3,     30,  -38, YF_TOPRIG, 10,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "th"    ,  SHAPE_ELLIPSE ,   8,   4,  40, 130,-120,   CAT_OTH ,   1,   1,     55,  -38, YF_TOPRIG, 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "tn"    ,  SHAPE_ELLIPSE ,  16,   8,  40, 130,-120,   CAT_OTH ,   1,   2,     42,  -38, YF_TOPRIG, 20,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "tm"    ,  SHAPE_ELLIPSE ,  24,  12,  40, 135,-120,   CAT_OTH ,   1,   3,     30,  -38, YF_TOPRIG, 10,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
    /*-unde---,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- */
-   { "ht"    ,  SHAPE_ELLIPSE ,   8,   4,  30, 220, 120,   CAT_UTH ,   1,   1,     95,  -24, YF_BOTRIG, 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
-   { "nt"    ,  SHAPE_ELLIPSE ,  16,   8,  30, 220, 120,   CAT_UTH ,   1,   2,     87,  -32, YF_BOTRIG, 20,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
-   { "nd"    ,  SHAPE_ELLIPSE ,  24,  12,  30, 200, 120,   CAT_UTH ,   1,   3,     80,  -40, YF_BOTRIG, 10,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "ht"    ,  SHAPE_ELLIPSE ,   8,   4,  40, 215, 120,   CAT_UTH ,   1,   1,     93,  -24, YF_BOTRIG, 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "nt"    ,  SHAPE_ELLIPSE ,  16,   8,  40, 205, 120,   CAT_UTH ,   1,   2,     87,  -32, YF_BOTRIG, 20,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "nd"    ,  SHAPE_ELLIPSE ,  24,  12,  40, 200, 120,   CAT_UTH ,   1,   3,     80,  -40, YF_BOTRIG, 10,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
    /*-arc----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- */
-   { "ts"    ,  SHAPE_ELLIPSE ,   8,   4,  50, 130,-220,   CAT_DF  ,   2,   1,      0,    0, YF_BOTRIG, 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
-   { "df"    ,  SHAPE_ELLIPSE ,  18,   9,  50, 130,-220,   CAT_DF  ,   2,   2,      0,    0, YF_BOTRIG, 20,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "ts"    ,  SHAPE_ELLIPSE ,   8,   4,  50, 130,-220,   CAT_DF  ,   2,   1,     35, -175, YF_BOTRIG, 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "df"    ,  SHAPE_ELLIPSE ,  18,   9,  50, 130,-220,   CAT_DF  ,   2,   2,     30, -168, YF_BOTRIG, 20,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
 
    /*=====[[ 2nd ZONE ]]================================   ====categories=====   =======display===========   ======================= */
    /*-line---,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- */
@@ -299,11 +296,8 @@ tLOCATION   g_loc [MAX_LETTERS] = {
    { "r"     ,  SHAPE_ELLIPSE ,  12,   6,   5, 190, 140,   CAT_R   ,   2,   2,     54,  -75, YF_BOTRIG, 20,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   /* 13, 6 */
    { "l"     ,  SHAPE_ELLIPSE ,  24,  12,   5, 190, 140,   CAT_R   ,   2,   3,     45,  -78, YF_BOTRIG, 10,   0, 0, 0, 0, 0, 0, 0, 0, 0 },   /* 24, 8 */
    /*-comb---,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- */
-   { "rd"    ,  SHAPE_ELLIPSE ,  12,   6,   5, 190, 190,   CAT_RD  ,   2,   2,      0,    0, YF_BOTRIG, 20,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
-   { "ld"    ,  SHAPE_ELLIPSE ,  24,  12,   5, 190, 190,   CAT_RD  ,   2,   3,      0,    0, YF_BOTRIG, 10,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
-   /*-comb---,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- */
-   /*> { "or" ,  SHAPE_ELLIPSE ,  12,   5,   5, 140, 220,   CAT_OR  ,   2,   2,    115,  -95, YF_BOTRIG,   0, 0, 0, 0, 0, 0, 0, 0 },   <*/
-   /*> { "ol" ,  SHAPE_ELLIPSE ,  22,   9,   5, 140, 220,   CAT_OR  ,   2,   3,    100,  -95, YF_BOTRIG,   0, 0, 0, 0, 0, 0, 0, 0 },   <*/
+   { "rd"    ,  SHAPE_ELLIPSE ,  12,   6,   5, 190, 190,   CAT_RD  ,   2,   2,     75, -195, YF_BOTRIG, 20,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "ld"    ,  SHAPE_ELLIPSE ,  24,  12,   5, 190, 190,   CAT_RD  ,   2,   3,     60, -195, YF_BOTRIG, 10,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
 
    /*=====[[ 3rd ZONE ]]================================   ====categories=====   =======display===========   ======================= */
    /*-line---,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- */
@@ -316,29 +310,29 @@ tLOCATION   g_loc [MAX_LETTERS] = {
    { "ch"    ,  SHAPE_LINE    ,  24,   0,-110,   0,   0,   CAT_CH  ,   4,   2,     25, -115, YF_BOTCEN,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
    { "j"     ,  SHAPE_LINE    ,  36,   0,-110,   0,   0,   CAT_CH  ,   4,   3,     35, -115, YF_BOTCEN,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
    /*-left---,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- */
-   { "s"     ,  SHAPE_ELLIPSE ,   6,   6,  65, -35, -90,   CAT_F   ,   4,   1,     87, -115, YF_BOTRIG, 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
-   { "xs"    ,  SHAPE_ELLIPSE ,   6,   6, 140, -35, -90,   CAT_F   ,   4,   1,     87, -115, YF_BOTRIG, 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "s"     ,  SHAPE_ELLIPSE ,   6,   6,  65, -35, -90,   CAT_F   ,   4,   1,     87, -110, YF_BOTRIG, 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "xs"    ,  SHAPE_ELLIPSE ,   6,   6, 140, -35, -90,   CAT_F   ,   4,   1,     75, -128, YF_BOTRIG, 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
    { "f"     ,  SHAPE_ELLIPSE ,  12,   6,  55, -15,-110,   CAT_F   ,   4,   2,     93, -107, YF_BOTRIG, 20,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
    { "v"     ,  SHAPE_ELLIPSE ,  24,  12,  55, -15,-110,   CAT_F   ,   4,   3,    100, -100, YF_BOTRIG, 10,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
    /*-righ---,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- */
-   { "z"     ,  SHAPE_ELLIPSE ,   6,   6,  65,  65,  90,   CAT_P   ,   4,   1,     65, -118, YF_BOTLEF, 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
-   { "xz"    ,  SHAPE_ELLIPSE ,   6,   6, 140,  65,  90,   CAT_P   ,   4,   1,     65, -118, YF_BOTLEF, 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "z"     ,  SHAPE_ELLIPSE ,   6,   6,  65,  65,  90,   CAT_P   ,   4,   1,     65, -115, YF_BOTLEF, 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "xz"    ,  SHAPE_ELLIPSE ,   6,   6, 140,  65,  90,   CAT_P   ,   4,   1,     60, -135, YF_BOTLEF, 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
    { "p"     ,  SHAPE_ELLIPSE ,  12,   6,  55,  65, 110,   CAT_P   ,   4,   2,     65, -108, YF_BOTLEF, 20,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
    { "b"     ,  SHAPE_ELLIPSE ,  24,  12,  55,  65, 110,   CAT_P   ,   4,   3,     65, -100, YF_BOTLEF, 10,   0, 0, 0, 0, 0, 0, 0, 0, 0 },  /* 26, 10 */
    /*-comb---,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- */
-   { "pt"    ,  SHAPE_ELLIPSE ,   8,   4,  50,  90, 230,   CAT_PT  ,   2,   1,      0,    0, 0        , 20,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
-   { "bd"    ,  SHAPE_ELLIPSE ,  18,   9,  50,  90, 230,   CAT_PT  ,   2,   2,      0,    0, 0        , 10,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "pt"    ,  SHAPE_ELLIPSE ,   8,   4,  50,  90, 230,   CAT_PT  ,   2,   1,     80, -152, YF_BOTRIG, 20,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "bd"    ,  SHAPE_ELLIPSE ,  18,   9,  50,  90, 230,   CAT_PT  ,   2,   2,     70, -158, YF_BOTRIG, 10,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
 
    /*=====[[ VOWELS ]]==================================   ====categories=====   =======display===========   ======================= */
    /*-cir----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- */
-   { "a"     ,  SHAPE_CIRCLE  ,   6,   0,  90,   0,   0,   CAT_A   ,   0,   0,    120, -115, YF_BOTRIG,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
-   { "a0"    ,  SHAPE_CIRCLE  ,   6,   0,  90,   0,   0,   CAT_A   ,   0,   0,    120, -115, YF_BOTRIG,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "a"     ,  SHAPE_CIRCLE  ,   5,   0,  90,   0,   0,   CAT_A   ,   0,   0,    120, -115, YF_BOTRIG,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "a0"    ,  SHAPE_CIRCLE  ,   5,   0,  90,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
    { "a1"    ,  SHAPE_TEARDROP,   5,   4,   0,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 }, /* 5 */
-   { "e"     ,  SHAPE_CIRCLE  ,   3,   0,  90,   0,   0,   CAT_E   ,   0,   0,    122,  -85, YF_BOTRIG,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "e"     ,  SHAPE_CIRCLE  , 2.5,   0,  90,   0,   0,   CAT_E   ,   0,   0,    122,  -85, YF_BOTRIG,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
    { "ea"    ,  SHAPE_CIRCLE  ,   3,   0,  90,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
    { "i"     ,  SHAPE_CIRCLE  ,   3,   0,  90,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
-   { "o"     ,  SHAPE_ELLIPSE ,   4,   6,   0, 190, 160,   CAT_O   ,   9,   1,     63,  -72, YF_BOTRIG, 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
-   { "u"     ,  SHAPE_ELLIPSE ,   4,   6,   0, 170,-160,   CAT_U   ,   2,   2,     90,  -59, YF_TOPRIG, 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "o"     ,  SHAPE_ELLIPSE ,   4,   6,   0, 190, 160,   CAT_O   ,   9,   1,     63,  -70, YF_BOTRIG, 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "u"     ,  SHAPE_ELLIPSE ,   4,   6,   0, 170,-160,   CAT_U   ,   2,   2,     90,  -60, YF_TOPRIG, 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
 
    /*=====[[ SPECIAL ]]=================================   ====categories=====   =======display===========   ======================= */
    /*-poin---,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- */
@@ -355,7 +349,7 @@ tLOCATION   g_loc [MAX_LETTERS] = {
    /*=====[[ SHOW-ONLY ]]===============================   ====categories=====   =======display===========   ======================= */
    /*-poin---,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- */
    { "a+"    ,  SHAPE_TEARDROP,   5,   5,  50,   0,   0,   CAT_A   ,   0,   0,    108, -135, YF_BOTRIG,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
-   { "e+"    ,  SHAPE_ELLIPSE ,   2,   2, 110,   0, 360,   CAT_E   ,   0,   0,    115,  -98, YF_BOTRIG,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "e+"    ,  SHAPE_TEARDROP, 2.5, 2.5,  50,   0,   0,   CAT_E   ,   0,   0,    115,  -98, YF_BOTRIG,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
 
    /*=====[[ header ]]==================================   ====categories=====   =======display===========   ======================= */
    /*-line---,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- */

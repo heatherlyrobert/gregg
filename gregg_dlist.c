@@ -15,7 +15,10 @@ DLIST_init         (void)
    /*---(header)-------------------------*/
    DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
    DLIST_letters_make (1.0);
-   DLIST_interpreter  ();
+   switch (my.w_layout) {
+   case  LAYOUT_INTERPRET  : DLIST_interpreter  ();  break;
+   case  LAYOUT_PAGEVIEW   : DLIST_pageview     ();  break;
+   }
    /*---(complete)-----------------------*/
    DEBUG_GRAF   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -71,7 +74,7 @@ DLIST_letters_make      (float a_scale)
    int         x_type      =    0;
    int         i           =    0;
    /*---(verify free)-----------------------*/
-   if (dl_solid < 0)   DLIST_letters_free ();
+   if ((int) dl_solid < 0)   DLIST_letters_free ();
    /*---(allocate)--------------------------*/
    dl_solid  = glGenLists (MAX_LETTERS);
    dl_dotted = glGenLists (MAX_LETTERS);
@@ -712,46 +715,45 @@ DLIST__back_edging      (void)
 {
    /*---(locals)-------------------------*/
    float     z;                        /* cartesian coordinates               */
-   short     x_min, x_max, y_min, y_max;
    /*---(header)-------------------------*/
    DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
    /*---(guides)----------------------------*/
-   yVIEW_bounds (YVIEW_MAIN, NULL, NULL, &x_min, &x_max, NULL, &y_min, &y_max, NULL);
-   DEBUG_GRAF   yLOG_complex ("bounds"    , "%4d xmin, %4d xmax, %4d ymin %4d ymax", x_min, x_max, y_min, y_max);
+   /*> yVIEW_bounds (YVIEW_MAIN, NULL, NULL, &x_min, &x_max, NULL, &y_min, &y_max, NULL);   <*/
+   DEBUG_GRAF   yLOG_complex ("bounds"    , "%4d xmin, %4d xmax, %4d ymin %4d ymax", my.t_lef, my.t_rig, my.t_bot, my.t_top);
    glLineWidth(0.8);
    z =  100.0;
    yCOLOR_opengl (YCOLOR_SPE, YCOLOR_BLK, 1.00);
-   x_min -= 125;
-   x_max -= 125;
-   y_min -= 225;
-   y_max -= 225;
+   /*> switch (my.w_layout) {                                                                                  <* 
+    *> case LAYOUT_INTERPRET  : my.t_lef -= 125; my.t_rig -= 125; my.t_bot -= 225; my.t_top -= 225;   break;   <* 
+    *> case LAYOUT_PAGEVIEW   : break;                                                                         <* 
+    *> }                                                                                                       <*/
    /*---(left)-----*/
    glBegin(GL_POLYGON); {
-      glVertex3f ( x_min      , y_min      , z);
-      glVertex3f ( x_min + 2.0, y_min      , z);
-      glVertex3f ( x_min + 2.0, y_max      , z);
-      glVertex3f ( x_min      , y_max      , z);
+      glVertex3f ( my.t_lef      , my.t_bot      , z);
+      glVertex3f ( my.t_lef + 2.0, my.t_bot      , z);
+      glVertex3f ( my.t_lef + 2.0, my.t_top      , z);
+      glVertex3f ( my.t_lef      , my.t_top      , z);
    } glEnd();
    /*---(right)----*/
    glBegin(GL_POLYGON); {
-      glVertex3f ( x_max      , y_min      , z);
-      glVertex3f ( x_max - 2.0, y_min      , z);
-      glVertex3f ( x_max - 2.0, y_max      , z);
-      glVertex3f ( x_max      , y_max      , z);
+      glVertex3f ( my.t_rig      , my.t_bot      , z);
+      glVertex3f ( my.t_rig - 2.0, my.t_bot      , z);
+      glVertex3f ( my.t_rig - 2.0, my.t_top      , z);
+      glVertex3f ( my.t_rig      , my.t_top      , z);
    } glEnd();
    /*---(top)------*/
    glBegin(GL_POLYGON); {
-      glVertex3f ( x_min      , y_max      , z);
-      glVertex3f ( x_max      , y_max      , z);
-      glVertex3f ( x_max      , y_max - 2.0, z);
-      glVertex3f ( x_min      , y_max - 2.0, z);
+      glVertex3f ( my.t_lef      , my.t_top      , z);
+      glVertex3f ( my.t_rig      , my.t_top      , z);
+      glVertex3f ( my.t_rig      , my.t_top - 2.0, z);
+      glVertex3f ( my.t_lef      , my.t_top - 2.0, z);
    } glEnd();
    /*---(bottom)---*/
    glBegin(GL_POLYGON); {
-      glVertex3f ( x_min      , y_min      , z);
-      glVertex3f ( x_max      , y_min      , z);
-      glVertex3f ( x_max      , y_min + 2.0, z);
-      glVertex3f ( x_min      , y_min + 2.0, z);
+      glVertex3f ( my.t_lef      , my.t_bot      , z);
+      glVertex3f ( my.t_rig      , my.t_bot      , z);
+      glVertex3f ( my.t_rig      , my.t_bot + 2.0, z);
+      glVertex3f ( my.t_lef      , my.t_bot + 2.0, z);
    } glEnd();
    /*---(complete)-----------------------*/
    DEBUG_GRAF   yLOG_exit    (__FUNCTION__);
@@ -777,6 +779,11 @@ DLIST_pageview          (void)
    glNewList (dl_back, GL_COMPILE);
    /*---(draw peices)----------------------*/
    glPushMatrix (); {
+      /*> BACK__degticks   ();                                                        <* 
+       *> BACK__rangefan   ();                                                        <* 
+       *> BACK__rangerings ();                                                        <* 
+       *> BACK__guidelines ();                                                        <*/
+      DLIST__back_edging ();
    } glPopMatrix ();
    /*---(end)-------------------------------*/
    glEndList ();

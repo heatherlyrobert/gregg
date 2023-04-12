@@ -197,6 +197,13 @@ PROG__init              (int a_argc, char *a_argv[])
       return rce;
    }
    /*> strlcpy (my.t_text     , "arachne, spider robot visualization and simulation"       , LEN_STR  );   <*/
+   /*---(setup main)---------------------*/
+   rc = yVIEW_full    (YVIEW_MAIN , YVIEW_FLAT, YVIEW_BOTLEF, YCOLOR_BAS, YCOLOR_MED, DRAW_primary);
+   DEBUG_PROG   yLOG_value    ("yVIEW_full", rc);
+   --rce;  if (rc < 0) {
+      DEBUG_PROG   yLOG_exitr    (__FUNCTION__, rce);
+      return rce;
+   }
    /*---(library config)-----------------*/
    rc = yMAP_config       (YMAP_OFFICE, api_ymap_locator, api_ymap_addressor, api_ymap_sizer, api_ymap_entry, api_ymap_placer, api_ymap_done);
    DEBUG_PROG   yLOG_value    ("yMAP"      , rc);

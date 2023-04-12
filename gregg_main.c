@@ -2,7 +2,6 @@
 #include "gregg.h"
 
 /*
- * metis § ····· § mode to create page and exit, with no window                           § N33NUY §  · §
  *
  */
 
