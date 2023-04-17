@@ -10,17 +10,70 @@
 
 
 
-#define          GAP_NORM     'n'
-#define          GAP_GRID     'g'
-
-
-/*> static uint      s_tex      =   -1;                                               <* 
- *> static uint      s_fbo      =   -1;                                               <* 
- *> static uint      s_depth    =   -1;                                               <*/
 
 static float     s_xpos     =   30;
 static float     s_ybase    =  -50;
 static float     s_ypos     =  -50;
+
+static float     s_bx       =  0.0;
+static float     s_by       =  0.0;
+
+static float     s_lef      =  0.0;
+static float     s_cen      =  0.0;
+static float     s_rig      =  0.0;
+
+static float     s_top      =  0.0;
+static float     s_mid      =  0.0;
+static float     s_bot      =  0.0;
+
+static float     s_ex       =  0.0;
+static float     s_ey       =  0.0;
+
+static char      s_ltr      [LEN_SHORT] = "";
+
+
+/*============================--------------------============================*/
+/*===----                       carry over values                      ----===*/
+/*============================--------------------============================*/
+static void o___SAVING____________________o (void) {;}
+
+char
+PAGE_word_begin         (void)
+{
+   s_bx    = s_by    = 0.0;
+   s_lef   = s_cen   = s_rig   = 0.0;
+   s_top   = s_mid   = s_bot   = 0.0;
+   s_ex    = s_ey    = 0.0;
+   return 0;
+}
+
+char
+PAGE_letter_save        (float bx, float by, float a_lef, float a_rig, float a_top, float a_bot, float ex, float ey, char a_ltr [LEN_SHORT])
+{  /* distances are relative to last letter end, current letter start */
+   float     dx, dy;
+   dx      = ex - bx;
+   dy      = ey - by;
+   s_bx    = bx;
+   s_by    = by;
+   s_lef   = a_lef - dx;
+   s_rig   = a_rig - dx;
+   s_cen   = (s_rig + s_lef) / 2.0;
+   s_top   = a_top - dy;
+   s_bot   = a_bot - dy;
+   s_mid   = (s_top + s_bot) / 2.0;
+   s_ex    = ex;
+   s_ey    = ey;
+   strlcpy (s_ltr, a_ltr, LEN_SHORT);
+   return 0;
+}
+
+char*
+PAGE_saved              (void)
+{
+   sprintf (g_print, "%6.1fbx  %6.1fby,  %6.1fex  %6.1fey,  %6.1fl  %6.1fr  %6.1fc,  %6.1ft  %6.1fb  %6.1fm", s_bx, s_by, s_ex, s_ey, s_lef, s_rig, s_cen, s_top, s_bot, s_mid);
+   return g_print;
+}
+
 
 
 /*============================--------------------============================*/
@@ -32,6 +85,7 @@ char
 PAGE_init               (void)
 {
    DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
+   my.t_tex = my.t_fbo = my.t_depth = -1;
    my.p_sizing = 0.0;  /* must initialize for config to update letters */
    PAGE_config ('/', -1, -1, '/', -1.0,    -1, -1, -1, -1,   -1, '/', -1, -1, -1, '/');
    DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
@@ -51,8 +105,7 @@ PAGE_config             (char a_layout, short a_wide, short a_tall, char a_ancho
    char        rce         =  -10;
    char        rc          =    0;
    int         n           =    0;
-   int         x_scale     = my.w_scale;
-   int         x_sizing    = my.p_sizing;
+   float       x_sizing    = my.p_sizing;
    /*---(header)-------------------------*/
    DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
    DEBUG_OUTP   yLOG_complex ("args"      , "%3d/%c   %4dw %4dt %2d %5.2f   ····· ·····   %4dl %4dr   %4dt %4db   %5.2f %2d   %4da %4dd   %4ds %3d/%c", a_layout, chrvisible (a_layout), a_wide, a_tall, a_anchor, a_scale, a_left, a_right, a_top, a_bottom, a_sizing, a_align, a_ascent, a_descent, a_spacing, a_gapping, chrvisible (a_gapping));
@@ -62,8 +115,10 @@ PAGE_config             (char a_layout, short a_wide, short a_tall, char a_ancho
    if      (a_layout  == '/')  my.w_layout  = LAYOUT_INTERPRET;
    else if (a_layout  != '-')  my.w_layout  = a_layout;
    switch (my.w_layout) {
-   case LAYOUT_INTERPRET  :  strlcpy (my.w_title, "gregg shorthand interpreter", LEN_HUND);       break;
-   case LAYOUT_PAGEVIEW   :  strlcpy (my.w_title, "gregg shorthand pageview"   , LEN_HUND);       break;
+   case LAYOUT_INTERPRET  :  strlcpy (my.w_title, "gregg shorthand interpreter"       , LEN_HUND);       break;
+   case LAYOUT_PAGEVIEW   :  strlcpy (my.w_title, "gregg shorthand pageview"          , LEN_HUND);       break;
+   case LAYOUT_DICTIONARY :  strlcpy (my.w_title, "gregg shorthand dictionary"        , LEN_HUND);       break;
+   case LAYOUT_CONNECT    :  strlcpy (my.w_title, "gregg shorthand connection checker", LEN_HUND);       break;
    }
    /*---(accept sizes)-------------------*/
    if      (a_wide     <  0)   my.w_wide    =  500;
@@ -107,7 +162,11 @@ PAGE_config             (char a_layout, short a_wide, short a_tall, char a_ancho
    /*---(done configuration)-------------*/
    DEBUG_OUTP   yLOG_complex ("after"     , "%3d/%c   %4dw %4dt %2d %5.2f   %4dw %4dt   %4dl %4dr   %4dt %4db   %5.2f %2d   %4da %4dd   %4ds %3d/%c", my.w_layout, chrvisible (my.w_layout), my.w_wide, my.w_tall, my.w_anchor, my.w_scale, my.t_wide, my.t_tall, my.p_left, my.p_right, my.p_top, my.p_bottom, my.p_sizing, my.p_align, my.p_ascent, my.p_descent, my.p_spacing, my.p_gapping, chrvisible (my.p_gapping));
    /*---(update letters)-----------------*/
-   if (my.p_sizing != x_sizing)  DLIST_letters_make (my.p_sizing);
+   DEBUG_OUTP   yLOG_complex ("sizing"    , "%4.2f p_sizing vs %4.2f x_sizing", my.p_sizing, x_sizing);
+   if (my.p_sizing != x_sizing) {
+      TABLE_letters_data   (my.w_scale);
+      DLIST_letters_make   (my.p_sizing);
+   }
    /*---(complete)-----------------------*/
    DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -123,12 +182,12 @@ PAGE_new                (char a_layout, short a_wide, short a_tall, char a_ancho
    int         x, y;
    /*---(header)-------------------------*/
    DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
-   DEBUG_OUTP   yLOG_complex ("args"      , "%c   %4dw %4dt %2d %5.2f   %4dl %4dr   %4dt %4db   %5.2f %c   %4da %4dd   %4ds %c", a_layout, a_wide, a_tall, a_anchor, a_scale, a_left, a_right, a_top, a_bottom, a_sizing, a_align, a_ascent, a_descent, a_spacing, a_gapping);
+   DEBUG_OUTP   yLOG_complex ("args"      , "%c   %4dw %4dt %2d %5.2f   %4dl %4dr   %4dt %4db   %5.2f %2d   %4da %4dd   %4ds %c", a_layout, a_wide, a_tall, a_anchor, a_scale, a_left, a_right, a_top, a_bottom, a_sizing, a_align, a_ascent, a_descent, a_spacing, a_gapping);
    /*---(free memory)--------------------*/
    DEBUG_OUTP   yLOG_complex ("pointers"  , "%4d tex, %4d fbo, %4d depth", my.t_tex, my.t_fbo, my.t_depth);
    --rce;  if ((int) my.t_tex >= 0) {
       DEBUG_OUTP   yLOG_note    ("must clear texture first");
-      rc = yGLTEX_free    (&my.t_tex, &my.t_fbo, &my.t_depth);
+      PAGE_free ();
       DEBUG_OUTP   yLOG_value   ("free"      , rc);
       if (rc < 0) {
          DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);
@@ -146,14 +205,14 @@ PAGE_new                (char a_layout, short a_wide, short a_tall, char a_ancho
    /*---(create texture)-----------------*/
    yCOLOR_opengl_clear (YCOLOR_BAS, YCOLOR_MED);
    DEBUG_OUTP   yLOG_complex ("size"      , "%4dw, %4dt", my.t_wide, my.t_tall);
-   rc = yGLTEX_new (&my.t_tex, &my.t_fbo, &my.t_depth, my.t_wide, my.t_tall);
+   rc = yGLTEX_new (&(my.t_tex), &(my.t_fbo), &(my.t_depth), my.t_wide, my.t_tall);
    DEBUG_OUTP   yLOG_value   ("new"       , rc);
    DEBUG_OUTP   yLOG_complex ("pointers"  , "%4d tex, %4d fbo, %4d depth", my.t_tex, my.t_fbo, my.t_depth);
    --rce;  if (rc < 0) {
       DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   rc = yGLTEX_draw         (my.t_fbo, my.w_anchor, my.t_wide, my.t_tall, my.w_scale);
+   rc = yGLTEX_draw         (my.t_tex, my.t_fbo, my.w_anchor, my.t_wide, my.t_tall, my.w_scale);
    DEBUG_OUTP   yLOG_value   ("draw"      , rc);
    --rce;  if (rc < 0) {
       DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);
@@ -168,7 +227,7 @@ PAGE_new                (char a_layout, short a_wide, short a_tall, char a_ancho
 
 /*                                                 --------page------------------      ----margins-----    ---------outlines----------  */
 char PAGE_new_default   (void)  { return PAGE_new ('/', -1     , -1   , '/', -1.0,      -1, -1, -1, -1,    -1.0, '/', -1, -1, -1, '/'); }
-char PAGE_new_again     (void)  { return PAGE_new ('-', 0      , 0    , '/',  0.0,       0,  0,  0,  0,     0.0, '-',  0,  0,  0, '-'); }
+char PAGE_new_again     (void)  { return PAGE_new ('-', 0      , 0    , '-',  0.0,       0,  0,  0,  0,     0.0, '-',  0,  0,  0, '-'); }
 char PAGE_new_screen    (void)  { return PAGE_new ('/', 1366   , 768  , '/', -1.0,      -1, -1, -1, -1,    -1.0, '/', -1, -1, -1, '/'); }
 char PAGE_new_sized     (short a_wide, short a_tall, char a_anchor, float a_scale)  { return PAGE_new ('/', a_wide, a_tall, a_anchor, a_scale,   -1, -1, -1, -1,    -1.0, '/', -1, -1, -1, '/'); }
 
@@ -217,12 +276,15 @@ PAGE_free               (void)
    /*---(header)-------------------------*/
    DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
    /*---(free memory)--------------------*/
-   rc = yGLTEX_free    (&my.t_tex, &my.t_fbo, &my.t_depth);
+   rc = yGLTEX_free    (&(my.t_tex), &(my.t_fbo), &(my.t_depth));
    DEBUG_OUTP   yLOG_value   ("free"      , rc);
    --rce;  if (rc < 0) {
       DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
+   /*---(ground)-------------------------*/
+   my.t_tex = my.t_fbo = my.t_depth = -1;
+   DEBUG_OUTP   yLOG_complex ("pointers"  , "%4d tex, %4d fbo, %4d depth", my.t_tex, my.t_fbo, my.t_depth);
    /*---(complete)-----------------------*/
    DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -255,6 +317,7 @@ PAGE_shown_letter       (char a_act, uchar *a_ltr)
       strlcpy (x_ltr, a_ltr, LEN_SHORT);
    }
    /*---(find base)----------------------*/
+   DEBUG_OUTP   yLOG_info    ("x_ltr"     , x_ltr);
    n = CREATE_find_by_name (x_ltr, LTRS_ALL, NULL, NULL, x_label, NULL, NULL, NULL, NULL, NULL, NULL);
    DEBUG_OUTP   yLOG_value   ("current"   , n);
    --rce;  if (n < 0) {
@@ -287,23 +350,66 @@ PAGE_gregg_letter       (char a_act, uchar *a_ltr)
    char        rce         =  -10;
    char        rc          =    0;
    short       n           =    0;
+   char        x_ltr       [LEN_SHORT] = "";
    char        x_label     [LEN_SHORT] = "";
+   int         l           =    0;
+   char        x_char      =  '·';
    /*---(header)-------------------------*/
    DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
-   n = CREATE_find_by_name (a_ltr, LTRS_ALL, NULL, NULL, x_label, NULL, NULL, NULL, NULL, NULL, NULL);
+   /*---(check for ae)-------------------*/
+   if (strcmp (a_ltr, " ") == 0)  sprintf (x_ltr, "e%s", s_ltr + 1);
+   else                           strlcpy (x_ltr, a_ltr, LEN_SHORT);
+   /*---(find)---------------------------*/
+   DEBUG_OUTP   yLOG_info    ("x_ltr"     , x_ltr);
+   n = CREATE_find_by_name (x_ltr, LTRS_ALL, NULL, NULL, x_label, NULL, NULL, NULL, NULL, NULL, NULL);
    DEBUG_OUTP   yLOG_value   ("current"   , n);
    --rce;  if (n < 0) {
       DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
    DEBUG_OUTP   yLOG_info    ("showing"   , x_label);
-   /*---(special)------------------------*/
-   if (a_ltr [0] == '/')  glColor4f (0.7, 0.0, 0.0, 1.0);
+   /*---(sheck special)------------------*/
+   l      = strlen (x_ltr);
+   x_char = x_ltr [0];
+   if (l == 1 && strchr ("+-á", x_char) != NULL) {
+      glColor4f (0.0, 0.0, 0.8, 1.0);
+      switch (x_char) {
+      case '-' :
+         glLineWidth   (3.0);
+         glBegin(GL_LINES); {
+            glVertex3f (s_cen - 5, s_bot - 4, 250);
+            glVertex3f (s_cen + 5, s_bot - 4, 250);
+         } glEnd();
+         break;
+      case '+' :
+         glLineWidth   (3.0);
+         glBegin(GL_LINES); {
+            glVertex3f (s_cen, s_mid, 250);
+            glVertex3f (s_ex , s_ey , 250);
+         } glEnd();
+         break;
+      case 'á' :
+         glPointSize   (5.0);
+         glBegin(GL_POINTS); {
+            glVertex3f (s_cen, s_mid, 250);
+         } glEnd();
+         break;
+      }
+      glColor4f (0.0, 0.0, 0.0, 1.0);
+   }
    /*---(show letter)--------------------*/
-   if (a_act == SHAPE_SAMPLE)   glCallList   (dl_dotted  + n);
-   else                         glCallList   (dl_solid   + n);
-   glTranslatef (g_loc [n].x_end, g_loc [n].y_end,  0.0);
-   if (a_ltr [0] == '/')  glColor4f (0.0, 0.0, 0.0, 1.0);
+   else {
+      if (x_ltr [0] == '/')  glColor4f (0.7, 0.0, 0.0, 1.0);
+      if (a_ltr [0] == (uchar) ' ')  glColor4f (0.0, 0.0, 0.8, 1.0);
+      if (a_act == SHAPE_SAMPLE)   glCallList   (dl_dotted  + n);
+      else                         glCallList   (dl_solid   + n);
+      if (x_ltr [0] == '>') glTranslatef (s_rig, s_bot,  0.0);
+      glTranslatef (g_loc [n].x_end, g_loc [n].y_end,  0.0);
+      if (x_ltr [0] == '/')  glColor4f (0.0, 0.0, 0.0, 1.0);
+      if (a_ltr [0] == (uchar) ' ')  glColor4f (0.0, 0.0, 0.0, 1.0);
+   }
+   /*---(save data)----------------------*/
+   PAGE_letter_save (0.0, 0.0, g_loc [n].x_lef, g_loc [n].x_rig, g_loc [n].y_top, g_loc [n].y_bot, g_loc [n].x_end, g_loc [n].y_end, x_ltr);
    /*---(complete)-----------------------*/
    DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -534,7 +640,7 @@ PAGE_next_line          (float *b_xpos, float *b_ypos)
       if (my.p_gapping == GAP_GRID)  *b_xpos = my.p_left + (my.p_spacing * 0.5);
       else                           *b_xpos = my.p_left;
    }
-   if (b_ypos != NULL)  *b_ypos = s_ybase -= my.p_linesize;
+   if (b_ypos != NULL)  *b_ypos -= my.p_linesize;
    return 0;
 }
 

@@ -37,8 +37,8 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "5.--= generalization for broader use"
 #define     P_VERMINOR  "5.4 = update for use as coding example"
-#define     P_VERNUM    "5.4k"
-#define     P_VERTXT    "dlists can handle resizing the main window properly now"
+#define     P_VERNUM    "5.4l"
+#define     P_VERTXT    "got complex vowels working fairly well"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -333,8 +333,16 @@ extern tWIN  win;
 
 #define     LAYOUT_INTERPRET    'i'
 #define     LAYOUT_PAGEVIEW     'P'
+#define     LAYOUT_DICTIONARY   'D'
+#define     LAYOUT_CONNECT      'V'
 
-#define     STYLE_HINTS         'y'
+#define     STYLE_HINTS    'y'
+
+
+#define     GAP_NORM       'n'
+#define     GAP_GRID       'g'
+
+
 
 /*---(struct.re)--------+-----------+-*//*-+----------------------------------*/
 typedef     struct      cMY   tMY;
@@ -355,12 +363,15 @@ struct cMY {
    char        w_title     [LEN_HUND];      /* current title                  */
    char        w_anchor;                    /* window anchor position         */
    float       w_scale;                     /* window vs texture size         */
+   short       w_npage;                     /* dictionary pages               */
+   short       w_ppage;                     /* entries per page               */
+   short       w_cpage;                     /* current page                   */
    /*---(texture)-----------*/
    short       t_wide;                      /* texture width                  */
    short       t_tall;                      /* texture height                 */
-   uint        t_tex;                       /* texture for image              */
-   uint        t_fbo;                       /* framebuffer                    */
-   uint        t_depth;                     /* depth buffer                   */
+   GLuint      t_tex;                       /* texture for image              */
+   GLuint      t_fbo;                       /* framebuffer                    */
+   GLuint      t_depth;                     /* depth buffer                   */
    short       t_lef;
    short       t_rig;
    short       t_xlen;
@@ -469,7 +480,7 @@ extern char  g_vows  [LEN_HUND];
 extern char  g_cons  [LEN_HUND];
 
 
-#define    MAX_LETTERS   500
+#define    MAX_LETTERS   1000
 typedef struct cLOCATION tLOCATION;
 struct cLOCATION
 {
@@ -584,10 +595,14 @@ extern tCOMBOS g_combos [MAX_COMBOS];
 #define    CAT_XS     16
 #define    CAT_XZ     17
 
-#define    CAT_A      20
-#define    CAT_E      21
-#define    CAT_O      22
-#define    CAT_U      23
+#define    CAT_WH     18
+#define    CAT_OW     19
+#define    CAT_OI     20
+
+#define    CAT_A      40
+#define    CAT_E      41
+#define    CAT_O      42
+#define    CAT_U      43
 
 #define    CAT_ALL    "xdTHDmkrRNjfpP"
 
@@ -903,6 +918,7 @@ struct cWORD {
    uchar      *unique;                      /* unique word key                */
    uchar       shown       [LEN_HUND];      /* gregg as needed to draw        */
    short       drawn       [LEN_LABEL];     /* gregg letter indexes           */
+   uchar      *fancy;                       /* fancy version of gregg         */
    /*---(source)---------------*/
    short       line;
    char        vary        [LEN_SHORT];     /* variation                      */
@@ -970,8 +986,9 @@ char        PROG__unit_end          (void);
 char       DRAW_tex_new            (short a_wide, short a_tall, float a_scale, float s_sizing);
 char       DRAW_tex_ready          (void);
 char       DRAW_init               (void);
-char       DRAW_make_interpreter   (void);
-char       DRAW_make_pageview      (void);
+char       DRAW_resize             (char a_layout);
+char       DRAW_make               (char a_layout);
+char       DRAW_dictionary_make    (void);
 char       DRAW_wrap               (void);
 
 char       DRAW_primary         (float a_mag);
@@ -1022,8 +1039,9 @@ char       DLIST_init              (void);
 char       DLIST_letters_make      (float a_scale);
 char       DLIST_letters_free      (void);
 char       DLIST__back_edging      (void);
-char       DLIST_interpreter       (void);
-char       DLIST_pageview          (void);
+char       DLIST_connect_read      (void);
+char       DLIST_connect           (void);
+char       DLIST_make              (char a_layout);
 
 /*---(outline)--------------*/
 char       OUT_status         (char *a_list);
@@ -1176,10 +1194,10 @@ char*       WORDS_entry             (int n);
 char        WORDS_table_ae          (void);
 char        WORDS_drawn_show        (short a_drawn [], uchar *a_out);
 char        WORDS_drawn_fix_OLD     (uchar *a_index, short a_drawn []);
-char        WORDS_fix_ae            (char i, char a_pcat, char a_name [LEN_TERSE], char a_ncat, uchar a_show [LEN_HUND], short a_drawn [LEN_LABEL]);
-char        WORDS_fix_ou            (char i, char a_pcat, char a_name [LEN_TERSE], char a_ncat, uchar a_show [LEN_HUND], short a_drawn [LEN_LABEL]);
-char        WORDS_fix_other         (char i, char a_pcat, char a_ccat, char a_name [LEN_TERSE], char a_ncat, uchar a_shown [LEN_HUND], short a_drawn [LEN_LABEL]);
-char        WORDS_fix_gregg         (uchar a_gregg [LEN_TITLE], uchar a_shown [LEN_HUND], short a_drawn [LEN_LABEL]);
+char        WORDS_fix_ae            (char i, char a_pcat, char a_name [LEN_TERSE], char a_ncat, uchar b_show [LEN_HUND], short b_drawn [LEN_LABEL]);
+char        WORDS_fix_ou            (char i, char a_pcat, char a_name [LEN_TERSE], char a_ncat, uchar b_show [LEN_HUND], short b_drawn [LEN_LABEL]);
+char        WORDS_fix_other         (char i, char a_pcat, char a_ccat, char a_name [LEN_TERSE], char a_ncat, uchar b_shown [LEN_HUND], short b_drawn [LEN_LABEL]);
+char        WORDS_fix_gregg         (uchar a_gregg [LEN_TITLE], uchar r_shown [LEN_HUND], short r_drawn [LEN_LABEL]);
 int         words_outstring         (char *);
 
 int         WORDS_find             (char* a_word);
@@ -1357,9 +1375,14 @@ char        CREATE_dump             (void);
 /*··········Ï·······················Ï·········································*/
 /*---(program)--------------*/
 char        PAGE_init               (void);
+char        PAGE_word_begin         (void);
+char        PAGE_letter_save        (float bx, float by, float a_lef, float a_rig, float a_top, float a_bot, float ex, float ey, char a_ltr [LEN_SHORT]);
+char*       PAGE_saved              (void);
 /*---(writing)--------------*/
 char        PAGE_gregg_letter       (char a_act, uchar *a_ltr);
 char        PAGE_gregg_size         (char a_gregg [LEN_TITLE], char *r_count, short *r_points, float *r_xmin, float *r_xmax, float *r_wide, float *r_ymin, float *r_ymax, float *r_tall, short r_list [LEN_LABEL]);
+char        PAGE_next_line          (float *b_xpos, float *b_ypos);
+char        PAGE_next_grid          (float *b_xpos, float *b_ypos);
 char        PAGE_gregg_word         (char a_act, char a_gregg [LEN_TITLE], float *b_xpos, float *b_ypos);
 char        PAGE_gregg              (char a_act, char a_gregg [LEN_RECD], float *b_xpos, float *b_ypos);
 /*---(organizing)-----------*/
@@ -1385,6 +1408,7 @@ char        PAGE_demo_cat_u         (void);
 char        PAGE_demo_dict          (void);
 
 
+char        TABLE_fix_sizing        (void);
 char        TABLE_init              (void);
 char        TABLE_letters_data      (float a_scale);
 
@@ -1395,6 +1419,10 @@ char        FAKE_touch              (short x, short y);
 char        FAKE_point              (short x, short y);
 char        FAKE_lift               (short x, short y);
 char        FAKE_done               (short x, short y);
+
+
+char        AUDIT_build_fancy       (char c, char a_rc, char a_letter [LEN_SHORT], char b_fancy [LEN_FULL]);
+char        AUDIT_gregg_outline     (char a_gregg [LEN_TITLE], char r_fancy [LEN_FULL]);
 
 #endif
 /*============================----(source-end)----============================*/

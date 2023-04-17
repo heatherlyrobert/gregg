@@ -41,32 +41,50 @@ TABLE_letters_data      (float a_scale)
 {
    /*---(locals)-----------+-----+-----+-*/
    int         i           =    0;
+   /*---(header)-------------------------*/
+   DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
    /*---(begin)-----------------------------*/
    for (i = 0; i < MAX_LETTERS; ++i) {
       if (strcmp (g_loc [i].label, "EOF") == 0)   break;
       CREATE_letter_data (g_loc [i].label, a_scale);
    }
    /*---(complete)--------------------------*/
+   DEBUG_GRAF   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+TABLE_fix_sizing        (void)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   short       a           =   -1;
+   short       e           =   -1;
+   char        x_label     [LEN_SHORT] = "";
+   /*---(header)-------------------------*/
+   DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
+   /*---(walk all)-----------------------*/
+   for (a = 0; a < MAX_LETTERS; ++a) {
+      DEBUG_GRAF   yLOG_complex ("base"      , "%3d å%sæ", a, g_loc [a].label);
+      if (strcmp (g_loc [a].label, "EOF") == 0)   break;
+      if (strlen (g_loc [a].label) != 3)          continue;
+      if (g_loc [a].label [0] != 'a')             continue;
+      strlcpy (x_label, g_loc [a].label, LEN_SHORT);
+      x_label [0] = 'e';
+      e = CREATE_find_by_name (x_label, LTRS_ALL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+      DEBUG_GRAF   yLOG_complex ("find e"    , "%3d å%sæ", e, g_loc [e].label);
+      if (e < 0)                                  continue;
+      g_loc [e].x_ellipse = g_loc [a].x_ellipse * 0.5;
+      g_loc [e].y_ellipse = g_loc [a].y_ellipse * 0.5;
+   }
+   /*---(complete)--------------------------*/
+   DEBUG_GRAF   yLOG_exit    (__FUNCTION__);
    return 0;
 }
 
 char
 TABLE_init              (void)
 {
-   short       a           =   -1;
-   short       e           =   -1;
-   char        x_label     [LEN_SHORT] = "";
-   for (a = 0; a < MAX_LETTERS; ++a) {
-      if (strcmp (g_loc [a].label, "EOF") == 0)   break;
-      if (strlen != 3)                            continue;
-      if (g_loc [a].label [0] != 'a')             continue;
-      strlcpy (x_label, g_loc [a].label, LEN_SHORT);
-      x_label [0] = 'e';
-      e = CREATE_find_by_name (x_label, LTRS_ALL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
-      if (e < 0)                                  continue;
-      g_loc [e].x_ellipse = g_loc [a].x_ellipse * 0.5;
-      g_loc [e].y_ellipse = g_loc [a].y_ellipse * 0.5;
-   }
+   TABLE_fix_sizing ();
 }
 
 
@@ -273,7 +291,7 @@ tLOCATION   g_loc [MAX_LETTERS] = {
    { "d"     ,  SHAPE_LINE    ,  24,   0,  30,   0,   0,   CAT_D   ,   1,   2,      0,  -30, YF_BOTRIG,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
    { "dd"    ,  SHAPE_LINE    ,  36,   0,  30,   0,   0,   CAT_D   ,   1,   3,      0,  -40, YF_BOTRIG,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
    /*-over---,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- */
-   { "th"    ,  SHAPE_ELLIPSE ,   8,   4,  40, 130,-120,   CAT_OTH ,   1,   1,     55,  -38, YF_TOPRIG, 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "th"    ,  SHAPE_ELLIPSE ,   8,   4,  40, 130,-130,   CAT_OTH ,   1,   1,     55,  -38, YF_TOPRIG, 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
    { "tn"    ,  SHAPE_ELLIPSE ,  16,   8,  40, 130,-120,   CAT_OTH ,   1,   2,     42,  -38, YF_TOPRIG, 20,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
    { "tm"    ,  SHAPE_ELLIPSE ,  24,  12,  40, 135,-120,   CAT_OTH ,   1,   3,     30,  -38, YF_TOPRIG, 10,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
    /*-unde---,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- */
@@ -345,15 +363,18 @@ tLOCATION   g_loc [MAX_LETTERS] = {
    { ".."    ,  SHAPE_LINE    ,   0,   0,   0,   0,  20,   CAT_NONE,   8,   2,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
    { "con"   ,  SHAPE_DOT     ,   0,   0,   0,   0, 360,   CAT_NONE,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
    { "-"     ,  SHAPE_SPACE   ,   0,   0,   5,  -5, 360,   CAT_NONE,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "á"     ,  SHAPE_SPACE   ,   0,   0,   5,  -5, 360,   CAT_NONE,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "+"     ,  SHAPE_SPACE   ,   0,   0,   5,  -5, 360,   CAT_NONE,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { " "     ,  SHAPE_SPACE   ,   0,   0,   5,  -5, 360,   CAT_NONE,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+
+   /*=====[[ header ]]==================================   ====categories=====   =======display===========   ======================= */
+   /*-line---,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- */
+   { "END"   ,  SHAPE_NONE    ,   0,   0,   0,   0,   0,   CAT_NONE,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
 
    /*=====[[ SHOW-ONLY ]]===============================   ====categories=====   =======display===========   ======================= */
    /*-poin---,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- */
    { "a+"    ,  SHAPE_TEARDROP,   5,   5,  50,   0,   0,   CAT_A   ,   0,   0,    108, -135, YF_BOTRIG,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
    { "e+"    ,  SHAPE_TEARDROP, 2.5, 2.5,  50,   0,   0,   CAT_E   ,   0,   0,    115,  -98, YF_BOTRIG,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
-
-   /*=====[[ header ]]==================================   ====categories=====   =======display===========   ======================= */
-   /*-line---,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- */
-   { "END"   ,  SHAPE_NONE    ,   0,   0,   0,   0,   0,   CAT_NONE,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
 
    /*=====[[ INITIAL H ]]===============================   ====categories=====   =======display===========   ======================= */
    { "/e"    ,  SHAPE_DOT     ,   1,   1,   0,   0, 360,   CAT_NONE,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
@@ -412,6 +433,8 @@ tLOCATION   g_loc [MAX_LETTERS] = {
    { "ads"   ,  SHAPE_TEARDROP,   5,   4, 290,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
    { "adz"   ,  SHAPE_TEARDROP,   7,   2, 310,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
 
+   { "Adx"   ,  SHAPE_TEARDROP,   5,   4, 100,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+
    { "edx"   ,  SHAPE_TEARDROP, 2.5, 2.0,  15,   0,   0,   CAT_E   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
    { "edd"   ,  SHAPE_TEARDROP, 1.5, 3.5,  50,   0,   0,   CAT_E   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
    { "edH"   ,  SHAPE_TEARDROP, 1.5, 3.5, 245,   0,   0,   CAT_E   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
@@ -431,12 +454,72 @@ tLOCATION   g_loc [MAX_LETTERS] = {
 
    /*=====[[ CAT_UTH ]]=================================   ====categories=====   =======display===========   ======================= */
    { "aHx"   ,  SHAPE_TEARDROP,   5,   4, 225,   0,  -1,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aHx"   ,  SHAPE_TEARDROP,   5,   4, 200,   0,  -1,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aHd"   ,  SHAPE_TEARDROP,   5,   4, 190,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aHH"   ,  SHAPE_TEARDROP,   5,   4, 210,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aHT"   ,  SHAPE_TEARDROP,   5,   4, 190,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aHD"   ,  SHAPE_TEARDROP,   5,   4, 190,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aHm"   ,  SHAPE_TEARDROP,   5,   4, 210,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aHk"   ,  SHAPE_TEARDROP,   5,   4, 210,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aHr"   ,  SHAPE_TEARDROP,   6,   3, 245,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aHR"   ,  SHAPE_TEARDROP,   6,   3, 245,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aHN"   ,  SHAPE_TEARDROP,   6,   3, 245,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+
 
    /*=====[[ CAT_OTH ]]=================================   ====categories=====   =======display===========   ======================= */
    { "aTx"   ,  SHAPE_TEARDROP,   5,   4,  45,   0,  -1,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aTd"   ,  SHAPE_TEARDROP,   3,   7,  70,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aTH"   ,  SHAPE_TEARDROP,   3,   7,  90,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aTT"   ,  SHAPE_TEARDROP,   4,   5,  45,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aTD"   ,  SHAPE_TEARDROP,   5,   5,  60,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aTm"   ,  SHAPE_TEARDROP,   3,   7,  90,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aTj"   ,  SHAPE_TEARDROP,   6,   3, 320,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aTN"   ,  SHAPE_TEARDROP,   4,   6, 270,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aTf"   ,  SHAPE_TEARDROP,   4,   6, 290,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aTp"   ,  SHAPE_TEARDROP,   7,   3, 330,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aTP"   ,  SHAPE_TEARDROP,   7,   3, 330,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aTk"   ,  SHAPE_TEARDROP,   4,   6,  70,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aTr"   ,  SHAPE_TEARDROP,   4,   5, 300,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aTR"   ,  SHAPE_TEARDROP,   4,   5, 300,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aTs"   ,  SHAPE_TEARDROP,   4,   6, 290,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aTz"   ,  SHAPE_TEARDROP,   7,   3, 330,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
 
    /*=====[[ CAT_DF ]]==================================   ====categories=====   =======display===========   ======================= */
    { "aDx"   ,  SHAPE_TEARDROP,   5,   4, 170,   0,  -1,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aDx"   ,  SHAPE_TEARDROP,   5,   4, 190,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aDd"   ,  SHAPE_TEARDROP,   7,   2, 135,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aDH"   ,  SHAPE_TEARDROP,   7,   3, 155,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aDT"   ,  SHAPE_TEARDROP,   7,   2, 135,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aDD"   ,  SHAPE_TEARDROP,   7,   2, 135,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aDm"   ,  SHAPE_TEARDROP,   7,   3, 155,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aDj"   ,  SHAPE_TEARDROP,   3,   6, 210,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aDN"   ,  SHAPE_TEARDROP,   6,   4, 180,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aDf"   ,  SHAPE_TEARDROP,   4,   5, 200,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aDp"   ,  SHAPE_TEARDROP,   3,   6,  40,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aDP"   ,  SHAPE_TEARDROP,   3,   6,  40,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aDk"   ,  SHAPE_TEARDROP,   7,   2, 135,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aDr"   ,  SHAPE_TEARDROP,   5,   4, 180,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aDR"   ,  SHAPE_TEARDROP,   5,   4, 180,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aDs"   ,  SHAPE_TEARDROP,   4,   5, 200,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aDz"   ,  SHAPE_TEARDROP,   3,   6,  40,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+
+   { "eDx"   ,  SHAPE_TEARDROP,   5,   4, 170,   0,  -1,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "eDx"   ,  SHAPE_TEARDROP,   5,   4, 190,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "eDd"   ,  SHAPE_TEARDROP,   7,   2, 135,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "eDH"   ,  SHAPE_TEARDROP,   7,   3, 155,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "eDT"   ,  SHAPE_TEARDROP,   7,   2, 135,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "eDD"   ,  SHAPE_TEARDROP,   7,   2, 135,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "eDm"   ,  SHAPE_TEARDROP,   7,   3, 155,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "eDj"   ,  SHAPE_TEARDROP,   3,   6, 210,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "eDN"   ,  SHAPE_TEARDROP,   6,   4, 180,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "eDf"   ,  SHAPE_TEARDROP,   4,   5, 200,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "eDp"   ,  SHAPE_TEARDROP,   3,   6,  40,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "eDP"   ,  SHAPE_TEARDROP,   3,   6,  40,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "eDk"   ,  SHAPE_TEARDROP,   7,   2, 135,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "eDr"   ,  SHAPE_TEARDROP,   5,   4, 180,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "eDR"   ,  SHAPE_TEARDROP,   5,   4, 180,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "eDs"   ,  SHAPE_TEARDROP,   4,   5, 200,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "eDz"   ,  SHAPE_TEARDROP,   3,   6,  40,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
 
    /*=====[[ CAT_M ]]===================================   ====categories=====   =======display===========   ======================= */
    { "amx"   ,  SHAPE_TEARDROP,   5,   4,  45,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
@@ -545,9 +628,63 @@ tLOCATION   g_loc [MAX_LETTERS] = {
 
    /*=====[[ CAT_RD ]]==================================   ====categories=====   =======display===========   ======================= */
    { "aRx"   ,  SHAPE_TEARDROP,   5,   4, 200,   0,  -1,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aRd"   ,  SHAPE_TEARDROP,   5,   4, 190,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aRH"   ,  SHAPE_TEARDROP,   5,   4, 210,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aRT"   ,  SHAPE_TEARDROP,   5,   4, 190,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aRD"   ,  SHAPE_TEARDROP,   5,   4, 190,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aRm"   ,  SHAPE_TEARDROP,   5,   4, 210,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aRk"   ,  SHAPE_TEARDROP,   5,   4, 210,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aRr"   ,  SHAPE_TEARDROP,   6,   3, 245,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aRR"   ,  SHAPE_TEARDROP,   6,   3, 245,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aRN"   ,  SHAPE_TEARDROP,   6,   3, 245,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+
+   { "eRx"   ,  SHAPE_TEARDROP,   5,   4, 200,   0,  -1,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "eRd"   ,  SHAPE_TEARDROP,   5,   4, 190,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "eRH"   ,  SHAPE_TEARDROP,   5,   4, 210,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "eRT"   ,  SHAPE_TEARDROP,   5,   4, 190,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "eRD"   ,  SHAPE_TEARDROP,   5,   4, 190,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "eRm"   ,  SHAPE_TEARDROP,   5,   4, 210,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "eRk"   ,  SHAPE_TEARDROP,   5,   4, 210,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "eRr"   ,  SHAPE_TEARDROP,   6,   3, 245,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "eRR"   ,  SHAPE_TEARDROP,   6,   3, 245,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "eRN"   ,  SHAPE_TEARDROP,   6,   3, 245,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
 
    /*=====[[ CAT_NG ]]==================================   ====categories=====   =======display===========   ======================= */
    { "aNx"   ,  SHAPE_TEARDROP,   5,   4,  75,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aNx"   ,  SHAPE_TEARDROP,   5,   4,  45,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aNd"   ,  SHAPE_TEARDROP,   4,   5,  80,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aNH"   ,  SHAPE_TEARDROP,   3,   7,  90,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aNT"   ,  SHAPE_TEARDROP,   5,   4,  55,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aND"   ,  SHAPE_TEARDROP,   5,   5,  60,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aNm"   ,  SHAPE_TEARDROP,   3,   7,  90,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aNj"   ,  SHAPE_TEARDROP,   6,   3, 320,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aNN"   ,  SHAPE_TEARDROP,   4,   6, 270,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aNf"   ,  SHAPE_TEARDROP,   4,   6, 290,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aNp"   ,  SHAPE_TEARDROP,   7,   3, 340,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aNP"   ,  SHAPE_TEARDROP,   7,   3, 340,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aNk"   ,  SHAPE_TEARDROP,   4,   5,  70,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aNr"   ,  SHAPE_TEARDROP,   4,   5, 300,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aNR"   ,  SHAPE_TEARDROP,   4,   5, 300,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aNs"   ,  SHAPE_TEARDROP,   4,   6, 290,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aNz"   ,  SHAPE_TEARDROP,   7,   3, 330,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+
+   { "eNx"   ,  SHAPE_TEARDROP,   5,   4,  75,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "eNx"   ,  SHAPE_TEARDROP,   5,   4,  45,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "eNd"   ,  SHAPE_TEARDROP,   4,   5,  80,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "eNH"   ,  SHAPE_TEARDROP,   3,   7,  90,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "eNT"   ,  SHAPE_TEARDROP,   5,   4,  55,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "eND"   ,  SHAPE_TEARDROP,   5,   5,  60,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "eNm"   ,  SHAPE_TEARDROP,   3,   7,  90,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "eNj"   ,  SHAPE_TEARDROP,   6,   3, 320,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "eNN"   ,  SHAPE_TEARDROP,   4,   6, 270,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "eNf"   ,  SHAPE_TEARDROP,   4,   6, 290,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "eNp"   ,  SHAPE_TEARDROP,   7,   3, 340,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "eNP"   ,  SHAPE_TEARDROP,   7,   3, 340,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "eNk"   ,  SHAPE_TEARDROP,   4,   5,  70,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "eNr"   ,  SHAPE_TEARDROP,   4,   5, 300,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "eNR"   ,  SHAPE_TEARDROP,   4,   5, 300,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "eNs"   ,  SHAPE_TEARDROP,   4,   6, 290,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "eNz"   ,  SHAPE_TEARDROP,   7,   3, 330,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
 
    /*=====[[ CAT_CH ]]==================================   ====categories=====   =======display===========   ======================= */
    { "ajx"   ,  SHAPE_TEARDROP,   5,   4,  45,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
@@ -656,6 +793,28 @@ tLOCATION   g_loc [MAX_LETTERS] = {
 
    /*=====[[ CAT_PT ]]==================================   ====categories=====   =======display===========   ======================= */
    { "aPx"   ,  SHAPE_TEARDROP,   5,   4, 225,   0,  -1,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aPx"   ,  SHAPE_TEARDROP,   5,   4, 200,   0,  -1,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aPd"   ,  SHAPE_TEARDROP,   5,   4, 190,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aPH"   ,  SHAPE_TEARDROP,   5,   4, 210,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aPT"   ,  SHAPE_TEARDROP,   5,   4, 190,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aPD"   ,  SHAPE_TEARDROP,   5,   4, 190,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aPm"   ,  SHAPE_TEARDROP,   5,   4, 210,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aPk"   ,  SHAPE_TEARDROP,   5,   4, 210,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aPr"   ,  SHAPE_TEARDROP,   6,   3, 245,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aPR"   ,  SHAPE_TEARDROP,   6,   3, 245,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aPN"   ,  SHAPE_TEARDROP,   6,   3, 245,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+
+   { "ePx"   ,  SHAPE_TEARDROP,   5,   4, 225,   0,  -1,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "ePx"   ,  SHAPE_TEARDROP,   5,   4, 200,   0,  -1,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "ePd"   ,  SHAPE_TEARDROP,   5,   4, 190,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "ePH"   ,  SHAPE_TEARDROP,   5,   4, 210,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "ePT"   ,  SHAPE_TEARDROP,   5,   4, 190,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "ePD"   ,  SHAPE_TEARDROP,   5,   4, 190,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "ePm"   ,  SHAPE_TEARDROP,   5,   4, 210,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "ePk"   ,  SHAPE_TEARDROP,   5,   4, 210,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "ePr"   ,  SHAPE_TEARDROP,   6,   3, 245,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "ePR"   ,  SHAPE_TEARDROP,   6,   3, 245,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "ePN"   ,  SHAPE_TEARDROP,   6,   3, 245,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
 
    /*=====[[ CAT_S ]]===================================   ====categories=====   =======display===========   ======================= */
    { "asx"   ,  SHAPE_TEARDROP,   5,   4, 190,   0,  -1,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
@@ -663,13 +822,51 @@ tLOCATION   g_loc [MAX_LETTERS] = {
    /*=====[[ CAT_Z ]]===================================   ====categories=====   =======display===========   ======================= */
    { "azx"   ,  SHAPE_TEARDROP,   5,   4, -25,   0,  -1,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
 
+   /*=====[[ CAT_WH ]]==================================   ====categories=====   =======display===========   ======================= */
+   { "awx"   ,  SHAPE_TEARDROP,   7,   2, 135,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "awd"   ,  SHAPE_TEARDROP,   7,   2, 135,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "awH"   ,  SHAPE_TEARDROP,   7,   2, 135,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "awT"   ,  SHAPE_TEARDROP,   7,   2, 135,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "awm"   ,  SHAPE_TEARDROP,   7,   2, 135,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "awj"   ,  SHAPE_TEARDROP,   5,   4, 180,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "awN"   ,  SHAPE_TEARDROP,   5,   4, 180,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "awf"   ,  SHAPE_TEARDROP,   5,   4, 180,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "awp"   ,  SHAPE_TEARDROP,   5,   4, 180,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "awk"   ,  SHAPE_TEARDROP,   7,   2, 135,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "awr"   ,  SHAPE_TEARDROP,   5,   4, 180,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "awR"   ,  SHAPE_TEARDROP,   5,   4, 180,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "aws"   ,  SHAPE_TEARDROP,   5,   4, 180,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "awz"   ,  SHAPE_TEARDROP,   5,   4, 180,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+
+   { "ewx"   ,  SHAPE_TEARDROP,   7,   2, 135,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "ewd"   ,  SHAPE_TEARDROP,   7,   2, 135,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "ewH"   ,  SHAPE_TEARDROP,   7,   2, 135,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "ewT"   ,  SHAPE_TEARDROP,   7,   2, 135,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "ewm"   ,  SHAPE_TEARDROP,   7,   2, 135,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "ewj"   ,  SHAPE_TEARDROP,   5,   4, 180,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "ewN"   ,  SHAPE_TEARDROP,   5,   4, 180,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "ewf"   ,  SHAPE_TEARDROP,   5,   4, 180,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "ewp"   ,  SHAPE_TEARDROP,   5,   4, 180,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "ewk"   ,  SHAPE_TEARDROP,   7,   2, 135,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "ewr"   ,  SHAPE_TEARDROP,   5,   4, 180,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "ewR"   ,  SHAPE_TEARDROP,   5,   4, 180,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "ews"   ,  SHAPE_TEARDROP,   5,   4, 180,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "ewz"   ,  SHAPE_TEARDROP,   5,   4, 180,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+
+   /*=====[[ CAT_OW ]]==================================   ====categories=====   =======display===========   ======================= */
+   { "amu"   ,  SHAPE_TEARDROP,   3,   7,  70,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+
+   { "emu"   ,  SHAPE_TEARDROP,   3,   7,  70,   0,   0,   CAT_A   ,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+
+   /*=====[[ CAT_OI ]]==================================   ====categories=====   =======display===========   ======================= */
+
    /*=====[[ 2nd ZONE FIXES ]]==========================   ====categories=====   =======display===========   ======================= */
    /*-o------,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- */
    { "o1"    ,  SHAPE_ELLIPSE ,   3,   3,   0, 160, 220,   CAT_O   ,   9,   1,      0,    0, 0        , 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
    { "o2"    ,  SHAPE_ELLIPSE ,   3,   3,   0,  70, 220,   CAT_O   ,   9,   1,      0,    0, 0        , 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
    { "o3"    ,  SHAPE_ELLIPSE ,   3,   3, 120,  90, 220,   CAT_O   ,   9,   1,      0,    0, 0        , 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
    { "o4"    ,  SHAPE_ELLIPSE ,   3,   3, 105,  90, 220,   CAT_O   ,   9,   1,      0,    0, 0        , 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
-   { "o5"    ,  SHAPE_ELLIPSE ,   3,   3,  90,  90, 180,   CAT_O   ,   9,   1,      0,    0, 0        , 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "o5"    ,  SHAPE_ELLIPSE ,   3,   3, 105,  90, 180,   CAT_O   ,   9,   1,      0,    0, 0        , 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
    { "o7"    ,  SHAPE_ELLIPSE ,   3,   3,  40,  90, 180,   CAT_O   ,   9,   1,      0,    0, 0        , 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
    { "o8"    ,  SHAPE_ELLIPSE ,   3,   3,  20,  90, 220,   CAT_O   ,   9,   1,      0,    0, 0        , 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
    { "o9"    ,  SHAPE_ELLIPSE ,   3,   3,   0,  90,  90,   CAT_O   ,   9,   1,      0,    0, 0        , 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
@@ -679,6 +876,14 @@ tLOCATION   g_loc [MAX_LETTERS] = {
    { "u7"    ,  SHAPE_ELLIPSE ,   3,   3,  70,  90,-180,   CAT_U   ,   2,   2,      0,    0, 0        , 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
    { "u8"    ,  SHAPE_ELLIPSE ,   3,   3,  40,  90,-180,   CAT_U   ,   2,   2,      0,    0, 0        , 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
    { "u9"    ,  SHAPE_ELLIPSE ,   3,   3,   0,  90,-180,   CAT_U   ,   2,   2,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   /*-wh-----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- */
+   { "uxa"   ,  SHAPE_ELLIPSE ,   8,   4,  40, 130,-180,   CAT_U   ,   2,   2,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "uxA"   ,  SHAPE_ELLIPSE ,   8,   4,  40,  90,-200,   CAT_U   ,   2,   2,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "uxe"   ,  SHAPE_ELLIPSE ,   4,   2,  40, 130,-180,   CAT_U   ,   2,   2,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "uxE"   ,  SHAPE_ELLIPSE ,   4,   2,  40,  90,-200,   CAT_U   ,   2,   2,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   /*-ow-----,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- */
+   { "uax"   ,  SHAPE_ELLIPSE ,   8,   4,  40, 130,-170,   CAT_U   ,   2,   2,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "uex"   ,  SHAPE_ELLIPSE ,   4,   2,  40, 130,-170,   CAT_U   ,   2,   2,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
 
    /*-comb---z, ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- */
    { "ox"    ,  SHAPE_ELLIPSE ,   5,   3,  15,  80, 180,   CAT_R   ,   0,   0,      0,    0, 0        , 30,   0, 0, 0, 0, 0, 0, 0, 0, 0 },

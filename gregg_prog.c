@@ -147,7 +147,8 @@ PROG__init              (int a_argc, char *a_argv[])
    /*---(header)----------------------*/
    DEBUG_PROG   yLOG_enter (__FUNCTION__);
    /*---(fonts)-----------------------*/
-   strcpy (win.face_pretty, "comfortaa");
+   /*> strcpy (win.face_pretty, "comfortaa");                                         <*/
+   strcpy (win.face_pretty, "shrike");
    /*> strcpy (win.face_fixed, "hack");                                               <*/
    strcpy (win.face_fixed, "shrike");
    /*---(yJOB config)--------------------*/
@@ -305,7 +306,9 @@ PROG__args              (int a_argc, char *a_argv[])
       else if (strcmp (a, "--exact"             ) == 0)   my.run_mode     = RUN_EXACT;
       else if (strcmp (a, "--reverse"           ) == 0)   my.run_mode     = RUN_REVERSE;
       else if (strcmp (a, "--words"             ) == 0)   my.run_mode     = RUN_WORDS;
-      else if (strcmp (a, "--page"              ) == 0)   DRAW_make_pageview ();
+      else if (strcmp (a, "--page"              ) == 0)   DRAW_resize (LAYOUT_PAGEVIEW);
+      else if (strcmp (a, "--dictionary"        ) == 0)   DRAW_resize (LAYOUT_DICTIONARY);
+      else if (strcmp (a, "--connect"           ) == 0)   DRAW_resize (LAYOUT_CONNECT);
       /*---(catch two-arg errors)--------*/
       if (rc < 0)  {
          DEBUG_PROG  yLOG_note  ("two arg test failed");
@@ -396,8 +399,6 @@ PROG_dawn          (void)
    rc = yFILE_dump_add  ("suffix", "", "inventory of all allowed word suffixes", DICT_dump_suffix);
    rc = yFILE_dump_add  ("words" , "", "all words in dictionary"               , DICT_dump_words);
    yCMD_direct (":layout min");
-   DRAW_init  ();
-   TOUCH_init ();
    /*> yVIKEYS_view_option (YVIKEYS_BUFFER, "file" , OUT_status, "current file name and stats");   <*/
    /*> yCMDS_direct (":buffer file");                                                 <*/
    /*> yCMDS_direct (":keys hide");                                                   <*/
@@ -409,13 +410,17 @@ PROG_dawn          (void)
    /*---(final program)------------------*/
    /*> if (my.dict   == 'y')  DICT_import  (NAME_DICT);                               <*/
    DICT_import  ("/var/lib/gregg/gregg_manual.dict");
+   DEBUG_PROG   yLOG_value   ("words"     , WORDS_eng_count ());
+   yMAP_refresh_full ();
    OUT_init      ();
+   DRAW_init  ();
+   TOUCH_init ();
    /*> FILE_rename   ("");                                                            <*/
    if (out_start > 0) o.curr = out_start;
    /*---(key mapping)--------------------*/
    /*> yVIKEYS_map_config  (YVIKEYS_RIGHT, YVIKEYS_map_update, MAP_locator, MAP_addresser);   <*/
-   REVERSE_report ();
-   REVERSE_english_text ("rob"               , SHAPE_LOAD, 1, 'y');
+   /*> REVERSE_report ();                                                             <*/
+   /*> REVERSE_english_text ("rob"               , SHAPE_LOAD, 1, 'y');               <*/
    /*> yVIKEYS_cmds_direct (":overlay sample");                                       <*/
    DEBUG_PROG   yLOG_exit    (__FUNCTION__);
    return 0;

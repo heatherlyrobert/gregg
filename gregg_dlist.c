@@ -4,9 +4,9 @@
 
 
 
-GLuint    dl_solid   = -1;
-GLuint    dl_dotted  = -1;
-GLuint    dl_back    = -1;
+GLuint    dl_solid   = NULL;
+GLuint    dl_dotted  = NULL;
+GLuint    dl_back    = NULL;
 
 
 char
@@ -15,10 +15,7 @@ DLIST_init         (void)
    /*---(header)-------------------------*/
    DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
    DLIST_letters_make (1.0);
-   switch (my.w_layout) {
-   case  LAYOUT_INTERPRET  : DLIST_interpreter  ();  break;
-   case  LAYOUT_PAGEVIEW   : DLIST_pageview     ();  break;
-   }
+   DLIST_make  (my.w_layout);
    /*---(complete)-----------------------*/
    DEBUG_GRAF   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -74,7 +71,7 @@ DLIST_letters_make      (float a_scale)
    int         x_type      =    0;
    int         i           =    0;
    /*---(verify free)-----------------------*/
-   if ((int) dl_solid < 0)   DLIST_letters_free ();
+   if (dl_solid != NULL)   DLIST_letters_free ();
    /*---(allocate)--------------------------*/
    dl_solid  = glGenLists (MAX_LETTERS);
    dl_dotted = glGenLists (MAX_LETTERS);
@@ -98,7 +95,7 @@ DLIST_letters_free      (void)
 {
    glDeleteLists (dl_solid , MAX_LETTERS);
    glDeleteLists (dl_dotted, MAX_LETTERS);
-   dl_solid = dl_dotted = -1;
+   dl_solid = dl_dotted = NULL;
    return 0;
 }
 
@@ -723,10 +720,6 @@ DLIST__back_edging      (void)
    glLineWidth(0.8);
    z =  100.0;
    yCOLOR_opengl (YCOLOR_SPE, YCOLOR_BLK, 1.00);
-   /*> switch (my.w_layout) {                                                                                  <* 
-    *> case LAYOUT_INTERPRET  : my.t_lef -= 125; my.t_rig -= 125; my.t_bot -= 225; my.t_top -= 225;   break;   <* 
-    *> case LAYOUT_PAGEVIEW   : break;                                                                         <* 
-    *> }                                                                                                       <*/
    /*---(left)-----*/
    glBegin(GL_POLYGON); {
       glVertex3f ( my.t_lef      , my.t_bot      , z);
@@ -761,34 +754,77 @@ DLIST__back_edging      (void)
 }
 
 char
-DLIST_pageview          (void)
+DLIST_dict              (void)
 {
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
+   tWORD      *x_word      = NULL;
+   int         i           =    0;
+   float       x           =    0;
+   float       y           =    0;
+   char        t           [LEN_TITLE] = "";
+   int         x_max       =    0;
+   static int  x_times     =    0;
+   int         x_extra     =    0;
    /*---(header)-------------------------*/
-   DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
-   /*---(create list)-----------------------*/
-   DEBUG_GRAF   yLOG_point   ("dl_back"   , dl_back);
-   if ((int) dl_back >= 0) {
-      DEBUG_GRAF   yLOG_note    ("must delete existing list");
-      glDeleteLists (dl_back , 1);
-   } else {
-      DEBUG_GRAF   yLOG_note    ("list not yet created");
-   }
-   dl_back = glGenLists (1);
-   DEBUG_GRAF   yLOG_point   ("dl_back"   , dl_back);
-   /*---(begin)-----------------------------*/
-   glNewList (dl_back, GL_COMPILE);
-   /*---(draw peices)----------------------*/
-   glPushMatrix (); {
-      /*> BACK__degticks   ();                                                        <* 
-       *> BACK__rangefan   ();                                                        <* 
-       *> BACK__rangerings ();                                                        <* 
-       *> BACK__guidelines ();                                                        <*/
-      DLIST__back_edging ();
-   } glPopMatrix ();
-   /*---(end)-------------------------------*/
-   glEndList ();
+   DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
+   /*---(defense)------------------------*/
+   DEBUG_OUTP   yLOG_value   ("words"     , WORDS_eng_count ());
+   /*> glColor4f    (1.0, 1.0, 1.0, 1.0);                                             <* 
+    *> for (x = -2000; x <= 2000; x += 100) {                                         <* 
+    *>    for (y = -2000; y <= 2000; y += 100) {                                      <* 
+    *>       glPushMatrix    (); {                                                    <* 
+    *>          glTranslatef (x, y, 250);                                             <* 
+    *>          sprintf (t, "%4.0fx,%4.0fy", x, y);                                   <* 
+    *>          yFONT_print (win.font_pretty,  8, YF_MIDCEN, t);                      <* 
+    *>       } glPopMatrix   ();                                                      <* 
+    *>    }                                                                           <* 
+    *> }                                                                              <*/
+   /*---(page)---------------------------*/
+   my.p_hinting = STYLE_HINTS;
+   my.w_ppage   = 120;
+   my.w_npage   = WORDS_eng_count () / my.w_ppage;
+   x_extra      = WORDS_eng_count () % my.w_ppage;
+   if (x_extra > 0)  ++(my.w_npage);
+   /*> my.w_cpage   = 2;                                                              <*/
+   DEBUG_OUTP   yLOG_value   ("cpage"     , my.w_cpage);
+   DEBUG_OUTP   yLOG_value   ("ppage"     , my.w_ppage);
+   DEBUG_OUTP   yLOG_complex ("bounds"    , "%4d lef, %4d rig, %4d xlen,  %4d bot, %4d top, %4d ylen", my.t_lef, my.t_rig, my.t_xlen, my.t_bot, my.t_top, my.t_ylen);
+   i = my.w_cpage * my.w_ppage;
+   x_max = i + my.w_ppage;
+   DEBUG_OUTP   yLOG_complex ("positions" , "%2dn, %2dc, %3dp, %4di, %4dx", my.w_npage, my.w_cpage, my.w_ppage, i, x_max);
+   glPushMatrix    (); {
+      /*> glPushMatrix    (); {                                                       <* 
+       *>    glTranslatef (-100,  100, 250);                                          <* 
+       *>    sprintf (t, "%2d/%2d (%d)", my.w_cpage, my.w_npage, ++x_times);          <* 
+       *>    yFONT_print (win.font_pretty, 12, YF_MIDCEN, t);                         <* 
+       *> } glPopMatrix   ();                                                         <*/
+      x =   60;
+      y =  -75;
+      WORDS_eng_by_index (i, &x_word);
+      while (x_word != NULL) {
+         DEBUG_OUTP   yLOG_complex ("x_word"    , "%4d %-15.15s %-15.15s %s", i, x_word->english, x_word->gregg, x_word->shown);
+         /*> printf ("%3d, %6.1f, %6.1f, %s, %s\n", i, x, y, x_word->english, x_word->gregg);   <*/
+         glPushMatrix    (); {
+            glTranslatef (x, y + 15, -50);
+            glColor4f    (0.5, 0.5, 0.5, 0.3);
+            /*> strlcpy  (t, x_word->shown, LEN_TITLE);                               <*/
+            strlcpy  (t, x_word->english, LEN_TITLE);
+            strldchg (t, '·', ' ', LEN_TITLE);
+            yFONT_print (win.font_pretty,  8, YF_MIDCEN, t);
+         } glPopMatrix   ();
+         PAGE_gregg_word (SHAPE_DRAW, x_word->shown, &x, &y);
+         WORDS_eng_by_index (++i, &x_word);
+         if (i %  12 == 0) {
+            PAGE_next_line (&x, &y);
+            x =  60;
+         }
+         if (i >= x_max)  break;
+      }
+   } glPopMatrix   ();
    /*---(complete)-----------------------*/
-   DEBUG_GRAF   yLOG_exit    (__FUNCTION__);
+   DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
    return 0;
 }
 
@@ -797,19 +833,6 @@ DLIST_interpreter       (void)
 {
    /*---(header)-------------------------*/
    DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
-   /*---(create list)-----------------------*/
-   DEBUG_GRAF   yLOG_point   ("dl_back"   , dl_back);
-   if ((int) dl_back >= 0) {
-      DEBUG_GRAF   yLOG_note    ("must delete existing list");
-      glDeleteLists (dl_back , 1);
-   } else {
-      DEBUG_GRAF   yLOG_note    ("list not yet created");
-   }
-   dl_back = glGenLists (1);
-   DEBUG_GRAF   yLOG_point   ("dl_back"   , dl_back);
-   /*---(begin)-----------------------------*/
-   glNewList (dl_back, GL_COMPILE);
-   /*---(draw peices)----------------------*/
    glPushMatrix (); {
       BACK__degticks   ();
       BACK__rangefan   ();
@@ -817,8 +840,202 @@ DLIST_interpreter       (void)
       BACK__guidelines ();
       DLIST__back_edging ();
    } glPopMatrix ();
+   /*---(complete)-----------------------*/
+   DEBUG_GRAF   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+DLIST_pageview          (void)
+{
+   /*---(header)-------------------------*/
+   DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
+   glPushMatrix (); {
+      DLIST__back_edging ();
+   } glPopMatrix ();
+   /*---(complete)-----------------------*/
+   DEBUG_GRAF   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+DLIST_dictionary        (void)
+{
+   /*---(header)-------------------------*/
+   DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
+   glPushMatrix (); {
+      DLIST_dict ();          
+      DLIST__back_edging ();
+   } glPopMatrix ();
+   /*---(complete)-----------------------*/
+   DEBUG_GRAF   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+DLIST_connect_cons      (char a_end, char a_entry, char a_out [LEN_TERSE])
+{
+   if (a_end == '>' && a_entry != 'x')   strcpy (a_out, "·");
+   else                                  strcpy (a_out, "");
+   switch (a_entry) {
+   case 'd'  :  strcat (a_out, "d"  );    break;
+   case 'T'  :  strcat (a_out, "th" );    break;
+   case 'H'  :  strcat (a_out, "ht" );    break;
+   case 'D'  :  strcat (a_out, "df" );    break;
+   case 'm'  :  strcat (a_out, "m"  );    break;
+   case 'k'  :  strcat (a_out, "k"  );    break;
+   case 'r'  :  strcat (a_out, "r"  );    break;
+   case 'R'  :  strcat (a_out, "rd" );    break;
+   case 'N'  :  strcat (a_out, "ngk");    break;
+   case 'j'  :  strcat (a_out, "ch" );    break;
+   case 'f'  :  strcat (a_out, "f"  );    break;
+   case 'p'  :  strcat (a_out, "p"  );    break;
+   case 'P'  :  strcat (a_out, "bd" );    break;
+   case 's'  :  strcat (a_out, "s"  );    break;
+   case 'z'  :  strcat (a_out, "z"  );    break;
+   }
+   if (a_end == '<' && a_entry != 'x')   strcat (a_out, "·");
+   else                                  strcat (a_out, "");
+   return 0;
+}
+
+char
+DLIST_connect_real      (void)
+{
+   char        x_entry     [LEN_LABEL] = "xdTHDmkrRNjfpPsz···";
+   short       xi, yi;
+   float       x, y;
+   char        x_pre       [LEN_LABEL] = "";
+   char        x_suf       [LEN_LABEL] = "";
+   char        t           [LEN_LABEL] = "";
+   /*---(header)-------------------------*/
+   DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
+   my.p_hinting = STYLE_HINTS;
+   glColor4f (0.0, 0.0, 0.0, 1.0);
+   glPushMatrix (); {
+      x = 60;  y = -75;
+      for (yi = 0; yi < LEN_LABEL; ++yi) {
+         if (x_entry [yi] == '·') break;
+         DLIST_connect_cons ('<', x_entry [yi], x_pre);
+         for (xi = 0; xi < LEN_LABEL; ++xi) {
+            if (x_entry [xi] == '·') break;
+            DLIST_connect_cons ('>', x_entry [xi], x_suf);
+            /*> sprintf (t, "%sa%c%c%s", x_pre, x_entry [yi], x_entry [xi], x_suf);   <*/
+            sprintf (t, "%sa%s", x_pre, x_suf);
+            /*> sprintf (t, "%s", x_pre);                                             <*/
+            printf ("%-10.10s  ", t);
+            PAGE_gregg (SHAPE_DRAW, t, &x, &y);
+            /*> glPushMatrix    (); {                                                              <* 
+             *>    glTranslatef (x, y + 15, -50);                                                  <* 
+             *>    glColor4f    (0.5, 0.5, 0.5, 0.3);                                              <* 
+             *>    /+> strlcpy  (t, x_word->shown, LEN_TITLE);                               <+/   <* 
+             *>    strldchg (t, '·', ' ', LEN_TITLE);                                              <* 
+             *>    yFONT_print (win.font_pretty,  8, YF_MIDCEN, t);                                <* 
+             *> } glPopMatrix   ();                                                                <*/
+         }
+         PAGE_next_line (&x, &y);
+         x =  60;
+         printf ("\n");
+      }
+   } glPopMatrix ();
+   /*---(complete)-----------------------*/
+   DEBUG_GRAF   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+DLIST_connect           (void)
+{
+   char        x_entry     [LEN_LABEL] = "xdTHDmkrRNjfpPsz···";
+   short       xi, yi;
+   float       x, y;
+   char        x_pre       [LEN_LABEL] = "";
+   char        x_suf       [LEN_LABEL] = "";
+   char        s           [LEN_LABEL] = "";
+   char        t           [LEN_LABEL] = "";
+   char        x_vowel     = 'a';
+   /*---(header)-------------------------*/
+   DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
+   /*> my.p_hinting = STYLE_HINTS;                                                    <*/
+   glColor4f (0.0, 0.0, 0.0, 1.0);
+   switch (my.w_cpage) {
+   case  0 :  x_vowel = 'a';  break;
+   case  1 :  x_vowel = 'e';  break;
+   case  2 :  x_vowel = 'o';  break;
+   case  3 :  x_vowel = 'u';  break;
+   }
+   glPushMatrix (); {
+      DLIST__back_edging ();
+      x = 45;  y = -40;
+      for (yi = 0; yi < LEN_LABEL; ++yi) {
+         if (x_entry [yi] == '·') break;
+         DLIST_connect_cons ('<', x_entry [yi], x_pre);
+         for (xi = 0; xi < LEN_LABEL; ++xi) {
+            if (x_entry [xi] == '·') break;
+            DLIST_connect_cons ('>', x_entry [xi], x_suf);
+            /*> sprintf (t, "%sa%c%c%s", x_pre, x_entry [yi], x_entry [xi], x_suf);   <*/
+            sprintf (t, "%s%c%s", x_pre, x_vowel, x_suf);
+            /*> sprintf (t, "%s", x_pre);                                             <*/
+            /*> printf ("%-10.10s  ", t);                                             <*/
+            glPushMatrix    (); {
+               glTranslatef (x, y + 15, -50);
+               glColor4f    (0.5, 0.5, 0.5, 0.3);
+               /*> strlcpy  (s, t, LEN_LABEL);                                        <*/
+               /*> strldchg (s, '·', ' ', LEN_TITLE);                                 <*/
+               yFONT_print (win.font_pretty,  8, YF_MIDCEN, t);
+            } glPopMatrix   ();
+            PAGE_gregg (SHAPE_DRAW, t, &x, &y);
+         }
+         PAGE_next_line (&x, &y);
+         x =  45;
+         /*> printf ("\n");                                                           <*/
+      }
+   } glPopMatrix ();
+   /*---(complete)-----------------------*/
+   DEBUG_GRAF   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+DLIST_make              (char a_layout)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   /*---(header)-------------------------*/
+   DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
+   /*---(create list)-----------------------*/
+   DEBUG_GRAF   yLOG_point   ("dl_back"   , dl_back);
+   if (dl_back != NULL) {
+      DEBUG_GRAF   yLOG_note    ("must delete existing list");
+      glDeleteLists (dl_back , 1);
+      dl_back = NULL;
+   } else {
+      DEBUG_GRAF   yLOG_note    ("list not yet created");
+   }
+   dl_back = glGenLists (1);
+   DEBUG_GRAF   yLOG_point   ("dl_back"   , dl_back);
+   --rce;  if (dl_back == NULL) {
+      DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(begin)-----------------------------*/
+   glNewList (dl_back, GL_COMPILE);
+   /*---(draw peices)----------------------*/
+   switch (a_layout) {
+   case  LAYOUT_INTERPRET  : DLIST_interpreter ();  break;
+   case  LAYOUT_PAGEVIEW   : DLIST_pageview    ();  break;
+   case  LAYOUT_DICTIONARY : DLIST_dictionary  ();  break;
+   case  LAYOUT_CONNECT    : DLIST_connect     ();  break;
+   }
    /*---(end)-------------------------------*/
    glEndList ();
+   /*---(check)-----------------------------*/
+   --rce;  if (!glIsList (dl_back)) {
+      DEBUG_OUTP   yLOG_note    ("not a valid list");
+      DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_OUTP   yLOG_note    ("final list checks as valid");
    /*---(complete)-----------------------*/
    DEBUG_GRAF   yLOG_exit    (__FUNCTION__);
    return 0;

@@ -815,7 +815,7 @@ REVERSE_page_beg        (void)
    /*---(create texture)-----------------*/
    yCOLOR_opengl_clear (YCOLOR_BAS, YCOLOR_MAX);
    rc = yGLTEX_new (&my.t_tex, &my.t_fbo, &my.t_depth, 850, 1100);
-   rc = yGLTEX_draw         (my.t_fbo, YGLTEX_TOPLEF, 850, 1100, 1.0);
+   rc = yGLTEX_draw  (my.t_tex, my.t_fbo, YGLTEX_TOPLEF, 850, 1100, 1.0);
    /*> glColor4f (1.00f, 1.00f, 1.00f, 1.0f);                                         <*/
    /*---(complete)-----------------------*/
    DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
@@ -830,9 +830,9 @@ REVERSE_page_end        (void)
    /*---(header)-------------------------*/
    DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
    /*---(write out image)----------------*/
-   rc = yGLTEX_tex2png      ("/tmp/gregg.png", 850, 1100);
+   /*> rc = yGLTEX_tex2png      ("/tmp/gregg.png", 850, 1100);                        <*/
    /*---(close texture)------------------*/
-   rc = yGLTEX_done         (my.t_tex);
+   /*> rc = yGLTEX_done         (my.t_tex);                                           <*/
    /*---(complete)-----------------------*/
    DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
    return 0;

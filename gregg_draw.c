@@ -89,9 +89,9 @@ DRAW_init            (void)
    /*---(header)-------------------------*/
    DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
    /*---(init)---------------------------*/
-   my.t_tex   = 0;
-   my.t_fbo   = 0;
-   my.t_depth = 0;
+   my.t_tex   = -1;
+   my.t_fbo   = -1;
+   my.t_depth = -1;
    /*---(window)-------------------------*/
    /*> yVIEW_full    (YVIEW_MAIN , YVIEW_FLAT, YVIEW_BOTLEF, YCOLOR_BAS, YCOLOR_MED, DRAW_primary);   <*/
    DRAW__sizes   (my.w_wide, my.w_tall);
@@ -102,9 +102,12 @@ DRAW_init            (void)
    /*---(custom drawing)-----------------*/
    yGLTEX_config   ();
    FONT__load      ();
-   PAGE_new_again  ();
-   DLIST_init      ();
-   DRAW_back       ();
+   /*> DRAW_resize     (my.w_layout);                                                 <*/
+   DRAW_make       (my.w_layout);
+   /*> DLIST_letters_make (1.0);                                                      <*/
+   /*> PAGE_new_again  ();                                                            <*/
+   /*> DLIST_init      ();                                                            <*/
+   /*> DRAW_back       ();                                                            <*/
    /*---(ribbon)-------------------------*/
    /*> yVIKEYS_view_ribbon ("play"    , "dj"          );                              <* 
     *> yVIKEYS_view_ribbon ("talk"    , "video_cam"   );                              <* 
@@ -122,37 +125,79 @@ DRAW_init            (void)
    /*> yVIKEYS_cmds_direct (":gridsize 1");                                           <*/
    /*> yVIKEYS_cmds_direct (":layer bas");                                            <*/
    /*> yVIKEYS_cmds_direct (":layer cur");                                            <*/
-   PAGE_ready      ("/tmp/gregg_back.png");
+   /*> PAGE_ready      ("/tmp/gregg_back.png");                                       <*/
    /*---(complete)-----------------------*/
    DEBUG_GRAF   yLOG_exit    (__FUNCTION__);
    return 0;
 }
 
 char
-DRAW_make_interpreter   (void)
+DRAW_resize             (char a_layout)
 {
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
    /*---(header)-------------------------*/
    DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
-   /*---(actions)------------------------*/
-   PAGE_new (LAYOUT_INTERPRET,  500,  350, YF_GREGG , 2.0,   -1, -1, -1, -1,   -1, '-', -1, -1, -1, '-');
-   yVIOPENGL_resize (my.w_title, my.w_wide, my.w_tall);
-   DLIST_interpreter ();
-   PAGE_ready      ("/tmp/gregg_back.png");
+   /*---(settings)-----------------------*/
+   switch (a_layout) {
+   case  LAYOUT_INTERPRET  : rc = PAGE_config (LAYOUT_INTERPRET ,  500,  350, YF_GREGG , 2.0,   -1, -1, -1, -1,   -1, YF_ORIGIN, -1, -1, -1, '-');          break;
+   case  LAYOUT_PAGEVIEW   : rc = PAGE_config (LAYOUT_PAGEVIEW  , 1000,  700, YF_TOPLEF, 2.0,   -1, -1, -1, -1,   -1, YF_MIDCEN, 15, 15, 40, GAP_GRID);     break;
+   case  LAYOUT_DICTIONARY : rc = PAGE_config (LAYOUT_DICTIONARY, 1000,  700, YF_TOPLEF, 2.0,   -1, -1, -1, -1,   -1, YF_MIDCEN, 15, 15, 40, GAP_GRID);     break;
+   case  LAYOUT_CONNECT    : rc = PAGE_config (LAYOUT_CONNECT   , 1300, 1100, YF_TOPLEF, 2.0,   -1, -1, -1, -1,   -1, YF_MIDCEN, 15, 15, 40, GAP_GRID);     break;
+   }
+   DEBUG_OUTP   yLOG_value   ("conf"      , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(resize)-------------------------*/
+   rc = yVIOPENGL_resize (my.w_title, my.w_wide, my.w_tall);
+   DEBUG_OUTP   yLOG_value   ("resize"    , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
    /*---(complete)-----------------------*/
    DEBUG_GRAF   yLOG_exit    (__FUNCTION__);
    return 0;
 }
 
 char
-DRAW_make_pageview      (void)
+DRAW_make               (char a_layout)
 {
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
    /*---(header)-------------------------*/
    DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
-   /*---(actions)------------------------*/
-   PAGE_new (LAYOUT_PAGEVIEW , 1000,  700, YF_TOPLEF, 2.0,   -1, -1, -1, -1,   -1, '-', -1, -1, -1, '-');
-   yVIOPENGL_resize (my.w_title, my.w_wide, my.w_tall);
-   DLIST_pageview ();
-   PAGE_ready      ("/tmp/gregg_back.png");
+   /*---(set and size)-------------------*/
+   rc = DRAW_resize (a_layout);
+   DEBUG_OUTP   yLOG_value   ("size"      , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(create texture)-----------------*/
+   switch (a_layout) {
+   case  LAYOUT_INTERPRET  : rc = PAGE_new    (LAYOUT_INTERPRET ,  500,  350, YF_GREGG , 2.0,   -1, -1, -1, -1,   -1, YF_ORIGIN, -1, -1, -1, '-');          break;
+   case  LAYOUT_PAGEVIEW   : rc = PAGE_new    (LAYOUT_PAGEVIEW  , 1000,  700, YF_TOPLEF, 2.0,   -1, -1, -1, -1,   -1, YF_MIDCEN, 15, 15, 40, GAP_GRID);     break;
+   case  LAYOUT_DICTIONARY : rc = PAGE_new    (LAYOUT_DICTIONARY, 1000,  700, YF_TOPLEF, 2.0,   -1, -1, -1, -1,   -1, YF_MIDCEN, 15, 15, 40, GAP_GRID);     break;
+   case  LAYOUT_CONNECT    : rc = PAGE_new    (LAYOUT_CONNECT   , 1300, 1100, YF_TOPLEF, 2.0,   -1, -1, -1, -1,   -1, YF_MIDCEN, 15, 15, 40, GAP_GRID);     break;
+   }
+   DEBUG_OUTP   yLOG_value   ("new"       , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(update)-------------------------*/
+   DLIST_letters_make (1.0);
+   DLIST_make         (a_layout);
+   /*---(call back)----------------------*/
+   glCallList (dl_back);
+   /*---(finalize)-----------------------*/
+   rc = PAGE_ready  ("/tmp/gregg_back.png");
+   DEBUG_OUTP   yLOG_value   ("ready"     , rc);
    /*---(complete)-----------------------*/
    DEBUG_GRAF   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -215,12 +260,20 @@ DRAW_primary         (float a_mag)
       glBindTexture(GL_TEXTURE_2D, 0);
    } glPopMatrix   ();
    /*---(title)--------------------------*/
-   if (my.w_layout == LAYOUT_INTERPRET) {
+   /*> if (my.w_layout == LAYOUT_CONNECT) {                                           <* 
+    *>    glColor4f (0.0, 0.0, 0.0, 1.0);                                             <* 
+    *>    DLIST_connect_real ();                                                      <* 
+    *> }                                                                              <*/
+   if (my.w_layout == LAYOUT_INTERPRET || my.w_layout == LAYOUT_CONNECT) {
       glPushMatrix    (); {
          /*> my.p_hinting = 'y';                                                         <*/
+         glColor4f (0.0, 0.0, 0.0, 1.0);
          glTranslatef (175.0, 60.0, 250.0);
          PAGE_gregg (SHAPE_DRAW, "r·o·b" , &i, &j);
-         glTranslatef ( 30.0, -20.0,   0.0);
+         glTranslatef (  0.0,   7.0,   0.0);
+         i = 0; j = 0;
+         PAGE_gregg (SHAPE_DRAW, "g·r·e·g" , &i, &j);
+         glTranslatef (  0.0, -15.0,   0.0);
          i = 0; j = 0;
          PAGE_gregg (SHAPE_DRAW, "sh·t·/·nd" , &i, &j);
          /*> my.p_hinting = '-';                                                         <*/
