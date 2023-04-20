@@ -9,6 +9,11 @@ GLuint    dl_dotted  = NULL;
 GLuint    dl_back    = NULL;
 
 
+
+tWORD    *g_pages [MAX_PAGES];
+
+
+
 char
 DLIST_init         (void)
 {
@@ -16,6 +21,9 @@ DLIST_init         (void)
    DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
    DLIST_letters_make (1.0);
    DLIST_make  (my.w_layout);
+   my.w_ppage   = 120;
+   my.w_npage   = 0;
+   my.w_cpage   = 0;
    /*---(complete)-----------------------*/
    DEBUG_GRAF   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -754,6 +762,42 @@ DLIST__back_edging      (void)
 }
 
 char
+DLIST_paginate          (void)
+{
+   tWORD      *x_word      = NULL;
+   short       i           =    0;
+   short       c           =    0;
+   short       p           =    0;
+   /*---(header)-------------------------*/
+   DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
+   /*---(basic inputs)-------------------*/
+   DEBUG_OUTP   yLOG_value   ("ppage"     , my.w_ppage);
+   /*---(clear paging)-------------------*/
+   for (i = 0; i < MAX_PAGES; ++i)  g_pages [i] = NULL;
+   /*---(paginate)-----------------------*/
+   WORDS_eng_by_cursor (YDLST_HEAD, &x_word);
+   while (x_word != NULL) {
+      DEBUG_OUTP   yLOG_complex ("x_word"    , "%4d %4d %4d %-15.15s %-15.15s %s", p, i++, c, x_word->english, x_word->gregg, x_word->shown);
+      if (my.baseonly == '-' || x_word->vary [0] == '<') {
+         if (c % my.w_ppage == 0) {
+            DEBUG_GRAF   yLOG_complex ("new page"  , "%4d, %s", p, x_word->english);
+            g_pages [p++] = x_word;
+         }
+         ++c;
+      }
+      WORDS_eng_by_cursor (YDLST_NEXT, &x_word);
+   }
+   /*---(update globals)-----------------*/
+   my.w_npage   = p;
+   my.w_entries = c;
+   DEBUG_OUTP   yLOG_value   ("npage"     , my.w_npage);
+   DEBUG_OUTP   yLOG_value   ("entries"   , my.w_entries);
+   /*---(complete)-----------------------*/
+   DEBUG_GRAF   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
 DLIST_dict              (void)
 {
    /*---(locals)-----------+-----+-----+-*/
@@ -761,6 +805,70 @@ DLIST_dict              (void)
    char        rc          =    0;
    tWORD      *x_word      = NULL;
    int         i           =    0;
+   int         c           =    0;
+   int         x_save      =    0;
+   float       x           =    0;
+   float       y           =    0;
+   char        t           [LEN_TITLE] = "";
+   int         x_max       =    0;
+   static int  x_times     =    0;
+   int         x_extra     =    0;
+   /*---(header)-------------------------*/
+   DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
+   /*---(defense)------------------------*/
+   DEBUG_OUTP   yLOG_value   ("words"     , WORDS_eng_count ());
+   /*---(page)---------------------------*/
+   my.p_hinting = STYLE_HINTS;
+   DEBUG_OUTP   yLOG_value   ("cpage"     , my.w_cpage);
+   DEBUG_OUTP   yLOG_point   ("g_pages"   , g_pages [my.w_cpage]);
+   --rce;  if (g_pages [my.w_cpage] == NULL) {
+      DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_OUTP   yLOG_complex ("bounds"    , "%4d lef, %4d rig, %4d xlen,  %4d bot, %4d top, %4d ylen", my.t_lef, my.t_rig, my.t_xlen, my.t_bot, my.t_top, my.t_ylen);
+   glPushMatrix    (); {
+      x =   60;
+      y =  -75;
+      WORDS_eng_by_name  (g_pages [my.w_cpage]->english, &x_word);
+      while (x_word != NULL) {
+         DEBUG_OUTP   yLOG_complex ("x_word"    , "%4d %-15.15s %-15.15s %s", i, x_word->english, x_word->gregg, x_word->shown);
+         if (my.baseonly == '-' || x_word->vary [0] == '<') {
+            glPushMatrix    (); {
+               glTranslatef (x, y + 15, -50);
+               glColor4f    (0.5, 0.5, 0.5, 0.3);
+               /*> strlcpy  (t, x_word->shown, LEN_TITLE);                               <*/
+               strlcpy  (t, x_word->english, LEN_TITLE);
+               strldchg (t, '·', ' ', LEN_TITLE);
+               yFONT_print (win.font_pretty,  8, YF_MIDCEN, t);
+            } glPopMatrix   ();
+            PAGE_gregg_word (SHAPE_DRAW, x_word->shown, &x, &y);
+            ++c;
+         }
+         ++i;
+         WORDS_eng_by_cursor (YDLST_NEXT, &x_word);
+         if (x_save != c && c %  12 == 0) {
+            PAGE_next_line (&x, &y);
+            x =  60;
+         }
+         if (c >= my.w_ppage)  break;
+         x_save = c;
+      }
+   } glPopMatrix   ();
+   /*---(complete)-----------------------*/
+   DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+DLIST_dict_OLD          (void)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
+   tWORD      *x_word      = NULL;
+   int         i           =    0;
+   int         c           =    0;
+   int         x_save      =    0;
    float       x           =    0;
    float       y           =    0;
    char        t           [LEN_TITLE] = "";
@@ -783,11 +891,6 @@ DLIST_dict              (void)
     *> }                                                                              <*/
    /*---(page)---------------------------*/
    my.p_hinting = STYLE_HINTS;
-   my.w_ppage   = 120;
-   my.w_npage   = WORDS_eng_count () / my.w_ppage;
-   x_extra      = WORDS_eng_count () % my.w_ppage;
-   if (x_extra > 0)  ++(my.w_npage);
-   /*> my.w_cpage   = 2;                                                              <*/
    DEBUG_OUTP   yLOG_value   ("cpage"     , my.w_cpage);
    DEBUG_OUTP   yLOG_value   ("ppage"     , my.w_ppage);
    DEBUG_OUTP   yLOG_complex ("bounds"    , "%4d lef, %4d rig, %4d xlen,  %4d bot, %4d top, %4d ylen", my.t_lef, my.t_rig, my.t_xlen, my.t_bot, my.t_top, my.t_ylen);
@@ -805,22 +908,26 @@ DLIST_dict              (void)
       WORDS_eng_by_index (i, &x_word);
       while (x_word != NULL) {
          DEBUG_OUTP   yLOG_complex ("x_word"    , "%4d %-15.15s %-15.15s %s", i, x_word->english, x_word->gregg, x_word->shown);
-         /*> printf ("%3d, %6.1f, %6.1f, %s, %s\n", i, x, y, x_word->english, x_word->gregg);   <*/
-         glPushMatrix    (); {
-            glTranslatef (x, y + 15, -50);
-            glColor4f    (0.5, 0.5, 0.5, 0.3);
-            /*> strlcpy  (t, x_word->shown, LEN_TITLE);                               <*/
-            strlcpy  (t, x_word->english, LEN_TITLE);
-            strldchg (t, '·', ' ', LEN_TITLE);
-            yFONT_print (win.font_pretty,  8, YF_MIDCEN, t);
-         } glPopMatrix   ();
-         PAGE_gregg_word (SHAPE_DRAW, x_word->shown, &x, &y);
-         WORDS_eng_by_index (++i, &x_word);
-         if (i %  12 == 0) {
+         if (my.baseonly == '-' || x_word->vary [0] == '<') {
+            glPushMatrix    (); {
+               glTranslatef (x, y + 15, -50);
+               glColor4f    (0.5, 0.5, 0.5, 0.3);
+               /*> strlcpy  (t, x_word->shown, LEN_TITLE);                               <*/
+               strlcpy  (t, x_word->english, LEN_TITLE);
+               strldchg (t, '·', ' ', LEN_TITLE);
+               yFONT_print (win.font_pretty,  8, YF_MIDCEN, t);
+            } glPopMatrix   ();
+            PAGE_gregg_word (SHAPE_DRAW, x_word->shown, &x, &y);
+            ++c;
+         }
+         ++i;
+         WORDS_eng_by_index (i, &x_word);
+         if (x_save != c && c %  12 == 0) {
             PAGE_next_line (&x, &y);
             x =  60;
          }
-         if (i >= x_max)  break;
+         if (c >= x_max)  break;
+         x_save = c;
       }
    } glPopMatrix   ();
    /*---(complete)-----------------------*/

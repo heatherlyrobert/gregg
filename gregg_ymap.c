@@ -79,10 +79,6 @@ api_ymap_sizer          (char a_axis, ushort *n, ushort *a, ushort *b, ushort *c
    case YMAP_YAXIS :
       DEBUG_YMAP    yLOG_snote   ("rows are pages");
       if (my.w_layout == LAYOUT_DICTIONARY) {
-         DEBUG_YMAP    yLOG_snote   ("dictionary");
-         my.w_npage = WORDS_eng_count () / my.w_ppage;
-         x_extra      = WORDS_eng_count () % my.w_ppage;
-         if (x_extra > 0)  ++(my.w_npage);
          DEBUG_YMAP    yLOG_sint    (my.w_npage);
          if (n != NULL)  *n = my.w_npage;
       } else if (my.w_layout == LAYOUT_CONNECT) {

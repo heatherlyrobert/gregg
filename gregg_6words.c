@@ -807,11 +807,11 @@ WORDS_drawn_fix_OLD        (uchar *a_index, short a_drawn [])
 }
 
 char
-WORDS_fix_ae            (char i, char a_pcat, char a_name [LEN_TERSE], char a_ncat, uchar b_shown [LEN_HUND], short b_drawn [LEN_LABEL])
+WORDS_fix_ae            (char i, char a_pcat, char a_name [LEN_TERSE], char a_ncat, char b_shown [LEN_HUND], short b_drawn [LEN_LABEL])
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
-   uchar       x_name      [LEN_TERSE] = "";
+   char        x_name      [LEN_TERSE] = "";
    short       x_new       =    0;
    /*---(header)-------------------------*/
    DEBUG_CONF   yLOG_enter   (__FUNCTION__);
@@ -868,13 +868,13 @@ WORDS_fix_ae            (char i, char a_pcat, char a_name [LEN_TERSE], char a_nc
 }
 
 char
-WORDS_fix_ou            (char i, char a_pcat, char a_name [LEN_TERSE], char a_ncat, uchar b_shown [LEN_HUND], short b_drawn [LEN_LABEL])
+WORDS_fix_ou            (char i, char a_pcat, char a_name [LEN_TERSE], char a_ncat, char b_shown [LEN_HUND], short b_drawn [LEN_LABEL])
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
-   uchar       x_name      [LEN_TERSE] = "";
+   char        x_name      [LEN_TERSE] = "";
    short       x_new       =    0;
-   uchar       x_var       =  '·';
+   char        x_var       =  '·';
    /*---(header)-------------------------*/
    DEBUG_CONF   yLOG_enter   (__FUNCTION__);
    /*---(defense)------------------------*/
@@ -904,7 +904,7 @@ WORDS_fix_ou            (char i, char a_pcat, char a_name [LEN_TERSE], char a_nc
    /*---(create names)-------------------*/
    x_var = s_ou [a_pcat][a_ncat];
    DEBUG_CONF   yLOG_char    ("x_var"     , x_var);
-   if (x_var != (uchar) '·')   sprintf (x_name , "%s%c", a_name, s_ou [a_pcat][a_ncat]);
+   if (x_var != '·')   sprintf (x_name , "%s%c", a_name, s_ou [a_pcat][a_ncat]);
    else                        strlcpy (x_name , a_name, LEN_TERSE);
    DEBUG_CONF   yLOG_complex ("table"     , "prev %2d, next %2d, %s name", a_pcat, a_ncat, x_name);
    /*---(verify vowel)-------------------*/
@@ -925,12 +925,12 @@ WORDS_fix_ou            (char i, char a_pcat, char a_name [LEN_TERSE], char a_nc
 }
 
 char
-WORDS_fix_other         (char i, char a_pcat, char a_ccat, char a_name [LEN_TERSE], char a_ncat, uchar b_shown [LEN_HUND], short b_drawn [LEN_LABEL])
+WORDS_fix_other         (char i, char a_pcat, char a_ccat, char a_name [LEN_TERSE], char a_ncat, char b_shown [LEN_HUND], short b_drawn [LEN_LABEL])
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
-   uchar       x_name      [LEN_TERSE] = "";
-   uchar       x_short     [LEN_TERSE] = "";
+   char        x_name      [LEN_TERSE] = "";
+   char        x_short     [LEN_TERSE] = "";
    short       x_new       =    0;
    /*---(header)-------------------------*/
    DEBUG_CONF   yLOG_enter   (__FUNCTION__);
@@ -958,35 +958,73 @@ WORDS_fix_other         (char i, char a_pcat, char a_ccat, char a_name [LEN_TERS
 }
 
 char
-WORDS_fix_prep          (uchar b_gregg [LEN_TITLE])
+WORDS_fix_prep          (char b_gregg [LEN_TITLE])
 {
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
+   char        x_gregg     [LEN_TITLE] = "";
+   char       *p           = NULL;
+   char       *q           =  "·";
+   char       *r           = NULL;
+   /*---(header)-------------------------*/
+   DEBUG_CONF   yLOG_enter   (__FUNCTION__);
+   /*---(defense)------------------------*/
+   DEBUG_CONF   yLOG_point   ("b_gregg"   , b_gregg);
+   --rce;  if (b_gregg == NULL) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(prepare)------------------------*/
+   strlcpy (x_gregg, b_gregg, LEN_TITLE);
+   strlcpy (b_gregg, ""     , LEN_TITLE);
+   /*---(begin parse)--------------------*/
+   p = strtok_r (x_gregg, q, &r);
+   DEBUG_CONF   yLOG_point   ("p"         , p);
+   while (p != NULL) {
+      if      (strlen (b_gregg) > 0)    strlcat (b_gregg, "·"  , LEN_TITLE);
+      if      (strcmp (p, "i" ) == 0)   strlcat (b_gregg, "a·+", LEN_TITLE);
+      else if (strcmp (p, "ia") == 0)   strlcat (b_gregg, "a· ", LEN_TITLE);
+      else if (strcmp (p, "ie") == 0)   strlcat (b_gregg, "a· ", LEN_TITLE);
+      else if (strcmp (p, "io") == 0)   strlcat (b_gregg, "a· ", LEN_TITLE);
+      else if (strcmp (p, "ea") == 0)   strlcat (b_gregg, "a·á", LEN_TITLE);
+      else if (strcmp (p, "wa") == 0)   strlcat (b_gregg, "a·-", LEN_TITLE);
+      else if (strcmp (p, "we") == 0)   strlcat (b_gregg, "e·-", LEN_TITLE);
+      else if (strcmp (p, "h" ) == 0)   strlcat (b_gregg, "/"  , LEN_TITLE);
+      else                              strlcat (b_gregg, p    , LEN_TITLE);
+      p = strtok_r (NULL, q, &r);
+      DEBUG_CONF   yLOG_point   ("p"         , p);
+   }
+   /*---(complete)-----------------------*/
+   DEBUG_CONF   yLOG_exit    (__FUNCTION__);
+   return 0;
 }
 
 char
-WORDS_fix_gregg         (uchar a_gregg [LEN_TITLE], uchar r_shown [LEN_HUND], short r_drawn [LEN_LABEL])
+WORDS_fix_gregg         (char a_gregg [LEN_TITLE], char r_shown [LEN_HUND], short r_drawn [LEN_LABEL])
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
    char        rc          =    0;
    int         i           =    0;
-   uchar       x_gregg     [LEN_TITLE] = "";
+   char        x_gregg     [LEN_TITLE] = "";
    char       *n           = NULL;
    char       *p           = NULL;
    char       *q           =  "·";
    char       *r           = NULL;
    char       *nn          = NULL;
    short       x_prev      =   -1;
-   uchar         x_lprev   [LEN_TERSE] = "";
-   uchar         x_pcat    =    0;
+   char          x_lprev   [LEN_TERSE] = "";
+   char          x_pcat    =    0;
    short       x_curr      =   -1;
-   uchar         x_lcurr   [LEN_TERSE] = "";
-   uchar         x_ccat    =    0;
+   char          x_lcurr   [LEN_TERSE] = "";
+   char          x_ccat    =    0;
    short       x_next      =   -1;
-   uchar         x_lnext   [LEN_TERSE] = "";
-   uchar         x_ncat    =    0;
+   char          x_lnext   [LEN_TERSE] = "";
+   char          x_ncat    =    0;
    short       x_nnext     =   -1;
-   uchar         x_lnnext  [LEN_TERSE] = "";
-   uchar         x_nncat   =    0;
+   char          x_lnnext  [LEN_TERSE] = "";
+   char          x_nncat   =    0;
    /*---(header)-------------------------*/
    DEBUG_CONF   yLOG_enter   (__FUNCTION__);
    /*---(defense)------------------------*/
@@ -1007,6 +1045,7 @@ WORDS_fix_gregg         (uchar a_gregg [LEN_TITLE], uchar r_shown [LEN_HUND], sh
    }
    /*---(prepare)------------------------*/
    strlcpy (x_gregg, a_gregg, LEN_TITLE);
+   WORDS_fix_prep (x_gregg);
    for (i = 0; i < LEN_HUND;  ++i)  r_shown  [i] = '\0';
    for (i = 0; i < LEN_LABEL; ++i)  r_drawn  [i] = -1;
    /*---(begin parse)--------------------*/

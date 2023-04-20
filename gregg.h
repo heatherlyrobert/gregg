@@ -37,8 +37,8 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "5.--= generalization for broader use"
 #define     P_VERMINOR  "5.4 = update for use as coding example"
-#define     P_VERNUM    "5.4l"
-#define     P_VERTXT    "got complex vowels working fairly well"
+#define     P_VERNUM    "5.4m"
+#define     P_VERTXT    "dictionary can paginate and show only base forms"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -356,6 +356,8 @@ struct cMY {
    long        run_time;                    /* time of program launch         */
    char        cwd         [LEN_PATH];      /* current working directory      */
    char        heartbeat   [LEN_HUND];      /* latest heartbeat               */
+   char        wordfile    [LEN_PATH];      /* input word file                */
+   char        baseonly;                    /* dictionary only shows bases    */
    /*---(x11 window)-----------*/
    char        w_layout;                    /* current format                 */
    short       w_wide;                      /* full window width              */
@@ -366,6 +368,7 @@ struct cMY {
    short       w_npage;                     /* dictionary pages               */
    short       w_ppage;                     /* entries per page               */
    short       w_cpage;                     /* current page                   */
+   short       w_entries;                   /* number of dictionary entries   */
    /*---(texture)-----------*/
    short       t_wide;                      /* texture width                  */
    short       t_tall;                      /* texture height                 */
@@ -942,6 +945,8 @@ struct cWORD {
 };
 
 
+#define   MAX_PAGES      100
+extern tWORD    *g_pages [MAX_PAGES];
 
 extern     char      g_print     [LEN_RECD];
 
@@ -1194,10 +1199,11 @@ char*       WORDS_entry             (int n);
 char        WORDS_table_ae          (void);
 char        WORDS_drawn_show        (short a_drawn [], uchar *a_out);
 char        WORDS_drawn_fix_OLD     (uchar *a_index, short a_drawn []);
-char        WORDS_fix_ae            (char i, char a_pcat, char a_name [LEN_TERSE], char a_ncat, uchar b_show [LEN_HUND], short b_drawn [LEN_LABEL]);
-char        WORDS_fix_ou            (char i, char a_pcat, char a_name [LEN_TERSE], char a_ncat, uchar b_show [LEN_HUND], short b_drawn [LEN_LABEL]);
-char        WORDS_fix_other         (char i, char a_pcat, char a_ccat, char a_name [LEN_TERSE], char a_ncat, uchar b_shown [LEN_HUND], short b_drawn [LEN_LABEL]);
-char        WORDS_fix_gregg         (uchar a_gregg [LEN_TITLE], uchar r_shown [LEN_HUND], short r_drawn [LEN_LABEL]);
+char        WORDS_fix_ae            (char i, char a_pcat, char a_name [LEN_TERSE], char a_ncat, char b_show [LEN_HUND], short b_drawn [LEN_LABEL]);
+char        WORDS_fix_ou            (char i, char a_pcat, char a_name [LEN_TERSE], char a_ncat, char b_show [LEN_HUND], short b_drawn [LEN_LABEL]);
+char        WORDS_fix_other         (char i, char a_pcat, char a_ccat, char a_name [LEN_TERSE], char a_ncat, char b_shown [LEN_HUND], short b_drawn [LEN_LABEL]);
+char        WORDS_fix_prep          (char b_gregg [LEN_TITLE]);
+char        WORDS_fix_gregg         (char a_gregg [LEN_TITLE], char r_shown [LEN_HUND], short r_drawn [LEN_LABEL]);
 int         words_outstring         (char *);
 
 int         WORDS_find             (char* a_word);

@@ -106,7 +106,6 @@ DRAW_init            (void)
    DRAW_make       (my.w_layout);
    /*> DLIST_letters_make (1.0);                                                      <*/
    /*> PAGE_new_again  ();                                                            <*/
-   /*> DLIST_init      ();                                                            <*/
    /*> DRAW_back       ();                                                            <*/
    /*---(ribbon)-------------------------*/
    /*> yVIKEYS_view_ribbon ("play"    , "dj"          );                              <* 

@@ -176,6 +176,8 @@ PROG__init              (int a_argc, char *a_argv[])
    my.quit         = '-';
    /*> my.ratio        = GREGG_WACOM;                                                 <*/
    my.ratio        = 10;
+   my.baseonly     = '-';
+   strlcpy (my.wordfile, "/var/lib/gregg/gregg_manual.dict", LEN_PATH);
    /*> my.w_wide       = 500;                                                         <* 
     *> my.w_tall       = 350;                                                         <* 
     *> strlcpy (my.w_title, "gregg shorthand interpreter", LEN_HUND);                 <*/
@@ -185,6 +187,9 @@ PROG__init              (int a_argc, char *a_argv[])
    /*---(get letters/sizing ready)----*/
    WORDS_init      ();
    DICT_init       ();
+   my.w_ppage   = 120;
+   my.w_npage   = 0;
+   my.w_cpage   = 0;
    /*---(get letters/sizing ready)----*/
    TABLE_init      ();
    PAGE_init       ();
@@ -309,6 +314,8 @@ PROG__args              (int a_argc, char *a_argv[])
       else if (strcmp (a, "--page"              ) == 0)   DRAW_resize (LAYOUT_PAGEVIEW);
       else if (strcmp (a, "--dictionary"        ) == 0)   DRAW_resize (LAYOUT_DICTIONARY);
       else if (strcmp (a, "--connect"           ) == 0)   DRAW_resize (LAYOUT_CONNECT);
+      else if (strcmp (a, "--baseonly"          ) == 0)   my.baseonly = 'y';
+      else if (strcmp (a, "--wordfile"          ) == 0)   TWOARG  { strncpy (my.wordfile, b, LEN_PATH); }
       /*---(catch two-arg errors)--------*/
       if (rc < 0)  {
          DEBUG_PROG  yLOG_note  ("two arg test failed");
@@ -409,7 +416,9 @@ PROG_dawn          (void)
    USER_init     ();
    /*---(final program)------------------*/
    /*> if (my.dict   == 'y')  DICT_import  (NAME_DICT);                               <*/
-   DICT_import  ("/var/lib/gregg/gregg_manual.dict");
+   /*> DICT_import  ("/var/lib/gregg/gregg_manual.dict");                             <*/
+   DLIST_init      ();
+   DICT_import  (my.wordfile);
    DEBUG_PROG   yLOG_value   ("words"     , WORDS_eng_count ());
    yMAP_refresh_full ();
    OUT_init      ();
