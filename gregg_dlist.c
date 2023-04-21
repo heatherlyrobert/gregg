@@ -11,6 +11,7 @@ GLuint    dl_back    = NULL;
 
 
 tWORD    *g_pages [MAX_PAGES];
+tWORD    *g_lasts [MAX_PAGES];
 
 
 
@@ -765,6 +766,7 @@ char
 DLIST_paginate          (void)
 {
    tWORD      *x_word      = NULL;
+   tWORD      *x_last      = NULL;
    short       i           =    0;
    short       c           =    0;
    short       p           =    0;
@@ -773,19 +775,32 @@ DLIST_paginate          (void)
    /*---(basic inputs)-------------------*/
    DEBUG_OUTP   yLOG_value   ("ppage"     , my.w_ppage);
    /*---(clear paging)-------------------*/
-   for (i = 0; i < MAX_PAGES; ++i)  g_pages [i] = NULL;
+   for (i = 0; i < MAX_PAGES; ++i)  g_pages [i] = g_lasts [i] = NULL;
    /*---(paginate)-----------------------*/
    WORDS_eng_by_cursor (YDLST_HEAD, &x_word);
    while (x_word != NULL) {
       DEBUG_OUTP   yLOG_complex ("x_word"    , "%4d %4d %4d %-15.15s %-15.15s %s", p, i++, c, x_word->english, x_word->gregg, x_word->shown);
+      if (x_last != NULL) {
+         DEBUG_OUTP   yLOG_info    ("x_last"    , x_last->english);
+      }
       if (my.baseonly == '-' || x_word->vary [0] == '<') {
          if (c % my.w_ppage == 0) {
             DEBUG_GRAF   yLOG_complex ("new page"  , "%4d, %s", p, x_word->english);
-            g_pages [p++] = x_word;
+            g_pages [p] = x_word;
+            if (p > 0) {
+               DEBUG_GRAF   yLOG_complex ("add last"  , "%4d, %s", p - 1, x_last->english);
+               g_lasts [p - 1] = x_last;
+            }
+            ++p;
          }
+         x_last = x_word;
          ++c;
       }
       WORDS_eng_by_cursor (YDLST_NEXT, &x_word);
+   }
+   if (p > 0) {
+      g_lasts [p - 1] = x_last;
+      DEBUG_GRAF   yLOG_complex ("add last"  , "%4d, %s", p - 1, x_last->english);
    }
    /*---(update globals)-----------------*/
    my.w_npage   = p;
@@ -813,12 +828,14 @@ DLIST_dict              (void)
    int         x_max       =    0;
    static int  x_times     =    0;
    int         x_extra     =    0;
+   float       x_left      =    0;
+   int         n           =    0;
    /*---(header)-------------------------*/
    DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
    /*---(defense)------------------------*/
    DEBUG_OUTP   yLOG_value   ("words"     , WORDS_eng_count ());
    /*---(page)---------------------------*/
-   my.p_hinting = STYLE_HINTS;
+   /*> my.p_hinting = STYLE_HINTS;                                                    <*/
    DEBUG_OUTP   yLOG_value   ("cpage"     , my.w_cpage);
    DEBUG_OUTP   yLOG_point   ("g_pages"   , g_pages [my.w_cpage]);
    --rce;  if (g_pages [my.w_cpage] == NULL) {
@@ -826,8 +843,9 @@ DLIST_dict              (void)
       return rce;
    }
    DEBUG_OUTP   yLOG_complex ("bounds"    , "%4d lef, %4d rig, %4d xlen,  %4d bot, %4d top, %4d ylen", my.t_lef, my.t_rig, my.t_xlen, my.t_bot, my.t_top, my.t_ylen);
+   x_left = my.p_left + 0.5 * my.p_spacing;
    glPushMatrix    (); {
-      x =   60;
+      x = x_left;
       y =  -75;
       WORDS_eng_by_name  (g_pages [my.w_cpage]->english, &x_word);
       while (x_word != NULL) {
@@ -840,6 +858,11 @@ DLIST_dict              (void)
                strlcpy  (t, x_word->english, LEN_TITLE);
                strldchg (t, '·', ' ', LEN_TITLE);
                yFONT_print (win.font_pretty,  8, YF_MIDCEN, t);
+               if (x_word->vary [0] == '<') {
+                  glTranslatef (0,   - 30,   0);
+                  sprintf  (t, "%d", x_word->count);
+                  yFONT_print (win.font_pretty,  8, YF_MIDCEN, t);
+               }
             } glPopMatrix   ();
             PAGE_gregg_word (SHAPE_DRAW, x_word->shown, &x, &y);
             ++c;
@@ -848,7 +871,10 @@ DLIST_dict              (void)
          WORDS_eng_by_cursor (YDLST_NEXT, &x_word);
          if (x_save != c && c %  12 == 0) {
             PAGE_next_line (&x, &y);
-            x =  60;
+            if (++n == 5)  y -= 40;
+            x = x_left;
+         } else if (x_save != c && c %   6 == 0) {
+            x += 30;
          }
          if (c >= my.w_ppage)  break;
          x_save = c;
@@ -903,7 +929,7 @@ DLIST_dict_OLD          (void)
        *>    sprintf (t, "%2d/%2d (%d)", my.w_cpage, my.w_npage, ++x_times);          <* 
        *>    yFONT_print (win.font_pretty, 12, YF_MIDCEN, t);                         <* 
        *> } glPopMatrix   ();                                                         <*/
-      x =   60;
+      x =   70;
       y =  -75;
       WORDS_eng_by_index (i, &x_word);
       while (x_word != NULL) {
@@ -924,7 +950,9 @@ DLIST_dict_OLD          (void)
          WORDS_eng_by_index (i, &x_word);
          if (x_save != c && c %  12 == 0) {
             PAGE_next_line (&x, &y);
-            x =  60;
+            x  = 70;
+         } else if (x_save != c && c %   6 == 0) {
+            x += 40;
          }
          if (c >= x_max)  break;
          x_save = c;

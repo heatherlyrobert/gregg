@@ -37,8 +37,8 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "5.--= generalization for broader use"
 #define     P_VERMINOR  "5.4 = update for use as coding example"
-#define     P_VERNUM    "5.4m"
-#define     P_VERTXT    "dictionary can paginate and show only base forms"
+#define     P_VERNUM    "5.4n"
+#define     P_VERTXT    "formatted dictionary view cleaner and nicer"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -923,10 +923,11 @@ struct cWORD {
    short       drawn       [LEN_LABEL];     /* gregg letter indexes           */
    uchar      *fancy;                       /* fancy version of gregg         */
    /*---(source)---------------*/
-   short       line;
+   short       line;                        /* input line                     */
    char        vary        [LEN_SHORT];     /* variation                      */
-   tWORD      *base;
-   tWORD      *next;
+   tWORD      *base;                        /* base of current variation      */
+   tWORD      *next;                        /* next variation or null         */
+   char        count;                       /* count of variations            */
    /*---(part-of-speech)-------*/
    char        part;                        /* primary part of speech         */
    char        sub;                         /* sub-part                       */
@@ -947,6 +948,7 @@ struct cWORD {
 
 #define   MAX_PAGES      100
 extern tWORD    *g_pages [MAX_PAGES];
+extern tWORD    *g_lasts [MAX_PAGES];
 
 extern     char      g_print     [LEN_RECD];
 

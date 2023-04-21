@@ -242,8 +242,8 @@ tVARY  g_varies [LEN_FULL] = {
    {   "em"  , ">·e·m"    , ""     , '·',  -1  , "-ism"                                                 , "brutalism, paganism, barbarism"                                      , 0 },
    {   "es"  , ">·e·s"    , ""     , '·',  -1  , "-ist"                                                 , "brutalist, paganist"                                                 , 0 },
    {   "en"  , ">·e·n"    , ""     , '·',  -1  , "-en, -in"                                             , "toughen, woken"                                                      , 0 },
-   { "o"     , ">·o"      , ""     , '5', 123  , "-alogy, -elogy, -ilogy"                               , "geology, analogy, psychology"                                        , 0 },
-   {   "ol"  , ">·o·l"    , ""     , '5', 123  , "-alogical, -elogical, -ilogical"                      , "geological, psychological"                                           , 0 },
+   { "o"     , ">·o"      , ""     , '5', 123  , "-alogy, -elogy, -ilogy, -ology"                       , "geology, analogy, psychology"                                        , 0 },
+   {   "ol"  , ">·o·l"    , ""     , '5', 123  , "-alogical, -elogical, -ilogical, -ological"           , "geological, psychological"                                           , 0 },
    {   "or"  , ">·o·r"    , ""     , '·',  -1  , "-ry, -ory, -ery, -ary, -ium, -itory, -atory"          , "observatory, aviary"                                                 , 0 },
    { "u"     , ">·u"      , ""     , '·',  -1  , "-ul, -al, -il, -ile, -ial, -el"                       , "additonal, observational"                                            , 0 },
    {    "us" , ">·u·s"    , ""     , '5', 118  , "-ulus, -elus, -ilus, -alus"                           , "modulus"                                                             , 0 },
@@ -841,6 +841,7 @@ DICT__variation_quick   (tWORD *a_base, tWORD *a_last, char a_english [LEN_TITLE
    x_new->freq = a_base->freq;
    /*---(connect to chain)---------------*/
    x_new->base = a_base;
+   ++(x_new->base->count);
    if (a_last != NULL)  a_last->next = x_new;
    /*---(save-back)----------------------*/
    if (r_new  != NULL)  *r_new = x_new;
@@ -951,6 +952,7 @@ DICT__parse             (short a_line, uchar *a_recd)
       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
+   x_new->count = 1;
    /*---(arpabet)------------------------*/
    if (s_nfield > 3) {
       x_new->arpabet   = strdup (s_fields [1]);

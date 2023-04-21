@@ -142,7 +142,7 @@ DRAW_resize             (char a_layout)
    switch (a_layout) {
    case  LAYOUT_INTERPRET  : rc = PAGE_config (LAYOUT_INTERPRET ,  500,  350, YF_GREGG , 2.0,   -1, -1, -1, -1,   -1, YF_ORIGIN, -1, -1, -1, '-');          break;
    case  LAYOUT_PAGEVIEW   : rc = PAGE_config (LAYOUT_PAGEVIEW  , 1000,  700, YF_TOPLEF, 2.0,   -1, -1, -1, -1,   -1, YF_MIDCEN, 15, 15, 40, GAP_GRID);     break;
-   case  LAYOUT_DICTIONARY : rc = PAGE_config (LAYOUT_DICTIONARY, 1000,  700, YF_TOPLEF, 2.0,   -1, -1, -1, -1,   -1, YF_MIDCEN, 15, 15, 40, GAP_GRID);     break;
+   case  LAYOUT_DICTIONARY : rc = PAGE_config (LAYOUT_DICTIONARY, 1200,  750, YF_TOPLEF, 2.0,   10, 10, -1, -1,   -1, YF_MIDCEN, 15, 15, 47, GAP_GRID);     break;
    case  LAYOUT_CONNECT    : rc = PAGE_config (LAYOUT_CONNECT   , 1300, 1100, YF_TOPLEF, 2.0,   -1, -1, -1, -1,   -1, YF_MIDCEN, 15, 15, 40, GAP_GRID);     break;
    }
    DEBUG_OUTP   yLOG_value   ("conf"      , rc);
@@ -181,7 +181,7 @@ DRAW_make               (char a_layout)
    switch (a_layout) {
    case  LAYOUT_INTERPRET  : rc = PAGE_new    (LAYOUT_INTERPRET ,  500,  350, YF_GREGG , 2.0,   -1, -1, -1, -1,   -1, YF_ORIGIN, -1, -1, -1, '-');          break;
    case  LAYOUT_PAGEVIEW   : rc = PAGE_new    (LAYOUT_PAGEVIEW  , 1000,  700, YF_TOPLEF, 2.0,   -1, -1, -1, -1,   -1, YF_MIDCEN, 15, 15, 40, GAP_GRID);     break;
-   case  LAYOUT_DICTIONARY : rc = PAGE_new    (LAYOUT_DICTIONARY, 1000,  700, YF_TOPLEF, 2.0,   -1, -1, -1, -1,   -1, YF_MIDCEN, 15, 15, 40, GAP_GRID);     break;
+   case  LAYOUT_DICTIONARY : rc = PAGE_new    (LAYOUT_DICTIONARY, 1200,  750, YF_TOPLEF, 2.0,   10, 10, -1, -1,   -1, YF_MIDCEN, 15, 15, 47, GAP_GRID);     break;
    case  LAYOUT_CONNECT    : rc = PAGE_new    (LAYOUT_CONNECT   , 1300, 1100, YF_TOPLEF, 2.0,   -1, -1, -1, -1,   -1, YF_MIDCEN, 15, 15, 40, GAP_GRID);     break;
    }
    DEBUG_OUTP   yLOG_value   ("new"       , rc);
@@ -225,6 +225,120 @@ DRAW_wrap            (void)
 static void      o___PANELS__________________o (void) {;}
 
 char
+DRAW_dictionary         (void)
+{
+   short       x_min, x_max, x_wide, y_min, y_max, y_tall;
+   short       x_cen, y_mid;
+   short       z           = 0;
+   char        t           [LEN_TITLE] = "";
+   yVIEW_bounds  (YVIEW_MAIN, NULL, NULL, &x_min, &x_max, &x_wide, &y_min, &y_max, &y_tall);
+   x_cen = x_min + (x_max - x_min) / 2.0;
+   y_mid = y_min + (y_max - y_min) / 2.0;
+   yCOLOR_opengl (YCOLOR_NEG, YCOLOR_DRK, 0.40);
+   /*> yCOLOR_opengl (YCOLOR_BAS, YCOLOR_MUT, 0.65);                                  <*/
+   /*> yCOLOR_opengl (YCOLOR_NEG, YCOLOR_MED, 0.65);                                  <*/
+   z = 0;
+   glLineWidth   (0.8);
+   glPushMatrix    (); {
+      glEnable      (GL_LINE_STIPPLE);
+      glLineStipple (1, 0x3333);
+      glBegin(GL_LINES); {
+         glVertex3f (x_min + 30, y_max - 30, z);
+         glVertex3f (x_max - 30, y_max - 30, z);
+         glVertex3f (x_min + 30, y_min + 50, z);
+         glVertex3f (x_max - 30, y_min + 50, z);
+         glVertex3f (x_min + 30, y_mid + 10, z);
+         glVertex3f (x_max - 30, y_mid + 10, z);
+      } glEnd();
+      glBegin(GL_LINES); {
+         glVertex3f (x_min + 30, y_max - 30, z);
+         glVertex3f (x_min + 30, y_min + 50, z);
+         glVertex3f (x_cen     , y_max - 30, z);
+         glVertex3f (x_cen     , y_min + 50, z);
+         glVertex3f (x_max - 30, y_max - 30, z);
+         glVertex3f (x_max - 30, y_min + 50, z);
+      } glEnd();
+      glDisable(GL_LINE_STIPPLE);
+   } glPopMatrix   ();
+   z = 0;
+   glPushMatrix    (); {
+      glBegin(GL_LINE_STRIP); {
+         glVertex3f (x_min + 30, y_max - 50, z);
+         glVertex3f (x_min + 30, y_max - 30, z);
+         glVertex3f (x_min + 50, y_max - 30, z);
+      } glEnd();
+      glBegin(GL_LINE_STRIP); {
+         glVertex3f (x_max - 30, y_max - 50, z);
+         glVertex3f (x_max - 30, y_max - 30, z);
+         glVertex3f (x_max - 50, y_max - 30, z);
+      } glEnd();
+      glBegin(GL_LINE_STRIP); {
+         glVertex3f (x_min + 30, y_min + 70, z);
+         glVertex3f (x_min + 30, y_min + 50, z);
+         glVertex3f (x_min + 50, y_min + 50, z);
+      } glEnd();
+      glBegin(GL_LINE_STRIP); {
+         glVertex3f (x_max - 30, y_min + 70, z);
+         glVertex3f (x_max - 30, y_min + 50, z);
+         glVertex3f (x_max - 50, y_min + 50, z);
+      } glEnd();
+   } glPopMatrix   ();
+   glPushMatrix    (); {
+      glBegin(GL_LINES); {
+         glVertex3f (x_min + 30, y_mid + 30, z);
+         glVertex3f (x_min + 30, y_mid - 10, z);
+         glVertex3f (x_min + 30, y_mid + 10, z);
+         glVertex3f (x_min + 50, y_mid + 10, z);
+      } glEnd();
+      glBegin(GL_LINES); {
+         glVertex3f (x_max - 30, y_mid + 30, z);
+         glVertex3f (x_max - 30, y_mid - 10, z);
+         glVertex3f (x_max - 30, y_mid + 10, z);
+         glVertex3f (x_max - 50, y_mid + 10, z);
+      } glEnd();
+   } glPopMatrix   ();
+   glPushMatrix    (); {
+      glBegin(GL_LINES); {
+         glVertex3f (x_cen - 20, y_max - 30, z);
+         glVertex3f (x_cen + 20, y_max - 30, z);
+         glVertex3f (x_cen     , y_max - 30, z);
+         glVertex3f (x_cen     , y_max - 50, z);
+      } glEnd();
+   } glPopMatrix   ();
+   glPushMatrix    (); {
+      glBegin(GL_LINES); {
+         glVertex3f (x_cen - 20, y_mid + 10, z);
+         glVertex3f (x_cen + 20, y_mid + 10, z);
+         glVertex3f (x_cen     , y_mid + 30, z);
+         glVertex3f (x_cen     , y_mid - 10, z);
+      } glEnd();
+   } glPopMatrix   ();
+   if (g_pages [my.w_cpage] != NULL) {
+      strlcpy (t, g_pages [my.w_cpage]->english, LEN_TITLE);
+   }
+   if (g_lasts [my.w_cpage] != NULL) {
+      strlcat (t, " - "               , LEN_TITLE);
+      strlcat (t, g_lasts [my.w_cpage]->english, LEN_TITLE);
+   }
+   /*> glColor4f (0.0, 0.0, 0.0, 1.0);                                                <*/
+   glPushMatrix    (); {
+      glTranslatef (x_cen, y_max - 15, 150);
+      yFONT_print(win.font_pretty,  12, YF_MIDCEN, t);
+   } glPopMatrix   ();
+   glPushMatrix    (); {
+      sprintf (t, "%d", my.w_cpage + 1);
+      glTranslatef (x_min + 30, y_min + 30, 150);
+      yFONT_print(win.font_pretty,  18, YF_MIDLEF, t);
+   } glPopMatrix   ();
+   glPushMatrix    (); {
+      sprintf (t, "%d", my.w_npage);
+      glTranslatef (x_max - 30, y_min + 30, 150);
+      yFONT_print(win.font_pretty,  18, YF_MIDRIG, t);
+   } glPopMatrix   ();
+   return 0;;
+}
+
+char
 DRAW_primary         (float a_mag)
 {
    char     x_on = 'y';
@@ -232,6 +346,8 @@ DRAW_primary         (float a_mag)
    float    i = 0, j = 0;
    char     t      [LEN_LABEL] = "";
    short    x_min, x_max, x_wide, y_min, y_max, y_tall;
+   short    x_cen, x_mid;
+   char     x_save  = '-';
    /*---(header)-------------------------*/
    DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
    yVIEW_bounds  (YVIEW_MAIN, NULL, NULL, &x_min, &x_max, &x_wide, &y_min, &y_max, &y_tall);
@@ -263,11 +379,15 @@ DRAW_primary         (float a_mag)
     *>    glColor4f (0.0, 0.0, 0.0, 1.0);                                             <* 
     *>    DLIST_connect_real ();                                                      <* 
     *> }                                                                              <*/
-   if (my.w_layout == LAYOUT_INTERPRET || my.w_layout == LAYOUT_CONNECT) {
+   if (my.w_layout == LAYOUT_DICTIONARY) {
+      DRAW_dictionary ();
+   }
+   if (my.w_layout == LAYOUT_INTERPRET || my.w_layout == LAYOUT_CONNECT || my.w_layout == LAYOUT_DICTIONARY) {
       glPushMatrix    (); {
-         /*> my.p_hinting = 'y';                                                         <*/
+         x_save = my.p_hinting;
+         my.p_hinting = '-';
          glColor4f (0.0, 0.0, 0.0, 1.0);
-         glTranslatef (175.0, 60.0, 250.0);
+         glTranslatef (x_min + (x_max - x_min) / 2.0, 40.0, 250.0);
          PAGE_gregg (SHAPE_DRAW, "r·o·b" , &i, &j);
          glTranslatef (  0.0,   7.0,   0.0);
          i = 0; j = 0;
@@ -275,7 +395,7 @@ DRAW_primary         (float a_mag)
          glTranslatef (  0.0, -15.0,   0.0);
          i = 0; j = 0;
          PAGE_gregg (SHAPE_DRAW, "sh·t·/·nd" , &i, &j);
-         /*> my.p_hinting = '-';                                                         <*/
+         my.p_hinting = x_save;
       } glPopMatrix   ();
    }
    /*---(parts)--------------------------*/

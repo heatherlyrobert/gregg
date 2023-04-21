@@ -114,6 +114,7 @@ WORDS__wipe             (tWORD *a_word)
    strcpy (a_word->vary, "<");
    a_word->base      = NULL;
    a_word->next      = NULL;
+   a_word->count     = 0;
    /*---(part-of-speech)-------*/
    a_word->part      = '·';
    a_word->sub       = '·';
