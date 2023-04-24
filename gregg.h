@@ -37,8 +37,8 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "5.--= generalization for broader use"
 #define     P_VERMINOR  "5.4 = update for use as coding example"
-#define     P_VERNUM    "5.4n"
-#define     P_VERTXT    "formatted dictionary view cleaner and nicer"
+#define     P_VERNUM    "5.4o"
+#define     P_VERTXT    "added many, many words and cleaned fr and kp curve connections"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -921,7 +921,11 @@ struct cWORD {
    uchar      *unique;                      /* unique word key                */
    uchar       shown       [LEN_HUND];      /* gregg as needed to draw        */
    short       drawn       [LEN_LABEL];     /* gregg letter indexes           */
+   /*---(audit)----------------*/
    uchar      *fancy;                       /* fancy version of gregg         */
+   char        g_audit;                     /* gregg passes audit             */
+   char        f_audit;                     /* gregg fix passes audit         */
+   char        a_audit;                     /* arpabet passes audit           */
    /*---(source)---------------*/
    short       line;                        /* input line                     */
    char        vary        [LEN_SHORT];     /* variation                      */

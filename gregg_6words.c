@@ -108,8 +108,12 @@ WORDS__wipe             (tWORD *a_word)
    a_word->gregg     = NULL;
    a_word->g_len     = 0;
    a_word->unique    = NULL;
+   /*---(audit)----------------*/
    a_word->fancy     = NULL;
-   /*---(ysort)----------------*/
+   a_word->g_audit   = '-';
+   a_word->f_audit   = '-';
+   a_word->a_audit   = '-';
+   /*---(parsing)--------------*/
    a_word->line      = -1; 
    strcpy (a_word->vary, "<");
    a_word->base      = NULL;
@@ -215,8 +219,10 @@ WORDS__new         (char *a_english, char *a_gregg, char a_part, tWORD **r_word)
    rc = AUDIT_gregg_outline (x_new->gregg, x_fancy);
    x_new->fancy = strdup (x_fancy);
    printf ("%-15.15s  %s\n", x_new->english, x_new->fancy);
+   if (rc < 0)  x_new->g_audit = 'F';
    /*---(drawn)-------------------------*/
-   WORDS_fix_gregg     (x_new->gregg, x_new->shown, x_new->drawn);
+   rc = WORDS_fix_gregg     (x_new->gregg, x_new->shown, x_new->drawn);
+   if (rc < 0)  x_new->f_audit = 'F';
    /*---(hook)---------------------------*/
    rc = ySORT_hook (B_ENGLISH, x_new, x_new->english, &(x_new->ysort_e));
    DEBUG_DATA   yLOG_value   ("hook eng"  , rc);
@@ -948,6 +954,9 @@ WORDS_fix_other         (char i, char a_pcat, char a_ccat, char a_name [LEN_TERS
       return rce;
    }
    DEBUG_CONF   yLOG_info    ("b_shown"   , b_shown);
+   /*---(check for inserts)--------------*/
+   if (a_pcat == CAT_F && a_ccat == CAT_R)   strlcat (b_shown, "·fr", LEN_HUND);
+   if (a_pcat == CAT_K && a_ccat == CAT_P)   strlcat (b_shown, "·kp", LEN_HUND);
    /*---(append to output)---------------*/
    if (strlen (b_shown) > 0)   strlcat (b_shown, "·", LEN_HUND);
    strlcat (b_shown, a_name, LEN_HUND);

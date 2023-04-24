@@ -880,6 +880,18 @@ DLIST_dict              (void)
          x_save = c;
       }
    } glPopMatrix   ();
+   /*---(totals)-------------------------*/
+   yCOLOR_opengl (YCOLOR_NEG, YCOLOR_DRK, 0.40);
+   glPushMatrix    (); {
+       glTranslatef ( 20, -10,   0);
+       sprintf  (t, "%d words", i);
+       yFONT_print (win.font_pretty,  8, YF_MIDLEF, t);
+   } glPopMatrix   ();
+   glPushMatrix    (); {
+       glTranslatef (my.t_xlen - 20, -10,   0);
+       sprintf  (t, "bases %d", c);
+       yFONT_print (win.font_pretty,  8, YF_MIDRIG, t);
+   } glPopMatrix   ();
    /*---(complete)-----------------------*/
    DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
    return 0;

@@ -154,8 +154,8 @@ tVARY  g_varies [LEN_FULL] = {
    {   "dsh" , ">·d·sh"   , ""     , '5',  82  ,  "-dation, -dition"                                    , "addition, gradation"                                                 , 0 },
    {   "dd"  , ">·dd"     , ""     , '5', 118  ,  "-hood, -ward"                                        , "childhood, likelihood, homeward, downward, forward, toward"          , 0 },
    /*--name-- --suffix---- --also-- ---source-- ---true-endings----------------------------------------- ---examples------------------------------------------------------------ cnt */
-   { "th"    , ">·th"     , "ths"  , '5', 111  , "-worthy, -th"                                         , "praiseworthy, trustworthy, width"                                    , 0 },
-   {   "ths" , ">·th·z"   , ""     , '5', 111  , "-ths"                                                 , "widths"                                                              , 0 },
+   { "th"    , ">·th"     , "ths"  , '5', 111  , "-worthy, -th, -inth"                                  , "praiseworthy, trustworthy, width"                                    , 0 },
+   {   "ths" , ">·th·z"   , ""     , '5', 111  , "-ths, -inths"                                         , "widths"                                                              , 0 },
    /*--name-- --suffix---- --also-- ---source-- ---true-endings----------------------------------------- ---examples------------------------------------------------------------ cnt */
    { "tm"    , ">·tm"     , ""     , '5', 118  ,  "-dom"                                                , "wisdom, kingdom"                                                     , 0 },
    /*--name-- --suffix---- --also-- ---source-- ---true-endings----------------------------------------- ---examples------------------------------------------------------------ cnt */
@@ -204,7 +204,9 @@ tVARY  g_varies [LEN_FULL] = {
    {   "kes" , ">·k·e·s"  , ""     , '5', 110  , "-quest"                                               , "request, conquest, bequest, inquest"                                 , 0 },
    {   "kest", ">·k·e·s·t", ""     , '5', 110  , "-quisite"                                             , "requisite, exquisite"                                                , 0 },
    /*--name-- --suffix---- --also-- ---source-- ---true-endings----------------------------------------- ---examples------------------------------------------------------------ cnt */
-   { "g"     , ">·g"      , ""     , '5', 117  , "-gram, -grim"                                         , "monogram, program, telegram"                                         , 0 },
+   { "g"     , ">·g"      , ""     , '5', 117  , "-gram, -grim, -graph"                                 , "monogram, program, telegram"                                         , 0 },
+   {   "ge"  , ">·g·e"    , ""     , '5', 123  , "-graphy"                                              , "lexigraph"                                                           , 0 },
+   {   "gu"  , ">·g·u"    , ""     , '5', 123  , "-graphical"                                           , "lexigraphical"                                                       , 0 },
    /*--name-- --suffix---- --also-- ---source-- ---true-endings----------------------------------------- ---examples------------------------------------------------------------ cnt */
    { "n"     , ">·n"      , ""     , '·',  -1  , "-ence, -ance, -ancy -ness"                            , "observance, lateness, fitness, awareness, witness"                   , 0 },
    {   "ns"  , ">·n·z"    , ""     , '·',  -1  , "-ancy, -ency, -cy, -acy"                              , "observancy, latency, urgency, frequency, transparency"               , 0 },
@@ -222,7 +224,7 @@ tVARY  g_varies [LEN_FULL] = {
    { "sh"    , ">·sh"     , "shs"  , '5',  30  , "-tion, -sion, -ation, -ition"                         , "observation, nation, session, action, motion, fashion"               , 0 },
    {   "shs" , ">·sh·s"   , ""     , '·',  -1  , "-tions, -sions, -ations, -itiosn"                     , "observations, nations, sessions, actions, motions, fashions"         , 0 },
    {   "shu" , ">·sh·u"   , ""     , '5', 111  , "-sure"                                                , "assure, measure, pressure"                                           , 0 },
-   {   "shus", ">·sh·u·s" , ""     , '5', 111  , "-cious"                                               , "audacious, vicious"                                                  , 0 },
+   {   "shus", ">·sh·u·s" , ""     , '5', 111  , "-cious, -sures"                                       , "audacious, vicious, assures, pressures"                              , 0 },
    {   "sht" , ">·sh·t"   , ""     , '5', 111  , "-tient, -cient"                                       , "patient, ancient, efficient, sufficient"                             , 0 },
    {   "shte", ">·sh·t·e" , ""     , '5', 111  , "-tiently, -ciently"                                   , "efficiently, sufficiently"                                           , 0 },
    {   "sh"  , ">·sh"     , ""     , '5', 117  , "-ship, -age"                                          , "partnership, ownership, hardship, friendship"                        , 0 },
@@ -232,16 +234,20 @@ tVARY  g_varies [LEN_FULL] = {
    {    "je" , ">·j·e"    , ""     , '·',  -1  , "-jury"                                                , "injury, purjury"                                                     , 0 },
    {    "js" , ">·j·s"    , ""     , '·',  -1  , "-juries"                                              , "injuries"                                                            , 0 },
    /*--name-- --suffix---- --also-- ---source-- ---true-endings----------------------------------------- ---examples------------------------------------------------------------ cnt */
-   { "a"     , ">·a"      , ""     , '5', 123  , "-tic, -atic, -etic, -itic, -otic"                     , "politic, hymnotic, systematic"                                       , 0 },
-   {    "as" , ">·a·s"    , ""     , '5', 123  , "-tics, -atics, -etics, -itics, -otics"                , "politics, hymnotics, systematics"                                    , 0 },
+   { "a"     , ">·a"      , "a"    , '5', 123  , "-tic, -atic, -etic, -itic, -otic"                     , "politic, hymnotic, systematic"                                       , 0 },
+   {    "as" , ">·a·s"    , "as"   , '5', 123  , "-tics, -atics, -etics, -itics, -otics"                , "politics, hymnotics, systematics"                                    , 0 },
    {    "ae" , ">·a·e"    , ""     , '5', 123  , "-ticly, -aticly, -eticly, -iticly, -oticly"           , "politicly, hymnoticly, systematicly"                                 , 0 },
    { "e"     , ">·e"      , ""     , '5',  30  , "-ly, -ily, -ally, -y"                                 , "only, calmly, totally, early, readity, nasty, tasty"                 , 0 },
+   {   "e"   , ">·e"      , ""     , '·',  -1  , "-ee"                                                  , "mentee, libelee, observee"                                           , 0 },
    {   "esh" , ">·e·sh"   , ""     , '5',  30  , "-ish, -like"                                          , "rougish, brutish"                                                    , 0 },
    {   "ez"  , ">·e·z"    , ""     , '5', 117  , "-ize, -ise, -itize"                                   , "prioritize, rationalize, sympathize"                                 , 0 },
    {   "er"  , ">·e·r"    , ""     , '·',  -1  , "-er, -ier"                                            , "longer, stronger, greater"                                           , 0 },
    {   "em"  , ">·e·m"    , ""     , '·',  -1  , "-ism"                                                 , "brutalism, paganism, barbarism"                                      , 0 },
    {   "es"  , ">·e·s"    , ""     , '·',  -1  , "-ist"                                                 , "brutalist, paganist"                                                 , 0 },
    {   "en"  , ">·e·n"    , ""     , '·',  -1  , "-en, -in"                                             , "toughen, woken"                                                      , 0 },
+   {   "eus" , ">·e·u·s"  , ""     , '·',  -1  , "-ous, -eous, -ious, -aous"                            , "toughen, woken"                                                      , 0 },
+   {   "et"  , ">·e·t"    , "ets"  , '·',  -1  , "-et, -at, -it, -ot, -let"                             , "lancet, leaflet"                                                     , 0 },
+   {   "ets" , ">·e·t·s"  , ""     , '·',  -1  , "-ets, -ats, -its, -ots, -lets"                        , "lancets, leaflets"                                                   , 0 },
    { "o"     , ">·o"      , ""     , '5', 123  , "-alogy, -elogy, -ilogy, -ology"                       , "geology, analogy, psychology"                                        , 0 },
    {   "ol"  , ">·o·l"    , ""     , '5', 123  , "-alogical, -elogical, -ilogical, -ological"           , "geological, psychological"                                           , 0 },
    {   "or"  , ">·o·r"    , ""     , '·',  -1  , "-ry, -ory, -ery, -ary, -ium, -itory, -atory"          , "observatory, aviary"                                                 , 0 },

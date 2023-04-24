@@ -383,6 +383,10 @@ tLOCATION   g_loc [MAX_LETTERS] = {
    { "eu"    ,  SHAPE_SPACE   ,   0,   0,   0,   0,   0,   CAT_NONE,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
    { "oi"    ,  SHAPE_SPACE   ,   0,   0,   0,   0,   0,   CAT_NONE,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
 
+   /*=====[[ CONNECTORS ]]==============================   ====categories=====   =======display===========   ======================= */
+   { "fr"    ,  SHAPE_ELLIPSE ,   3,   3,   0, 115,  85,   CAT_NONE,   2,   2,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+   { "kp"    ,  SHAPE_ELLIPSE ,   3,   3,   0,   0, -85,   CAT_NONE,   2,   2,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },
+
    /*=====[[ header ]]==================================   ====categories=====   =======display===========   ======================= */
    /*-line---,  ---shape------  -sx  -sy  rot  beg  arc    --cat---  -ra  -sz    --tx  --ty  --align--  sp   ----calculated--------- */
    { "END"   ,  SHAPE_NONE    ,   0,   0,   0,   0,   0,   CAT_NONE,   0,   0,      0,    0, 0        ,  0,   0, 0, 0, 0, 0, 0, 0, 0, 0 },

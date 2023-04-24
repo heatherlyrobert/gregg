@@ -61,6 +61,7 @@ AUDIT_gregg_outline     (char a_gregg [LEN_TITLE], char r_fancy [LEN_FULL])
    char       *r           = NULL;
    short       n           =    0;
    char        c           =    0;
+   char        x_fail      =  '-';
    /*---(header)-------------------------*/
    DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
    /*---(defense)------------------------*/
@@ -84,6 +85,7 @@ AUDIT_gregg_outline     (char a_gregg [LEN_TITLE], char r_fancy [LEN_FULL])
       DEBUG_CONF   yLOG_info    ("p"         , p);
       n = CREATE_find_by_name (p, LTRS_NORM, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
       DEBUG_OUTP   yLOG_value   ("current"   , n);
+      if (n < 0) x_fail = 'y';
       /*---(fancify)---------------------*/
       AUDIT_build_fancy (c, n, p, r_fancy);
       /*---(next)------------------------*/
@@ -94,6 +96,12 @@ AUDIT_gregg_outline     (char a_gregg [LEN_TITLE], char r_fancy [LEN_FULL])
    }
    /*---(complete)-----------------------*/
    AUDIT_build_fancy (100, 0, "", r_fancy);
+   /*---(check trouble)------------------*/
+   DEBUG_CONF   yLOG_char    ("x_fail"    , x_fail);
+   --rce;  if (x_fail == 'y') {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
    /*---(complete)-----------------------*/
    DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
    return 0;
