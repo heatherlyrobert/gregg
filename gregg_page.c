@@ -318,7 +318,7 @@ PAGE_shown_letter       (char a_act, uchar *a_ltr)
    }
    /*---(find base)----------------------*/
    DEBUG_OUTP   yLOG_info    ("x_ltr"     , x_ltr);
-   n = CREATE_find_by_name (x_ltr, LTRS_ALL, NULL, NULL, x_label, NULL, NULL, NULL, NULL, NULL, NULL);
+   n = TABLE_letter_by_name (x_ltr, LTRS_ALL, NULL, NULL, x_label, NULL, NULL, NULL, NULL, NULL, NULL);
    DEBUG_OUTP   yLOG_value   ("current"   , n);
    --rce;  if (n < 0) {
       DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);
@@ -361,7 +361,7 @@ PAGE_gregg_letter       (char a_act, uchar *a_ltr)
    else                           strlcpy (x_ltr, a_ltr, LEN_SHORT);
    /*---(find)---------------------------*/
    DEBUG_OUTP   yLOG_info    ("x_ltr"     , x_ltr);
-   n = CREATE_find_by_name (x_ltr, LTRS_ALL, NULL, NULL, x_label, NULL, NULL, NULL, NULL, NULL, NULL);
+   n = TABLE_letter_by_name (x_ltr, LTRS_ALL, NULL, NULL, x_label, NULL, NULL, NULL, NULL, NULL, NULL);
    DEBUG_OUTP   yLOG_value   ("current"   , n);
    --rce;  if (n < 0) {
       DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);
@@ -449,9 +449,9 @@ PAGE_gregg_size         (char a_gregg [LEN_TITLE], char *r_count, short *r_point
    if (r_points != NULL)  *r_points  = 0;
    if (r_list   != NULL)  { for (i = 0; i < LEN_LABEL; ++i)  r_list [i] = -1; }
    /*---(defense)------------------------*/
-   DEBUG_CONF   yLOG_point   ("a_gregg"   , a_gregg);
+   DEBUG_OUTP   yLOG_point   ("a_gregg"   , a_gregg);
    --rce;  if (a_gregg == NULL) {
-      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
    /*---(prepare)------------------------*/
@@ -461,8 +461,8 @@ PAGE_gregg_size         (char a_gregg [LEN_TITLE], char *r_count, short *r_point
    /*---(walk letters)-------------------*/
    --rce;  while (p != NULL) {
       /*---(find letter)-----------------*/
-      DEBUG_CONF   yLOG_info    ("p"         , p);
-      n = CREATE_find_by_name (p, LTRS_ALL, NULL, NULL, x_label, NULL, NULL, NULL, NULL, NULL, NULL);
+      DEBUG_OUTP   yLOG_info    ("p"         , p);
+      n = TABLE_letter_by_name (p, LTRS_ALL, NULL, NULL, x_label, NULL, NULL, NULL, NULL, NULL, NULL);
       DEBUG_OUTP   yLOG_value   ("current"   , n);
       --rce;  if (n < 0) {
          DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);
@@ -487,7 +487,7 @@ PAGE_gregg_size         (char a_gregg [LEN_TITLE], char *r_count, short *r_point
       cy += g_loc [n].y_end;
       /*---(next)------------------------*/
       p = strtok_r (NULL   , q, &r);
-      DEBUG_CONF   yLOG_point   ("p"         , p);
+      DEBUG_OUTP   yLOG_point   ("p"         , p);
       /*---(done)------------------------*/
    }
    /*---(save-back)----------------------*/
@@ -522,22 +522,22 @@ PAGE_gregg_word         (char a_act, char a_gregg [LEN_TITLE], float *b_xpos, fl
    /*---(header)-------------------------*/
    DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
    /*---(defense)------------------------*/
-   DEBUG_CONF   yLOG_point   ("a_gregg"   , a_gregg);
+   DEBUG_OUTP   yLOG_point   ("a_gregg"   , a_gregg);
    --rce;  if (a_gregg == NULL) {
-      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
    /*---(get data)-----------------------*/
    rc = PAGE_gregg_size (a_gregg, &x_count, &x_points, &x_min, &x_max, &x_wide, &y_min, &y_max, &y_tall, x_list);
-   DEBUG_CONF   yLOG_value   ("sizing"    , rc);
+   DEBUG_OUTP   yLOG_value   ("sizing"    , rc);
    --rce;  if (rc < 0) {
-      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
    /*---(draw outline)-------------------*/
    glPushMatrix(); {
       /*---(get to start)----------------*/
-      DEBUG_CONF   yLOG_complex ("start"     , "%6.1fx, %6.1fy", *b_xpos, *b_ypos);
+      DEBUG_OUTP   yLOG_complex ("start"     , "%6.1fx, %6.1fy", *b_xpos, *b_ypos);
       glTranslatef (*b_xpos, *b_ypos,  0.0);
       /*---(mark default start)----------*/
       if (my.p_hinting == STYLE_HINTS) {
@@ -552,28 +552,28 @@ PAGE_gregg_word         (char a_act, char a_gregg [LEN_TITLE], float *b_xpos, fl
       }
       /*---(adjust for start)------------*/
       if (my.p_align != YF_ORIGIN) {
-         DEBUG_CONF   yLOG_complex ("not origin", "%6.1fx, %6.1fy", -x_min, -y_max);
+         DEBUG_OUTP   yLOG_complex ("not origin", "%6.1fx, %6.1fy", -x_min, -y_max);
          glTranslatef (-x_min, -y_max,  0.0);
       }
       switch (my.p_align) {
       case YF_ORIGIN :
          x_fore = x_max + my.p_spacing;
-         DEBUG_CONF   yLOG_complex ("x-align"   , "origin  %6.1ff, %6.1ff, %3ds", x_move, x_fore, my.p_spacing);
+         DEBUG_OUTP   yLOG_complex ("x-align"   , "origin  %6.1ff, %6.1ff, %3ds", x_move, x_fore, my.p_spacing);
          break;
       case YF_TOPLEF : case YF_MIDLEF : case YF_BASLEF : case YF_BOTLEF : case YF_ORILEF :
          x_fore = x_wide * 1.0 + my.p_spacing;
-         DEBUG_CONF   yLOG_complex ("x-align"   , "left    %6.1ff, %6.1ff, %3ds", x_move, x_fore, my.p_spacing);
+         DEBUG_OUTP   yLOG_complex ("x-align"   , "left    %6.1ff, %6.1ff, %3ds", x_move, x_fore, my.p_spacing);
          break;
       case YF_TOPCEN : case YF_MIDCEN : case YF_BASCEN : case YF_BOTCEN : case YF_ORICEN :
          x_fore = x_wide * 0.5 + my.p_spacing;
          x_move = -(x_wide * 0.5);
-         DEBUG_CONF   yLOG_complex ("x-align"   , "center  %6.1ff, %6.1ff, %3ds", x_move, x_fore, my.p_spacing);
+         DEBUG_OUTP   yLOG_complex ("x-align"   , "center  %6.1ff, %6.1ff, %3ds", x_move, x_fore, my.p_spacing);
          glTranslatef (x_move, 0.0,  0.0);
          break;
       case YF_TOPRIG : case YF_MIDRIG : case YF_BASRIG : case YF_BOTRIG : case YF_ORIRIG :
          x_fore = my.p_spacing;
          x_move = -(x_wide * 1.0);
-         DEBUG_CONF   yLOG_complex ("x-align"   , "right   %6.1ff, %6.1ff, %3ds", x_move, x_fore, my.p_spacing);
+         DEBUG_OUTP   yLOG_complex ("x-align"   , "right   %6.1ff, %6.1ff, %3ds", x_move, x_fore, my.p_spacing);
          glTranslatef (-(x_wide * 1.0), 0.0,  0.0);
          break;
       }
@@ -604,14 +604,16 @@ PAGE_gregg_word         (char a_act, char a_gregg [LEN_TITLE], float *b_xpos, fl
          } glEnd       ();
       }
       /*---(back to defaults)------------*/
-      if (strldcnt (a_gregg, '<', LEN_TITLE) > 0)  glColor4f (0.7, 0.0, 0.0, 1.0);
-      else                                         glColor4f (0.0, 0.0, 0.0, 1.0);
+      if      (strldcnt (a_gregg, '<', LEN_TITLE) > 0)  glColor4f (0.7, 0.0, 0.0, 1.0);
+      else if (strldcnt (a_gregg, '¢', LEN_TITLE) > 0)  glColor4f (0.7, 0.0, 0.0, 1.0);
+      else                                              glColor4f (0.0, 0.0, 0.0, 1.0);
       /*---(walk letters)----------------*/
       /*> glScalef              (my.p_sizing, my.p_sizing, my.p_sizing);                       <*/
       for (i = 0; i < x_count; ++i)  {
          strlcpy (x_label, g_loc [x_list [i]].label, LEN_TERSE);
-         DEBUG_CONF   yLOG_info    ("x_label"   , x_label);
+         DEBUG_OUTP   yLOG_info    ("x_label"   , x_label);
          if (strcmp (x_label, "<") == 0)   glColor4f (0.0, 0.0, 0.0, 1.0);
+         if (strcmp (x_label, "¢") == 0)   glColor4f (0.0, 0.0, 0.0, 1.0);
          if (strcmp (x_label, ">") == 0)   glColor4f (0.7, 0.0, 0.0, 1.0);
          rc =  PAGE_gregg_letter (a_act, x_label);
       }
@@ -669,18 +671,18 @@ PAGE_gregg              (char a_act, char a_gregg [LEN_RECD], float *b_xpos, flo
    /*---(header)-------------------------*/
    DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
    /*---(defense)------------------------*/
-   DEBUG_CONF   yLOG_point   ("a_gregg"   , a_gregg);
+   DEBUG_OUTP   yLOG_point   ("a_gregg"   , a_gregg);
    --rce;  if (a_gregg == NULL) {
-      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
    /*---(prepare)------------------------*/
    strlcpy (x_gregg, a_gregg, LEN_RECD);
    /*---(begin parse)--------------------*/
    p = strtok_r (x_gregg, q, &r);
-   DEBUG_CONF   yLOG_point   ("p"         , p);
+   DEBUG_OUTP   yLOG_point   ("p"         , p);
    if (p == NULL) {
-      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
    /*---(walk letters)-------------------*/
@@ -688,21 +690,21 @@ PAGE_gregg              (char a_act, char a_gregg [LEN_RECD], float *b_xpos, flo
       l = strlen (p);
       DEBUG_OUTP   yLOG_complex ("parsed"    , "%2d[%s]", l, p);
       if (strcmp (p, "¦") == 0) {
-         DEBUG_CONF   yLOG_note    ("found new line");
+         DEBUG_OUTP   yLOG_note    ("found new line");
          PAGE_next_line (b_xpos, b_ypos);
       } else if (strcmp (p, "£") == 0) {
-         DEBUG_CONF   yLOG_note    ("found empty grid");
+         DEBUG_OUTP   yLOG_note    ("found empty grid");
          PAGE_next_grid (b_xpos, b_ypos);
       } else {
          n = WORDS_by_gregg (p, &x_word);
          if (n >= 0)  strlcpy (x_shown, x_word->shown, LEN_HUND);
-         else         WORDS_fix_gregg  (p, x_shown, x_drawn);
+         else         WORDS_fix_gregg  (p, x_shown, x_drawn, NULL);
          rc =  PAGE_gregg_word (a_act, x_shown, b_xpos, b_ypos);
-         DEBUG_CONF   yLOG_value   ("word"      , rc);
+         DEBUG_OUTP   yLOG_value   ("word"      , rc);
       }
       DEBUG_OUTP   yLOG_complex ("new pos"   , "%6.1fx, %6.1fy", *b_xpos, *b_ypos);
       p = strtok_r (NULL   , q, &r);
-      DEBUG_CONF   yLOG_point   ("p"         , p);
+      DEBUG_OUTP   yLOG_point   ("p"         , p);
    }
    /*---(complete)-----------------------*/
    DEBUG_OUTP   yLOG_exit    (__FUNCTION__);

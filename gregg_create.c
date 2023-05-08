@@ -648,47 +648,6 @@ CREATE_space            (short n, char a_act, float a_xradius, float a_yradius, 
 /*============================--------------------============================*/
 static void o___LETTERS________________o (void) {;}
 
-short 
-CREATE_find_by_name     (char *a_ltr, char a_scope, char *r_type, char *r_lcat, char r_label [LEN_TERSE], float *r_xradius, float *r_yradius, float *r_rot, float *r_beg, float *r_arc, char *r_dots)
-{
-   /*---(locals)-----------+-----+-----+-*/
-   char        rce         =  -10;
-   short       i           =    0;
-   /*---(default)------------------------*/
-   if (r_type    != NULL)  *r_type    = '-';
-   if (r_lcat    != NULL)  *r_lcat    = 0;
-   if (r_label   != NULL)  strcpy (r_label, "");
-   if (r_xradius != NULL)  *r_xradius = 0;
-   if (r_yradius != NULL)  *r_yradius = 0;
-   if (r_rot     != NULL)  *r_rot     = 0;
-   if (r_beg     != NULL)  *r_beg     = 0;
-   if (r_arc     != NULL)  *r_arc     = 0;
-   if (r_dots    != NULL)  *r_dots    = 0;
-   /*---(defense)------------------------*/
-   --rce;  if (a_ltr == NULL)  return rce;
-   /*---(walk letters)-------------------*/
-   for (i = 0; i < MAX_LETTERS; ++i) {
-      /*---(check end)-------------------*/
-      if (a_scope != LTRS_ALL && strcmp (g_loc[i].label, "END") == 0)    break;
-      if (strcmp (g_loc[i].label, "EOF") == 0)                           break;
-      /*---(check match)-----------------*/
-      if (strcmp (a_ltr, g_loc[i].label) != 0)                           continue;
-      /*---(found)-----------------------*/
-      if (r_type    != NULL)  *r_type    = g_loc [i].type;
-      if (r_lcat    != NULL)  *r_lcat    = g_loc [i].lcat;
-      if (r_label   != NULL)  strlcpy (r_label, g_loc [i].label, LEN_TERSE);
-      if (r_xradius != NULL)  *r_xradius = g_loc [i].x_ellipse;;
-      if (r_yradius != NULL)  *r_yradius = g_loc [i].y_ellipse;;
-      if (r_rot     != NULL)  *r_rot     = g_loc [i].r_ellipse;
-      if (r_beg     != NULL)  *r_beg     = g_loc [i].b_arc;
-      if (r_arc     != NULL)  *r_arc     = g_loc [i].l_arc;
-      if (r_dots    != NULL)  *r_dots    = g_loc [i].dots;
-      return i;
-   }
-   /*---(complete)-----------------------*/
-   return --rce;
-}
-
 char
 CREATE_letter           (char a_act, uchar *a_ltr, float a_scale, float *b_xpos, float *b_ypos)
 {
@@ -701,7 +660,7 @@ CREATE_letter           (char a_act, uchar *a_ltr, float a_scale, float *b_xpos,
    float       x_rot, x_beg, x_arc, x_xradius, x_yradius;
    /*---(header)-------------------------*/
    DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
-   n = CREATE_find_by_name (a_ltr, LTRS_ALL, &x_type, NULL, x_label, &x_xradius, &x_yradius, &x_rot, &x_beg, &x_arc, &x_dots);
+   n = TABLE_letter_by_name (a_ltr, LTRS_ALL, &x_type, NULL, x_label, &x_xradius, &x_yradius, &x_rot, &x_beg, &x_arc, &x_dots);
    DEBUG_OUTP   yLOG_value   ("current"   , n);
    --rce;  if (n < 0) {
       DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);

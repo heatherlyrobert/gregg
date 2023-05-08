@@ -771,17 +771,17 @@ DLIST_paginate          (void)
    short       c           =    0;
    short       p           =    0;
    /*---(header)-------------------------*/
-   DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
+   DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
    /*---(basic inputs)-------------------*/
-   DEBUG_OUTP   yLOG_value   ("ppage"     , my.w_ppage);
+   DEBUG_GRAF   yLOG_value   ("ppage"     , my.w_ppage);
    /*---(clear paging)-------------------*/
    for (i = 0; i < MAX_PAGES; ++i)  g_pages [i] = g_lasts [i] = NULL;
    /*---(paginate)-----------------------*/
    WORDS_eng_by_cursor (YDLST_HEAD, &x_word);
    while (x_word != NULL) {
-      DEBUG_OUTP   yLOG_complex ("x_word"    , "%4d %4d %4d %-15.15s %-15.15s %s", p, i++, c, x_word->english, x_word->gregg, x_word->shown);
+      DEBUG_GRAF   yLOG_complex ("x_word"    , "%4d %4d %4d %-15.15s %-15.15s %s", p, i++, c, x_word->english, x_word->gregg, x_word->shown);
       if (x_last != NULL) {
-         DEBUG_OUTP   yLOG_info    ("x_last"    , x_last->english);
+         DEBUG_GRAF   yLOG_info    ("x_last"    , x_last->english);
       }
       if (my.baseonly == '-' || x_word->vary [0] == '<') {
          if (c % my.w_ppage == 0) {
@@ -805,8 +805,8 @@ DLIST_paginate          (void)
    /*---(update globals)-----------------*/
    my.w_npage   = p;
    my.w_entries = c;
-   DEBUG_OUTP   yLOG_value   ("npage"     , my.w_npage);
-   DEBUG_OUTP   yLOG_value   ("entries"   , my.w_entries);
+   DEBUG_GRAF   yLOG_value   ("npage"     , my.w_npage);
+   DEBUG_GRAF   yLOG_value   ("entries"   , my.w_entries);
    /*---(complete)-----------------------*/
    DEBUG_GRAF   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -831,26 +831,27 @@ DLIST_dict              (void)
    float       x_left      =    0;
    int         n           =    0;
    /*---(header)-------------------------*/
-   DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
+   DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
    /*---(defense)------------------------*/
-   DEBUG_OUTP   yLOG_value   ("words"     , WORDS_eng_count ());
+   DEBUG_GRAF   yLOG_value   ("words"     , WORDS_eng_count ());
    /*---(page)---------------------------*/
    /*> my.p_hinting = STYLE_HINTS;                                                    <*/
-   DEBUG_OUTP   yLOG_value   ("cpage"     , my.w_cpage);
-   DEBUG_OUTP   yLOG_point   ("g_pages"   , g_pages [my.w_cpage]);
+   DEBUG_GRAF   yLOG_value   ("cpage"     , my.w_cpage);
+   DEBUG_GRAF   yLOG_point   ("g_pages"   , g_pages [my.w_cpage]);
    --rce;  if (g_pages [my.w_cpage] == NULL) {
-      DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);
+      DEBUG_GRAF   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   DEBUG_OUTP   yLOG_complex ("bounds"    , "%4d lef, %4d rig, %4d xlen,  %4d bot, %4d top, %4d ylen", my.t_lef, my.t_rig, my.t_xlen, my.t_bot, my.t_top, my.t_ylen);
+   DEBUG_GRAF   yLOG_complex ("bounds"    , "%4d lef, %4d rig, %4d xlen,  %4d bot, %4d top, %4d ylen", my.t_lef, my.t_rig, my.t_xlen, my.t_bot, my.t_top, my.t_ylen);
    x_left = my.p_left + 0.5 * my.p_spacing;
    glPushMatrix    (); {
       x = x_left;
       y =  -75;
       WORDS_eng_by_name  (g_pages [my.w_cpage]->english, &x_word);
       while (x_word != NULL) {
-         DEBUG_OUTP   yLOG_complex ("x_word"    , "%4d %-15.15s %-15.15s %s", i, x_word->english, x_word->gregg, x_word->shown);
+         DEBUG_GRAF   yLOG_complex ("x_word"    , "%4d %-15.15s %-5.5s %-15.15s %s", i, x_word->english, x_word->vary, x_word->gregg, x_word->shown);
          if (my.baseonly == '-' || x_word->vary [0] == '<') {
+            DEBUG_GRAF   yLOG_complex ("show at"   , "%4d, %6.2fx, %6.2fy", c, x, y);
             glPushMatrix    (); {
                glTranslatef (x, y + 15, -50);
                glColor4f    (0.5, 0.5, 0.5, 0.3);
@@ -883,95 +884,17 @@ DLIST_dict              (void)
    /*---(totals)-------------------------*/
    yCOLOR_opengl (YCOLOR_NEG, YCOLOR_DRK, 0.40);
    glPushMatrix    (); {
-       glTranslatef ( 20, -10,   0);
-       sprintf  (t, "%d words", i);
-       yFONT_print (win.font_pretty,  8, YF_MIDLEF, t);
+      glTranslatef ( 20, -10,   0);
+      sprintf  (t, "%d words", i);
+      yFONT_print (win.font_pretty,  8, YF_MIDLEF, t);
    } glPopMatrix   ();
    glPushMatrix    (); {
-       glTranslatef (my.t_xlen - 20, -10,   0);
-       sprintf  (t, "bases %d", c);
-       yFONT_print (win.font_pretty,  8, YF_MIDRIG, t);
+      glTranslatef (my.t_xlen - 20, -10,   0);
+      sprintf  (t, "bases %d", c);
+      yFONT_print (win.font_pretty,  8, YF_MIDRIG, t);
    } glPopMatrix   ();
    /*---(complete)-----------------------*/
-   DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
-   return 0;
-}
-
-char
-DLIST_dict_OLD          (void)
-{
-   /*---(locals)-----------+-----+-----+-*/
-   char        rce         =  -10;
-   char        rc          =    0;
-   tWORD      *x_word      = NULL;
-   int         i           =    0;
-   int         c           =    0;
-   int         x_save      =    0;
-   float       x           =    0;
-   float       y           =    0;
-   char        t           [LEN_TITLE] = "";
-   int         x_max       =    0;
-   static int  x_times     =    0;
-   int         x_extra     =    0;
-   /*---(header)-------------------------*/
-   DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
-   /*---(defense)------------------------*/
-   DEBUG_OUTP   yLOG_value   ("words"     , WORDS_eng_count ());
-   /*> glColor4f    (1.0, 1.0, 1.0, 1.0);                                             <* 
-    *> for (x = -2000; x <= 2000; x += 100) {                                         <* 
-    *>    for (y = -2000; y <= 2000; y += 100) {                                      <* 
-    *>       glPushMatrix    (); {                                                    <* 
-    *>          glTranslatef (x, y, 250);                                             <* 
-    *>          sprintf (t, "%4.0fx,%4.0fy", x, y);                                   <* 
-    *>          yFONT_print (win.font_pretty,  8, YF_MIDCEN, t);                      <* 
-    *>       } glPopMatrix   ();                                                      <* 
-    *>    }                                                                           <* 
-    *> }                                                                              <*/
-   /*---(page)---------------------------*/
-   my.p_hinting = STYLE_HINTS;
-   DEBUG_OUTP   yLOG_value   ("cpage"     , my.w_cpage);
-   DEBUG_OUTP   yLOG_value   ("ppage"     , my.w_ppage);
-   DEBUG_OUTP   yLOG_complex ("bounds"    , "%4d lef, %4d rig, %4d xlen,  %4d bot, %4d top, %4d ylen", my.t_lef, my.t_rig, my.t_xlen, my.t_bot, my.t_top, my.t_ylen);
-   i = my.w_cpage * my.w_ppage;
-   x_max = i + my.w_ppage;
-   DEBUG_OUTP   yLOG_complex ("positions" , "%2dn, %2dc, %3dp, %4di, %4dx", my.w_npage, my.w_cpage, my.w_ppage, i, x_max);
-   glPushMatrix    (); {
-      /*> glPushMatrix    (); {                                                       <* 
-       *>    glTranslatef (-100,  100, 250);                                          <* 
-       *>    sprintf (t, "%2d/%2d (%d)", my.w_cpage, my.w_npage, ++x_times);          <* 
-       *>    yFONT_print (win.font_pretty, 12, YF_MIDCEN, t);                         <* 
-       *> } glPopMatrix   ();                                                         <*/
-      x =   70;
-      y =  -75;
-      WORDS_eng_by_index (i, &x_word);
-      while (x_word != NULL) {
-         DEBUG_OUTP   yLOG_complex ("x_word"    , "%4d %-15.15s %-15.15s %s", i, x_word->english, x_word->gregg, x_word->shown);
-         if (my.baseonly == '-' || x_word->vary [0] == '<') {
-            glPushMatrix    (); {
-               glTranslatef (x, y + 15, -50);
-               glColor4f    (0.5, 0.5, 0.5, 0.3);
-               /*> strlcpy  (t, x_word->shown, LEN_TITLE);                               <*/
-               strlcpy  (t, x_word->english, LEN_TITLE);
-               strldchg (t, '·', ' ', LEN_TITLE);
-               yFONT_print (win.font_pretty,  8, YF_MIDCEN, t);
-            } glPopMatrix   ();
-            PAGE_gregg_word (SHAPE_DRAW, x_word->shown, &x, &y);
-            ++c;
-         }
-         ++i;
-         WORDS_eng_by_index (i, &x_word);
-         if (x_save != c && c %  12 == 0) {
-            PAGE_next_line (&x, &y);
-            x  = 70;
-         } else if (x_save != c && c %   6 == 0) {
-            x += 40;
-         }
-         if (c >= x_max)  break;
-         x_save = c;
-      }
-   } glPopMatrix   ();
-   /*---(complete)-----------------------*/
-   DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
+   DEBUG_GRAF   yLOG_exit    (__FUNCTION__);
    return 0;
 }
 
@@ -1137,6 +1060,17 @@ DLIST_connect           (void)
          x =  45;
          /*> printf ("\n");                                                           <*/
       }
+      for (xi = 0; xi <= 9; ++xi) {
+         /*> PAGE_gregg (SHAPE_DRAW, "o1 o2 o3 o4 o5 o6 o7 o8 o9", &x, &y);           <*/
+         glPushMatrix    (); {
+            glTranslatef (x, y + 15, -50);
+            glColor4f    (0.5, 0.5, 0.5, 0.3);
+            if (xi > 0)  sprintf (t, "o%d", xi);
+            else         sprintf (t, "o");
+            yFONT_print (win.font_pretty,  8, YF_MIDCEN, t);
+         } glPopMatrix   ();
+         PAGE_gregg (SHAPE_DRAW, t, &x, &y);
+      }
    } glPopMatrix ();
    /*---(complete)-----------------------*/
    DEBUG_GRAF   yLOG_exit    (__FUNCTION__);
@@ -1162,7 +1096,7 @@ DLIST_make              (char a_layout)
    dl_back = glGenLists (1);
    DEBUG_GRAF   yLOG_point   ("dl_back"   , dl_back);
    --rce;  if (dl_back == NULL) {
-      DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);
+      DEBUG_GRAF   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
    /*---(begin)-----------------------------*/
@@ -1178,11 +1112,11 @@ DLIST_make              (char a_layout)
    glEndList ();
    /*---(check)-----------------------------*/
    --rce;  if (!glIsList (dl_back)) {
-      DEBUG_OUTP   yLOG_note    ("not a valid list");
-      DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);
+      DEBUG_GRAF   yLOG_note    ("not a valid list");
+      DEBUG_GRAF   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   DEBUG_OUTP   yLOG_note    ("final list checks as valid");
+   DEBUG_GRAF   yLOG_note    ("final list checks as valid");
    /*---(complete)-----------------------*/
    DEBUG_GRAF   yLOG_exit    (__FUNCTION__);
    return 0;

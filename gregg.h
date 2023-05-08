@@ -37,8 +37,8 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "5.--= generalization for broader use"
 #define     P_VERMINOR  "5.4 = update for use as coding example"
-#define     P_VERNUM    "5.4o"
-#define     P_VERTXT    "added many, many words and cleaned fr and kp curve connections"
+#define     P_VERNUM    "5.5a"
+#define     P_VERTXT    "prefixing shared bases is mostly working"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -500,6 +500,7 @@ struct cLOCATION
    uchar     lcat;                               /* letter group      */
    char      range;                              /* range of letter   */
    char      size;                               /* size category     */
+   char      code;                               /* single char id    */
    /*---(display)-----------*/
    short     x_show;                             /* teaching x        */
    short     y_show;                             /* teaching y        */
@@ -520,6 +521,9 @@ struct cLOCATION
    /*---(done)--------------*/
 };
 extern tLOCATION   g_loc [MAX_LETTERS];
+extern short  g_real;
+extern short  g_end;
+extern short  g_eof;
 
 #define     LTRS_NORM      '-'
 #define     LTRS_ALL       'a'
@@ -598,16 +602,19 @@ extern tCOMBOS g_combos [MAX_COMBOS];
 #define    CAT_XS     16
 #define    CAT_XZ     17
 
-#define    CAT_WH     18
-#define    CAT_OW     19
-#define    CAT_OI     20
+#define    CAT_A      20
+#define    CAT_E      21
+#define    CAT_O      22
+#define    CAT_U      23
 
-#define    CAT_A      40
-#define    CAT_E      41
-#define    CAT_O      42
-#define    CAT_U      43
+#define    CAT_WH     25
+#define    CAT_OW     26
+#define    CAT_OI     27
 
-#define    CAT_ALL    "xdTHDmkrRNjfpP"
+#define    CAT_H      30
+/*                     ·         1         2         3         4          */
+/*                     -123456789-123456789-123456789-123456789-123456789 */
+#define    CAT_ALL    "·dHTDmkrRNjfpPszSZ··aeou·WOI··h··········"
 
 
 typedef struct cCATS tCATS;
@@ -891,16 +898,18 @@ extern tTYPES  g_types  [LEN_TERSE];
 typedef struct cVARY   tVARY;
 struct cVARY {
    /*---(working)--------------*/
-   char        name        [LEN_SHORT];
-   char        suffix      [LEN_TERSE];
-   char        also        [LEN_SHORT];
+   char        name        [LEN_TERSE];     /* name for dictionary use        */
+   char        suffix      [LEN_TERSE];     /* gregg letters added            */
    /*---(source)---------------*/
    char        src;                         /* source version of gregg        */
    short       page;                        /* location within source         */
-   /*---(real)-----------------*/
-   char        endings     [LEN_HUND];
-   char        example     [LEN_HUND];
-   int         count;
+   /*---(used for)-------------*/
+   char        endings     [LEN_HUND];      /* word suffixes actually used    */
+   char        base        [LEN_TERSE];     /* first add this base            */
+   char        change      [LEN_TERSE];     /*   modifying this way           */
+   char        example     [LEN_HUND];      /* show actual uses               */
+   /*---(working)--------------*/
+   short       count;                       /* how many uses                  */
    /*---(done)-----------------*/
 };
 extern tVARY  g_varies [LEN_FULL];
@@ -917,10 +926,13 @@ struct cWORD {
    char        e_len;
    uchar      *arpabet;                     /* pronouce in arpabet            */
    uchar      *gregg;                       /* gregg translation              */
+   uchar      *official;                    /* gregg translation (official)   */
    char        g_len;
    uchar      *unique;                      /* unique word key                */
+   /*---(upates)---------------*/
    uchar       shown       [LEN_HUND];      /* gregg as needed to draw        */
    short       drawn       [LEN_LABEL];     /* gregg letter indexes           */
+   uchar       tree        [LEN_SHORT];     /* gregg as series of letters     */
    /*---(audit)----------------*/
    uchar      *fancy;                       /* fancy version of gregg         */
    char        g_audit;                     /* gregg passes audit             */
@@ -928,7 +940,7 @@ struct cWORD {
    char        a_audit;                     /* arpabet passes audit           */
    /*---(source)---------------*/
    short       line;                        /* input line                     */
-   char        vary        [LEN_SHORT];     /* variation                      */
+   char        vary        [LEN_TERSE];     /* variation                      */
    tWORD      *base;                        /* base of current variation      */
    tWORD      *next;                        /* next variation or null         */
    char        count;                       /* count of variations            */
@@ -1205,11 +1217,7 @@ char*       WORDS_entry             (int n);
 char        WORDS_table_ae          (void);
 char        WORDS_drawn_show        (short a_drawn [], uchar *a_out);
 char        WORDS_drawn_fix_OLD     (uchar *a_index, short a_drawn []);
-char        WORDS_fix_ae            (char i, char a_pcat, char a_name [LEN_TERSE], char a_ncat, char b_show [LEN_HUND], short b_drawn [LEN_LABEL]);
-char        WORDS_fix_ou            (char i, char a_pcat, char a_name [LEN_TERSE], char a_ncat, char b_show [LEN_HUND], short b_drawn [LEN_LABEL]);
-char        WORDS_fix_other         (char i, char a_pcat, char a_ccat, char a_name [LEN_TERSE], char a_ncat, char b_shown [LEN_HUND], short b_drawn [LEN_LABEL]);
-char        WORDS_fix_prep          (char b_gregg [LEN_TITLE]);
-char        WORDS_fix_gregg         (char a_gregg [LEN_TITLE], char r_shown [LEN_HUND], short r_drawn [LEN_LABEL]);
+
 int         words_outstring         (char *);
 
 int         WORDS_find             (char* a_word);
@@ -1323,20 +1331,25 @@ char        DICT__find_sub          (char a_abbr, char a_sub);
 char        DICT__find_grp          (char a_grp);
 char        DICT__find_source       (char a_source);
 char        DICT__find_type         (char a_type);
-char        DICT__find_variation    (char a_name [LEN_SHORT], char r_suffix [LEN_TERSE], char r_also [LEN_SHORT], char r_alsos [LEN_TERSE]);
+char        DICT__find_prefix       (char a_prefix [LEN_TERSE], char r_english [LEN_TERSE], char r_gregg [LEN_TERSE]);
+char        DICT__find_variation    (char a_name [LEN_TERSE], char r_suffix [LEN_TERSE], char r_endings [LEN_HUND], char r_base [LEN_TERSE], char r_change [LEN_TERSE]);
 char        DICT__open              (char a_name [LEN_PATH], FILE **r_file);
 char        DICT__close             (FILE **b_file);
-char        DICT__read              (FILE *a_file, short *r_line, char r_recd [LEN_RECD]);
+char        DICT__read              (FILE *a_file, short *r_line, char r_prefixes [LEN_HUND], char r_recd [LEN_RECD]);
 char        DICT__split             (uchar *a_recd);
 char        DICT__primary           (short a_line, cchar a_english [LEN_TITLE], cchar a_gregg [LEN_TITLE], cchar a_cats [LEN_TITLE], tWORD **r_word);
 char        DICT__category_five     (tWORD *a_new, char l, cchar *a_cats);
 char        DICT__category_six      (tWORD *a_new, char l, cchar *a_cats);
 char        DICT__category_preview  (cchar *a_cats);
 char        DICT__category          (tWORD *a_new, cchar *a_cats);
-char        DICT__variation_quick   (tWORD *a_base, tWORD *a_last, char a_english [LEN_TITLE], char a_vary [LEN_SHORT], char a_suffix [LEN_TERSE], tWORD **r_new);
-char        DICT__variation         (tWORD *a_base, tWORD *a_last, cchar *a_vary, tWORD **r_new);
-char        DICT__parse             (short a_line, uchar *a_recd);
-char        DICT_import             (char a_name [LEN_PATH]);
+char        DICT__variation_quick   (tWORD *a_base, tWORD *a_last, char a_english [LEN_TITLE], char a_vary [LEN_TERSE], char a_prefix [LEN_TERSE], char a_suffix [LEN_TERSE], tWORD **r_new);
+char        DICT__var_english       (char a_english [LEN_TITLE], char a_change [LEN_TERSE], char r_update [LEN_TITLE]);
+char        DICT__variation         (tWORD *a_base, tWORD *a_last, cchar a_english [LEN_TERSE], cchar a_gregg [LEN_TERSE], cchar *a_vary, tWORD **r_new);
+char        DICT__parse             (short a_line, cchar a_english [LEN_TERSE], cchar a_gregg [LEN_TERSE], cchar a_recd [LEN_RECD]);
+char        DICT__parse_easy        (short a_line, cchar a_recd [LEN_RECD]);
+char        DICT__pre_update        (char b_prefix [LEN_LABEL], char b_english [LEN_TITLE]);
+char        DICT__parse_all         (short a_line, cchar a_prefixes [LEN_HUND], cchar a_recd [LEN_RECD]);
+char        DICT_import             (cchar a_name [LEN_PATH]);
 char        DICT_list               (void);
 char        DICT_list_all           (void);
 char        DICT_dump_suffix        (FILE *f);
@@ -1373,7 +1386,6 @@ char        CREATE_teardrop         (short n, char a_act, float a_xradius, float
 char        CREATE_dot              (short n, char a_act, float a_xradius, float a_yradius, float *b_xpos, float *b_ypos);
 char        CREATE_space            (short n, char a_act, float a_xradius, float a_yradius, float *b_xpos, float *b_ypos);
 /*---(letters)--------------*/
-short       CREATE_find_by_name     (char *a_ltr, char a_scope, char *r_type, char *r_lcat, char r_label [LEN_TERSE], float *r_xradius, float *r_yradius, float *r_rot, float *r_beg, float *r_arc, char *r_dots);
 char        CREATE_letter           (char a_act, uchar *a_ltr, float a_scale, float *b_xpos, float *b_ypos);
 char        CREATE_letter_dlist     (char a_act, uchar *a_ltr, float a_scale);
 char        CREATE_letter_data      (uchar *a_ltr, float a_scale);
@@ -1423,6 +1435,9 @@ char        PAGE_demo_dict          (void);
 char        TABLE_fix_sizing        (void);
 char        TABLE_init              (void);
 char        TABLE_letters_data      (float a_scale);
+short       TABLE_letter_by_name    (char *a_ltr, char a_scope, char *r_type, char *r_lcat, char r_label [LEN_TERSE], float *r_xradius, float *r_yradius, float *r_rot, float *r_beg, float *r_arc, char *r_dots);
+char        TABLE_letter_by_index   (short n, char *r_type, char *r_lcat, char r_label [LEN_TERSE], float *r_xradius, float *r_yradius, float *r_rot, float *r_beg, float *r_arc, char *r_dots);
+char        TABLE_letter_sizing     (short n, float *r_xend, float *r_yend, float *r_deg, float *r_xylen, float *r_lef, float *r_rig, float *r_top, float *r_bot, short *r_count);
 
 
 
@@ -1435,6 +1450,16 @@ char        FAKE_done               (short x, short y);
 
 char        AUDIT_build_fancy       (char c, char a_rc, char a_letter [LEN_SHORT], char b_fancy [LEN_FULL]);
 char        AUDIT_gregg_outline     (char a_gregg [LEN_TITLE], char r_fancy [LEN_FULL]);
+
+
+/*---(fix)------------------*/
+char        FIX__prepare            (char *i, char *j, char b_gregg [LEN_TITLE], char r_shown [LEN_HUND], short r_drawn [LEN_LABEL], char r_tree [LEN_TERSE]);
+char        FIX__append             (char *i, char *j, char a_name [LEN_TERSE], short a_new, char b_shown [LEN_HUND], short b_drawn [LEN_LABEL], char b_tree [LEN_TERSE]);
+char        FIX__ae                 (char *i, char *j, char a_pcat, char a_ccat, char a_name [LEN_TERSE], char a_ncat, char b_shown [LEN_HUND], short b_drawn [LEN_LABEL], char b_tree [LEN_TERSE]);
+char        FIX__ou                 (char *i, char *j, char a_pcat, char a_ccat, char a_name [LEN_TERSE], char a_ncat, char b_shown [LEN_HUND], short b_drawn [LEN_LABEL], char b_tree [LEN_TERSE]);
+char        FIX__other              (char *i, char *j, char a_pcat, char a_ccat, char a_name [LEN_TERSE], char a_ncat, char b_shown [LEN_HUND], short b_drawn [LEN_LABEL], char b_tree [LEN_TERSE]);
+char        WORDS_fix_gregg         (char a_gregg [LEN_TITLE], char r_shown [LEN_HUND], short r_drawn [LEN_LABEL], char r_tree [LEN_TERSE]);
+
 
 #endif
 /*============================----(source-end)----============================*/

@@ -145,16 +145,16 @@ DRAW_resize             (char a_layout)
    case  LAYOUT_DICTIONARY : rc = PAGE_config (LAYOUT_DICTIONARY, 1200,  750, YF_TOPLEF, 2.0,   10, 10, -1, -1,   -1, YF_MIDCEN, 15, 15, 47, GAP_GRID);     break;
    case  LAYOUT_CONNECT    : rc = PAGE_config (LAYOUT_CONNECT   , 1300, 1100, YF_TOPLEF, 2.0,   -1, -1, -1, -1,   -1, YF_MIDCEN, 15, 15, 40, GAP_GRID);     break;
    }
-   DEBUG_OUTP   yLOG_value   ("conf"      , rc);
+   DEBUG_GRAF   yLOG_value   ("conf"      , rc);
    --rce;  if (rc < 0) {
-      DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);
+      DEBUG_GRAF   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
    /*---(resize)-------------------------*/
    rc = yVIOPENGL_resize (my.w_title, my.w_wide, my.w_tall);
-   DEBUG_OUTP   yLOG_value   ("resize"    , rc);
+   DEBUG_GRAF   yLOG_value   ("resize"    , rc);
    --rce;  if (rc < 0) {
-      DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);
+      DEBUG_GRAF   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
    /*---(complete)-----------------------*/
@@ -172,9 +172,9 @@ DRAW_make               (char a_layout)
    DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
    /*---(set and size)-------------------*/
    rc = DRAW_resize (a_layout);
-   DEBUG_OUTP   yLOG_value   ("size"      , rc);
+   DEBUG_GRAF   yLOG_value   ("size"      , rc);
    --rce;  if (rc < 0) {
-      DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);
+      DEBUG_GRAF   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
    /*---(create texture)-----------------*/
@@ -184,9 +184,9 @@ DRAW_make               (char a_layout)
    case  LAYOUT_DICTIONARY : rc = PAGE_new    (LAYOUT_DICTIONARY, 1200,  750, YF_TOPLEF, 2.0,   10, 10, -1, -1,   -1, YF_MIDCEN, 15, 15, 47, GAP_GRID);     break;
    case  LAYOUT_CONNECT    : rc = PAGE_new    (LAYOUT_CONNECT   , 1300, 1100, YF_TOPLEF, 2.0,   -1, -1, -1, -1,   -1, YF_MIDCEN, 15, 15, 40, GAP_GRID);     break;
    }
-   DEBUG_OUTP   yLOG_value   ("new"       , rc);
+   DEBUG_GRAF   yLOG_value   ("new"       , rc);
    --rce;  if (rc < 0) {
-      DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);
+      DEBUG_GRAF   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
    /*---(update)-------------------------*/
@@ -196,7 +196,7 @@ DRAW_make               (char a_layout)
    glCallList (dl_back);
    /*---(finalize)-----------------------*/
    rc = PAGE_ready  ("/tmp/gregg_back.png");
-   DEBUG_OUTP   yLOG_value   ("ready"     , rc);
+   DEBUG_GRAF   yLOG_value   ("ready"     , rc);
    /*---(complete)-----------------------*/
    DEBUG_GRAF   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -388,8 +388,8 @@ DRAW_primary         (float a_mag)
          my.p_hinting = '-';
          glColor4f (0.0, 0.0, 0.0, 1.0);
          glTranslatef (x_min + (x_max - x_min) / 2.0, 40.0, 250.0);
-         PAGE_gregg (SHAPE_DRAW, "r·o·b" , &i, &j);
-         glTranslatef (  0.0,   7.0,   0.0);
+         PAGE_gregg (SHAPE_DRAW, "r·o·b·z" , &i, &j);
+         glTranslatef (  0.0,  12.0,   0.0);
          i = 0; j = 0;
          PAGE_gregg (SHAPE_DRAW, "g·r·e·g" , &i, &j);
          glTranslatef (  0.0, -15.0,   0.0);
