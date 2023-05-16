@@ -31,23 +31,19 @@ gregg_yjobs             (cchar a_req, cchar *a_data)
    switch (a_req) {
    case YJOBS_READ     :
       DEBUG_PROG    yLOG_note    ("read database");
-      /*> if (!yJOBS_ifgather ())  rc = metis_yjobs_read     ();                      <*/
+      if (!yJOBS_ifgather ())  rc = DB_read     ();
       break;
    case YJOBS_STATS    :
       DEBUG_PROG    yLOG_note    ("called for stats");
-      /*> rc = metis_yjobs_stats ();                                                  <*/
+      rc = DB_stats ();
       break;
    case YJOBS_WRITE    :
       DEBUG_PROG    yLOG_note    ("write database");
-      /*> if (my.source == DATA_DATABASE)  rc = metis_yjobs_write    ();              <*/
-      /*> rc = metis_yjobs_write    ();                                               <*/
+      rc = DB_write    ();
       break;
    case YJOBS_PULL     :
       DEBUG_PROG    yLOG_note    ("called for pull");
       rc = DICT_import (a_data);
-      DICT_list     ();
-      /*> DICT_list_all ();                                                           <*/
-      /*> rc = metis_yjobs_pull     (a_data);                                         <*/
       break;
    case YJOBS_LOCALRPT : 
       DEBUG_PROG    yLOG_note    ("called for localrpt");

@@ -37,8 +37,8 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "5.--= generalization for broader use"
 #define     P_VERMINOR  "5.4 = update for use as coding example"
-#define     P_VERNUM    "5.5a"
-#define     P_VERTXT    "prefixing shared bases is mostly working"
+#define     P_VERNUM    "5.5b"
+#define     P_VERTXT    "saving to first-draft database"              
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -273,6 +273,7 @@
 #define     B_ENGLISH      'e'
 #define     B_GREGG        'g'
 #define     B_UNIQUE       'q'
+#define     B_TREE         't'
 
 #define     LEN_HUGE     10000
 #define     LEN_RECD      2000
@@ -358,6 +359,21 @@ struct cMY {
    char        heartbeat   [LEN_HUND];      /* latest heartbeat               */
    char        wordfile    [LEN_PATH];      /* input word file                */
    char        baseonly;                    /* dictionary only shows bases    */
+   char        nopre;                       /* dictionary w/o prefixed words  */
+   /*---(output)---------------*/
+   char        n_db        [LEN_PATH];      /* name of database file          */
+   FILE       *f_db;                        /* shared database of tags        */
+   /*---(audit from db)--------*/
+   char        a_name      [LEN_LABEL];     /* read db program name           */
+   char        a_ver       [LEN_SHORT];     /* read db program version        */
+   int         a_nfile;                     /* read db source files           */
+   int         a_nbase;                     /* read db word bases             */
+   int         a_nword;                     /* read db words w/varations      */
+   char        a_heart     [LEN_HUND];      /* read db heartbeat              */
+   /*---(running stats)--------*/
+   int         r_nfile;
+   int         r_nbase;
+   int         r_nword;
    /*---(x11 window)-----------*/
    char        w_layout;                    /* current format                 */
    short       w_wide;                      /* full window width              */
@@ -916,48 +932,45 @@ extern tVARY  g_varies [LEN_FULL];
 extern char    VARIATIONS      [LEN_RECD];
 
 
+extern char  g_files     [LEN_DESC][LEN_HUND];
+
 /*---(words structure)--------------------------*/
 #define  MAX_WORDS      5000
 #define  MAX_LEN          30
 typedef struct cWORD  tWORD;
 struct cWORD {
    /*---(header)---------------*/
-   char       *english;                     /* english word                   */
-   char        e_len;
-   uchar      *arpabet;                     /* pronouce in arpabet            */
-   uchar      *gregg;                       /* gregg translation              */
-   uchar      *official;                    /* gregg translation (official)   */
-   char        g_len;
-   uchar      *unique;                      /* unique word key                */
-   /*---(upates)---------------*/
-   uchar       shown       [LEN_HUND];      /* gregg as needed to draw        */
-   short       drawn       [LEN_LABEL];     /* gregg letter indexes           */
-   uchar       tree        [LEN_SHORT];     /* gregg as series of letters     */
-   /*---(audit)----------------*/
-   uchar      *fancy;                       /* fancy version of gregg         */
-   char        g_audit;                     /* gregg passes audit             */
-   char        f_audit;                     /* gregg fix passes audit         */
-   char        a_audit;                     /* arpabet passes audit           */
+   char        w_english   [LEN_TITLE];     /* english word                   */
+   char        w_gregg     [LEN_TITLE];     /* gregg translation              */
+   char        w_unique    [LEN_DESC];      /* unique word key                */
+   /*---(updates)--------------*/
+   char        w_shown     [LEN_HUND];      /* gregg as needed to draw        */
+   short       w_drawn     [LEN_LABEL];     /* gregg letter indexes           */
+   char        w_tree      [LEN_TERSE];     /* gregg as series of letters     */
    /*---(source)---------------*/
-   short       line;                        /* input line                     */
-   char        vary        [LEN_TERSE];     /* variation                      */
-   tWORD      *base;                        /* base of current variation      */
-   tWORD      *next;                        /* next variation or null         */
-   char        count;                       /* count of variations            */
+   char        w_file;                      /* source file                    */
+   short       w_line;                      /* input line                     */
+   short       w_bref;                      /* reference id for bases         */
+   /*---(variations)-----------*/
+   char        w_vary      [LEN_TERSE];     /* variation label                */
+   tWORD      *w_base;                      /* base of current variation      */
+   tWORD      *w_next;                      /* next variation or null         */
+   char        w_nvary;                     /* count of variations            */
    /*---(part-of-speech)-------*/
-   char        part;                        /* primary part of speech         */
-   char        sub;                         /* sub-part                       */
+   char        w_part;                      /* primary part of speech         */
+   char        w_sub;                       /* sub-part                       */
    /*---(source)---------------*/
-   char        src;                         /* source version of gregg        */
-   char        cat;                         /* word-sign, normal, custom, ... */
-   short       page;                        /* location within source         */
+   char        w_src;                       /* source version of gregg        */
+   char        w_cat;                       /* word-sign, normal, custom, ... */
+   short       w_page;                      /* location within source         */
    /*---(frequency)------------*/
-   char        grp;                         /* grouping by frequency          */
-   short       freq;                        /* google frequency               */
+   char        w_grp;                       /* grouping by frequency          */
+   short       w_freq;                      /* google frequency               */
    /*---(btree)-------------*/
-   tSORT      *ysort_e;
-   tSORT      *ysort_g;
-   tSORT      *ysort_f;
+   tSORT      *ysort_e;                     /* english sort                   */
+   tSORT      *ysort_g;                     /* gregg sort                     */
+   tSORT      *ysort_u;                     /* unique entry sort              */
+   tSORT      *ysort_t;                     /* gregg letter tree sort         */
    /*---(done)-----------------*/
 };
 
@@ -1201,14 +1214,23 @@ char        CIRCLE_driver           (void);
 /*---(program)--------------*/
 char        WORDS_init              (void);
 /*---(memory)---------------*/
-char        WORDS__new              (char *a_english, char *a_gregg, char a_part, tWORD **r_word);
+char        WORDS__check            (char a_english [LEN_TITLE], char a_gregg [LEN_TITLE], char a_part, char r_full [LEN_DESC]);
+char        WORDS_new               (char a_force, tWORD **r_new);
+char        WORDS__populate         (tWORD *a_new, char a_english [LEN_TITLE], char a_gregg [LEN_TITLE], char a_part, char a_full [LEN_DESC]);
+char        WORDS_new_full          (char a_english [LEN_TITLE], char a_gregg [LEN_TITLE], char a_part, char a_base, tWORD **r_new);
+char        WORDS_new_base          (char a_english [LEN_TITLE], char a_gregg [LEN_TITLE], char a_part, tWORD **r_new);
+char        WORDS_new_vary          (char a_english [LEN_TITLE], char a_gregg [LEN_TITLE], char a_part, tWORD **r_new);
 char        WORDS__free             (tWORD **b_word);
 char        WORDS_purge             (void);
+/*---(hooking)--------------*/
+char        WORDS_hook              (tWORD *a_new);
+char        WORDS_unhook            (tWORD *a_old);
 /*---(find)-----------------*/
 int         WORDS_eng_count         (void);
 char        WORDS_eng_by_name       (uchar *a_text, tWORD **r_word);
 char        WORDS_eng_by_index      (int n, tWORD **r_word);
 char        WORDS_eng_by_cursor     (char a_dir, tWORD **r_word);
+char        WORDS_eng_all           (FILE *a_file, char *f_callback (FILE *a_file, tWORD *a_curr));
 char        WORDS_by_gregg          (uchar *a_text, tWORD **r_word);
 char        WORDS_detail            (tWORD *a_word, char a_out [LEN_FULL]);
 char*       WORDS_entry             (int n);
@@ -1331,7 +1353,7 @@ char        DICT__find_sub          (char a_abbr, char a_sub);
 char        DICT__find_grp          (char a_grp);
 char        DICT__find_source       (char a_source);
 char        DICT__find_type         (char a_type);
-char        DICT__find_prefix       (char a_prefix [LEN_TERSE], char r_english [LEN_TERSE], char r_gregg [LEN_TERSE]);
+char        DICT__find_prefix       (char a_prefix [LEN_TERSE], char r_english [LEN_TERSE], char r_gregg [LEN_LABEL]);
 char        DICT__find_variation    (char a_name [LEN_TERSE], char r_suffix [LEN_TERSE], char r_endings [LEN_HUND], char r_base [LEN_TERSE], char r_change [LEN_TERSE]);
 char        DICT__open              (char a_name [LEN_PATH], FILE **r_file);
 char        DICT__close             (FILE **b_file);
@@ -1354,6 +1376,7 @@ char        DICT_list               (void);
 char        DICT_list_all           (void);
 char        DICT_dump_suffix        (FILE *f);
 char        DICT_dump_words         (FILE *f);
+char        DICT_dump_gregg         (FILE *f);
 
 
 char        gregg_yjobs             (cchar a_req, cchar *a_data);
@@ -1458,7 +1481,34 @@ char        FIX__append             (char *i, char *j, char a_name [LEN_TERSE], 
 char        FIX__ae                 (char *i, char *j, char a_pcat, char a_ccat, char a_name [LEN_TERSE], char a_ncat, char b_shown [LEN_HUND], short b_drawn [LEN_LABEL], char b_tree [LEN_TERSE]);
 char        FIX__ou                 (char *i, char *j, char a_pcat, char a_ccat, char a_name [LEN_TERSE], char a_ncat, char b_shown [LEN_HUND], short b_drawn [LEN_LABEL], char b_tree [LEN_TERSE]);
 char        FIX__other              (char *i, char *j, char a_pcat, char a_ccat, char a_name [LEN_TERSE], char a_ncat, char b_shown [LEN_HUND], short b_drawn [LEN_LABEL], char b_tree [LEN_TERSE]);
-char        WORDS_fix_gregg         (char a_gregg [LEN_TITLE], char r_shown [LEN_HUND], short r_drawn [LEN_LABEL], char r_tree [LEN_TERSE]);
+char        FIX_gregg               (char a_gregg [LEN_TITLE], char r_shown [LEN_HUND], short r_drawn [LEN_LABEL], char r_tree [LEN_TERSE]);
+/*---(hooking)--------------*/
+char        FIX_hook                (tWORD *a_new);
+char        FIX_unhook              (tWORD *a_old);
+char*       FIX_tree_showable       (char a_tree [LEN_TERSE], char a_max);
+
+
+
+
+/*---(header)---------------*/
+char        DB__head_write          (FILE *a_file, char a_label [LEN_TERSE], int a_var);
+char        DB__head_read           (FILE *a_file, char a_label [LEN_TERSE], int *a_var);
+/*---(sources)--------------*/
+char        DB_source_add           (char a_file [LEN_HUND]);
+char        DB_source_purge         (void);
+char        DB__source_write        (FILE *a_file);
+char        DB__source_read         (int n, FILE *a_file);
+/*---(words)----------------*/
+char        DB__word_write_one      (FILE *a_file, tWORD *a_curr);
+char        DB__word_write          (FILE *a_file);
+char        DB__word_read           (int n, FILE *a_file);
+/*---(file)-----------------*/
+char        DB__open                (char a_name [LEN_PATH], char a_mode, int *b_nfile, int *b_nbase, int *b_nword, char b_heartbeat [LEN_DESC], FILE **b_file);
+char        DB__close               (FILE **b_file);
+/*---(driver)---------------*/
+char        DB_write                (void);
+char        DB_read                 (void);
+/*---(done)-----------------*/
 
 
 #endif

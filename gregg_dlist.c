@@ -778,35 +778,39 @@ DLIST_paginate          (void)
    for (i = 0; i < MAX_PAGES; ++i)  g_pages [i] = g_lasts [i] = NULL;
    /*---(paginate)-----------------------*/
    WORDS_eng_by_cursor (YDLST_HEAD, &x_word);
+   i = 0;
    while (x_word != NULL) {
-      DEBUG_GRAF   yLOG_complex ("x_word"    , "%4d %4d %4d %-15.15s %-15.15s %s", p, i++, c, x_word->english, x_word->gregg, x_word->shown);
-      if (x_last != NULL) {
-         DEBUG_GRAF   yLOG_info    ("x_last"    , x_last->english);
-      }
-      if (my.baseonly == '-' || x_word->vary [0] == '<') {
-         if (c % my.w_ppage == 0) {
-            DEBUG_GRAF   yLOG_complex ("new page"  , "%4d, %s", p, x_word->english);
-            g_pages [p] = x_word;
-            if (p > 0) {
-               DEBUG_GRAF   yLOG_complex ("add last"  , "%4d, %s", p - 1, x_last->english);
-               g_lasts [p - 1] = x_last;
+      DEBUG_GRAF   yLOG_complex ("x_word"    , "%4d %4d %4d %-15.15s %-5.5s %-15.15s %s", p, i++, c, x_word->w_english, x_word->w_vary, x_word->w_gregg, x_word->w_shown);
+      if (my.baseonly == '-' || x_word->w_vary [0] == '<') {
+         if (my.nopre == '-' || strchr (x_word->w_gregg, '<') == NULL)  {
+            if (c % my.w_ppage == 0) {
+               DEBUG_GRAF   yLOG_complex ("NEW PAGE"  , "%4d, %s", p, x_word->w_english);
+               g_pages [p] = x_word;
+               if (p > 0) {
+                  DEBUG_GRAF   yLOG_complex ("add last"  , "%4d, %s", p - 1, x_last->w_english);
+                  g_lasts [p - 1] = x_last;
+               }
+               ++p;
             }
-            ++p;
+            x_last = x_word;
+            DEBUG_GRAF   yLOG_info    ("x_last"    , x_last->w_english);
+            ++c;
+         } else {
+            DEBUG_GRAF   yLOG_note    ("SKIP, prefixed base");
          }
-         x_last = x_word;
-         ++c;
+      } else {
+         DEBUG_GRAF   yLOG_note    ("SKIP, not a base");
       }
       WORDS_eng_by_cursor (YDLST_NEXT, &x_word);
    }
    if (p > 0) {
       g_lasts [p - 1] = x_last;
-      DEBUG_GRAF   yLOG_complex ("add last"  , "%4d, %s", p - 1, x_last->english);
+      DEBUG_GRAF   yLOG_complex ("add last"  , "%4d, %s", p - 1, x_last->w_english);
    }
    /*---(update globals)-----------------*/
    my.w_npage   = p;
    my.w_entries = c;
-   DEBUG_GRAF   yLOG_value   ("npage"     , my.w_npage);
-   DEBUG_GRAF   yLOG_value   ("entries"   , my.w_entries);
+   DEBUG_GRAF   yLOG_complex ("dict page" , "%3dp, %3dn, %3dc, %3de", my.w_ppage, my.w_npage, my.w_cpage, my.w_entries);
    /*---(complete)-----------------------*/
    DEBUG_GRAF   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -847,26 +851,28 @@ DLIST_dict              (void)
    glPushMatrix    (); {
       x = x_left;
       y =  -75;
-      WORDS_eng_by_name  (g_pages [my.w_cpage]->english, &x_word);
+      WORDS_eng_by_name  (g_pages [my.w_cpage]->w_english, &x_word);
       while (x_word != NULL) {
-         DEBUG_GRAF   yLOG_complex ("x_word"    , "%4d %-15.15s %-5.5s %-15.15s %s", i, x_word->english, x_word->vary, x_word->gregg, x_word->shown);
-         if (my.baseonly == '-' || x_word->vary [0] == '<') {
-            DEBUG_GRAF   yLOG_complex ("show at"   , "%4d, %6.2fx, %6.2fy", c, x, y);
-            glPushMatrix    (); {
-               glTranslatef (x, y + 15, -50);
-               glColor4f    (0.5, 0.5, 0.5, 0.3);
-               /*> strlcpy  (t, x_word->shown, LEN_TITLE);                               <*/
-               strlcpy  (t, x_word->english, LEN_TITLE);
-               strldchg (t, '·', ' ', LEN_TITLE);
-               yFONT_print (win.font_pretty,  8, YF_MIDCEN, t);
-               if (x_word->vary [0] == '<') {
-                  glTranslatef (0,   - 30,   0);
-                  sprintf  (t, "%d", x_word->count);
+         DEBUG_GRAF   yLOG_complex ("x_word"    , "%4d %-15.15s %-5.5s %-15.15s %s", i, x_word->w_english, x_word->w_vary, x_word->w_gregg, x_word->w_shown);
+         if (my.baseonly == '-' || x_word->w_vary [0] == '<') {
+            if (my.nopre == '-' || strchr (x_word->w_gregg, '<') == NULL)  {
+               DEBUG_GRAF   yLOG_complex ("show at"   , "%4d, %6.2fx, %6.2fy", c, x, y);
+               glPushMatrix    (); {
+                  glTranslatef (x, y + 15, -50);
+                  glColor4f    (0.5, 0.5, 0.5, 0.3);
+                  /*> strlcpy  (t, x_word->w_shown, LEN_TITLE);                               <*/
+                  strlcpy  (t, x_word->w_english, LEN_TITLE);
+                  strldchg (t, '·', ' ', LEN_TITLE);
                   yFONT_print (win.font_pretty,  8, YF_MIDCEN, t);
-               }
-            } glPopMatrix   ();
-            PAGE_gregg_word (SHAPE_DRAW, x_word->shown, &x, &y);
-            ++c;
+                  if (x_word->w_vary [0] == '<') {
+                     glTranslatef (0,   - 30,   0);
+                     sprintf  (t, "%d", x_word->w_nvary);
+                     yFONT_print (win.font_pretty,  8, YF_MIDCEN, t);
+                  }
+               } glPopMatrix   ();
+               PAGE_gregg_word (SHAPE_DRAW, x_word->w_shown, &x, &y);
+               ++c;
+            }
          }
          ++i;
          WORDS_eng_by_cursor (YDLST_NEXT, &x_word);
@@ -998,7 +1004,7 @@ DLIST_connect_real      (void)
             /*> glPushMatrix    (); {                                                              <* 
              *>    glTranslatef (x, y + 15, -50);                                                  <* 
              *>    glColor4f    (0.5, 0.5, 0.5, 0.3);                                              <* 
-             *>    /+> strlcpy  (t, x_word->shown, LEN_TITLE);                               <+/   <* 
+             *>    /+> strlcpy  (t, x_word->w_shown, LEN_TITLE);                               <+/   <* 
              *>    strldchg (t, '·', ' ', LEN_TITLE);                                              <* 
              *>    yFONT_print (win.font_pretty,  8, YF_MIDCEN, t);                                <* 
              *> } glPopMatrix   ();                                                                <*/
@@ -1067,6 +1073,19 @@ DLIST_connect           (void)
             glColor4f    (0.5, 0.5, 0.5, 0.3);
             if (xi > 0)  sprintf (t, "o%d", xi);
             else         sprintf (t, "o");
+            yFONT_print (win.font_pretty,  8, YF_MIDCEN, t);
+         } glPopMatrix   ();
+         PAGE_gregg (SHAPE_DRAW, t, &x, &y);
+      }
+      PAGE_next_line (&x, &y);
+      x =  45;
+      for (xi = 0; xi <= 9; ++xi) {
+         /*> PAGE_gregg (SHAPE_DRAW, "o1 o2 o3 o4 o5 o6 o7 o8 o9", &x, &y);           <*/
+         glPushMatrix    (); {
+            glTranslatef (x, y + 15, -50);
+            glColor4f    (0.5, 0.5, 0.5, 0.3);
+            if (xi > 0)  sprintf (t, "u%d", xi);
+            else         sprintf (t, "u");
             yFONT_print (win.font_pretty,  8, YF_MIDCEN, t);
          } glPopMatrix   ();
          PAGE_gregg (SHAPE_DRAW, t, &x, &y);

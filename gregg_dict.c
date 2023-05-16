@@ -4,10 +4,8 @@
 /*
  *
  * metis § tn4·· § verbose dictionary parsing mode to find mistakes                       § N2O4rp §  · §
- * metis § dc4·· § add verification of arpabet entry                                      § N2U1OE §  · §
  * metis § dc4·· § add verification of gregg letters entry                                § N2U1OS §  · §
  */
-
 
 /*
  *  PREFIXES
@@ -72,54 +70,65 @@ char   s_fields  [MAX_FIELD][LEN_TITLE];
 char   s_nfield  = 0;
 
 struct cPREFIX {
-   char        name        [LEN_TERSE];
-   char        english     [LEN_TERSE];
-   char        gregg       [LEN_TERSE];
+   char        p_name      [LEN_TERSE];
+   char        p_english   [LEN_TERSE];
+   char        p_orig      [LEN_LABEL];
+   char        p_gregg     [LEN_LABEL];
 } g_prefix [LEN_HUND] = {
    /* 123456789   123456789- */
    /*---t-------------------------------------*/
-   { "trans"    , "trans"    , "t·<·"         },
+   { "trans"    , "trans"    , "t·<·"         , "t·<·"         },
    /*---d-------------------------------------*/
-   { "de"       , "de"       , "d·<·"         },
-   { "dis"      , "dis"      , "d·<·"         },
-   { "dys"      , "dys"      , "d·<·"         },
+   { "de"       , "de"       , "d·<·"         , "d·<·"         },
+   { "dis"      , "dis"      , "d·<·"         , "d·<·"         },
+   { "dys"      , "dys"      , "d·<·"         , "d·<·"         },
    /*---n-------------------------------------*/
-   { "in"       , "in"       , "n·<·"         },
-   { "un"       , "un"       , "n·<·"         },
+   { "in"       , "in"       , "n·<·"         , "n·<·"         },
+   { "un"       , "un"       , "n·<·"         , "n·<·"         },
    /*---m-------------------------------------*/
-   { "em"       , "em"       , "m·<·"         },
-   { "im"       , "im"       , "m·<·"         },
+   { "em"       , "em"       , "m·<·"         , "m·<·"         },
+   { "im"       , "im"       , "m·<·"         , "m·<·"         },
    /*---r-------------------------------------*/
-   { "re"       , "re"       , "r·<·"         },
+   { "re"       , "re"       , "r·<·"         , "r·<·"         },
    /*---l-------------------------------------*/
    /*---k-------------------------------------*/
-   { "con"      , "con"      , "k·<·"         },
-   { "com"      , "com"      , "k·<·"         },
+   { "co"       , "co"       , "k·<·"         , "k·<·"         },
+   { "con"      , "con"      , "k·<·"         , "k·<·"         },
+   { "com"      , "com"      , "k·<·"         , "k·<·"         },
+   { "counter"  , "counter"  , "k·<·"         , "k·<·"         },
    /*---g-------------------------------------*/
    /*---f-------------------------------------*/
+   { "for"      , "for"      , "f·<·"         , "f·<·"         },
+   { "fore"     , "fore"     , "f·<·"         , "f·<·"         },
+   { "ful"      , "ful"      , "f·<·"         , "f·<·"         },
    /*---v-------------------------------------*/
    /*---p-------------------------------------*/
-   { "per"      , "per"      , "p·r·<·"       },
-   { "peri"     , "peri"     , "p·e·r·<·"     },
-   { "pre"      , "pre"      , "p·r·e·<·"     },
-   { "pro"      , "pro"      , "p·r·o·<·"     },
+   { "par"      , "par"      , "p·a·r·<·"     , "p·<·"         },
+   { "para"     , "para"     , "p·a·r·a·<·"   , "p·<·"         },
+   { "per"      , "per"      , "p·r·<·"       , "p·<·"         },
+   { "peri"     , "peri"     , "p·e·r·e·<·"   , "p·<·"         },
+   { "pre"      , "pre"      , "p·r·e·<·"     , "p·<·"         },
+   { "pro"      , "pro"      , "p·r·o·<·"     , "p·<·"         },
+   { "pur"      , "pur"      , "p·r·<·"       , "p·<·"         },
    /*---b-------------------------------------*/
    /*---s-------------------------------------*/
-   { "sub"      , "sub"      , "s·<·"         },
-   { "circum"   , "circum"   , "z·<·"         },
+   { "sub"      , "sub"      , "s·<·"         , "s·<·"         },
+   { "circum"   , "circum"   , "z·<·"         , "z·<·"         },
    /*---a-------------------------------------*/
-   { "a"        , "a"        , "a·<·"         },
+   { "a"        , "a"        , "a·<·"         , "a·<·"         },
+   { "an"       , "an"       , "a·<·"         , "a·<·"         },
+   { "anti"     , "anti"     , "a·<·"         , "a·<·"         },
    /*---e-------------------------------------*/
-   { "e"        , "e"        , "e·<·"         },
-   { "ex"       , "ex"       , "e·xz·<·"      },
+   { "e"        , "e"        , "e·<·"         , "e·<·"         },
+   { "ex"       , "ex"       , "e·xz·<·"      , "e·<·"         },
    /*---o-------------------------------------*/
-   { "ob"       , "ob"       , "o·<·"         },
+   { "ob"       , "ob"       , "o·<·"         , "o·<·"         },
    /*---u-------------------------------------*/
    /*---mutli---------------------------------*/
-   { "in-de"    , "inde"     , "nd·<·"        },
-   { "re-de"    , "rede"     , "rd·<·"        },
-   { "un-de"    , "unde"     , "nd·<·"        },
-   { "---"      , "---"      , ""             },
+   { "in-de"    , "inde"     , "nd·<·"        , "nd·<·"        },
+   { "re-de"    , "rede"     , "rd·<·"        , "rd·<·"        },
+   { "un-de"    , "unde"     , "nd·<·"        , "nd·<·"        },
+   { "---"      , "---"      , ""             , ""             },
 };
 
 
@@ -276,6 +285,8 @@ tVARY  g_varies [LEN_FULL] = {
    {   "tn"    , ">·tn"     , '5', 111  , "-ington, -iton, -eton, -aton"                         , ""     , ""         , "washington, graviton"                                                , 0 },
    {     "TN"  , ">·tn·z"   , '·',  -1  , "-ingtons, -itons, -etons, -atons"                     , "tn"   , "s"        , "gravitons"                                                           , 0 },
    {   "tt"    , ">·t"      , '5',  43  , "-ted, -ded"                                           , ""     , ""         , "invited, divided, demanded, printed"                                 , 0 },
+   {   "tr"    , ">·t·r"    , '·',  -1  , "-ture"                                                , ""     , ""         , "fixture"                                                             , 0 },
+   {     "TR"  , ">·t·r·s"  , '·',  -1  , "-tures"                                               , "tr"   , "s"        , "fixtures"                                                            , 0 },
    /*--name---- --suffix---- ---source-- ---true-endings----------------------------------------- ---plus-base--------- ---examples------------------------------------------------------------ cnt */
    { "d"       , ">·d"      , '·',  -1  ,  "-d, -ed, -ied"                                       , ""     , ""         , "observed, cared, drank, knew, liked, used, forgot"                   , 0 },
    {   "dsh"   , ">·d·sh"   , '5',  82  ,  "-dation, -dition"                                    , ""     , ""         , "addition, gradation"                                                 , 0 },
@@ -298,6 +309,7 @@ tVARY  g_varies [LEN_FULL] = {
    {   "su"    , ">·s·u"    , '5', 111  , "-sult"                                                , ""     , ""         , "result, insult, consult"                                             , 0 },
    {     "SU"  , ">·s·u"    , '·',  -1  , "-sults"                                               , "su"   , "s"        , "results, insults, consults"                                          , 0 },
    {   "sm"    , ">·s·m"    , '5', 111  , "-sume, -some"                                         , ""     , ""         , "assume, presume, resume"                                             , 0 },
+   {   "sz"    , ">·s·z"    , '5', 111  , "-sys, -sis"                                           , ""     , ""         , "prosthesis"                                                          , 0 },
    /*--name---- --suffix---- ---source-- ---true-endings----------------------------------------- ---plus-base--------- ---examples------------------------------------------------------------ cnt */
    { "f"       , ">·f"      , '5', 109  , "-ful, -fil"                                           , ""     , ""         , "careful, beautiful, useful, thoughtful"                              , 0 },
    {   "fe"    , ">·f·e"    , '5', 109  , "-fully, -filly"                                       , "f"    , "ly"       , "carefully, beautifully, usefully, thoughtfully"                      , 0 },
@@ -368,7 +380,7 @@ tVARY  g_varies [LEN_FULL] = {
    { "n"       , ">·n"      , '·',  -1  , "-ence, -ance, -ness"                                  , ""     , ""         , "observance, lateness, fitness, awareness, witness"                   , 0 },
    {   "ns"    , ">·n·z"    , '·',  -1  , "-ences, -ances, -ness"                                , "n"    , "s"        , "observances, lateness, fitness, awareness, witness"                  , 0 },
    {   "ne"    , ">·n·e"    , '·',  -1  , "-ancy, -ency, -cy, -acy"                              , ""     , ""         , "observancy, latency, urgency, frequency, transparency"               , 0 },
-   {   "nes"   , ">·n·e·z"  , '·',  -1  , "-ancies, -encies, -cies, -acies"                      , ""     , ""         , "latencies, urgencies, frequencies, transparencies"                   , 0 },
+   {   "NE"    , ">·n·e·z"  , '·',  -1  , "-ancies, -encies, -cies, -acies"                      , "ne"   , "×ies"     , "latencies, urgencies, frequencies, transparencies"                   , 0 },
    {   "nt"    , ">·nt"     , '5', 123  , "-nity, -anity, -enity"                                , ""     , ""         , "humanity, community, affinity, profanity, opportunity, unity"        , 0 },
    {   "nk"    , ">·n·k"    , '5', 123  , "-ntic, -antic, -intic"                                , ""     , ""         , "gigangic, authentic, frantic"                                        , 0 },
    {   "nke"   , ">·n·k·e"  , '5', 123  , "-nticly, -anticly, -inticly"                          , ""     , ""         , "franticly"                                                           , 0 },
@@ -377,7 +389,6 @@ tVARY  g_varies [LEN_FULL] = {
    {     "+N"  , ""         , '·',  -1  ,   "er,ST,N"                                            , ""     , ""         ,   "harder, hardest, hardness"                                         , 0 },
    /*--name---- --suffix---- ---source-- ---true-endings----------------------------------------- ---plus-base--------- ---examples------------------------------------------------------------ cnt */
    { "m"       , ">·m"      , '5', 109  , "-ment"                                                , ""     , ""         , "experiment, amusement, department"                                   , 0 },
-   {   "ms"    , ">·m·z"    , '5', 117  , "-ments, -iments, -aments"                             , "m"    , "s"        , "experiments, amusements, departments"                                , 0 },
    {   "M"     , ">·m·z"    , '5', 117  , "-ments, -iments, -aments"                             , "m"    , "s"        , "experiments, amusements, departments"                                , 0 },
    {   "mt"    , ">·m·l"    , '5', 117  , "-mental, -imental, -amental"                          , "m"    , "al"       , "experimental, fundamental"                                           , 0 },
    {     "+M"  , ""         , '·',  -1  ,   "m,ms,mt"                                            , ""     , ""         ,   "experiment, experiments, and experimental"                         , 0 },
@@ -392,7 +403,7 @@ tVARY  g_varies [LEN_FULL] = {
    {   "she"   , ">·sh·l·e" , '·',  -1  , "-tionally"                                            , "sh"   , "ally"     , "observationally, nationally, devotionally"                           , 0 },
    {     "+SH" , ""         , '·',  -1  ,   "sh,SH,shu,shus,she"                                 , ""     , ""         ,   "navigation, navigational, navigationally"                          , 0 },
    {   "shr"   , ">·sh·u"   , '5', 111  , "-sure"                                                , ""     , ""         , "assure, measure, pressure"                                           , 0 },
-   {   "shus"  , ">·sh·u·s" , '5', 111  , "-cious, -sures"                                       , ""     , ""         , "audacious, vicious, assures, pressures"                              , 0 },
+   {     "SHR" , ">·sh·u·s" , '5', 111  , "-sures"                                               , ""     , ""         , "assures, pressures"                                                  , 0 },
    {   "sht"   , ">·sh·t"   , '5', 111  , "-tient, -cient"                                       , ""     , ""         , "patient, ancient, efficient, sufficient"                             , 0 },
    {   "shte"  , ">·sh·t·e" , '5', 111  , "-tiently, -ciently"                                   , ""     , ""         , "efficiently, sufficiently"                                           , 0 },
    {   "sh"    , ">·sh"     , '5', 117  , "-ship, -age"                                          , ""     , ""         , "partnership, ownership, hardship, friendship"                        , 0 },
@@ -413,8 +424,10 @@ tVARY  g_varies [LEN_FULL] = {
    {      "+A" , ""         , '·',  -1  ,   "a,as,au,ae,aun"                                     , ""     , ""         , "systematic, systematics, systematical, and systematically"           , 0 },
    {      "*A" , ""         , '·',  -1  ,   "a,as,au,ae,aun,ar,ars"                              , ""     , ""         , "politic, politics, political, politically, and politician"           , 0 },
    {    "at"   , ">·a·t"    , '·',  -1  , "-ant, -ent"                                           , ""     , ""         , "observant"                                                           , 0 },
+   {    "ate"  , ">·a·t·e"  , '·',  -1  , "-antly, -ently"                                       , "at"   , "ly"       , "observantly"                                                         , 0 },
    /*--name---- --suffix---- ---source-- ---true-endings----------------------------------------- ---plus-base--------- ---examples------------------------------------------------------------ cnt */
    { "e"       , ">·e"      , '5',  30  , "-y, -ee"                                              , ""     , ""         , "identity, nasty, tasty, handy, ready"                                , 0 },
+   {   "E"     , ">·e·s"    , '·',  -1  , "-ies, -ees"                                           , "e"    , "×ies"     , "identities"                                                          , 0 },
    {   "es"    , ">·e·s"    , '·',  -1  , "-ies, -ees"                                           , "e"    , "×ies"     , "identities"                                                          , 0 },
    {   "el"    , ">·e·l"    , '·',  -1  , "-ly, -ily"                                            , ""     , ""         , "nastily, tastily, handily, readily"                                  , 0 },
    {   "esh"   , ">·e·sh"   , '5',  30  , "-ish, -like, -oid"                                    , ""     , ""         , "rougish, brutish, hairlike, lifelike"                                , 0 },
@@ -459,6 +472,8 @@ tVARY  g_varies [LEN_FULL] = {
    {   "USE"   , ">·u·s·e"  , '·',  -1  , "-ously, -eously, -iously, -aously, -uously"           , "US"   , "ly"       , "ambiguously, audaciously, viciously"                                 , 0 },
    {   "USN"   , ">·u·s·n"  , '·',  -1  , "-ousness, -eousness, -iousness, -aousness, -uousness" , "US"   , "ness"     , "ambiguousness, audaciousness, viciousness"                           , 0 },
    {     "+US" , ""         , '·',  -1  ,   "US,USE,USN"                                         , ""     , ""         , "ambiguous, ambiguously, and ambiguousness"                           , 0 },
+   {   "uR"    , ">·u·r"    , '·',  -1  , "-ure"                                                 , ""     , ""         , "feature"                                                             , 0 },
+   {     "UR"  , ">·u·r·z"  , '·',  -1  , "-ures"                                                , "uR"   , "s"        , "features"                                                            , 0 },
    /*--name---- --suffix---- ---source-- ---true-endings----------------------------------------- ---plus-base--------- ---examples------------------------------------------------------------ cnt */
    { "---"     , "---"      , '·',  -1  , "---"                                                  , "---"  , ""         , "---"                                                                 , 0 },
    /*--name---- --suffix---- ---source-- ---true-endings----------------------------------------- ---plus-base--------- ---examples------------------------------------------------------------ cnt */
@@ -680,7 +695,7 @@ DICT__find_variation    (char a_name [LEN_TERSE], char r_suffix [LEN_TERSE], cha
 }
 
 char
-DICT__find_prefix       (char a_prefix [LEN_TERSE], char r_english [LEN_TERSE], char r_gregg [LEN_TERSE])
+DICT__find_prefix       (char a_prefix [LEN_TERSE], char r_english [LEN_TERSE], char r_gregg [LEN_LABEL])
 {
    /*---(locals)-------------------------*/
    char        rce         =  -10;
@@ -691,10 +706,10 @@ DICT__find_prefix       (char a_prefix [LEN_TERSE], char r_english [LEN_TERSE], 
    --rce;  if (r_english == NULL)  return rce;
    --rce;  if (r_gregg   == NULL)  return rce;
    for (i = 0; i < LEN_HUND; ++i) {
-      if (strcmp (g_prefix [i].name, "---")    == 0)       break;
-      if (strcmp (g_prefix [i].name, a_prefix) != 0)       continue;
-      strlcpy (r_english, g_prefix [i].english, LEN_TERSE);
-      strlcpy (r_gregg  , g_prefix [i].gregg  , LEN_TERSE);
+      if (strcmp (g_prefix [i].p_name, "---")    == 0)       break;
+      if (strcmp (g_prefix [i].p_name, a_prefix) != 0)       continue;
+      strlcpy (r_english, g_prefix [i].p_english, LEN_TERSE);
+      strlcpy (r_gregg  , g_prefix [i].p_gregg  , LEN_LABEL);
       return 0;
    }
    return --rce;
@@ -830,6 +845,7 @@ DICT__split             (uchar *a_recd)
    char       *q           = "§";
    char       *r           = NULL;
    uchar       x_recd      [LEN_RECD]  = "";
+   char       *m           = NULL;
    /*---(header)-------------------------*/
    DEBUG_CONF   yLOG_enter   (__FUNCTION__);
    /*---(prepare)------------------------*/
@@ -846,7 +862,10 @@ DICT__split             (uchar *a_recd)
    p = strtok_r (x_recd, q, &r);
    while (p != NULL) {
       strlcpy  (s_fields [s_nfield], p, LEN_TITLE);
+      m = strchr (s_fields [s_nfield], '¬');
+      if (m != NULL)  m [0] = '\0';
       strltrim (s_fields [s_nfield], ySTR_BOTH, LEN_TITLE);
+      if (s_nfield == 0)  strllower (s_fields [s_nfield], LEN_TITLE);
       ++s_nfield;
       p = strtok_r (NULL  , q, &r);
    }
@@ -893,15 +912,23 @@ DICT__primary           (short a_line, cchar a_english [LEN_TITLE], cchar a_greg
    /*---(preview part of speech)---------*/
    x_part = DICT__category_preview (a_cats);
    /*---(add word)-----------------------*/
-   rc = WORDS__new (a_english, x_gregg, x_part, &x_new);
+   rc = WORDS_new_base (a_english, x_gregg, x_part, &x_new);
    DEBUG_CONF   yLOG_value   ("new"       , rc);
    --rce;  if (rc < 0) {
       yURG_err ('w', "%d primary word å%sæ could not be created", a_line, a_english);
       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
+   /*---(hook to lists)------------------*/
+   rc = WORDS_hook (x_new);
+   DEBUG_CONF   yLOG_value   ("hook"      , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
    /*---(save-back)----------------------*/
-   x_new->line = a_line;
+   x_new->w_file = my.r_nfile;
+   x_new->w_line = a_line;
    if (r_word != NULL)  *r_word = x_new;
    /*---(status)-------------------------*/
    yURG_msg ('-', "%d primary word å%sæ å%sæ successful", a_line, a_english, x_gregg);
@@ -916,20 +943,20 @@ DICT__category_five     (tWORD *a_new, char l, cchar *a_cats)
    /*---(header)-------------------------*/
    DEBUG_CONF   yLOG_enter   (__FUNCTION__);
    /*---(part-of-speech)-----------------*/
-   if (l >= 1)  a_new->part = DICT__find_speech (a_cats [0]);
-   else         a_new->part = DICT__find_speech ('¢');
+   if (l >= 1)  a_new->w_part = DICT__find_speech (a_cats [0]);
+   else         a_new->w_part = DICT__find_speech ('¢');
    /*---(sub part-of-speech)-------------*/
-   if (l >= 3)  a_new->sub  = DICT__find_sub    (a_new->part, a_cats [2]);
-   else         a_new->sub  = DICT__find_sub    (a_new->part, '¢');
+   if (l >= 3)  a_new->w_sub  = DICT__find_sub    (a_new->w_part, a_cats [2]);
+   else         a_new->w_sub  = DICT__find_sub    (a_new->w_part, '¢');
    /*---(source group)-------------------*/
-   if (l >= 5)  a_new->grp  = DICT__find_grp    (a_cats [4]);
-   else         a_new->grp  = DICT__find_grp    ('¢');
+   if (l >= 5)  a_new->w_grp  = DICT__find_grp    (a_cats [4]);
+   else         a_new->w_grp  = DICT__find_grp    ('¢');
    /*---(source)-------------------------*/
-   if (l >= 7)  a_new->src  = DICT__find_source (a_cats [6]);
-   else         a_new->src  = DICT__find_source ('¢');
+   if (l >= 7)  a_new->w_src  = DICT__find_source (a_cats [6]);
+   else         a_new->w_src  = DICT__find_source ('¢');
    /*---(category)-----------------------*/
-   if (l >= 9)  a_new->cat  = DICT__find_type   (a_cats [8]);
-   else         a_new->cat  = DICT__find_type   ('¢');
+   if (l >= 9)  a_new->w_cat  = DICT__find_type   (a_cats [8]);
+   else         a_new->w_cat  = DICT__find_type   ('¢');
    /*---(complete)-----------------------*/
    DEBUG_CONF   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -943,22 +970,22 @@ DICT__category_six      (tWORD *a_new, char l, cchar *a_cats)
    /*---(header)-------------------------*/
    DEBUG_CONF   yLOG_enter   (__FUNCTION__);
    /*---(part-of-speech)-----------------*/
-   if (l >= 1)  a_new->part = DICT__find_speech (a_cats [0]);
-   else         a_new->part = DICT__find_speech ('¢');
+   if (l >= 1)  a_new->w_part = DICT__find_speech (a_cats [0]);
+   else         a_new->w_part = DICT__find_speech ('¢');
    /*---(sub part-of-speech)-------------*/
-   if (l >= 3)  a_new->sub  = DICT__find_sub    (a_new->part, a_cats [2]);
-   else         a_new->sub  = DICT__find_sub    (a_new->part, '¢');
+   if (l >= 3)  a_new->w_sub  = DICT__find_sub    (a_new->w_part, a_cats [2]);
+   else         a_new->w_sub  = DICT__find_sub    (a_new->w_part, '¢');
    /*---(source group)-------------------*/
-   if (l >= 5)  a_new->grp  = DICT__find_grp    (a_cats [4]);
-   else         a_new->grp  = DICT__find_grp    ('¢');
+   if (l >= 5)  a_new->w_grp  = DICT__find_grp    (a_cats [4]);
+   else         a_new->w_grp  = DICT__find_grp    ('¢');
    /*---(source)-------------------------*/
-   if (l >= 8)  a_new->src  = DICT__find_source (a_cats [7]);
-   else         a_new->src  = DICT__find_source ('¢');
+   if (l >= 8)  a_new->w_src  = DICT__find_source (a_cats [7]);
+   else         a_new->w_src  = DICT__find_source ('¢');
    /*---(category)-----------------------*/
-   if (l >= 10) a_new->cat  = DICT__find_type   (a_cats [9]);
-   else         a_new->cat  = DICT__find_type   ('¢');
+   if (l >= 10) a_new->w_cat  = DICT__find_type   (a_cats [9]);
+   else         a_new->w_cat  = DICT__find_type   ('¢');
    /*---(page)---------------------------*/
-   if (l >= 12) a_new->page = atoi (a_cats + 11);
+   if (l >= 12) a_new->w_page = atoi (a_cats + 11);
    /*---(complete)-----------------------*/
    DEBUG_CONF   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -972,23 +999,23 @@ DICT__category_seven    (tWORD *a_new, char l, cchar *a_cats)
    /*---(header)-------------------------*/
    DEBUG_CONF   yLOG_enter   (__FUNCTION__);
    /*---(part-of-speech)-----------------*/
-   if (l >= 1)  a_new->part = DICT__find_speech (a_cats [0]);
-   else         a_new->part = DICT__find_speech ('¢');
-   if (l >= 3)  a_new->sub  = DICT__find_sub    (a_new->part, a_cats [2]);
-   else         a_new->sub  = DICT__find_sub    (a_new->part, '¢');
+   if (l >= 1)  a_new->w_part = DICT__find_speech (a_cats [0]);
+   else         a_new->w_part = DICT__find_speech ('¢');
+   if (l >= 3)  a_new->w_sub  = DICT__find_sub    (a_new->w_part, a_cats [2]);
+   else         a_new->w_sub  = DICT__find_sub    (a_new->w_part, '¢');
    /*---(source)-------------------------*/
-   if (l >= 6)  a_new->src  = DICT__find_source (a_cats [5]);
-   else         a_new->src  = DICT__find_source ('¢');
-   if (l >= 8)  a_new->cat  = DICT__find_type   (a_cats [7]);
-   else         a_new->cat  = DICT__find_type   ('¢');
+   if (l >= 6)  a_new->w_src  = DICT__find_source (a_cats [5]);
+   else         a_new->w_src  = DICT__find_source ('¢');
+   if (l >= 8)  a_new->w_cat  = DICT__find_type   (a_cats [7]);
+   else         a_new->w_cat  = DICT__find_type   ('¢');
    if (l >= 10) {
       sprintf (t, "%-3.3s", a_cats + 9);
-      a_new->page = atoi (t);
+      a_new->w_page = atoi (t);
    }
    /*---(frequency)----------------------*/
-   if (l >= 14) a_new->grp  = DICT__find_grp    (a_cats [13]);
-   else         a_new->grp  = DICT__find_grp    ('¢');
-   if (l >= 16) a_new->freq = atoi (a_cats + 15);
+   if (l >= 14) a_new->w_grp  = DICT__find_grp    (a_cats [13]);
+   else         a_new->w_grp  = DICT__find_grp    ('¢');
+   if (l >= 16) a_new->w_freq = atoi (a_cats + 15);
    /*---(complete)-----------------------*/
    DEBUG_CONF   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -1054,32 +1081,40 @@ DICT__variation_quick   (tWORD *a_base, tWORD *a_last, char a_english [LEN_TITLE
    /*---(header)-------------------------*/
    DEBUG_CONF   yLOG_enter   (__FUNCTION__);
    /*---(build gregg)--------------------*/
-   sprintf (x_gregg, "%s·%s", a_base->gregg, a_suffix);
+   sprintf (x_gregg, "%s·%s", a_base->w_gregg, a_suffix);
    DEBUG_CONF   yLOG_info    ("x_gregg"   , x_gregg);
    /*---(add word)-----------------------*/
-   rc = WORDS__new (a_english, x_gregg, a_base->part, &x_new);
+   rc = WORDS_new_vary (a_english, x_gregg, a_base->w_part, &x_new);
    DEBUG_CONF   yLOG_value   ("new"       , rc);
    --rce;  if (rc < 0) {
       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
+   /*---(hook to lists)------------------*/
+   rc = WORDS_hook (x_new);
+   DEBUG_CONF   yLOG_value   ("hook"      , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
    /*---(carry-over)---------------------*/
-   x_new->line = a_base->line;
-   strlcpy (x_new->vary, a_vary, LEN_TERSE);
+   x_new->w_file = a_base->w_file;
+   x_new->w_line = a_base->w_line;
+   strlcpy (x_new->w_vary, a_vary, LEN_TERSE);
    /*---(past-of-speech)-----------------*/
-   x_new->part = a_base->part;
-   x_new->sub  = a_base->sub;
+   x_new->w_part = a_base->w_part;
+   x_new->w_sub  = a_base->w_sub;
    /*---(source)-------------------------*/
-   x_new->src  = a_base->src;
-   x_new->cat  = a_base->cat;
-   x_new->page = a_base->page;
+   x_new->w_src  = a_base->w_src;
+   x_new->w_cat  = a_base->w_cat;
+   x_new->w_page = a_base->w_page;
    /*---(frequency)----------------------*/
-   x_new->grp  = a_base->grp;
-   x_new->freq = a_base->freq;
+   x_new->w_grp  = a_base->w_grp;
+   x_new->w_freq = a_base->w_freq;
    /*---(connect to chain)---------------*/
-   x_new->base = a_base;
-   ++(x_new->base->count);
-   if (a_last != NULL)  a_last->next = x_new;
+   x_new->w_base = a_base;
+   ++(x_new->w_base->w_nvary);
+   if (a_last != NULL)  a_last->w_next = x_new;
    /*---(save-back)----------------------*/
    if (r_new  != NULL)  *r_new = x_new;
    /*---(complete)-----------------------*/
@@ -1246,6 +1281,8 @@ DICT__parse             (short a_line, cchar a_english [LEN_TERSE], cchar a_greg
    char        rce         =  -10;
    char        rc          =    0;
    int         i           =    0;
+   char        x_pre       [LEN_TERSE] = "";
+   char        x_base      [LEN_TITLE] = "";
    char        x_revised   =  '-';
    char        x_english   [LEN_TITLE] = "";
    char        x_gregg     [LEN_TITLE] = "";
@@ -1261,12 +1298,25 @@ DICT__parse             (short a_line, cchar a_english [LEN_TERSE], cchar a_greg
       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   /*---(preprare words)-----------------*/
+   /*---(preprare english)---------------*/
+   strlcpy (x_pre , a_english   , LEN_TERSE);
+   strlcpy (x_base, s_fields [0], LEN_TITLE);
+   if (strcmp (x_pre, "") != NULL) {
+      rc = DICT__pre_update  (x_pre, x_base);
+      rc = DICT__find_prefix (x_pre, x_english, x_gregg);
+      DEBUG_CONF   yLOG_complex ("find"      , "%4d, %s, %s", rc, x_english, x_gregg);
+      --rce;  if (rc < 0) {
+         DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+         return rce;
+      }
+   }
+   sprintf (x_english, "%s%s", x_pre, x_base);
+   /*---(update with prefix)-------------*/
    if (s_nfield >= 5 && (strcmp (s_fields [4], "·") != 0 && strcmp (s_fields [4], "") != 0))   x_revised = 'y';
    DEBUG_CONF   yLOG_value   ("x_revised" , x_revised);
-   sprintf (x_english, "%s%s", a_english, s_fields [0]);
-   if (x_revised != 'y')  sprintf (x_gregg  , "%s%s", a_gregg, s_fields [2]);
-   else                   sprintf (x_gregg  , "%s%s", a_gregg, s_fields [4]);
+   /*---(preprare gregg)-----------------*/
+   if (x_revised != 'y')  sprintf (x_gregg  , "%s%s", x_gregg, s_fields [2]);
+   else                   sprintf (x_gregg  , "%s%s", x_gregg, s_fields [4]);
    DEBUG_CONF   yLOG_complex ("words"     , "%-20.20s, %s", x_english, x_gregg);
    /*---(primary)------------------------*/
    rc = DICT__primary (a_line, x_english, x_gregg, s_fields [3], &x_new);
@@ -1275,13 +1325,9 @@ DICT__parse             (short a_line, cchar a_english [LEN_TERSE], cchar a_greg
       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   if (x_revised != 'y')  x_new->official = x_new->gregg;
-   else                   x_new->official  = strdup (s_fields [2]);
-   x_new->count = 1;
-   /*---(arpabet)------------------------*/
-   if (s_nfield > 3) {
-      x_new->arpabet   = strdup (s_fields [1]);
-   }
+   /*> if (x_revised != 'y')  x_new->official = x_new->w_gregg;                       <* 
+    *> else                   x_new->official  = strdup (s_fields [2]);               <*/
+   x_new->w_nvary = 1;
    /*---(categories)---------------------*/
    if (s_nfield > 3) {
       rc = DICT__category (x_new, s_fields [3]);
@@ -1295,7 +1341,7 @@ DICT__parse             (short a_line, cchar a_english [LEN_TERSE], cchar a_greg
    x_last = x_new;
    for (i = 5; i <= MAX_FIELD; ++i) {
       if (strlen (s_fields [i]) == 0)  continue;
-      rc = DICT__variation (x_new, x_last, a_english, a_gregg, s_fields [i], &x_vary);
+      rc = DICT__variation (x_new, x_last, x_pre, x_gregg, s_fields [i], &x_vary);
       DEBUG_CONF   yLOG_value   ("variation" , rc);
       --rce;  if (rc < 0) {
          DEBUG_CONF   yLOG_note    ("variation failed, continuing");
@@ -1372,6 +1418,7 @@ DICT__parse_all         (short a_line, cchar a_prefixes [LEN_HUND], cchar a_recd
    char        x_prefixes  [LEN_HUND]  = "";
    char        x_prefix    [LEN_TERSE] = "";
    char        x_english   [LEN_TERSE] = "";
+   char        t           [LEN_TERSE] = "";
    char        x_gregg     [LEN_TERSE] = "";
    char       *p           = NULL;
    char       *q           =  ","; 
@@ -1395,6 +1442,7 @@ DICT__parse_all         (short a_line, cchar a_prefixes [LEN_HUND], cchar a_recd
    if (strcmp (x_prefixes, "") == 0  || strcmp (x_prefixes, "·") == 0) {
       DEBUG_CONF   yLOG_note    ("no prefixes passed, simple");
       rc = DICT__parse_easy (a_line, a_recd);
+      DEBUG_CONF   yLOG_exit    (__FUNCTION__);
       return rc;
    }
    /*---(prefixes)-----------------------*/
@@ -1409,11 +1457,7 @@ DICT__parse_all         (short a_line, cchar a_prefixes [LEN_HUND], cchar a_recd
          rc = DICT__parse_easy (a_line, a_recd);
       } else {
          DEBUG_CONF   yLOG_note    ("handling prefix");
-         rc = DICT__find_prefix (x_prefix, x_english, x_gregg);
-         DEBUG_CONF   yLOG_complex ("find"      , "%4d, %s, %s", rc, x_english, x_gregg);
-         if (rc >= 0) {
-            rc = DICT__parse (a_line, x_english, x_gregg, a_recd);
-         }
+         rc = DICT__parse (a_line, x_prefix, x_gregg, a_recd);
       }
       p = strtok_r (NULL  , q, &r);
    }
@@ -1585,16 +1629,16 @@ DICT_list          (void)
    /*---(search)-------------------------*/
    WORDS_eng_by_index  (a, &x_curr);
    while (x_curr != NULL) {
-      if (strcmp (x_curr->vary, "<") == 0) {
+      if (strcmp (x_curr->w_vary, "<") == 0) {
          WORDS_detail (x_curr, t);
          strlpadn (++c, n, '.', '<', 5);
          printf ("%5.5s··%s\n", n, t);
-         x_sub = x_curr->next;
+         x_sub = x_curr->w_next;
          x_col = 0;
          while (x_sub != NULL) {
             WORDS_detail (x_sub, t);
             printf ("    %c  %s\n", ++x_col + 'a', t);
-            x_sub  = x_sub->next;
+            x_sub  = x_sub->w_next;
          }
       }
       ++a;
@@ -1675,40 +1719,82 @@ DICT_dump_words         (FILE *f)
    fprintf (f, "##   inventory of dictionary words\n");
    fprintf (f, "\n");
    fprintf (f, "#@ style     V = printable columnar values\n");
-   fprintf (f, "#@ x-parse  14åÏ---···Ï-----------------------··Ï---·Ï---·Ï·Ï··Ï·Ï·Ï--··Ï·Ï---··Ï-----------------------··Ï----------------------------------··Ï-----------------------·æ\n");
-   fprintf (f, "#@ titles     åref····english···················line·var··p·s··s·c·pg···g·freq··gregg·····················shown································arpabet··················æ\n");
+   fprintf (f, "#@ x-parse  14åÏ---···Ï-----------------------··Ï---·Ï---·Ï·Ï··Ï·Ï·Ï--··Ï·Ï---··Ï-----------------------··Ï----------------------------------·æ\n");
+   fprintf (f, "#@ titles     åref····english···················line·var··p·s··s·c·pg···g·freq··gregg·····················shown·······························æ\n");
    fprintf (f, "\n");
    WORDS_eng_by_index  (a, &x_curr);
    while (x_curr != NULL) {
-      if (strcmp (x_curr->vary, "<") == 0) {
-         DEBUG_CONF   yLOG_info    ("base"      , x_curr->english);
+      if (strcmp (x_curr->w_vary, "<") == 0) {
+         DEBUG_CONF   yLOG_info    ("base"      , x_curr->w_english);
          WORDS_detail (x_curr, t);
          DEBUG_CONF   yLOG_info    ("t"         , t);
          strlpadn (++c, n, '.', '<', 5);
          if (i %  5 == 0)  fprintf (f, "\n");
-         if (i % 25 == 0)  fprintf (f, "##-····---english--------------··line·var··p·s··s·c·pg···g·freq··---gregg----------------··---shown---------------------------··---arpabet--------------\n\n");
+         if (i % 25 == 0)  fprintf (f, "##-····---english--------------··line·var··p·s··s·c·pg···g·freq··---gregg----------------··---shown---------------------------\n\n");
          i++;
          fprintf (f, "%5.5s··%s\n", n, t);
-         x_sub = x_curr->next;
+         x_sub = x_curr->w_next;
          x_col = 0;
          while (x_sub != NULL) {
-            DEBUG_CONF   yLOG_info    ("vary"      , x_sub->english);
+            DEBUG_CONF   yLOG_info    ("vary"      , x_sub->w_english);
             WORDS_detail (x_sub, t);
             DEBUG_CONF   yLOG_info    ("t"         , t);
             if (i %  5 == 0)  fprintf (f, "\n");
-            if (i % 25 == 0)  fprintf (f, "##-····---english--------------··line·var··p·s··s·c·pg···g·freq··---gregg----------------··---shown---------------------------··---arpabet--------------\n\n");
+            if (i % 25 == 0)  fprintf (f, "##-····---english--------------··line·var··p·s··s·c·pg···g·freq··---gregg----------------··---shown---------------------------\n\n");
             i++;
             fprintf (f, "    %c  %s\n", ++x_col + 'a', t);
-            x_sub  = x_sub->next;
+            x_sub  = x_sub->w_next;
          }
       }
       ++a;
       WORDS_eng_by_index (a, &x_curr);
    }
    fprintf (f, "\n");
-   fprintf (f, "##-····---english--------------··line·var··p·s··s·c·pg···g·freq··---gregg----------------··---shown---------------------------··---arpabet--------------\n\n");
+   fprintf (f, "##-····---english--------------··line·var··p·s··s·c·pg···g·freq··---gregg----------------··---shown---------------------------\n\n");
    fprintf (f, "## found %d primaries and %d total words (%4.2fx)\n", c, a, (float) a / (float) c);
    /*---(complete)-------------------------*/
+   DEBUG_CONF   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+DICT_dump_gregg         (FILE *f)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   int         x_pos       =    0;
+   int         x_gregg     =    0;
+   int         i           =    0;
+   int         a           =    0;
+   int         c           =    0;
+   char        r           [LEN_SHORT] = "";
+   char        s           [LEN_SHORT] = "";
+   char        t           [LEN_SHORT] = "";
+   char        u           [LEN_SHORT] = "";
+   char        v           [LEN_SHORT] = "";
+   char        x_col       =    0;
+   tWORD      *x_curr      = NULL;
+   /*---(header)-------------------------*/
+   DEBUG_CONF   yLOG_enter   (__FUNCTION__);
+   WORDS_eng_by_index  (a, &x_curr);
+   while (x_curr != NULL) {
+      if (strcmp (x_curr->w_vary, "<") != 0) {
+         WORDS_eng_by_index (++a, &x_curr);
+         continue;
+      }
+      if (x_curr->w_tree [0] > 0)  sprintf (r, "%02d" , x_curr->w_tree [0]);
+      else                         strcpy  (r, "  ");
+      if (x_curr->w_tree [1] > 0)  sprintf (s, "·%02d", x_curr->w_tree [1]);
+      else                         strcpy  (s, "   ");
+      if (x_curr->w_tree [2] > 0)  sprintf (t, "·%02d", x_curr->w_tree [2]);
+      else                         strcpy  (t, "   ");
+      if (x_curr->w_tree [3] > 0)  sprintf (u, "·%02d", x_curr->w_tree [3]);
+      else                         strcpy  (u, "   ");
+      if (x_curr->w_tree [4] > 0)  sprintf (v, "·%02d", x_curr->w_tree [4]);
+      else                         strcpy  (v, "   ");
+      fprintf (f, "%2s%2s%2s%2s%2s  %-20.20s  %s\n", r, s, t, u, v, x_curr->w_gregg, x_curr->w_english);
+      WORDS_eng_by_index (++a, &x_curr);
+   }
+   /*---(complete)-----------------------*/
    DEBUG_CONF   yLOG_exit    (__FUNCTION__);
    return 0;
 }

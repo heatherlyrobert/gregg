@@ -9,7 +9,6 @@ static FILE  *s_file = NULL;
 static char   s_recd [LEN_HUGE] = "";
 static int    s_len  =    0;
 
-
 tOUTLINE  o;
 
 char

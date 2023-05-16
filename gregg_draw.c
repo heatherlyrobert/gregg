@@ -143,7 +143,7 @@ DRAW_resize             (char a_layout)
    case  LAYOUT_INTERPRET  : rc = PAGE_config (LAYOUT_INTERPRET ,  500,  350, YF_GREGG , 2.0,   -1, -1, -1, -1,   -1, YF_ORIGIN, -1, -1, -1, '-');          break;
    case  LAYOUT_PAGEVIEW   : rc = PAGE_config (LAYOUT_PAGEVIEW  , 1000,  700, YF_TOPLEF, 2.0,   -1, -1, -1, -1,   -1, YF_MIDCEN, 15, 15, 40, GAP_GRID);     break;
    case  LAYOUT_DICTIONARY : rc = PAGE_config (LAYOUT_DICTIONARY, 1200,  750, YF_TOPLEF, 2.0,   10, 10, -1, -1,   -1, YF_MIDCEN, 15, 15, 47, GAP_GRID);     break;
-   case  LAYOUT_CONNECT    : rc = PAGE_config (LAYOUT_CONNECT   , 1300, 1100, YF_TOPLEF, 2.0,   -1, -1, -1, -1,   -1, YF_MIDCEN, 15, 15, 40, GAP_GRID);     break;
+   case  LAYOUT_CONNECT    : rc = PAGE_config (LAYOUT_CONNECT   , 1300, 1200, YF_TOPLEF, 2.0,   -1, -1, -1, -1,   -1, YF_MIDCEN, 15, 15, 40, GAP_GRID);     break;
    }
    DEBUG_GRAF   yLOG_value   ("conf"      , rc);
    --rce;  if (rc < 0) {
@@ -182,7 +182,7 @@ DRAW_make               (char a_layout)
    case  LAYOUT_INTERPRET  : rc = PAGE_new    (LAYOUT_INTERPRET ,  500,  350, YF_GREGG , 2.0,   -1, -1, -1, -1,   -1, YF_ORIGIN, -1, -1, -1, '-');          break;
    case  LAYOUT_PAGEVIEW   : rc = PAGE_new    (LAYOUT_PAGEVIEW  , 1000,  700, YF_TOPLEF, 2.0,   -1, -1, -1, -1,   -1, YF_MIDCEN, 15, 15, 40, GAP_GRID);     break;
    case  LAYOUT_DICTIONARY : rc = PAGE_new    (LAYOUT_DICTIONARY, 1200,  750, YF_TOPLEF, 2.0,   10, 10, -1, -1,   -1, YF_MIDCEN, 15, 15, 47, GAP_GRID);     break;
-   case  LAYOUT_CONNECT    : rc = PAGE_new    (LAYOUT_CONNECT   , 1300, 1100, YF_TOPLEF, 2.0,   -1, -1, -1, -1,   -1, YF_MIDCEN, 15, 15, 40, GAP_GRID);     break;
+   case  LAYOUT_CONNECT    : rc = PAGE_new    (LAYOUT_CONNECT   , 1300, 1200, YF_TOPLEF, 2.0,   -1, -1, -1, -1,   -1, YF_MIDCEN, 15, 15, 40, GAP_GRID);     break;
    }
    DEBUG_GRAF   yLOG_value   ("new"       , rc);
    --rce;  if (rc < 0) {
@@ -314,11 +314,11 @@ DRAW_dictionary         (void)
       } glEnd();
    } glPopMatrix   ();
    if (g_pages [my.w_cpage] != NULL) {
-      strlcpy (t, g_pages [my.w_cpage]->english, LEN_TITLE);
+      strlcpy (t, g_pages [my.w_cpage]->w_english, LEN_TITLE);
    }
    if (g_lasts [my.w_cpage] != NULL) {
       strlcat (t, " - "               , LEN_TITLE);
-      strlcat (t, g_lasts [my.w_cpage]->english, LEN_TITLE);
+      strlcat (t, g_lasts [my.w_cpage]->w_english, LEN_TITLE);
    }
    /*> glColor4f (0.0, 0.0, 0.0, 1.0);                                                <*/
    glPushMatrix    (); {

@@ -177,14 +177,13 @@ PROG__init              (int a_argc, char *a_argv[])
    /*> my.ratio        = GREGG_WACOM;                                                 <*/
    my.ratio        = 10;
    my.baseonly     = '-';
+   my.nopre        = '-';
    strlcpy (my.wordfile, "/var/lib/gregg/gregg_manual.dict", LEN_PATH);
-   /*> my.w_wide       = 500;                                                         <* 
-    *> my.w_tall       = 350;                                                         <* 
-    *> strlcpy (my.w_title, "gregg shorthand interpreter", LEN_HUND);                 <*/
    /*---(other)-----------------------*/
    strlcpy (my.words, "", LEN_RECD);
    strlcpy (my.guide, "", LEN_RECD);
    /*---(get letters/sizing ready)----*/
+   DB_source_purge ();
    WORDS_init      ();
    DICT_init       ();
    my.w_ppage   = 120;
@@ -315,6 +314,7 @@ PROG__args              (int a_argc, char *a_argv[])
       else if (strcmp (a, "--dictionary"        ) == 0)   DRAW_resize (LAYOUT_DICTIONARY);
       else if (strcmp (a, "--connect"           ) == 0)   DRAW_resize (LAYOUT_CONNECT);
       else if (strcmp (a, "--baseonly"          ) == 0)   my.baseonly = 'y';
+      else if (strcmp (a, "--nopre"             ) == 0)   my.nopre    = 'y';
       else if (strcmp (a, "--wordfile"          ) == 0)   TWOARG  { strncpy (my.wordfile, b, LEN_PATH); }
       /*---(catch two-arg errors)--------*/
       if (rc < 0)  {
@@ -405,6 +405,7 @@ PROG_dawn          (void)
    }
    rc = yFILE_dump_add  ("suffix", "", "inventory of all allowed word suffixes", DICT_dump_suffix);
    rc = yFILE_dump_add  ("words" , "", "all words in dictionary"               , DICT_dump_words);
+   rc = yFILE_dump_add  ("gregg" , "", "word tree by gregg letters"            , DICT_dump_gregg);
    yCMD_direct (":layout min");
    /*> yVIKEYS_view_option (YVIKEYS_BUFFER, "file" , OUT_status, "current file name and stats");   <*/
    /*> yCMDS_direct (":buffer file");                                                 <*/
@@ -418,9 +419,7 @@ PROG_dawn          (void)
    /*> if (my.dict   == 'y')  DICT_import  (NAME_DICT);                               <*/
    /*> DICT_import  ("/var/lib/gregg/gregg_manual.dict");                             <*/
    DLIST_init      ();
-   DICT_import  (my.wordfile);
-   DEBUG_PROG   yLOG_value   ("words"     , WORDS_eng_count ());
-   yMAP_refresh_full ();
+   /*> DICT_import  (my.wordfile);                                                    <*/
    OUT_init      ();
    DRAW_init  ();
    TOUCH_init ();

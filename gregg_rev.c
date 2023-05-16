@@ -724,10 +724,10 @@ REVERSE_english_word    (uchar *a_word, char a_type, char a_skip)
       DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   strlcpy (my.word , a_word       , LEN_HUND);
-   strlcpy (my.gregg, x_word->gregg, LEN_HUND);
+   strlcpy (my.word , a_word         , LEN_HUND);
+   strlcpy (my.gregg, x_word->w_gregg, LEN_HUND);
    /*---(translate)----------------------*/
-   rc = WORDS_drawn_show     (x_word->drawn, my.shown);
+   rc = WORDS_drawn_show     (x_word->w_drawn, my.shown);
    DEBUG_OUTP   yLOG_value   ("tranlate"  , rc);
    --rce;  if (rc < 0) {
       DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);

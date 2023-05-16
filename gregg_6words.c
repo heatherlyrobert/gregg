@@ -55,13 +55,13 @@ static uchar    s_4th   = '·';
 static uchar    s_top   = '·';  /*  A = 100, b =500, c = 2000, - = others  */
 
 
-char       *english;                     /* english word                   */
-char        e_len;
-uchar      *gregg;                       /* gregg translation              */
-char        g_len;
-short       drawn       [LEN_LABEL];     /* gregg as drawn                 */
+/*> char       *english;                     /+ english word                   +/     <*/
+/*> char        e_len;                                                                <* 
+ *> uchar      *gregg;                       /+ gregg translation              +/     <* 
+ *> char        g_len;                                                                <* 
+ *> short       drawn       [LEN_LABEL];     /+ gregg as drawn                 +/     <*/
 /*---(info)-----------------*/
-char        part;                        /* primary part of speech         */
+/*> char        part;                        /+ primary part of speech         +/     <*/
 
 
 char
@@ -91,6 +91,16 @@ WORDS_init              (void)
       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
+   /*---(initialize)---------------------*/
+   rc = ySORT_btree (B_TREE   , "tree");
+   DEBUG_CONF   yLOG_value   ("tree"      , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(defaults)-----------------------*/
+   my.r_nbase = 0;
+   my.r_nword = 0;
    /*---(complete)-----------------------*/
    DEBUG_CONF   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -102,42 +112,43 @@ WORDS__wipe             (tWORD *a_word)
    /*---(locals)-----------+-----+-----+-*/
    int         i           =    0;
    /*---(header)-------------------------*/
-   a_word->english   = NULL;
-   a_word->e_len     = 0;
-   a_word->arpabet   = NULL;
-   a_word->gregg     = NULL;
-   a_word->official  = NULL;
-   a_word->g_len     = 0;
-   a_word->unique    = NULL;
+   a_word->w_english [0] = '\0';
+   a_word->w_gregg   [0] = '\0';
+   a_word->w_unique  [0] = '\0';
    /*---(updates)--------------*/
-   for (i = 0; i < LEN_HUND;  ++i)  a_word->shown  [i] = '\0';
-   for (i = 0; i < LEN_LABEL; ++i)  a_word->drawn  [i] = -1;
-   for (i = 0; i < LEN_TERSE; ++i)  a_word->tree   [i] = -1;
+   for (i = 0; i < LEN_HUND;  ++i)  a_word->w_shown  [i] = '\0';
+   for (i = 0; i < LEN_LABEL; ++i)  a_word->w_drawn  [i] = -1;
+   for (i = 0; i < LEN_TERSE; ++i)  a_word->w_tree   [i] = -1;
    /*---(audit)----------------*/
-   a_word->fancy     = NULL;
-   a_word->g_audit   = '-';
-   a_word->f_audit   = '-';
-   a_word->a_audit   = '-';
+   /*> a_word->trouble   = '-';                                                       <* 
+    *> a_word->fancy     = NULL;                                                      <* 
+    *> a_word->g_audit   = '-';                                                       <* 
+    *> a_word->f_audit   = '-';                                                       <* 
+    *> a_word->a_audit   = '-';                                                       <*/
    /*---(parsing)--------------*/
-   a_word->line      = -1; 
-   strcpy (a_word->vary, "<");
-   a_word->base      = NULL;
-   a_word->next      = NULL;
-   a_word->count     = 0;
+   a_word->w_file    = -1;
+   a_word->w_line    = -1; 
+   a_word->w_bref    = -1; 
+   /*---(variations)-----------*/
+   strcpy (a_word->w_vary, "<");
+   a_word->w_base    = NULL;
+   a_word->w_next    = NULL;
+   a_word->w_nvary   = 0;
    /*---(part-of-speech)-------*/
-   a_word->part      = '·';
-   a_word->sub       = '·';
+   a_word->w_part    = '·';
+   a_word->w_sub     = '·';
    /*---(source)---------------*/
-   a_word->src       = '·';
-   a_word->cat       = '·';
-   a_word->page      = 0;
+   a_word->w_src     = '·';
+   a_word->w_cat     = '·';
+   a_word->w_page    = 0;
    /*---(frequency)------------*/
-   a_word->grp       = '·';
-   a_word->freq      = 0;
+   a_word->w_grp     = '·';
+   a_word->w_freq    = 0;
    /*---(ysort)----------------*/
    a_word->ysort_e   = NULL;
    a_word->ysort_g   = NULL;
-   a_word->ysort_f   = NULL;
+   a_word->ysort_u   = NULL;
+   a_word->ysort_t   = NULL;
    /*---(complete)-------------*/
    return 1;
 }
@@ -148,23 +159,15 @@ WORDS__wipe             (tWORD *a_word)
 /*====================------------------------------------====================*/
 static void  o___MEMORY__________o () { return; }
 
-char         /*-> create a single new empty cell -----[ leaf   [fe.KB4.224.80]*/ /*-[12.0000.123.A]-*/ /*-[--.---.---.--]-*/
-WORDS__new         (char *a_english, char *a_gregg, char a_part, tWORD **r_word)
+char
+WORDS__check            (char a_english [LEN_TITLE], char a_gregg [LEN_TITLE], char a_part, char r_full [LEN_DESC])
 {
    /*---(locals)-----------+-----------+-*/
    char        rce         =  -10;
-   char        rc          =    0;
-   int         x_tries     =    0;
-   tWORD     *x_new       = NULL;
-   llong       x_ekey      =   -1;
-   llong       x_gkey      =   -1;
-   uchar       x_index     [LEN_LABEL] = "";
-   uchar       x_full      [LEN_DESC]  = "";
-   uchar       x_fancy     [LEN_FULL]  = "";
+   char        rc          =  -10;
+   tWORD     *x_dup       = NULL;
    /*---(begin)--------------------------*/
    DEBUG_CONF   yLOG_enter   (__FUNCTION__);
-   /*---(default)------------------------*/
-   if (r_word != NULL)  *r_word == NULL;
    /*---(defense)------------------------*/
    DEBUG_CONF   yLOG_point   ("a_english" , a_english);
    --rce;  if (a_english == NULL) {
@@ -187,17 +190,44 @@ WORDS__new         (char *a_english, char *a_gregg, char a_part, tWORD **r_word)
       return rce;
    }
    /*---(check for duplicate)------------*/
-   sprintf (x_full, "%-20.20s  %c  %s", a_english, a_part, a_gregg);
-   rc = ySORT_by_name (B_UNIQUE , x_full, &x_new);
-   DEBUG_CONF   yLOG_point   ("x_exist"   , x_new);
-   --rce;  while (x_new != NULL) {
+   sprintf (r_full, "%-20.20s  %c  %s", a_english, a_part, a_gregg);
+   rc = ySORT_by_name (B_UNIQUE , r_full, &x_dup);
+   DEBUG_CONF   yLOG_point   ("x_exist"   , x_dup);
+   --rce;  while (x_dup != NULL) {
       DEBUG_CONF   yLOG_note    ("english/gregg combination already exists");
-      DEBUG_CONF   yLOG_point   ("->name"    , x_new->english);
-      if (r_word != NULL)  *r_word = x_new;
+      DEBUG_CONF   yLOG_point   ("->name"    , x_dup->w_english);
       DEBUG_CONF   yLOG_exit    (__FUNCTION__);
       return 1;
    }
-   x_new = NULL;
+   /*---(complete)-----------------------*/
+   DEBUG_CONF   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+WORDS_new               (char a_force, tWORD **r_new)
+{
+   /*---(locals)-----------+-----------+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
+   int         x_tries     =    0;
+   tWORD     *x_new       = NULL;
+   /*---(begin)--------------------------*/
+   DEBUG_CONF   yLOG_enter   (__FUNCTION__);
+   /*---(defense)------------------------*/
+   DEBUG_CONF   yLOG_point   ("r_new"     , r_new);
+   --rce;  if (r_new  == NULL) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_CONF   yLOG_point   ("*r_new"    , *r_new);
+   DEBUG_CONF   yLOG_char    ("a_force"   , a_force);
+   --rce;  if (a_force != 'y' && *r_new  != NULL) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(default)------------------------*/
+   *r_new == NULL;
    /*---(create cell)--------------------*/
    while (x_new == NULL) {
       ++x_tries;
@@ -214,48 +244,92 @@ WORDS__new         (char *a_english, char *a_gregg, char a_part, tWORD **r_word)
    /*---(header)-------------------------*/
    DEBUG_CONF   yLOG_note    ("add all data");
    WORDS__wipe (x_new);
-   x_new->english   = strdup (a_english);
-   x_new->e_len     = strlen (x_new->english);
-   x_new->gregg     = strdup (a_gregg);
-   x_new->g_len     = strlen (x_new->gregg);
-   x_new->unique    = strdup (x_full);
-   x_new->part      = a_part;
-   /*---(drawn)-------------------------*/
-   rc = AUDIT_gregg_outline (x_new->gregg, x_fancy);
-   x_new->fancy = strdup (x_fancy);
-   printf ("%-15.15s  %s\n", x_new->english, x_new->fancy);
-   if (rc < 0)  x_new->g_audit = 'F';
-   /*---(drawn)-------------------------*/
-   rc = WORDS_fix_gregg     (x_new->gregg, x_new->shown, x_new->drawn, x_new->tree);
-   if (rc < 0)  x_new->f_audit = 'F';
-   /*---(hook)---------------------------*/
-   rc = ySORT_hook (B_ENGLISH, x_new, x_new->english, &(x_new->ysort_e));
-   DEBUG_CONF   yLOG_value   ("hook eng"  , rc);
-   --rce;  if (rc < 0) {
-      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   rc = ySORT_hook (B_GREGG  , x_new, x_new->gregg  , &(x_new->ysort_g));
-   DEBUG_CONF   yLOG_value   ("hook gregg", rc);
-   rc = ySORT_hook (B_UNIQUE , x_new, x_new->unique , &(x_new->ysort_f));
-   DEBUG_CONF   yLOG_value   ("hook uniq" , rc);
-   /*---(prepare)------------------------*/
-   rc = ySORT_prepare (B_ENGLISH);
-   DEBUG_CONF   yLOG_value   ("prep eng"  , rc);
-   --rce;  if (rc < 0) {
-      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   rc = ySORT_prepare (B_GREGG);
-   DEBUG_CONF   yLOG_value   ("prep gregg", rc);
-   rc = ySORT_prepare (B_UNIQUE);
-   DEBUG_CONF   yLOG_value   ("prep uniq" , rc);
    /*---(save-back)----------------------*/
-   if (r_word != NULL)  *r_word = x_new;
+   *r_new = x_new;
    /*---(complete)-----------------------*/
    DEBUG_CONF   yLOG_exit    (__FUNCTION__);
    return 0;
 }
+
+char
+WORDS__populate         (tWORD *a_new, char a_english [LEN_TITLE], char a_gregg [LEN_TITLE], char a_part, char a_full [LEN_DESC])
+{
+   /*---(locals)-----------+-----------+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
+   /*---(begin)--------------------------*/
+   DEBUG_CONF   yLOG_enter   (__FUNCTION__);
+   /*---(header)-------------------------*/
+   DEBUG_CONF   yLOG_note    ("add all data");
+   strlcpy (a_new->w_english, a_english, LEN_TITLE);
+   strlcpy (a_new->w_gregg  , a_gregg  , LEN_TITLE);
+   strlcpy (a_new->w_unique , a_full   , LEN_DESC);
+   a_new->w_part = a_part;
+   /*---(drawn)-------------------------*/
+   /*> rc = AUDIT_gregg_outline (a_new->w_gregg, x_fancy);                            <* 
+    *> printf ("%-15.15s  %s\n", a_new->w_english, x_fancy);                          <*/
+   /*---(drawn)-------------------------*/
+   rc = FIX_gregg (a_new->w_gregg, a_new->w_shown, a_new->w_drawn, a_new->w_tree);
+   /*---(hook to tree)------------------*/
+   rc = FIX_hook   (a_new);
+   DEBUG_CONF   yLOG_value   ("fix"       , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(complete)-----------------------*/
+   DEBUG_CONF   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+WORDS_new_full          (char a_english [LEN_TITLE], char a_gregg [LEN_TITLE], char a_part, char a_base, tWORD **r_new)
+{
+   /*---(locals)-----------+-----------+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
+   char        x_full      [LEN_DESC]  = "";
+   /*---(begin)--------------------------*/
+   DEBUG_CONF   yLOG_enter   (__FUNCTION__);
+   /*---(verify)-------------------------*/
+   rc = WORDS__check  (a_english, a_gregg, a_part, x_full);
+   DEBUG_CONF   yLOG_value   ("check"     , rc);
+   --rce; if (rc < 0) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   if (rc == 1) {
+      DEBUG_CONF   yLOG_exit    (__FUNCTION__);
+      return 1;
+   }
+   /*---(malloc)-------------------------*/
+   rc = WORDS_new     ('-', r_new);
+   DEBUG_CONF   yLOG_value   ("malloc"    , rc);
+   --rce; if (rc < 0) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(populate)-----------------------*/
+   rc = WORDS__populate  (*r_new, a_english, a_gregg, a_part, x_full);
+   DEBUG_CONF   yLOG_value   ("populate"  , rc);
+   --rce; if (rc < 0) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(stats)--------------------------*/
+   if (a_base == 'B' && strchr (a_gregg, '<') == NULL) {
+      (*r_new)->w_bref = my.r_nbase;
+      ++(my.r_nbase);
+   }
+   ++(my.r_nword);
+   /*---(complete)-----------------------*/
+   DEBUG_CONF   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char WORDS_new_base          (char a_english [LEN_TITLE], char a_gregg [LEN_TITLE], char a_part, tWORD **r_new)    { return WORDS_new_full (a_english, a_gregg, a_part, 'B', r_new); }
+char WORDS_new_vary          (char a_english [LEN_TITLE], char a_gregg [LEN_TITLE], char a_part, tWORD **r_new)    { return WORDS_new_full (a_english, a_gregg, a_part, '-', r_new); }
+
 
 char         /*-> remove a cell completely -----------[ ------ [fe.943.224.81]*/ /*-[11.0000.133.7]-*/ /*-[--.---.---.--]-*/
 WORDS__free             (tWORD **b_word)
@@ -279,35 +353,14 @@ WORDS__free             (tWORD **b_word)
    }
    x_old = *b_word;
    /*---(unhook from btree)--------------*/
-   rc = ySORT_unhook (&(x_old->ysort_e));
-   DEBUG_CONF   yLOG_value   ("un-eng"    , rc);
+   rc = WORDS_unhook (x_old);
+   DEBUG_CONF   yLOG_value   ("unhook"    , rc);
    --rce;  if (rc < 0) {
       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   rc = ySORT_unhook (&(x_old->ysort_g));
-   DEBUG_CONF   yLOG_value   ("un-gregg"  , rc);
-   rc = ySORT_unhook (&(x_old->ysort_f));
-   DEBUG_CONF   yLOG_value   ("un-uniq"   , rc);
    /*---(wipe data)----------------------*/
-   free (x_old->english);
-   x_old->english = NULL;
-   free (x_old->arpabet);
-   x_old->arpabet = NULL;
-   free (x_old->gregg);
-   x_old->gregg   = NULL;
    free (x_old);
-   /*---(prepare)------------------------*/
-   rc = ySORT_prepare (B_ENGLISH);
-   DEBUG_CONF   yLOG_value   ("prep eng"  , rc);
-   --rce;  if (rc < 0) {
-      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   rc = ySORT_prepare (B_GREGG);
-   DEBUG_CONF   yLOG_value   ("prep gregg", rc);
-   rc = ySORT_prepare (B_UNIQUE);
-   DEBUG_CONF   yLOG_value   ("prep uniq" , rc);
    /*---(save-back)----------------------*/
    *b_word = NULL;
    /*---(complete)-----------------------*/
@@ -330,6 +383,133 @@ WORDS_purge             (void)
       rc = WORDS__free   (&x_word);
       rc = WORDS_eng_by_index  (0, &x_word);
    }
+   /*---(defaults)-----------------------*/
+   my.r_nbase = 0;
+   my.r_nword = 0;
+   /*---(complete)-----------------------*/
+   DEBUG_CONF   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+
+
+/*====================------------------------------------====================*/
+/*===----                        searching                             ----===*/
+/*====================------------------------------------====================*/
+static void  o___HOOKING_________o () { return; }
+
+char
+WORDS_hook              (tWORD *a_new)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
+   /*---(header)-------------------------*/
+   DEBUG_CONF   yLOG_enter   (__FUNCTION__);
+   /*---(english)------------------------*/
+   rc = ySORT_hook (B_ENGLISH, a_new, a_new->w_english, &(a_new->ysort_e));
+   DEBUG_CONF   yLOG_value   ("hook eng"  , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   rc = ySORT_prepare (B_ENGLISH);
+   DEBUG_CONF   yLOG_value   ("prep eng"  , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(gregg)--------------------------*/
+   rc = ySORT_hook (B_GREGG  , a_new, a_new->w_gregg  , &(a_new->ysort_g));
+   DEBUG_CONF   yLOG_value   ("hook gregg", rc);
+   --rce;  if (rc < 0) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   rc = ySORT_prepare (B_GREGG);
+   DEBUG_CONF   yLOG_value   ("prep gregg", rc);
+   --rce;  if (rc < 0) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(unique)-------------------------*/
+   rc = ySORT_hook (B_UNIQUE , a_new, a_new->w_unique , &(a_new->ysort_u));
+   DEBUG_CONF   yLOG_value   ("hook uniq" , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   rc = ySORT_prepare (B_UNIQUE);
+   DEBUG_CONF   yLOG_value   ("prep uniq" , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(complete)-----------------------*/
+   DEBUG_CONF   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+WORDS_unhook            (tWORD *a_old)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
+   /*---(header)-------------------------*/
+   DEBUG_CONF   yLOG_enter   (__FUNCTION__);
+   /*---(english)------------------------*/
+   rc = ySORT_unhook (&(a_old->ysort_e));
+   DEBUG_CONF   yLOG_value   ("un-eng"    , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   rc = ySORT_prepare (B_ENGLISH);
+   DEBUG_CONF   yLOG_value   ("prep eng"  , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(gregg)--------------------------*/
+   rc = ySORT_unhook (&(a_old->ysort_g));
+   DEBUG_CONF   yLOG_value   ("un-gregg"  , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   rc = ySORT_prepare (B_GREGG);
+   DEBUG_CONF   yLOG_value   ("prep gregg", rc);
+   --rce;  if (rc < 0) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(unique)-------------------------*/
+   rc = ySORT_unhook (&(a_old->ysort_u));
+   DEBUG_CONF   yLOG_value   ("un-uniq"   , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   rc = ySORT_prepare (B_UNIQUE);
+   DEBUG_CONF   yLOG_value   ("prep uniq" , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(tree)---------------------------*/
+   rc = ySORT_unhook (&(a_old->ysort_t));
+   DEBUG_CONF   yLOG_value   ("un-tree"   , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   rc = ySORT_prepare (B_TREE);
+   DEBUG_CONF   yLOG_value   ("prep tree" , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
    /*---(complete)-----------------------*/
    DEBUG_CONF   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -347,26 +527,57 @@ char WORDS_eng_by_name       (uchar *a_text, tWORD **r_word)   { return ySORT_by
 char WORDS_eng_by_index      (int n, tWORD **r_word)           { return ySORT_by_index  (B_ENGLISH, n, r_word); }
 char WORDS_eng_by_cursor     (char a_dir, tWORD **r_word)      { return ySORT_by_cursor (B_ENGLISH, a_dir, r_word); }
 
+char
+WORDS_eng_all           (FILE *a_file, char *f_callback (FILE *a_file, tWORD *a_curr))
+{
+   /*---(locals)-----------+-----+-----+-*/
+   int         a           =    0;
+   tWORD      *x_curr      = NULL;
+   tWORD      *x_sub       = NULL;
+   /*---(header)---------------------------*/
+   DEBUG_CONF   yLOG_enter   (__FUNCTION__);
+   WORDS_eng_by_index  (a, &x_curr);
+   while (x_curr != NULL) {
+      if (strcmp (x_curr->w_vary, "<") == 0) {
+         DEBUG_CONF   yLOG_info    ("base"      , x_curr->w_english);
+         f_callback (a_file, x_curr);
+         x_sub = x_curr->w_next;
+         while (x_sub != NULL) {
+            DEBUG_CONF   yLOG_info    ("vary"      , x_sub->w_english);
+            f_callback (a_file, x_sub);
+            x_sub  = x_sub->w_next;
+         }
+      }
+      ++a;
+      WORDS_eng_by_index (a, &x_curr);
+   }
+   /*---(complete)-------------------------*/
+   DEBUG_CONF   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
 char WORDS_by_gregg          (uchar *a_text, tWORD **r_word)   { return ySORT_by_name   (B_GREGG  , a_text, r_word); }
 
 char
 WORDS_detail            (tWORD *a_word, char a_out [LEN_FULL])
 {
-   char        rce         =   -10;
+   char        rce         =  -10;
    char        s           [LEN_TITLE] = " ·åæ";
    char        t           [LEN_TITLE] = " ·åæ";
    char        u           [LEN_DESC]  = " ·åæ";
-   char        v           [LEN_LABEL] = "   ·";
-   char        w           [LEN_TITLE] = " ···";
+   char        v           [LEN_TERSE] = "   ·";
+   int         x_ref       =    0;
    --rce;  if (a_out  == NULL)  return rce;
    strcpy (a_out, "");
    if (a_word == NULL) return 0;
-   sprintf  (s, "%2då%.20sæ", a_word->e_len, a_word->english);
-   sprintf  (t, "%2då%.20sæ", a_word->g_len, a_word->gregg);
-   if (a_word->line >= 0)  sprintf (v, "%4d", a_word->line);
-   sprintf  (u, "%2då%.30sæ", strlen (a_word->shown), a_word->shown);
-   if (a_word->arpabet != NULL)   sprintf  (w, "%2då%.20sæ", strlen (a_word->arpabet), a_word->arpabet);
-   sprintf (a_out, "%-24.24s  %s %-4.4s  %c %c  %c %c %-3d  %c %-4d  %-24.24s  %-34.34s  %-24.24s  å%sæ", s, v, a_word->vary, a_word->part, a_word->sub, a_word->src, a_word->cat, a_word->page, a_word->grp, a_word->freq, t, u, w, a_word->fancy);
+   sprintf  (s, "%2då%.20sæ", strlen (a_word->w_english), a_word->w_english);
+   sprintf  (t, "%2då%.20sæ", strlen (a_word->w_gregg)  , a_word->w_gregg);
+   if (a_word->w_line >= 0)  sprintf (v, "%2d/%4d", a_word->w_file, a_word->w_line);
+   sprintf  (u, "%2då%.30sæ", strlen (a_word->w_shown), a_word->w_shown);
+   if      (a_word->w_bref >= 0)      x_ref = a_word->w_bref;
+   else if (a_word->w_base != NULL)   x_ref = a_word->w_base->w_bref;
+   else                               x_ref = -66;
+   sprintf (a_out, "%-24.24s  %s  %3d  %-4.4s  %c %c  %c %c %-3d  %c %-4d  %-24.24s  %-34.34s  %s", s, v, x_ref, a_word->w_vary, a_word->w_part, a_word->w_sub, a_word->w_src, a_word->w_cat, a_word->w_page, a_word->w_grp, a_word->w_freq, t, u, FIX_tree_showable (a_word->w_tree, 5));
    return 0;
 }
 
@@ -381,7 +592,6 @@ WORDS_entry             (int n)
    else                      sprintf (g_print, "%-5d %s", n, t);
    return g_print;
 }
-
 
 
 /*============================--------------------============================*/
@@ -730,15 +940,15 @@ words_outstring (            /* locate outline in the translation dictionary  */
    strlcpy (o.word, "(unknown)", MAX_LEN);
    int count = 0;
    for (i = 0; i < MAX_WORDS; ++i) {
-      if (strncmp(s_words[i].english, "EOF",  MAX_LEN) == 0)  return -1;
+      if (strncmp(s_words[i].w_english, "EOF",  MAX_LEN) == 0)  return -1;
       /*> DEBUG_CONFH   printf("look <<%s>>\n", s_words[i].gregg);                    <*/
-      if (strncmp(s_words[i].gregg, a_outstring, MAX_LEN) != 0)  continue;
+      if (strncmp(s_words[i].w_gregg, a_outstring, MAX_LEN) != 0)  continue;
       /*> DEBUG_CONFTING  printf("%3d) <<%s>>\n", i, s_words[i].gregg);             <* 
        *> DEBUG_CONFH   printf("%3d) <<%s>>\n", i, s_words[i].gregg);             <*/
       ++count;
       if (count == 1) strlcpy (o.word, "", MAX_LEN);
       if (count >  1) strncat(o.word, ",", MAX_LEN);
-      strncat(o.word, s_words[i].english, MAX_LEN);
+      strncat(o.word, s_words[i].w_english, MAX_LEN);
       /*> return  i;                                                                  <*/
    }
    return  0;
@@ -926,7 +1136,7 @@ words_translate    (int a_word)
    char   a_outstring[MAX_LEN];
    int       i         = 0;            /* loop iterator : general             */
    /*---(init)---------------------------*/
-   strlcpy (a_outstring, s_words[a_word].gregg, MAX_LEN);
+   strlcpy (a_outstring, s_words[a_word].w_gregg, MAX_LEN);
    /*---(clear letters)------------------*/
    for (i = 0; i < 30; ++i) {
       letters[i] = 0;
@@ -1138,9 +1348,9 @@ WORDS__unit          (char *a_question, int a_num)
        *> }                                                                                                                                             <* 
        *> if (x_curr == NULL)  snprintf (unit_answer, LEN_FULL, "WORDS eng   (%2d) :  -[]                       -[]                      []", a_num);   <* 
        *> else {                                                                                                                                        <* 
-       *>    sprintf  (s, "%2d[%.20s]", x_curr->e_len, x_curr->english);                                                                                <* 
-       *>    sprintf  (t, "%2d[%.20s]", x_curr->g_len, x_curr->gregg);                                                                                  <* 
-       *>    WORDS_drawn_show (x_curr->drawn, x_show);                                                                                                  <* 
+       *>    sprintf  (s, "%2d[%.20s]", x_curr->e_len, x_curr->w_english);                                                                                <* 
+       *>    sprintf  (t, "%2d[%.20s]", x_curr->g_len, x_curr->w_gregg);                                                                                  <* 
+       *>    WORDS_drawn_show (x_curr->w_drawn, x_show);                                                                                                  <* 
        *>    sprintf  (u, "[%.20s]"   , x_show);                                                                                                        <* 
        *>    snprintf (unit_answer, LEN_STR, "WORDS eng   (%2d) : %-24.24s  %-24.24s  %s", a_num, s, t, u);                                             <* 
        *> }                                                                                                                                             <*/
@@ -1154,9 +1364,9 @@ WORDS__unit          (char *a_question, int a_num)
        *> }                                                                                                                                             <* 
        *> if (x_curr == NULL)  snprintf (unit_answer, LEN_FULL, "WORDS gregg (%2d) :  -[]                       -[]                      []", a_num);   <* 
        *> else {                                                                                                                                        <* 
-       *>    sprintf  (s, "%2d[%.20s]", x_curr->e_len, x_curr->english);                                                                                <* 
-       *>    sprintf  (t, "%2d[%.20s]", x_curr->g_len, x_curr->gregg);                                                                                  <* 
-       *>    WORDS_drawn_show (x_curr->drawn, x_show);                                                                                                  <* 
+       *>    sprintf  (s, "%2d[%.20s]", x_curr->e_len, x_curr->w_english);                                                                                <* 
+       *>    sprintf  (t, "%2d[%.20s]", x_curr->g_len, x_curr->w_gregg);                                                                                  <* 
+       *>    WORDS_drawn_show (x_curr->w_drawn, x_show);                                                                                                  <* 
        *>    sprintf  (u, "[%.20s]"   , x_show);                                                                                                        <* 
        *>    snprintf (unit_answer, LEN_STR, "WORDS gregg (%2d) : %-24.24s  %-24.24s  %s", a_num, s, t, u);                                             <* 
        *> }                                                                                                                                             <*/

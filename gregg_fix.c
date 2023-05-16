@@ -104,7 +104,7 @@ uchar  s_o    [LEN_LABEL] [LEN_LABEL] = {
    /* ng  */ "······6666666666",
    /* ------- ´dHTDmkrRNjfpPsz"   */
    /* ch  */ "·6·66·········68",
-   /* f   */ "77777777777777··",
+   /* f   */ "77776676677777··",
    /* p   */ "4444544445555555",
    /* pt  */ "············6·66",
    /* ------- ´dHTDmkrRNjfpPsz"   */
@@ -114,51 +114,55 @@ uchar  s_o    [LEN_LABEL] [LEN_LABEL] = {
 };
 
 uchar  s_u    [LEN_LABEL] [LEN_LABEL] = {
-   /* pr/nx   xdHTDmkrRNjfpPsz"   */
-   /* -   */ "·798·9899···8···",
-   /* d   */ "88···8899·8888·8",
-   /* uth */ "·7·7······8888·8",
-   /* oth */ "·8···8····8888·8",
-   /* df  */ "················",
-
-   /* m   */ "·7·7·8·99·8888·8",
-   /* k   */ "·7·7······8888·8",
-   /* r   */ "·777·87··88888·8",
+   /* prev    ------next-------   */
+   /* ------- ´dHTDmkrRNjfpPsz"   */
+   /* -   */ "··········6866·6",
+   /* d   */ "88877888887888·8",
+   /* uth */ "················",
+   /* oth */ "················",
+   /* df  */ "··········6866·6",
+   /* ------- ´dHTDmkrRNjfpPsz"   */
+   /* m   */ "2989929·········",
+   /* k   */ "················",
+   /* r   */ "················",
    /* rd  */ "················",
-
+   /* ------- ´dHTDmkrRNjfpPsz"   */
    /* ng  */ "················",
-
+   /* ------- ´dHTDmkrRNjfpPsz"   */
    /* ch  */ "················",
-   /* f   */ "················",
-   /* p   */ "44445444455555·5",
+   /* f   */ "6666666666666666",
+   /* p   */ "················",
    /* pt  */ "················",
-
+   /* ------- ´dHTDmkrRNjfpPsz"   */
    /* s   */ "················",
    /* z   */ "················",
+   /* ------- ´dHTDmkrRNjfpPsz"   */
 };
 
 uchar  s_sz   [LEN_LABEL] [LEN_LABEL] = {
-   /*         xdHTDmkrRNjfpPsz"   */
+   /* prev    ------next-------   */
+   /* ------- ´dHTDmkrRNjfpPsz"   */
    /* -   */ "··············",
    /* d   */ "··············",
    /* uth */ "··············",
    /* oth */ "··············",
    /* df  */ "··············",
-
+   /* ------- ´dHTDmkrRNjfpPsz"   */
    /* m   */ "77777777777777",
    /* k   */ "77777777777777",
    /* r   */ "77777777777777",
    /* rd  */ "··············",
-
+   /* ------- ´dHTDmkrRNjfpPsz"   */
    /* ng  */ "··············",
-
+   /* ------- ´dHTDmkrRNjfpPsz"   */
    /* ch  */ "··············",
    /* f   */ "77777777777777",
    /* p   */ "22222222222222",
    /* pt  */ "··············",
-
+   /* ------- ´dHTDmkrRNjfpPsz"   */
    /* s   */ "················",
    /* z   */ "················",
+   /* ------- ´dHTDmkrRNjfpPsz"   */
 };
 
 
@@ -213,7 +217,7 @@ FIX__prepare            (char *i, char *j, char b_gregg [LEN_TITLE], char r_show
    /*---(initialize others)--------------*/
    if (r_shown != NULL)  { for (k = 0; k < LEN_HUND;  ++k)  r_shown  [k] = '\0'; }
    if (r_drawn != NULL)  { for (k = 0; k < LEN_LABEL; ++k)  r_drawn  [k] = -1;   }
-   if (r_tree  != NULL)  { for (k = 0; k < LEN_TERSE; ++k)  r_tree   [k] = -1;   }
+   if (r_tree  != NULL)  { for (k = 0; k < LEN_TERSE; ++k)  r_tree   [k] =  0;   }
    /*---(complete)-----------------------*/
    DEBUG_CONF   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -249,17 +253,20 @@ FIX__append             (char *i, char *j, char a_name [LEN_TERSE], short a_new,
    /*---(cats)---------------------------*/
    if (j != NULL && b_tree  != NULL && *j >= 0 && *j < 9) {
       DEBUG_CONF   yLOG_sint    (a_new);
-      if (a_new < g_end) {
+      if (a_new < g_real) {
          DEBUG_CONF   yLOG_snote   ("normal/real");
          b_tree  [*j] = a_new;
-      } else {
+         ++(*j);
+      } else if (a_new > g_end) {
          DEBUG_CONF   yLOG_snote   ("must fix");
          sprintf (t, "%c", g_loc [a_new].code);
          DEBUG_CONF   yLOG_snote   (t);
          b_tree  [*j] = TABLE_letter_by_name (t, LTRS_ALL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
          DEBUG_CONF   yLOG_sint    (b_tree [*j]);
+         ++(*j);
+      } else {
+         DEBUG_CONF   yLOG_snote   ("non-included");
       }
-      ++(*j);
    }
    /*---(save-back)----------------------*/
    if (i != NULL)   ++(*i);
@@ -297,6 +304,9 @@ FIX__ae                 (char *i, char *j, char a_pcat, char a_ccat, char a_name
       return rce;
    }
    DEBUG_CONF   yLOG_info    ("b_shown"   , b_shown);
+   /*---(corrective)---------------------*/
+   if (a_pcat < 0 || a_pcat > CAT_XZ)  a_pcat = 0;
+   if (a_ncat < 0 || a_ncat > CAT_XZ)  a_pcat = 0;
    /*---(fix WH)-------------------------*/
    if (a_pcat == CAT_WH) {
       switch (a_ncat) {
@@ -356,6 +366,9 @@ FIX__ou                 (char *i, char *j, char a_pcat, char a_ccat, char a_name
       return rce;
    }
    DEBUG_CONF   yLOG_info    ("b_shown"   , b_shown);
+   /*---(corrective)---------------------*/
+   if (a_pcat < 0 || a_pcat > CAT_XZ)  a_pcat = 0;
+   if (a_ncat < 0 || a_ncat > CAT_XZ)  a_pcat = 0;
    /*---(fix w)--------------------------*/
    if (a_pcat == CAT_A || a_pcat == CAT_E) {
       DEBUG_CONF   yLOG_note    ("handle u after a/e");
@@ -435,8 +448,15 @@ FIX__other              (char *i, char *j, char a_pcat, char a_ccat, char a_name
    return 0;
 }
 
+
+
+/*============================--------------------============================*/
+/*===----                         main driver                          ----===*/
+/*============================--------------------============================*/
+static void o___DRIVER_________________o (void) {;}
+
 char
-WORDS_fix_gregg         (char a_gregg [LEN_TITLE], char r_shown [LEN_HUND], short r_drawn [LEN_LABEL], char r_tree [LEN_TERSE])
+FIX_gregg               (char a_gregg [LEN_TITLE], char r_shown [LEN_HUND], short r_drawn [LEN_LABEL], char r_tree [LEN_TERSE])
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
@@ -449,6 +469,9 @@ WORDS_fix_gregg         (char a_gregg [LEN_TITLE], char r_shown [LEN_HUND], shor
    char       *q           =  "·";
    char       *r           = NULL;
    char       *nn          = NULL;
+   short       x_pprev     =   -1;
+   char          x_lpprev  [LEN_TERSE] = "";
+   char          x_ppcat   =    0;
    short       x_prev      =   -1;
    char          x_lprev   [LEN_TERSE] = "";
    char          x_pcat    =    0;
@@ -522,6 +545,10 @@ WORDS_fix_gregg         (char a_gregg [LEN_TITLE], char r_shown [LEN_HUND], shor
       }
       /*---(next)------------------------*/
       DEBUG_CONF   yLOG_info    ("x_shown"   , x_shown);
+      /*---(curr to pre-prev)------------*/
+      x_pprev = x_prev;
+      x_ppcat = x_pcat;
+      strlcpy (x_lpprev, x_lprev, LEN_TERSE);
       /*---(curr to prev)----------------*/
       x_prev = x_curr;
       x_pcat = x_ccat;
@@ -556,4 +583,64 @@ WORDS_fix_gregg         (char a_gregg [LEN_TITLE], char r_shown [LEN_HUND], shor
    /*---(complete)-----------------------*/
    DEBUG_CONF   yLOG_exit    (__FUNCTION__);
    return 0;
+}
+
+
+
+/*====================------------------------------------====================*/
+/*===----                        searching                             ----===*/
+/*====================------------------------------------====================*/
+static void  o___HOOKING_________o () { return; }
+
+char
+FIX_hook                (tWORD *a_new)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
+   /*---(header)-------------------------*/
+   DEBUG_CONF   yLOG_enter   (__FUNCTION__);
+   /*---(tree)---------------------------*/
+   rc = ySORT_hook (B_TREE   , a_new, a_new->w_tree   , &(a_new->ysort_t));
+   DEBUG_CONF   yLOG_value   ("hook tree" , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   rc = ySORT_prepare (B_TREE);
+   DEBUG_CONF   yLOG_value   ("prep tree" , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(complete)-----------------------*/
+   DEBUG_CONF   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+
+
+/*============================--------------------============================*/
+/*===----                       reporting/audit                        ----===*/
+/*============================--------------------============================*/
+static void o___REPORT_________________o (void) {;}
+
+char*
+FIX_tree_showable       (char a_tree [LEN_TERSE], char a_max)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        t           [LEN_SHORT] = "";
+   int         i           =    0;
+   /*---(prepare)------------------------*/
+   strcpy (g_print, "");
+   /*---(walk)---------------------------*/
+   for (i = 0; i < a_max; ++i) {
+      if (a_tree [i] == 0)       break;
+      if (a_tree [i] >= g_real)  break;
+      if (i > 0)  strlcat (g_print, "·", LEN_RECD);
+      sprintf (t, "%02d", a_tree [i]);
+      strlcat (g_print, t, LEN_RECD);
+   }
+   /*---(complete)-----------------------*/
+   return g_print;
 }

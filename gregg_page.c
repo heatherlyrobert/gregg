@@ -697,8 +697,8 @@ PAGE_gregg              (char a_act, char a_gregg [LEN_RECD], float *b_xpos, flo
          PAGE_next_grid (b_xpos, b_ypos);
       } else {
          n = WORDS_by_gregg (p, &x_word);
-         if (n >= 0)  strlcpy (x_shown, x_word->shown, LEN_HUND);
-         else         WORDS_fix_gregg  (p, x_shown, x_drawn, NULL);
+         if (n >= 0)  strlcpy (x_shown, x_word->w_shown, LEN_HUND);
+         else         FIX_gregg  (p, x_shown, x_drawn, NULL);
          rc =  PAGE_gregg_word (a_act, x_shown, b_xpos, b_ypos);
          DEBUG_OUTP   yLOG_value   ("word"      , rc);
       }
@@ -1104,8 +1104,8 @@ PAGE_demo_dict          (void)
       s_ypos = s_ybase;
       WORDS_eng_by_index (i, &x_word);
       while (x_word != NULL) {
-         printf ("%3d, %s, %s\n", i, x_word->english, x_word->gregg);
-         PAGE_gregg (SHAPE_DRAW, x_word->gregg, &s_xpos, &s_ypos);
+         printf ("%3d, %s, %s\n", i, x_word->w_english, x_word->w_gregg);
+         PAGE_gregg (SHAPE_DRAW, x_word->w_gregg, &s_xpos, &s_ypos);
          WORDS_eng_by_index (++i, &x_word);
          if (i % 10 == 0)  PAGE_gregg (SHAPE_DRAW, "¦", &s_xpos, &s_ypos);
          if (i > 50)  break;
