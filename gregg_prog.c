@@ -191,7 +191,7 @@ PROG__init              (int a_argc, char *a_argv[])
    my.w_cpage   = 0;
    /*---(get letters/sizing ready)----*/
    TABLE_init      ();
-   PAGE_init       ();
+   /*> PAGE_init       ();                                                            <*/
    /*---(prep recognizer)-------------*/
    BASE_config     (10.0, 2.0, 70.0);
    /*---(yvicurses config)---------------*/
@@ -341,6 +341,9 @@ PROG__begin             (void)
    char        rc          =    0;
    DEBUG_PROG   yLOG_enter   (__FUNCTION__);
    WORDS_table_ae ();
+   DEBUG_ARGS   yLOG_info    ("yPARSE"   ,"initializing");
+   rc = yPARSE_init  ('-', NULL, '-');
+   rc = yPARSE_delimiters  ("§");
    DEBUG_PROG   yLOG_exit    (__FUNCTION__);
    return 0;
 }

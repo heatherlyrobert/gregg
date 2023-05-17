@@ -36,9 +36,9 @@
 #define     P_CREATED   "2008-07"
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "5.--= generalization for broader use"
-#define     P_VERMINOR  "5.4 = update for use as coding example"
-#define     P_VERNUM    "5.5b"
-#define     P_VERTXT    "saving to first-draft database"              
+#define     P_VERMINOR  "5.6 = build out for fast, focused database"
+#define     P_VERNUM    "5.6a"
+#define     P_VERTXT    "added prefix.txt file reading (elimintate internal static data sourcing)"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -357,9 +357,12 @@ struct cMY {
    long        run_time;                    /* time of program launch         */
    char        cwd         [LEN_PATH];      /* current working directory      */
    char        heartbeat   [LEN_HUND];      /* latest heartbeat               */
-   char        wordfile    [LEN_PATH];      /* input word file                */
    char        baseonly;                    /* dictionary only shows bases    */
    char        nopre;                       /* dictionary w/o prefixed words  */
+   /*---(names)----------------*/
+   char        wordfile    [LEN_PATH];      /* input word file                */
+   char        n_prefix    [LEN_HUND];      /* name of prefix file            */
+   char        n_suffix    [LEN_HUND];      /* name of suffix file            */
    /*---(output)---------------*/
    char        n_db        [LEN_PATH];      /* name of database file          */
    FILE       *f_db;                        /* shared database of tags        */
@@ -987,6 +990,64 @@ extern char   s_fields  [MAX_FIELD][LEN_TITLE];
 extern char   s_nfield;
 
 
+
+/*---(BASE structure)---------------------------*/
+typedef struct cBASE  tBASE;
+struct cBASE {
+   /*---(header)---------------*/
+   char        b_english   [LEN_TITLE];     /* english word                   */
+   char        b_gregg     [LEN_TITLE];     /* gregg translation              */
+   /*---(updates)--------------*/
+   char        b_shown     [LEN_HUND];      /* gregg as needed to draw        */
+   short       b_drawn     [LEN_LABEL];     /* gregg letter indexes           */
+   char        b_tree      [LEN_TERSE];     /* gregg as series of letters     */
+   /*---(source)---------------*/
+   char        b_file;                      /* source file                    */
+   short       b_line;                      /* input line                     */
+   /*---(variations)-----------*/
+   tWORD      *b_head;                      /* first variation                */
+   char        b_nvary;                     /* count of variations            */
+   /*---(part-of-speech)-------*/
+   char        b_part;                      /* primary part of speech         */
+   char        b_sub;                       /* sub-part                       */
+   /*---(source)---------------*/
+   char        b_src;                       /* source version of gregg        */
+   char        b_cat;                       /* word-sign, normal, custom, ... */
+   short       b_page;                      /* location within source         */
+   /*---(frequency)------------*/
+   char        b_grp;                       /* grouping by frequency          */
+   short       b_freq;                      /* google frequency               */
+   /*---(btree)-------------*/
+   tSORT      *ysort_g;                     /* gregg sort                     */
+   tSORT      *ysort_t;                     /* gregg letter tree sort         */
+   /*---(done)-----------------*/
+};
+
+/*---(ENGLISH structure)------------------------*/
+typedef struct cENGL  tENGL;
+struct cENGL {
+   char        e_english   [LEN_TITLE];     /* english word                   */
+   short       e_prefix;                    /* english prefix                 */
+   char        e_base      [LEN_TITLE];     /* english base                   */
+   char        p_base;                      /* english base                   */
+   short       e_suffix;                    /* english suffix                 */
+   /*---(btree)-------------*/
+   tSORT      *ysort_e;                     /* gregg sort                     */
+};
+
+typedef  struct  cPREFIX   tPREFIX;
+struct cPREFIX {
+   char        p_line;                      /* line in prefix.txt             */
+   char        p_name      [LEN_LABEL];     /* name used in .dict files       */
+   char        p_english   [LEN_LABEL];     /* text prefixed to english       */
+   char        p_gregg     [LEN_LABEL];     /* gregg prefix                   */
+   short       p_drawn     [LEN_LABEL];     /* fast gregg prefix (indexed)    */
+   short       p_used;                      /* how many time in dictionary    */
+};
+extern tPREFIX  g_prefix [LEN_FULL];
+extern short    g_nprefix;
+
+
 /*============================--------------------============================*/
 /*===----                           prototypes                         ----===*/
 /*============================--------------------============================*/
@@ -1353,7 +1414,6 @@ char        DICT__find_sub          (char a_abbr, char a_sub);
 char        DICT__find_grp          (char a_grp);
 char        DICT__find_source       (char a_source);
 char        DICT__find_type         (char a_type);
-char        DICT__find_prefix       (char a_prefix [LEN_TERSE], char r_english [LEN_TERSE], char r_gregg [LEN_LABEL]);
 char        DICT__find_variation    (char a_name [LEN_TERSE], char r_suffix [LEN_TERSE], char r_endings [LEN_HUND], char r_base [LEN_TERSE], char r_change [LEN_TERSE]);
 char        DICT__open              (char a_name [LEN_PATH], FILE **r_file);
 char        DICT__close             (FILE **b_file);
@@ -1509,6 +1569,24 @@ char        DB__close               (FILE **b_file);
 char        DB_write                (void);
 char        DB_read                 (void);
 /*---(done)-----------------*/
+
+
+
+/*===[[ gregg_prefix.c ]]=====================================================*/
+/*········· ´······················ ´·········································*/
+/*---(program)--------------*/
+char        PREFIX_purge            (void);
+char        PREFIX_init             (void);
+char        PREFIX_wrap             (void);
+/*---(load)-----------------*/
+char        PREFIX_handler          (int n, char a_verb [LEN_LABEL], char a_exist, void *a_handler);
+char        PREFIX_load             (char a_fname [LEN_HUND]);
+/*---(debugging)------------*/
+char*       PREFIX_detail           (uchar n);
+/*---(find)-----------------*/
+char        PREFIX_by_name          (char a_prefix [LEN_LABEL], char r_english [LEN_LABEL], char r_gregg [LEN_LABEL]);
+/*---(done)-----------------*/
+
 
 
 #endif
