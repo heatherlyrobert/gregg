@@ -216,7 +216,7 @@ FIX__prepare            (char *i, char *j, char b_gregg [LEN_TITLE], char r_show
    }
    /*---(initialize others)--------------*/
    if (r_shown != NULL)  { for (k = 0; k < LEN_HUND;  ++k)  r_shown  [k] = '\0'; }
-   if (r_drawn != NULL)  { for (k = 0; k < LEN_LABEL; ++k)  r_drawn  [k] = -1;   }
+   if (r_drawn != NULL)  { for (k = 0; k < LEN_LABEL; ++k)  r_drawn  [k] =  0;   }
    if (r_tree  != NULL)  { for (k = 0; k < LEN_TERSE; ++k)  r_tree   [k] =  0;   }
    /*---(complete)-----------------------*/
    DEBUG_CONF   yLOG_exit    (__FUNCTION__);
@@ -456,7 +456,7 @@ FIX__other              (char *i, char *j, char a_pcat, char a_ccat, char a_name
 static void o___DRIVER_________________o (void) {;}
 
 char
-FIX_gregg               (char a_gregg [LEN_TITLE], char r_shown [LEN_HUND], short r_drawn [LEN_LABEL], char r_tree [LEN_TERSE])
+FIX_gregg               (char a_gregg [LEN_TITLE], char r_shown [LEN_HUND], short r_drawn [LEN_LABEL], char r_tree [LEN_TERSE], char r_sort [LEN_LABEL])
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
@@ -580,6 +580,7 @@ FIX_gregg               (char a_gregg [LEN_TITLE], char r_shown [LEN_HUND], shor
    if (r_shown  != NULL) { for (i = 0; i < LEN_HUND;  ++i)   r_shown [i] = x_shown [i]; }
    if (r_drawn  != NULL) { for (i = 0; i < LEN_LABEL; ++i)   r_drawn [i] = x_drawn [i]; }
    if (r_tree   != NULL) { for (i = 0; i < LEN_SHORT; ++i)   r_tree  [i] = x_tree  [i]; }
+   if (r_sort   != NULL) strlcpy (r_sort, FIX_tree_showable (x_tree, 5), LEN_LABEL);
    /*---(complete)-----------------------*/
    DEBUG_CONF   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -601,18 +602,18 @@ FIX_hook                (tWORD *a_new)
    /*---(header)-------------------------*/
    DEBUG_CONF   yLOG_enter   (__FUNCTION__);
    /*---(tree)---------------------------*/
-   rc = ySORT_hook (B_TREE   , a_new, a_new->w_tree   , &(a_new->ysort_t));
-   DEBUG_CONF   yLOG_value   ("hook tree" , rc);
-   --rce;  if (rc < 0) {
-      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   rc = ySORT_prepare (B_TREE);
-   DEBUG_CONF   yLOG_value   ("prep tree" , rc);
-   --rce;  if (rc < 0) {
-      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
+   /*> rc = ySORT_hook (B_TREE   , a_new, a_new->w_tree   , &(a_new->ysort_t));       <* 
+    *> DEBUG_CONF   yLOG_value   ("hook tree" , rc);                                  <* 
+    *> --rce;  if (rc < 0) {                                                          <* 
+    *>    DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);                              <* 
+    *>    return rce;                                                                 <* 
+    *> }                                                                              <* 
+    *> rc = ySORT_prepare (B_TREE);                                                   <* 
+    *> DEBUG_CONF   yLOG_value   ("prep tree" , rc);                                  <* 
+    *> --rce;  if (rc < 0) {                                                          <* 
+    *>    DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);                              <* 
+    *>    return rce;                                                                 <* 
+    *> }                                                                              <*/
    /*---(complete)-----------------------*/
    DEBUG_CONF   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -644,3 +645,5 @@ FIX_tree_showable       (char a_tree [LEN_TERSE], char a_max)
    /*---(complete)-----------------------*/
    return g_print;
 }
+
+

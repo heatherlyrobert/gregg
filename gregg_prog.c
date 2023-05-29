@@ -184,6 +184,10 @@ PROG__init              (int a_argc, char *a_argv[])
    strlcpy (my.guide, "", LEN_RECD);
    /*---(get letters/sizing ready)----*/
    DB_source_purge ();
+   BASE_init       ();
+   PREFIX_init     ();
+   SUFFIX_init     ();
+   LETTER_init     ();
    WORDS_init      ();
    DICT_init       ();
    my.w_ppage   = 120;
@@ -193,7 +197,7 @@ PROG__init              (int a_argc, char *a_argv[])
    TABLE_init      ();
    /*> PAGE_init       ();                                                            <*/
    /*---(prep recognizer)-------------*/
-   BASE_config     (10.0, 2.0, 70.0);
+   BAS_config     (10.0, 2.0, 70.0);
    /*---(yvicurses config)---------------*/
    rc = yVIOPENGL_init   (my.w_title, P_VERNUM, MODE_MAP, my.w_wide, my.w_tall);
    DEBUG_PROG   yLOG_value    ("yVIOPENGL" , rc);
@@ -201,7 +205,7 @@ PROG__init              (int a_argc, char *a_argv[])
       DEBUG_PROG   yLOG_exitr    (__FUNCTION__, rce);
       return rce;
    }
-   /*> strlcpy (my.t_text     , "arachne, spider robot visualization and simulation"       , LEN_STR  );   <*/
+   /*> strlcpy (my.t_text     , "arachne, spider robot visualization and simulation"       , LEN_FULL  );   <*/
    /*---(setup main)---------------------*/
    rc = yVIEW_full    (YVIEW_MAIN , YVIEW_FLAT, YVIEW_BOTLEF, YCOLOR_BAS, YCOLOR_MED, DRAW_primary);
    DEBUG_PROG   yLOG_value    ("yVIEW_full", rc);
@@ -406,7 +410,7 @@ PROG_dawn          (void)
       DEBUG_PROG   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   rc = yFILE_dump_add  ("suffix", "", "inventory of all allowed word suffixes", DICT_dump_suffix);
+   rc = yFILE_dump_add  ("suffix", "", "inventory of all allowed word suffixes", SUFFIX_dump);
    rc = yFILE_dump_add  ("words" , "", "all words in dictionary"               , DICT_dump_words);
    rc = yFILE_dump_add  ("gregg" , "", "word tree by gregg letters"            , DICT_dump_gregg);
    yCMD_direct (":layout min");

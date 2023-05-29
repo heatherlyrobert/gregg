@@ -4,7 +4,7 @@
 
 
 
-static char  s_event     [LEN_STR];
+static char  s_event     [LEN_FULL];
 static FILE *s_file      = NULL;
 
 static int   s_line     = 0;
@@ -48,12 +48,12 @@ struct      cEVENT {
 /*====================------------------------------------====================*/
 /*===----                        program level                         ----===*/
 /*====================------------------------------------====================*/
-PRIV void  o___PROGRAM_________o () { return; }
+static void  o___PROGRAM_________o () { return; }
 
 char
 TOUCH_init           (void)
 {
-   snprintf (s_event  , LEN_STR, "%s%s", "/dev/input/", "event12");
+   snprintf (s_event  , LEN_FULL, "%s%s", "/dev/input/", "event12");
    printf ("s_event = å%sæ\n", s_event);
    TOUCH__open ();
    return 0;
@@ -71,7 +71,7 @@ TOUCH_wrap           (void)
 /*====================------------------------------------====================*/
 /*===----                          device file                         ----===*/
 /*====================------------------------------------====================*/
-PRIV void  o___DEVICE__________o () { return; }
+static void  o___DEVICE__________o () { return; }
 
 char         /*--> open touch device event file ----------[ leaf   [ ------ ]-*/
 TOUCH__open          (void)
@@ -253,7 +253,7 @@ TOUCH_slider         (int a_x, int a_y)
 /*====================------------------------------------====================*/
 /*===----                         data reading                         ----===*/
 /*====================------------------------------------====================*/
-PRIV void  o___READING_________o () { return; }
+static void  o___READING_________o () { return; }
 
 char             /* [------] read input event -------------------------------*/
 TOUCH_read           (void)

@@ -37,8 +37,8 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "5.--= generalization for broader use"
 #define     P_VERMINOR  "5.6 = build out for fast, focused database"
-#define     P_VERNUM    "5.6a"
-#define     P_VERTXT    "added prefix.txt file reading (elimintate internal static data sourcing)"
+#define     P_VERNUM    "5.6b"
+#define     P_VERTXT    "prefix coding is looking sweet and unit tested"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -270,25 +270,23 @@
 #include    <yDLST_solo.h>   /* heatherly                                     */
 
 
+
+#define     B_BASE         'b'
+#define     B_DICT         'd'
+
 #define     B_ENGLISH      'e'
 #define     B_GREGG        'g'
 #define     B_UNIQUE       'q'
-#define     B_TREE         't'
 
-#define     LEN_HUGE     10000
-#define     LEN_RECD      2000
-#define     LEN_STR        200
-#define     LEN_DESC       100
-#define     LEN_LABEL       20
 
 #define     NAME_DICT    "/var/lib/gregg/gregg_manual.dict"
+
+
 
 typedef     const char          cchar;
 typedef     const int           cint;
 
 
-#define    PUBL      /*--*/
-#define    PRIV      static
 
 /*---(window formatting)-------------------*/
 typedef struct cWIN  tWIN;
@@ -361,6 +359,7 @@ struct cMY {
    char        nopre;                       /* dictionary w/o prefixed words  */
    /*---(names)----------------*/
    char        wordfile    [LEN_PATH];      /* input word file                */
+   char        n_letter    [LEN_HUND];      /* name of letter file            */
    char        n_prefix    [LEN_HUND];      /* name of prefix file            */
    char        n_suffix    [LEN_HUND];      /* name of suffix file            */
    /*---(output)---------------*/
@@ -482,7 +481,11 @@ extern tMY  my;
 #define     RUN_USER           'i'      /* running in user mode (ncurses)     */
 #define     RUN_TEST           '-'      /* running as a test    (no ncurses)  */
 
-extern char unit_answer  [LEN_STR];
+
+
+/*===[[ UNIT TEST HELPERS ]]==================================================*/
+extern char unit_answer  [LEN_FULL];
+
 
 
 /*===[[ DEBUGGER : GENERIC ]]=================================================*/
@@ -879,63 +882,9 @@ extern tOUTLINE  o;
 
 
 
-typedef struct cPARTS  tPARTS;
-struct cPARTS {
-   char        abbr;
-   char        sub;  
-   char        name        [LEN_LABEL];
-   int         count;
-   int         scount;
-};
-extern tPARTS  g_parts  [LEN_HUND];
-extern char    PARTS_OF_SPEECH [LEN_LABEL];
-
-typedef struct cSOURCE  tSOURCE;
-struct cSOURCE {
-   char        abbr;
-   char        source      [LEN_TITLE];
-   int         count;
-};
-extern tSOURCE  g_source   [LEN_LABEL];
-
-typedef struct cGRPS  tGRPS;
-struct cGRPS {
-   char        grp;  
-   char        name        [LEN_TITLE];
-   int         count;
-};
-extern tGRPS  g_grps  [LEN_LABEL];
-
-typedef struct cTYPES    tTYPES;
-struct cTYPES {
-   char        abbr;
-   char        source      [LEN_TITLE];
-   int         count;
-};
-extern tTYPES  g_types  [LEN_TERSE];
-
-typedef struct cVARY   tVARY;
-struct cVARY {
-   /*---(working)--------------*/
-   char        name        [LEN_TERSE];     /* name for dictionary use        */
-   char        suffix      [LEN_TERSE];     /* gregg letters added            */
-   /*---(source)---------------*/
-   char        src;                         /* source version of gregg        */
-   short       page;                        /* location within source         */
-   /*---(used for)-------------*/
-   char        endings     [LEN_HUND];      /* word suffixes actually used    */
-   char        base        [LEN_TERSE];     /* first add this base            */
-   char        change      [LEN_TERSE];     /*   modifying this way           */
-   char        example     [LEN_HUND];      /* show actual uses               */
-   /*---(working)--------------*/
-   short       count;                       /* how many uses                  */
-   /*---(done)-----------------*/
-};
-extern tVARY  g_varies [LEN_FULL];
-extern char    VARIATIONS      [LEN_RECD];
-
-
 extern char  g_files     [LEN_DESC][LEN_HUND];
+
+
 
 /*---(words structure)--------------------------*/
 #define  MAX_WORDS      5000
@@ -990,62 +939,45 @@ extern char   s_fields  [MAX_FIELD][LEN_TITLE];
 extern char   s_nfield;
 
 
-
-/*---(BASE structure)---------------------------*/
-typedef struct cBASE  tBASE;
-struct cBASE {
-   /*---(header)---------------*/
-   char        b_english   [LEN_TITLE];     /* english word                   */
-   char        b_gregg     [LEN_TITLE];     /* gregg translation              */
-   /*---(updates)--------------*/
-   char        b_shown     [LEN_HUND];      /* gregg as needed to draw        */
-   short       b_drawn     [LEN_LABEL];     /* gregg letter indexes           */
-   char        b_tree      [LEN_TERSE];     /* gregg as series of letters     */
-   /*---(source)---------------*/
-   char        b_file;                      /* source file                    */
-   short       b_line;                      /* input line                     */
-   /*---(variations)-----------*/
-   tWORD      *b_head;                      /* first variation                */
-   char        b_nvary;                     /* count of variations            */
-   /*---(part-of-speech)-------*/
-   char        b_part;                      /* primary part of speech         */
-   char        b_sub;                       /* sub-part                       */
-   /*---(source)---------------*/
-   char        b_src;                       /* source version of gregg        */
-   char        b_cat;                       /* word-sign, normal, custom, ... */
-   short       b_page;                      /* location within source         */
-   /*---(frequency)------------*/
-   char        b_grp;                       /* grouping by frequency          */
-   short       b_freq;                      /* google frequency               */
-   /*---(btree)-------------*/
-   tSORT      *ysort_g;                     /* gregg sort                     */
-   tSORT      *ysort_t;                     /* gregg letter tree sort         */
-   /*---(done)-----------------*/
+#define    MAX_LETTERS   1000
+typedef struct cLETTER tLETTER;
+struct cLETTER
+{
+   /*---(header)------------*/
+   short     l_line;                             /* source file line  */
+   char      l_label       [LEN_TERSE];          /* name              */
+   /*---(creation)----------*/
+   char      l_type;                             /* draw function     */
+   float     l_xrad;                             /* ellipse x-radius  */
+   float     l_yrad;                             /* ellipse y-radius  */
+   float     l_rot;                              /* ellipse rotation  */
+   float     l_beg;                              /* arc begin         */
+   float     l_arc;                              /* arc length        */
+   /*---(grouping)----------*/
+   uchar     l_cat;                              /* letter group      */
+   char      l_code;                             /* single char id    */
+   /*---(trend)-------------*/
+   float     l_xend;                             /* ending x          */
+   float     l_yend;                             /* ending y          */
+   float     l_deg;                              /* degrees of slope  */
+   float     l_xylen;                            /* full length       */
+   /*---(bounds)------------*/
+   float     l_lef;                              /* leftmost          */
+   float     l_rig;                              /* rightmost         */
+   float     l_top;                              /* topmost           */
+   float     l_bot;                              /* bottommost        */
+   /*---(count)-------------*/
+   short     l_points;                           /* number of points  */
+   /*---(count)-------------*/
+   short     l_base;                             /* in how many bases */
+   short     l_used;                             /* in how many words */
+   /*---(done)--------------*/
 };
+extern tLETTER     g_letter [MAX_LETTERS];
+extern short       g_nletter;
 
-/*---(ENGLISH structure)------------------------*/
-typedef struct cENGL  tENGL;
-struct cENGL {
-   char        e_english   [LEN_TITLE];     /* english word                   */
-   short       e_prefix;                    /* english prefix                 */
-   char        e_base      [LEN_TITLE];     /* english base                   */
-   char        p_base;                      /* english base                   */
-   short       e_suffix;                    /* english suffix                 */
-   /*---(btree)-------------*/
-   tSORT      *ysort_e;                     /* gregg sort                     */
-};
 
-typedef  struct  cPREFIX   tPREFIX;
-struct cPREFIX {
-   char        p_line;                      /* line in prefix.txt             */
-   char        p_name      [LEN_LABEL];     /* name used in .dict files       */
-   char        p_english   [LEN_LABEL];     /* text prefixed to english       */
-   char        p_gregg     [LEN_LABEL];     /* gregg prefix                   */
-   short       p_drawn     [LEN_LABEL];     /* fast gregg prefix (indexed)    */
-   short       p_used;                      /* how many time in dictionary    */
-};
-extern tPREFIX  g_prefix [LEN_FULL];
-extern short    g_nprefix;
+
 
 
 /*============================--------------------============================*/
@@ -1074,6 +1006,7 @@ char        PROG_shutdown           (void);
 
 /*===[[ arachne_test.c ]]=====================================================*/
 /*345678901-12345678901-12345678901-12345678901-12345678901-12345678901-123456*/
+char        PROG_wiper              (void);
 char        PROG__unit_quiet        (void);
 char        PROG__unit_loud         (void);
 char        PROG__unit_end          (void);
@@ -1210,29 +1143,29 @@ char*       RAW__unit               (char *a_question, int a_num);
 
 
 /*---(program)--------------*/
-char        BASE_config             (float a_append, float a_adjust, float a_sharp);
-char        BASE_init               (void);
+char        BAS_config              (float a_append, float a_adjust, float a_sharp);
+char        BAS_init                (void);
 /*---(support)--------------*/
-float       BASE__dist              (short a, short b);
+float       BAS__dist               (short a, short b);
 /*---(moving)---------------*/
-char        BASE__push_up           (short x_old);
-char        BASE_bas2avg            (short a_bas);
+char        BAS__push_up            (short x_old);
+char        BAS_bas2avg             (short a_bas);
 /*---(new)------------------*/
-char        BASE__force_point       (uchar a_type, short x, short y);
-short       BASE_append             (short a_raw, uchar a_force);
-char        BASE_insert             (short a_raw);
-char        BASE_adjust             (short a_bas, short a_raw);
+char        BAS__force_point        (uchar a_type, short x, short y);
+short       BAS_append              (short a_raw, uchar a_force);
+char        BAS_insert              (short a_raw);
+char        BAS_adjust              (short a_bas, short a_raw);
 /*---(statistics)-----------*/
-char        BASE_calc_all           (void);
-char        BASE__push_out          (short a_bas, char a_dir);
-char        BASE__pull_in           (short a_bas);
-char        BASE_extend_ends        (void);
-char        BASE_retract_ends       (void);
+char        BAS_calc_all            (void);
+char        BAS__push_out           (short a_bas, char a_dir);
+char        BAS__pull_in            (short a_bas);
+char        BAS_extend_ends         (void);
+char        BAS_retract_ends        (void);
 /*---(specialty)------------*/
-char        BASE_add_extremes       (void);
-char        BASE_mark_sharps        (void);
+char        BAS_add_extremes        (void);
+char        BAS_mark_sharps         (void);
 /*---(driver)---------------*/
-char        BASE_filter             (void);
+char        BAS_filter              (void);
 /*---(mapping)--------------*/
 /*> char        BASE_map_update         (tMAPPED *a_map, int a_ycur, int a_ynew);     <*/
 
@@ -1408,33 +1341,25 @@ char        api_ymap_done           (void);
 /*---(done)-----------------*/
 
 
-char        DICT_init               (void);
-char        DICT__find_speech       (char a_abbr);
-char        DICT__find_sub          (char a_abbr, char a_sub);
-char        DICT__find_grp          (char a_grp);
-char        DICT__find_source       (char a_source);
-char        DICT__find_type         (char a_type);
-char        DICT__find_variation    (char a_name [LEN_TERSE], char r_suffix [LEN_TERSE], char r_endings [LEN_HUND], char r_base [LEN_TERSE], char r_change [LEN_TERSE]);
-char        DICT__open              (char a_name [LEN_PATH], FILE **r_file);
-char        DICT__close             (FILE **b_file);
+/*> char        DICT__open              (char a_name [LEN_PATH], FILE **r_file);      <*/
+/*> char        DICT__close             (FILE **b_file);                              <*/
 char        DICT__read              (FILE *a_file, short *r_line, char r_prefixes [LEN_HUND], char r_recd [LEN_RECD]);
 char        DICT__split             (uchar *a_recd);
 char        DICT__primary           (short a_line, cchar a_english [LEN_TITLE], cchar a_gregg [LEN_TITLE], cchar a_cats [LEN_TITLE], tWORD **r_word);
-char        DICT__category_five     (tWORD *a_new, char l, cchar *a_cats);
-char        DICT__category_six      (tWORD *a_new, char l, cchar *a_cats);
-char        DICT__category_preview  (cchar *a_cats);
-char        DICT__category          (tWORD *a_new, cchar *a_cats);
+/*> char        DICT__category_five     (tWORD *a_new, char l, cchar *a_cats);        <* 
+ *> char        DICT__category_six      (tWORD *a_new, char l, cchar *a_cats);        <* 
+ *> char        DICT__category_preview  (cchar *a_cats);                              <* 
+ *> char        DICT__category          (tWORD *a_new, cchar *a_cats);                <*/
 char        DICT__variation_quick   (tWORD *a_base, tWORD *a_last, char a_english [LEN_TITLE], char a_vary [LEN_TERSE], char a_prefix [LEN_TERSE], char a_suffix [LEN_TERSE], tWORD **r_new);
-char        DICT__var_english       (char a_english [LEN_TITLE], char a_change [LEN_TERSE], char r_update [LEN_TITLE]);
+/*> char        DICT__var_english       (char a_english [LEN_TITLE], char a_change [LEN_TERSE], char r_update [LEN_TITLE]);   <*/
 char        DICT__variation         (tWORD *a_base, tWORD *a_last, cchar a_english [LEN_TERSE], cchar a_gregg [LEN_TERSE], cchar *a_vary, tWORD **r_new);
-char        DICT__parse             (short a_line, cchar a_english [LEN_TERSE], cchar a_gregg [LEN_TERSE], cchar a_recd [LEN_RECD]);
+char        DICT__parse             (short a_line, cchar a_eprefix [LEN_LABEL], cchar a_recd [LEN_RECD]);
 char        DICT__parse_easy        (short a_line, cchar a_recd [LEN_RECD]);
 char        DICT__pre_update        (char b_prefix [LEN_LABEL], char b_english [LEN_TITLE]);
 char        DICT__parse_all         (short a_line, cchar a_prefixes [LEN_HUND], cchar a_recd [LEN_RECD]);
 char        DICT_import             (cchar a_name [LEN_PATH]);
 char        DICT_list               (void);
 char        DICT_list_all           (void);
-char        DICT_dump_suffix        (FILE *f);
 char        DICT_dump_words         (FILE *f);
 char        DICT_dump_gregg         (FILE *f);
 
@@ -1541,7 +1466,7 @@ char        FIX__append             (char *i, char *j, char a_name [LEN_TERSE], 
 char        FIX__ae                 (char *i, char *j, char a_pcat, char a_ccat, char a_name [LEN_TERSE], char a_ncat, char b_shown [LEN_HUND], short b_drawn [LEN_LABEL], char b_tree [LEN_TERSE]);
 char        FIX__ou                 (char *i, char *j, char a_pcat, char a_ccat, char a_name [LEN_TERSE], char a_ncat, char b_shown [LEN_HUND], short b_drawn [LEN_LABEL], char b_tree [LEN_TERSE]);
 char        FIX__other              (char *i, char *j, char a_pcat, char a_ccat, char a_name [LEN_TERSE], char a_ncat, char b_shown [LEN_HUND], short b_drawn [LEN_LABEL], char b_tree [LEN_TERSE]);
-char        FIX_gregg               (char a_gregg [LEN_TITLE], char r_shown [LEN_HUND], short r_drawn [LEN_LABEL], char r_tree [LEN_TERSE]);
+char        FIX_gregg               (char a_gregg [LEN_TITLE], char r_shown [LEN_HUND], short r_drawn [LEN_LABEL], char r_tree [LEN_TERSE], char r_sort [LEN_LABEL]);
 /*---(hooking)--------------*/
 char        FIX_hook                (tWORD *a_new);
 char        FIX_unhook              (tWORD *a_old);
@@ -1575,16 +1500,142 @@ char        DB_read                 (void);
 /*===[[ gregg_prefix.c ]]=====================================================*/
 /*········· ´······················ ´·········································*/
 /*---(program)--------------*/
-char        PREFIX_purge            (void);
+char        PREFIX__purge           (void);
 char        PREFIX_init             (void);
 char        PREFIX_wrap             (void);
 /*---(load)-----------------*/
-char        PREFIX_handler          (int n, char a_verb [LEN_LABEL], char a_exist, void *a_handler);
+char        PREFIX__handler         (int n, char a_verb [LEN_LABEL], char a_exist, void *a_handler);
 char        PREFIX_load             (char a_fname [LEN_HUND]);
 /*---(debugging)------------*/
-char*       PREFIX_detail           (uchar n);
+short       PREFIX__count           (void);
+char*       PREFIX__detail_by_ptr   (short n, void *a_prefix);
+char*       PREFIX__detail          (uchar n);
 /*---(find)-----------------*/
-char        PREFIX_by_name          (char a_prefix [LEN_LABEL], char r_english [LEN_LABEL], char r_gregg [LEN_LABEL]);
+char        PREFIX__english_change  (cchar a_base [LEN_TITLE], cchar a_change [LEN_LABEL], char r_update [LEN_TITLE], char r_prefix [LEN_LABEL], char *r_trunc);
+short       PREFIX__by_name         (char a_prefix [LEN_LABEL], char r_english [LEN_LABEL], char r_gregg [LEN_LABEL]);
+char        PREFIX_driver           (cchar a_prefix [LEN_LABEL], char b_english [LEN_TITLE], char b_gregg [LEN_TITLE], void **r_point);
+/*---(done)-----------------*/
+
+
+
+/*===[[ gregg_letter.c ]]=====================================================*/
+/*········· ´······················ ´·········································*/
+/*---(program)--------------*/
+char        LETTER_purge            (void);
+char        LETTER_init             (void);
+char        LETTER_wrap             (void);
+/*---(load)-----------------*/
+char        LETTER_handler          (int n, char a_verb [LEN_LABEL], char a_exist, void *a_handler);
+char        LETTER_load             (char a_fname [LEN_HUND]);
+/*---(debug)----------------*/
+char*       LETTER_detail           (uchar n);
+/*---(find)-----------------*/
+short       LETTER_by_name          (char a_ltr [LEN_TERSE], char a_scope, char *r_type, char *r_lcat, char r_label [LEN_TERSE], float *r_xrad, float *r_yrad, float *r_rot, float *r_beg, float *r_arc);
+char        LETTER_by_index         (short n, char *r_type, char *r_lcat, char r_label [LEN_TERSE], float *r_xrad, float *r_yrad, float *r_rot, float *r_beg, float *r_arc);
+char        LETTER_sizing           (short n, float *r_xend, float *r_yend, float *r_deg, float *r_xylen, float *r_lef, float *r_rig, float *r_top, float *r_bot, short *r_points);
+/*---(done)-----------------*/
+
+
+
+/*===[[ gregg_suffix.c ]]=====================================================*/
+/*········· ´······················ ´·········································*/
+/*---(program)--------------*/
+char        SUFFIX_purge            (void);
+char        SUFFIX_init             (void);
+char        SUFFIX_wrap             (void);
+/*---(load)-----------------*/
+char        SUFFIX_handler          (int n, char a_verb [LEN_LABEL], char a_exist, void *a_handler);
+char        SUFFIX_load             (char a_fname [LEN_HUND]);
+/*---(debug)----------------*/
+short       SUFFIX_count            (void);
+char*       SUFFIX_detail           (uchar n);
+/*---(find)-----------------*/
+short       SUFFIX_by_name          (char a_suffix [LEN_LABEL], char *r_type, char r_gregg [LEN_LABEL], char r_base [LEN_TITLE], char r_change [LEN_LABEL]);
+/*---(support)--------------*/
+char        SUFFIX_english_change   (cchar a_english [LEN_TITLE], cchar a_change [LEN_LABEL], char r_update [LEN_TITLE]);
+/*---(driver)---------------*/
+short       SUFFIX__field           (cchar a_eprefix [LEN_TERSE], cchar a_field [LEN_TITLE], char r_vary [LEN_TERSE], char r_english [LEN_TITLE], char *r_type, char r_gsuffix [LEN_LABEL], char r_base [LEN_TITLE], char r_change [LEN_LABEL]);
+char        SUFFIX__simple          (tWORD *a_base, tWORD *a_last, cchar a_vary [LEN_TERSE], cchar a_english [LEN_TITLE], cchar a_gprefix [LEN_LABEL], cchar a_gsuffix [LEN_LABEL], tWORD **r_new);
+/*---(report)---------------*/
+char        SUFFIX_dump             (FILE *f);
+/*---(done)-----------------*/
+
+
+
+/*---(memory)---------------*/
+char        SHARED_new              (char a_abbr, char a_force, short a_size, char *a_wiper (void *), void **r_new);
+char        SHARED_free             (char a_abbr, void **r_old);
+/*---(files)----------------*/
+char        SHARED_open             (char a_name [LEN_PATH], char a_mode, FILE **r_file);
+char        SHARED_close            (FILE **b_file);
+/*---(done)-----------------*/
+
+
+
+/*===[[ gregg_base.c ]]=======================================================*/
+/*········· ´······················ ´·········································*/
+/*---(program)--------------*/
+char        BASE_init               (void);
+char        BASE__purge             (void);
+char        BASE_wrap               (void);
+/*---(memory)---------------*/
+char        BASE__wipe              (void *a_base);
+char        BASE__new               (void **r_new);
+char        BASE__force             (void **r_new);
+char        BASE__free              (void **r_old);
+/*---(hooking)--------------*/
+char        BASE__hook              (void *a_new);
+char        BASE__unhook            (void *a_old);
+/*---(search)---------------*/
+short       BASE__count             (void);
+char        BASE__by_index          (int n, void **r_base);
+char        BASE__by_cursor         (char a_dir, void **r_base);
+char        BASE__detail            (void *a_base, char a_out [LEN_FULL]);
+char*       BASE__entry             (int n);
+/*---(driver)---------------*/
+char        BASE__prepare           (short a_line, cchar a_english [LEN_TITLE], cchar a_gregg [LEN_TITLE]);
+char        BASE__populate          (void *a_new, char a_file, short a_line, char a_english [LEN_TITLE], char a_gregg [LEN_TITLE]);
+char        BASE_create             (char a_file, short a_line, cchar a_english [LEN_TITLE], cchar a_gregg [LEN_TITLE], cchar a_cats [LEN_TITLE], void **r_base);
+/*---(done)-----------------*/
+
+
+
+/*===[[ gregg_english.c ]]====================================================*/
+/*········· ´······················ ´·········································*/
+/*---(program)--------------*/
+char        DICT_init               (void);
+char        DICT__purge             (void);
+char        DICT_wrap               (void);
+/*---(memory)---------------*/
+char        DICT__wipe              (void *a_base);
+char        DICT__new               (void **r_new);
+char        DICT__force             (void **r_new);
+char        DICT__free              (void **r_old);
+/*---(hooking)--------------*/
+char        DICT__hook              (void *a_new);
+char        DICT__unhook            (void *a_old);
+/*---(done)-----------------*/
+
+
+
+/*===[[ gregg_cats.c ]]=======================================================*/
+/*········· ´······················ ´·········································*/
+/*---(speech)---------------*/
+char        CATS__find_speech       (char a_abbr);
+char        CATS__find_sub          (char a_abbr, char a_sub);
+/*---(source)---------------*/
+char        CATS__find_source       (char a_source);
+char        CATS__find_type         (char a_type);
+/*---(freq)-----------------*/
+char        CATS__find_grp          (char a_grp);
+/*---(program)--------------*/
+char        CATS_init               (void);
+/*---(driver)---------------*/
+char        CATS__prepare           (cchar a_cats [LEN_LABEL], char *r_len, char *r_part, char *r_sub, char *r_src, char *r_cat, short *r_page, char *r_grp, short *r_freq);
+char        CATS__driver            (cchar *a_func, cchar a_type, cchar a_cats [LEN_LABEL], char *r_part, char *r_sub, char *r_src, char *r_cat, short *r_page, char *r_grp, short *r_freq);
+char        CATS_prefix             (cchar a_cats [LEN_LABEL], char *r_src, char *r_cat, short *r_page);
+char        CATS_suffix             (cchar a_cats [LEN_LABEL], char *r_part, char *r_sub, char *r_src, char *r_cat, short *r_page);
+char        CATS_base               (cchar a_cats [LEN_LABEL], char *r_part, char *r_sub, char *r_src, char *r_cat, short *r_page, char *r_grp, short *r_freq);
 /*---(done)-----------------*/
 
 

@@ -27,7 +27,7 @@ static short   s_beg       =    0;
 static void o___PROGRAM________________o (void) {;}
 
 char
-BASE_config             (float a_append, float a_adjust, float a_sharp)
+BAS_config             (float a_append, float a_adjust, float a_sharp)
 {
    s_append = a_append;
    s_adjust = a_adjust;
@@ -37,7 +37,7 @@ BASE_config             (float a_append, float a_adjust, float a_sharp)
 }
 
 char
-BASE_init            (void)
+BAS_init             (void)
 {
    o.nbas     = 0;
    o.navg     = 0;
@@ -54,7 +54,7 @@ BASE_init            (void)
 static void o___SUPPORT________________o (void) {;}
 
 float         /*----: check distance to potential point ----------------------*/
-BASE__dist              (short a, short b)
+BAS__dist               (short a, short b)
 {
    float       xd, yd, d;
    if (a < 0 || a >= o.nraw)    return -1;
@@ -78,7 +78,7 @@ BASE__dist              (short a, short b)
 void o___MOVEMENT_______________o (void) {;}
 
 char
-BASE__push_up           (short a_old)
+BAS__push_up            (short a_old)
 {
    /*---(locals)-----------+-----+-----+-*/
    short       x_new       = a_old + 1;
@@ -121,7 +121,7 @@ BASE__push_up           (short a_old)
 }
 
 char
-BASE_bas2avg            (short a_bas)
+BAS_bas2avg             (short a_bas)
 {
    /*---(leave blank)--------------------*/
    o.avg [a_bas].xd     = o.avg [a_bas].yd     = o.avg [a_bas].len     = 0;
@@ -142,7 +142,7 @@ BASE_bas2avg            (short a_bas)
 static void o___NEW____________________o (void) {;}
 
 char
-BASE__force_point   (uchar a_type, short x, short y)
+BAS__force_point        (uchar a_type, short x, short y)
 {
    /*---(tie raw and bas)-----------------*/
    o.bas [o.nbas].p_raw   = o.avg [o.nbas].p_raw   = -1;
@@ -195,7 +195,7 @@ BASE__force_point   (uchar a_type, short x, short y)
  *> }                                                                                 <*/
 
 short         /*----: add an additional basic point from a raw point ---------*/
-BASE_append             (short a_raw, uchar a_force)
+BAS_append              (short a_raw, uchar a_force)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
@@ -210,7 +210,7 @@ BASE_append             (short a_raw, uchar a_force)
    float       dt, pt      =  0.0;
    short       x_new       =   -1;
    /*---(if tail)------------------------*/
-   if (o.raw [a_raw].type == POINT_TAIL)  BASE_append (a_raw - 5, POINT_SUFFIX);
+   if (o.raw [a_raw].type == POINT_TAIL)  BAS_append (a_raw - 5, POINT_SUFFIX);
    /*---(header)-------------------------*/
    DEBUG_RAW    yLOG_senter  (__FUNCTION__);
    DEBUG_RAW    yLOG_sint    (a_raw);
@@ -268,14 +268,14 @@ BASE_append             (short a_raw, uchar a_force)
    /*---(filter too close)---------------*/
    DEBUG_RAW    yLOG_schar   (a_force);
    --rce;  if (x_type == POINT_NORMAL && a_force == POINT_NORMAL) {
-      d = BASE__dist (x_curr, x_prev);
+      d = BAS__dist (x_curr, x_prev);
       DEBUG_RAW    yLOG_sdouble (d);
       if (d >= 0 && d <= s_append) {
          DEBUG_RAW    yLOG_snote   ("too close to prev");
          DEBUG_RAW    yLOG_sexitr  (__FUNCTION__, rce);
          return rce;
       }
-      /*> d = BASE__dist (x_curr, x_pprev);                                           <* 
+      /*> d = BAS__dist (x_curr, x_pprev);                                           <* 
        *> DEBUG_RAW    yLOG_sdouble (d);                                              <* 
        *> if (d >= 0 && d <= s_append) {                                              <* 
        *>    DEBUG_RAW    yLOG_snote   ("too close to prev-prev");                    <* 
@@ -291,11 +291,11 @@ BASE_append             (short a_raw, uchar a_force)
          --o.navg;
       } else {
          x_tail = a_raw + 5;
-         d  = BASE__dist (x_curr, x_pprev);
+         d  = BAS__dist (x_curr, x_pprev);
          DEBUG_RAW    yLOG_sdouble (d);
-         dt = BASE__dist (x_curr, x_tail);
+         dt = BAS__dist (x_curr, x_tail);
          DEBUG_RAW    yLOG_sdouble (dt);
-         pt = BASE__dist (x_prev, x_tail);
+         pt = BAS__dist (x_prev, x_tail);
          DEBUG_RAW    yLOG_sdouble (pt);
          /*> if (pt <= dt) {                                                             <* 
           *>    DEBUG_AVG    yLOG_snote   ("prev after suffix");                         <* 
@@ -331,13 +331,13 @@ BASE_append             (short a_raw, uchar a_force)
    DEBUG_RAW    yLOG_sexit   (__FUNCTION__);
    /*---(check head)---------------------*/
    x_new = x_curr;
-   if (o.raw [x_curr].type == POINT_HEAD)  x_new = BASE_append (x_curr + 5, POINT_PREFIX);
+   if (o.raw [x_curr].type == POINT_HEAD)  x_new = BAS_append (x_curr + 5, POINT_PREFIX);
    /*---(complete)-----------------------*/
    return x_new;
 }
 
 char
-BASE_insert             (short a_raw)
+BAS_insert              (short a_raw)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
@@ -365,7 +365,7 @@ BASE_insert             (short a_raw)
    /*---(open slot)----------------------*/
    DEBUG_RAW    yLOG_note    ("open up slot");
    for (i = o.navg - 1; i >= n; --i) {
-      BASE__push_up (i);
+      BAS__push_up (i);
    }
    /*---(insert new point)---------------*/
    DEBUG_RAW    yLOG_note    ("copy data");
@@ -374,7 +374,7 @@ BASE_insert             (short a_raw)
    ++o.navg;
    /*---(update values)------------------*/
    DEBUG_RAW    yLOG_note    ("recalculate");
-   BASE_calc_all ();
+   BAS_calc_all ();
    /*> POINT_list (stdout, 'd', o.bas, o.nbas);                                       <*/
    /*> POINT_list (stdout, 'd', o.avg, o.navg);                                       <*/
    /*---(complete)-----------------------*/
@@ -383,7 +383,7 @@ BASE_insert             (short a_raw)
 }
 
 char
-BASE_adjust             (short a_bas, short a_raw)
+BAS_adjust              (short a_bas, short a_raw)
 {
    /*---(locals)-----------+-----+-----+-*/
    short       x_old       =    0;
@@ -403,7 +403,7 @@ BASE_adjust             (short a_bas, short a_raw)
    o.raw [a_raw].p_key  = x_key;
    /*---(repoint bas)--------------------*/
    POINT_raw2bas  (a_raw, a_bas);
-   BASE_calc_all ();
+   BAS_calc_all ();
    /*---(complete)-----------------------*/
    DEBUG_AVG    yLOG_sexit   (__FUNCTION__);
    return 0;
@@ -425,28 +425,28 @@ BASE_handler            (short a_bef, short a_new, short a_aft)
       return 0;
    }
    /*---(get distances)------------------*/
-   da   = BASE__dist (a_bef, a_new);
-   db   = BASE__dist (a_new, a_aft);
-   df   = BASE__dist (a_bef, a_aft);
+   da   = BAS__dist (a_bef, a_new);
+   db   = BAS__dist (a_new, a_aft);
+   df   = BAS__dist (a_bef, a_aft);
    DEBUG_AVG    yLOG_complex (" dist"     , "%4.1fa, %4.1fb, %4.1ff", da, db, df);
    /*---(update)-------------------------*/
    if      (da <= s_adjust) {
       x_bas  = o.raw [a_bef].p_bas;
       x_type = o.bas [x_bas].type;
       DEBUG_AVG    yLOG_complex (" bef small", "%4d, %4d, %c", a_bef, x_bas, x_type);
-      if (strchr ("S><F", x_type) != NULL)  BASE_insert (a_new);
-      else                                  BASE_adjust (x_bas, a_new);
+      if (strchr ("S><F", x_type) != NULL)  BAS_insert (a_new);
+      else                                  BAS_adjust (x_bas, a_new);
       rc = 0;
    } else if (db <= s_adjust) {
       x_bas  = o.raw [a_aft].p_bas;
       x_type = o.bas [x_bas].type;
       DEBUG_AVG    yLOG_complex (" aft small", "%4d, %4d, %c", a_bef, x_bas, x_type);
-      if (strchr ("S><F", x_type) != NULL)  BASE_insert (a_new);
-      else                                  BASE_adjust (x_bas, a_new);
+      if (strchr ("S><F", x_type) != NULL)  BAS_insert (a_new);
+      else                                  BAS_adjust (x_bas, a_new);
       rc = 0;
    } else  {
       DEBUG_AVG    yLOG_note    (" middle addition");
-      BASE_insert (a_new);
+      BAS_insert (a_new);
       rc = 1;
    }
    /*---(complete)-----------------------*/
@@ -480,7 +480,7 @@ BASE__calc_copy      (short a_dst, short a_src)
 }
 
 char          /*----: calculate additional information on basic points -------*/
-BASE_calc_all        (void)
+BAS_calc_all         (void)
 {
    /*---(locals)-----------+-----+-----+-*/
    int         i;
@@ -508,7 +508,7 @@ BASE_calc_all        (void)
 static void o___ENDS___________________o (void) {;}
 
 char          /*----: move the beg/end points out to test circles ------------*/
-BASE__push_out       (short a_bas, char a_dir)
+BAS__push_out        (short a_bas, char a_dir)
 {
    short       x_raw;
    short       x_off       =    1;
@@ -541,7 +541,7 @@ BASE__push_out       (short a_bas, char a_dir)
 }
 
 char          /*----: move the beg/end points out to test circles ------------*/
-BASE__pull_in        (short a_bas)
+BAS__pull_in         (short a_bas)
 {
    short       x_raw;
    float       x, y;
@@ -560,7 +560,7 @@ BASE__pull_in        (short a_bas)
 }
 
 char          /*----: move the beg/end points out to test circles ------------*/
-BASE_extend_ends     (void)
+BAS_extend_ends      (void)
 {
    /*---(locals)-------------------------*/
    int       i         = 0;            /* loop iterator -- bas points         */
@@ -568,8 +568,8 @@ BASE_extend_ends     (void)
    DEBUG_AVG    yLOG_enter   (__FUNCTION__);
    /*---(beginning)----------------------*/
    for (i = 0; i < o.nbas; ++i) {
-      if (o.avg [i].type == POINT_START)   BASE__push_out (i, '-');
-      if (o.avg [i].type == POINT_FINISH)  BASE__push_out (i, '+');
+      if (o.avg [i].type == POINT_START)   BAS__push_out (i, '-');
+      if (o.avg [i].type == POINT_FINISH)  BAS__push_out (i, '+');
    }
    /*---(complete)-----------------------*/
    DEBUG_AVG    yLOG_exit    (__FUNCTION__);
@@ -577,7 +577,7 @@ BASE_extend_ends     (void)
 }
 
 char
-BASE_retract_ends    (void)
+BAS_retract_ends     (void)
 {
    /*---(locals)-------------------------*/
    int       i         = 0;            /* loop iterator -- bas points         */
@@ -585,8 +585,8 @@ BASE_retract_ends    (void)
    DEBUG_AVG    yLOG_enter   (__FUNCTION__);
    /*---(beginning)----------------------*/
    for (i = 0; i < o.nbas; ++i) {
-      if (o.avg [i].type == POINT_START)   BASE__pull_in  (i);
-      if (o.avg [i].type == POINT_FINISH)  BASE__pull_in  (i);
+      if (o.avg [i].type == POINT_START)   BAS__pull_in  (i);
+      if (o.avg [i].type == POINT_FINISH)  BAS__pull_in  (i);
    }
    /*---(complete)-----------------------*/
    DEBUG_AVG    yLOG_exit    (__FUNCTION__);
@@ -601,7 +601,7 @@ BASE_retract_ends    (void)
 static void o___SPECIALTY______________o (void) {;}
 
 char
-BASE_add_extremes       (void)
+BAS_add_extremes        (void)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rc          =    0;
@@ -667,7 +667,7 @@ BASE_add_extremes       (void)
 }
 
 char
-BASE_mark_sharps        (void)
+BAS_mark_sharps         (void)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rc          =    0;
@@ -709,7 +709,7 @@ BASE_mark_sharps        (void)
 static void o___DRIVER_________________o (void) {;}
 
 char          /*----: filter raw points into basic points --------------------*/
-BASE_filter        (void)
+BAS_filter         (void)
 {
    /*---(locals)-----------+-----+-----+-*/
    short       x_new       =   -1;
@@ -725,16 +725,16 @@ BASE_filter        (void)
       if (o.nbas > 0)  x_prev  = o.bas [o.nbas - 1].type;
       x_type = o.raw [i].type;
       /*---(normal)----------------------*/
-      x_new = BASE_append (i, POINT_NORMAL);
+      x_new = BAS_append (i, POINT_NORMAL);
       if (x_new >= 0)  i = x_new;
       /*---(done)------------------------*/
    }
    /*---(end points)---------------------*/
    DEBUG_AVG    yLOG_value   ("o.nbas"    , o.nbas);
    /*---(run calculations)---------------*/
-   /*> BASE_calc_all      ();                                                         <*/
+   /*> BAS_calc_all      ();                                                         <*/
    /*> BASE__sharpen ();                                                              <*/
-   BASE_calc_all ();
+   BAS_calc_all ();
    /*---(display version)----------------*/
    /*> for (i = 0; i < o.navg; ++i) {                                                 <* 
     *>    POINT_display (o.bas + i);                                                  <* 

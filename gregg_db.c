@@ -225,7 +225,7 @@ DB__open                (char a_name [LEN_PATH], char a_mode, int *b_nfile, int 
    /*---(header)-------------------------*/
    DEBUG_FILE   yLOG_enter   (__FUNCTION__);
    /*---(report out)---------------------*/
-   DEBUG_OUTP   yLOG_complex ("actual"    , "A  %4df  %4db  %4dw  /  R  %4df  %4db  %4dw  /  Y  %4de  %4dg  %4du  %4dt", my.a_nfile, my.a_nbase, my.a_nword, my.r_nfile, my.r_nbase, my.r_nword, ySORT_count (B_ENGLISH), ySORT_count (B_GREGG), ySORT_count (B_UNIQUE), ySORT_count (B_TREE));
+   DEBUG_OUTP   yLOG_complex ("actual"    , "A  %4df  %4db  %4dw  /  R  %4df  %4db  %4dw  /  Y  %4de  %4dg  %4du  %4dt", my.a_nfile, my.a_nbase, my.a_nword, my.r_nfile, my.r_nbase, my.r_nword, ySORT_count (B_ENGLISH), ySORT_count (B_GREGG), ySORT_count (B_UNIQUE), ySORT_count (B_BASE));
    /*---(default)------------------------*/
    if (a_mode == 'r') {
       if (b_nfile != NULL)  *b_nfile = 0;
@@ -338,7 +338,7 @@ DB__open                (char a_name [LEN_PATH], char a_mode, int *b_nfile, int 
       fflush (f);
    }
    /*---(report out)---------------------*/
-   DEBUG_OUTP   yLOG_complex ("actual"    , "A  %4df  %4db  %4dw  /  R  %4df  %4db  %4dw  /  Y  %4de  %4dg  %4du  %4dt", my.a_nfile, my.a_nbase, my.a_nword, my.r_nfile, my.r_nbase, my.r_nword, ySORT_count (B_ENGLISH), ySORT_count (B_GREGG), ySORT_count (B_UNIQUE), ySORT_count (B_TREE));
+   DEBUG_OUTP   yLOG_complex ("actual"    , "A  %4df  %4db  %4dw  /  R  %4df  %4db  %4dw  /  Y  %4de  %4dg  %4du  %4db", my.a_nfile, my.a_nbase, my.a_nword, my.r_nfile, my.r_nbase, my.r_nword, ySORT_count (B_ENGLISH), ySORT_count (B_GREGG), ySORT_count (B_UNIQUE), ySORT_count (B_BASE));
    /*---(save-back)----------------------*/
    if (b_file != NULL)  *b_file = f;
    /*---(complete)-----------------------*/
@@ -432,7 +432,7 @@ DB_write                (void)
       return rce;
    }
    /*---(summary)------------------------*/
-   DEBUG_OUTP   yLOG_complex ("actual"    , "A  %4df  %4db  %4dw  /  R  %4df  %4db  %4dw  /  Y  %4de  %4dg  %4du  %4dt", my.a_nfile, my.a_nbase, my.a_nword, my.r_nfile, my.r_nbase, my.r_nword, ySORT_count (B_ENGLISH), ySORT_count (B_GREGG), ySORT_count (B_UNIQUE), ySORT_count (B_TREE));
+   DEBUG_OUTP   yLOG_complex ("actual"    , "A  %4df  %4db  %4dw  /  R  %4df  %4db  %4dw  /  Y  %4de  %4dg  %4du  %4dt", my.a_nfile, my.a_nbase, my.a_nword, my.r_nfile, my.r_nbase, my.r_nword, ySORT_count (B_ENGLISH), ySORT_count (B_GREGG), ySORT_count (B_UNIQUE), ySORT_count (B_BASE));
    yURG_msg ('-', "actual %4df  %4db  %4dw", my.r_nfile, my.r_nbase, my.r_nword);
    yURG_msg ('-', "success, current database saved correctly");
    yURG_msg (' ', "");
@@ -485,7 +485,7 @@ DB_read                 (void)
       return rce;
    }
    /*---(summary)------------------------*/
-   DEBUG_OUTP   yLOG_complex ("actual"    , "A  %4df  %4db  %4dw  /  R  %4df  %4db  %4dw  /  Y  %4de  %4dg  %4du  %4dt", my.a_nfile, my.a_nbase, my.a_nword, my.r_nfile, my.r_nbase, my.r_nword, ySORT_count (B_ENGLISH), ySORT_count (B_GREGG), ySORT_count (B_UNIQUE), ySORT_count (B_TREE));
+   DEBUG_OUTP   yLOG_complex ("actual"    , "A  %4df  %4db  %4dw  /  R  %4df  %4db  %4dw  /  Y  %4de  %4dg  %4du  %4dt", my.a_nfile, my.a_nbase, my.a_nword, my.r_nfile, my.r_nbase, my.r_nword, ySORT_count (B_ENGLISH), ySORT_count (B_GREGG), ySORT_count (B_UNIQUE), ySORT_count (B_BASE));
    yURG_msg ('-', "actual %4df  %4db  %4dw", my.a_nfile, my.a_nbase, my.a_nword);
    /*---(paginate)-----------------------*/
    DLIST_paginate ();
@@ -539,7 +539,7 @@ DB_stats                (void)
    strl4main (my.a_nword , t , 0, 'c', '-', LEN_LABEL);
    printf ("word   %7.7s\n", t);
    printf ("stamp  å%sæ\n" , my.a_heart);
-   DEBUG_OUTP   yLOG_complex ("actual"    , "A  %4df  %4db  %4dw  /  R  %4df  %4db  %4dw  /  Y  %4de  %4dg  %4du  %4dt", my.a_nfile, my.a_nbase, my.a_nword, my.r_nfile, my.r_nbase, my.r_nword, ySORT_count (B_ENGLISH), ySORT_count (B_GREGG), ySORT_count (B_UNIQUE), ySORT_count (B_TREE));
+   DEBUG_OUTP   yLOG_complex ("actual"    , "A  %4df  %4db  %4dw  /  R  %4df  %4db  %4dw  /  Y  %4de  %4dg  %4du  %4dt", my.a_nfile, my.a_nbase, my.a_nword, my.r_nfile, my.r_nbase, my.r_nword, ySORT_count (B_ENGLISH), ySORT_count (B_GREGG), ySORT_count (B_UNIQUE), ySORT_count (B_BASE));
    /*---(complete)-----------------------*/
    DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
    return 0;

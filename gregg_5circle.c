@@ -181,9 +181,9 @@ CIRCLE__fix_ends     (int a_p1, int a_p3)
    /*---(add new base points)------------*/
    BASE_handler (ab, s_mina, ae);
    BASE_handler (bb, s_minb, be);
-   /*> if (s_mina != ab && s_mina != ae)  BASE_adjust (p2, s_mina);                         <*/
-   /*> if (s_minb != bb && s_minb != be)  BASE_adjust (p3, s_minb);                         <*/
-   /*> BASE_calc_all ();                                                              <*/
+   /*> if (s_mina != ab && s_mina != ae)  BAS_adjust (p2, s_mina);                         <*/
+   /*> if (s_minb != bb && s_minb != be)  BAS_adjust (p3, s_minb);                         <*/
+   /*> BAS_calc_all ();                                                                    <*/
    /*---(complete)-----------------------*/
    DEBUG_CIRC   yLOG_exit    (__FUNCTION__);
    return 0;

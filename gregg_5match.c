@@ -1352,14 +1352,14 @@ MATCH__unit          (char *a_question, int a_num)
    strlcpy (unit_answer, "POINT unit       : unknownn request", 100);
    /*---(core data)----------------------*/
    if        (strncmp (a_question, "pos"       , 20)  == 0) {
-      snprintf (unit_answer, LEN_STR, "OPENS pos        : %4.0fxd %4.0fyd %3.0fl %8.3fs %6.0fi %4.0fd %dq  --  %d len   %d range (%d)",
+      snprintf (unit_answer, LEN_FULL, "OPENS pos        : %4.0fxd %4.0fyd %3.0fl %8.3fs %6.0fi %4.0fd %dq  --  %d len   %d range (%d)",
             opens.xd   , opens.yd   , opens.len,
             opens.slope, opens.icept,
             opens.degs , opens.quad,
             opens.size , opens.range, opens.range2);
    }
    else if   (strncmp (a_question, "curve"     , 20)  == 0) {
-      snprintf (unit_answer, LEN_STR, "OPENS curve      : %6.1fl %6.1fd %6.1fr, %1dc",
+      snprintf (unit_answer, LEN_FULL, "OPENS curve      : %6.1fl %6.1fd %6.1fr, %1dc",
             opens.len, opens.depth , opens.ratio, opens.ccat);
    }
    /*---(complete)-----------------------*/

@@ -882,13 +882,13 @@ REV__unit        (char *a_question, int a_num)
       snprintf (t, 80, "%s", g_fake.load);
       if (strlen (g_fake.load) > 80)  sprintf (s, "å%s>", t);
       else                      sprintf (s, "å%sæ", t);
-      snprintf (unit_answer, LEN_STR, "REVERSE load %3d : %s", g_fake.count, s);
+      snprintf (unit_answer, LEN_FULL, "REVERSE load %3d : %s", g_fake.count, s);
    }
    else if (strncmp (a_question, "box"       , 20)  == 0) {
       snprintf (t, 80, "%s", g_fake.load);
       if (strlen (g_fake.load) > 80)  sprintf (s, "[%s>", t);
       else                      sprintf (s, "[%s]", t);
-      snprintf (unit_answer, LEN_STR, "REVERSE box  %3d : %s", g_fake.count, s);
+      snprintf (unit_answer, LEN_FULL, "REVERSE box  %3d : %s", g_fake.count, s);
    }
    /*---(complete)-----------------------*/
    return unit_answer;

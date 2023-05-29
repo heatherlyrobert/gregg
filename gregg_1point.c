@@ -1054,7 +1054,7 @@ POINT_calc         (char a_type, tPOINT *a_curr, char a_span)
          return 0;
       } else {
          DEBUG_CALC   yLOG_snote   ("reversal, copy bas");
-         BASE_bas2avg (a_curr->seq);
+         BAS_bas2avg (a_curr->seq);
          DEBUG_CALC   yLOG_sexit   (__FUNCTION__);
          return 0;
       }
@@ -1380,31 +1380,31 @@ POINT__unit          (char *a_question, char a_type, int a_num)
       }
       if (c > 45)  sprintf (s, "[%s>", t);
       else         sprintf (s, "[%s]", t);
-      snprintf (unit_answer, LEN_STR, "%-3.3s by type      : %2d %s", x_pre, c, s);
+      snprintf (unit_answer, LEN_FULL, "%-3.3s by type      : %2d %s", x_pre, c, s);
    }
    else if   (strncmp (a_question, "links"     , 20)  == 0) {
-      snprintf (unit_answer, LEN_STR, "%-3.3s links   (%2d) : %c ", x_pre, a_num, p [a_num].type);
+      snprintf (unit_answer, LEN_FULL, "%-3.3s links   (%2d) : %c ", x_pre, a_num, p [a_num].type);
       if (p [a_num].seq   >= 0)  sprintf  (t, " %4d%c" , p [a_num].seq  , '#');
       else                       sprintf  (t, "    -%c",                  '#');
-      strlcat (unit_answer, t, LEN_STR);
+      strlcat (unit_answer, t, LEN_FULL);
       if (p [a_num].p_raw >= 0)  sprintf  (t, " %4d%c" , p [a_num].p_raw, 'r');
       else                       sprintf  (t, "    -%c",                  'r');
-      strlcat (unit_answer, t, LEN_STR);
+      strlcat (unit_answer, t, LEN_FULL);
       if (p [a_num].p_bas >= 0)  sprintf  (t, " %4d%c" , p [a_num].p_bas, 'b');
       else                       sprintf  (t, "    -%c",                  'b');
-      strlcat (unit_answer, t, LEN_STR);
+      strlcat (unit_answer, t, LEN_FULL);
       if (p [a_num].p_key >= 0)  sprintf  (t, " %4d%c" , p [a_num].p_key, 'k');
       else                       sprintf  (t, "    -%c",                  'k');
-      strlcat (unit_answer, t, LEN_STR);
+      strlcat (unit_answer, t, LEN_FULL);
    }
    else if   (strncmp (a_question, "touch"     , 20)  == 0) {
-      snprintf (unit_answer, LEN_STR, "%-3.3s touch   (%2d) : %c  %4dx %4dy  %4dx %4dy",
+      snprintf (unit_answer, LEN_FULL, "%-3.3s touch   (%2d) : %c  %4dx %4dy  %4dx %4dy",
             x_pre, a_num, p [a_num].type,
             p [a_num].x_touch, p [a_num].y_touch,
             p [a_num].x_raw  , p [a_num].y_raw);
    }
    else if   (strncmp (a_question, "pos"       , 20)  == 0) {
-      snprintf (unit_answer, LEN_STR, "%-3.3s pos     (%2d) : %c  %4dx %4dy  %4.0fx %4.0fy %4.0fxd %4.0fyd %3.0fl %8.3fs %6.0fi %6.3fr %4.0fd %dq",
+      snprintf (unit_answer, LEN_FULL, "%-3.3s pos     (%2d) : %c  %4dx %4dy  %4.0fx %4.0fy %4.0fxd %4.0fyd %3.0fl %8.3fs %6.0fi %6.3fr %4.0fd %dq",
             x_pre, a_num, p [a_num].type,
             p [a_num].x_raw, p [a_num].y_raw,
             p [a_num].x_pos, p [a_num].y_pos,
@@ -1413,7 +1413,7 @@ POINT__unit          (char *a_question, char a_type, int a_num)
             p [a_num].rads , p [a_num].degs , p [a_num].quad);
    }
    else if   (strncmp (a_question, "curve"     , 20)  == 0) {
-      snprintf (unit_answer, LEN_STR, "%-3.3s curve   (%2d) : %6.1fl %6.1fd %6.3fr   %1dc",
+      snprintf (unit_answer, LEN_FULL, "%-3.3s curve   (%2d) : %6.1fl %6.1fd %6.3fr   %1dc",
             x_pre, a_num, p [a_num].len, p [a_num].depth, p [a_num].ratio, p [a_num].ccat);
    }
    /*---(complete)-----------------------*/

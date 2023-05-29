@@ -92,12 +92,12 @@ WORDS_init              (void)
       return rce;
    }
    /*---(initialize)---------------------*/
-   rc = ySORT_btree (B_TREE   , "tree");
-   DEBUG_CONF   yLOG_value   ("tree"      , rc);
-   --rce;  if (rc < 0) {
-      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
+   /*> rc = ySORT_btree (B_TREE   , "tree");                                          <* 
+    *> DEBUG_CONF   yLOG_value   ("tree"      , rc);                                  <* 
+    *> --rce;  if (rc < 0) {                                                          <* 
+    *>    DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);                              <* 
+    *>    return rce;                                                                 <* 
+    *> }                                                                              <*/
    /*---(defaults)-----------------------*/
    my.r_nbase = 0;
    my.r_nword = 0;
@@ -269,7 +269,7 @@ WORDS__populate         (tWORD *a_new, char a_english [LEN_TITLE], char a_gregg 
    /*> rc = AUDIT_gregg_outline (a_new->w_gregg, x_fancy);                            <* 
     *> printf ("%-15.15s  %s\n", a_new->w_english, x_fancy);                          <*/
    /*---(drawn)-------------------------*/
-   rc = FIX_gregg (a_new->w_gregg, a_new->w_shown, a_new->w_drawn, a_new->w_tree);
+   rc = FIX_gregg (a_new->w_gregg, a_new->w_shown, a_new->w_drawn, a_new->w_tree, NULL);
    /*---(hook to tree)------------------*/
    rc = FIX_hook   (a_new);
    DEBUG_CONF   yLOG_value   ("fix"       , rc);
@@ -504,12 +504,12 @@ WORDS_unhook            (tWORD *a_old)
       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   rc = ySORT_prepare (B_TREE);
-   DEBUG_CONF   yLOG_value   ("prep tree" , rc);
-   --rce;  if (rc < 0) {
-      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
+   /*> rc = ySORT_prepare (B_TREE);                                                   <* 
+    *> DEBUG_CONF   yLOG_value   ("prep tree" , rc);                                  <* 
+    *> --rce;  if (rc < 0) {                                                          <* 
+    *>    DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);                              <* 
+    *>    return rce;                                                                 <* 
+    *> }                                                                              <*/
    /*---(complete)-----------------------*/
    DEBUG_CONF   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -606,9 +606,9 @@ static int    s_nword;
 /*---(english index)----------------------------*/
 tWORD *eng_index [27][27][27];
 
-PRIV int       a         = 0;           /* 1st letter index                    */
-PRIV int       b         = 0;           /* 2nd letter index                    */
-PRIV int       c         = 0;           /* 3rd letter index                    */
+static int       a         = 0;           /* 1st letter index                    */
+static int       b         = 0;           /* 2nd letter index                    */
+static int       c         = 0;           /* 3rd letter index                    */
 
 
 int    letters[30];
@@ -1327,7 +1327,7 @@ WORDS__unit          (char *a_question, int a_num)
    if        (strncmp (a_question, "parsing"   , 20)  == 0) {
       /*> sprintf  (s, "%2d[%.20s]", strlen (s_english), s_english);                  <*/
       /*> sprintf  (t, "%2d[%.20s]", strlen (s_gregg)  , s_gregg);                    <*/
-      /*> snprintf (unit_answer, LEN_STR, "WORDS parsing    : %-24.24s  %-24.24s  %c  %c  %3d  %c    %c  %c  %c  %c  %c", s, t, s_ver, s_book, s_page, s_type, s_diff, s_simp, s_3rd, s_4th, s_top);   <*/
+      /*> snprintf (unit_answer, LEN_FULL, "WORDS parsing    : %-24.24s  %-24.24s  %c  %c  %3d  %c    %c  %c  %c  %c  %c", s, t, s_ver, s_book, s_page, s_type, s_diff, s_simp, s_3rd, s_4th, s_top);   <*/
    }
    else if (strcmp(a_question, "e_count"       ) == 0) {
       /*> x_curr = e_hword; while (x_curr != NULL) { ++x_fore; x_curr = x_curr->e_next; }   <* 
@@ -1352,7 +1352,7 @@ WORDS__unit          (char *a_question, int a_num)
        *>    sprintf  (t, "%2d[%.20s]", x_curr->g_len, x_curr->w_gregg);                                                                                  <* 
        *>    WORDS_drawn_show (x_curr->w_drawn, x_show);                                                                                                  <* 
        *>    sprintf  (u, "[%.20s]"   , x_show);                                                                                                        <* 
-       *>    snprintf (unit_answer, LEN_STR, "WORDS eng   (%2d) : %-24.24s  %-24.24s  %s", a_num, s, t, u);                                             <* 
+       *>    snprintf (unit_answer, LEN_FULL, "WORDS eng   (%2d) : %-24.24s  %-24.24s  %s", a_num, s, t, u);                                             <* 
        *> }                                                                                                                                             <*/
    }
    else if   (strncmp (a_question, "g_entry"   , 20)  == 0) {
@@ -1368,7 +1368,7 @@ WORDS__unit          (char *a_question, int a_num)
        *>    sprintf  (t, "%2d[%.20s]", x_curr->g_len, x_curr->w_gregg);                                                                                  <* 
        *>    WORDS_drawn_show (x_curr->w_drawn, x_show);                                                                                                  <* 
        *>    sprintf  (u, "[%.20s]"   , x_show);                                                                                                        <* 
-       *>    snprintf (unit_answer, LEN_STR, "WORDS gregg (%2d) : %-24.24s  %-24.24s  %s", a_num, s, t, u);                                             <* 
+       *>    snprintf (unit_answer, LEN_FULL, "WORDS gregg (%2d) : %-24.24s  %-24.24s  %s", a_num, s, t, u);                                             <* 
        *> }                                                                                                                                             <*/
    }
    /*---(complete)-----------------------*/

@@ -698,7 +698,7 @@ PAGE_gregg              (char a_act, char a_gregg [LEN_RECD], float *b_xpos, flo
       } else {
          n = WORDS_by_gregg (p, &x_word);
          if (n >= 0)  strlcpy (x_shown, x_word->w_shown, LEN_HUND);
-         else         FIX_gregg  (p, x_shown, x_drawn, NULL);
+         else         FIX_gregg  (p, x_shown, x_drawn, NULL, NULL);
          rc =  PAGE_gregg_word (a_act, x_shown, b_xpos, b_ypos);
          DEBUG_OUTP   yLOG_value   ("word"      , rc);
       }
@@ -1135,7 +1135,7 @@ PAGE_demo               (void)
    char       *p           = NULL;
    char       *q           =  "·";
    char       *r           = NULL;
-   char        x_cons      [LEN_DESC] = "t·d·dd·th·tn·tm·ht·nt·nd·ds·df·n·m·mm·k·g·r·l·rd·ld·ng·ngk·sh·ch·j·s·f·v·z·p·b·pt·bd";
+   char        x_cons      [LEN_HUND] = "t·d·dd·th·tn·tm·ht·nt·nd·ds·df·n·m·mm·k·g·r·l·rd·ld·ng·ngk·sh·ch·j·s·f·v·z·p·b·pt·bd";
    /*---(header)-------------------------*/
    DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
    /*---(page)---------------------------*/

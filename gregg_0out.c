@@ -341,7 +341,7 @@ char         /*-> tbd --------------------------------[ leaf   [gc.C55.124.30]*/
 FILE_rename          (char *a_name)
 {
    /*---(locals)-----------+-----+-----+-*/
-   char        t           [LEN_STR]   = "";
+   char        t           [LEN_FULL]   = "";
    char       *p           = NULL;
    /*---(header)-------------------------*/
    DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
@@ -363,7 +363,7 @@ FILE_rename          (char *a_name)
    }
    DEBUG_OUTP   yLOG_info    ("a_name"    , a_name);
    /*---(parse base name)----------------*/
-   strlcpy (t, a_name, LEN_STR);
+   strlcpy (t, a_name, LEN_FULL);
    p = strrchr (t, "/");
    DEBUG_OUTP   yLOG_point   ("p"         , p);
    if (p == NULL) {
@@ -415,22 +415,22 @@ OUT__unit            (char *a_question, tPOINT *a_curr)
    strlcpy (unit_answer, "OUT unit         : unknown request", 100);
    /*---(core data)----------------------*/
    if        (strncmp (a_question, "globals"   , 20)  == 0) {
-      snprintf (unit_answer, LEN_STR, "OUT globals      : ratio %4.1f, x_scale %5d, y_scale %5d", my.ratio, my.x_scale, my.y_scale);
+      snprintf (unit_answer, LEN_FULL, "OUT globals      : ratio %4.1f, x_scale %5d, y_scale %5d", my.ratio, my.x_scale, my.y_scale);
    }
    else if   (strncmp (a_question, "bounds"    , 20)  == 0) {
-      snprintf (unit_answer, LEN_STR, "OUT bounds       : x %4dm %4dx %4dw   y %4dm %4dx %4dh", my.x_min, my.x_max, my.x_wide, my.y_min, my.y_max, my.y_tall);
+      snprintf (unit_answer, LEN_FULL, "OUT bounds       : x %4dm %4dx %4dw   y %4dm %4dx %4dh", my.x_min, my.x_max, my.x_wide, my.y_min, my.y_max, my.y_tall);
    }
    else if   (strncmp (a_question, "center"    , 20)  == 0) {
-      snprintf (unit_answer, LEN_STR, "OUT center       : x %5.3f   y %5.3f", my.x_center, my.y_center);
+      snprintf (unit_answer, LEN_FULL, "OUT center       : x %5.3f   y %5.3f", my.x_center, my.y_center);
    }
    else if   (strncmp (a_question, "coord"     , 20)  == 0) {
-      snprintf (unit_answer, LEN_STR, "OUT coord        : %c   x %5d (%5.3f) %4d   y %5d (%5.3f) %4d", a_curr->type, a_curr->x_raw, a_curr->x_rel, a_curr->x_pos, a_curr->y_raw, a_curr->y_rel, a_curr->y_pos);
+      snprintf (unit_answer, LEN_FULL, "OUT coord        : %c   x %5d (%5.3f) %4d   y %5d (%5.3f) %4d", a_curr->type, a_curr->x_raw, a_curr->x_rel, a_curr->x_pos, a_curr->y_raw, a_curr->y_rel, a_curr->y_pos);
    }
    else if   (strncmp (a_question, "stats"     , 20)  == 0) {
-      snprintf (unit_answer, LEN_STR, "OUT stats        : %c   s %8.2f, b %6d, r %5.2f, d %3d, q %d", a_curr->type, a_curr->slope, a_curr->icept, a_curr->rads, a_curr->degs, a_curr->quad);
+      snprintf (unit_answer, LEN_FULL, "OUT stats        : %c   s %8.2f, b %6d, r %5.2f, d %3d, q %d", a_curr->type, a_curr->slope, a_curr->icept, a_curr->rads, a_curr->degs, a_curr->quad);
    }
    else if   (strncmp (a_question, "other"     , 20)  == 0) {
-      snprintf (unit_answer, LEN_STR, "OUT other        : %c   depth %5.1f, ratio %5.1f, cat %2d, sharp %c", a_curr->type, a_curr->depth, a_curr->ratio, a_curr->ccat, a_curr->sharp);
+      snprintf (unit_answer, LEN_FULL, "OUT other        : %c   depth %5.1f, ratio %5.1f, cat %2d, sharp %c", a_curr->type, a_curr->depth, a_curr->ratio, a_curr->ccat, a_curr->sharp);
    }
    /*---(complete)-----------------------*/
    return unit_answer;

@@ -24,7 +24,7 @@ KEY_init             (void)
 /*============================--------------------============================*/
 void o___KEY_POINTS_____________o (void) {;}
 
-PRIV char     /*----: swap two points during the sort ------------------------*/
+static char     /*----: swap two points during the sort ------------------------*/
 KEY__swap          (int a_i, int a_j)
 {
    /*---(locals)-------------------------*/
@@ -69,7 +69,7 @@ KEY__swap          (int a_i, int a_j)
    return 0;
 }
 
-PRIV char     /*----: reorder key points by bas id ---------------------------*/
+static char     /*----: reorder key points by bas id ---------------------------*/
 KEY__sort          (void)
 {
    int i;
@@ -290,7 +290,7 @@ KEY_prep           (void)
    return 0;
 }
 
-PRIV char     /*---: remove similar key points -------------------------------*/
+static char     /*---: remove similar key points -------------------------------*/
 KEY__clean           (void)
 {
    int i;
@@ -309,7 +309,7 @@ KEY__clean           (void)
    return 0;
 }
 
-PRIV char     /*----: move the beg/end points out to test circles ------------*/
+static char     /*----: move the beg/end points out to test circles ------------*/
 KEY__extend        (void)
 {
 

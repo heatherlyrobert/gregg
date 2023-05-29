@@ -482,7 +482,7 @@ BACK__degticks     (void)
    return 0;
 }
 
-PRIV char     /*----: create display list for range fan ----------------------*/
+static char     /*----: create display list for range fan ----------------------*/
 BACK__rangefan     (void)
 {
    /*---(locals)-------------------------*/
@@ -626,7 +626,7 @@ DLIST__ring_minmax   (float a_size, float a_thick)
    return 0;
 }
 
-PRIV char     /*----: create display list for ranging rings ------------------*/
+static char     /*----: create display list for ranging rings ------------------*/
 BACK__rangerings   (void)
 {
    /*---(locals)-----------+-----+-----+-*/
@@ -652,7 +652,7 @@ BACK__rangerings   (void)
    return 0;
 }
 
-PRIV char     /*----: create display list for guide lines --------------------*/
+static char     /*----: create display list for guide lines --------------------*/
 BACK__guidelines   (void)
 {
    /*---(locals)-------------------------*/

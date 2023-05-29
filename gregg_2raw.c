@@ -244,14 +244,14 @@ RAW_driver            (void)
    /*---(header)-------------------------*/
    DEBUG_RAW    yLOG_enter   (__FUNCTION__);
    POINT_list (stdout, 'd', o.raw, o.nraw);
-   if (rc == 0)  rc = BASE_filter   ();
+   if (rc == 0)  rc = BAS_filter   ();
    /*> POINT_list (stdout, 'd', o.bas, o.nbas);                                       <*/
    /*> POINT_list (stdout, 'd', o.avg, o.navg);                                       <*/
-   if (rc == 0)  rc = BASE_add_extremes ();
-   if (rc == 0)  rc = BASE_extend_ends  ();
+   if (rc == 0)  rc = BAS_add_extremes ();
+   if (rc == 0)  rc = BAS_extend_ends  ();
    /*> POINT_list (stdout, 'd', o.bas, o.nbas);                                       <*/
    /*> POINT_list (stdout, 'd', o.avg, o.navg);                                       <*/
-   if (rc == 0)  rc = BASE_mark_sharps  ();
+   if (rc == 0)  rc = BAS_mark_sharps  ();
    if (rc == 0)  rc = CIRCLE_driver     ();
    if (rc == 0)  rc = KEY_driver        ();
 
@@ -405,7 +405,7 @@ RAW__unit            (char *a_question, int a_num)
    strlcpy (unit_answer, "RAW unit         : unknownn request", 100);
    /*---(core data)----------------------*/
    if        (strncmp (a_question, "count"     , 20)  == 0) {
-      snprintf (unit_answer, LEN_STR, "RAW count        : %d", o.nraw);
+      snprintf (unit_answer, LEN_FULL, "RAW count        : %d", o.nraw);
    } else if (strncmp (a_question, "types"     , 20)  == 0) {
       for (i = 0; i < 45; ++i) {
          if (i >= o.nraw)  break;
@@ -414,18 +414,18 @@ RAW__unit            (char *a_question, int a_num)
       }
       if (o.nraw > 45)  sprintf (s, "[%s>", t);
       else              sprintf (s, "[%s]", t);
-      snprintf (unit_answer, LEN_STR, "RAW by type      : %2d %s", o.nraw, s);
+      snprintf (unit_answer, LEN_FULL, "RAW by type      : %2d %s", o.nraw, s);
    }
    else if   (strncmp (a_question, "point"     , 20)  == 0) {
-      snprintf (unit_answer, LEN_STR, "RAW point   (%2d) : %c  %4dx %4dy  %4dx %4dy", a_num, o.raw [a_num].type, o.raw [a_num].x_touch, o.raw [a_num].y_touch, o.raw [a_num].x_raw, o.raw [a_num].y_raw);
+      snprintf (unit_answer, LEN_FULL, "RAW point   (%2d) : %c  %4dx %4dy  %4dx %4dy", a_num, o.raw [a_num].type, o.raw [a_num].x_touch, o.raw [a_num].y_touch, o.raw [a_num].x_raw, o.raw [a_num].y_raw);
    }
    else if   (strncmp (a_question, "adjust"    , 20)  == 0) {
-      snprintf (unit_answer, LEN_STR, "RAW adjust       : %4dx %4dy", o.xadj, o.yadj);
+      snprintf (unit_answer, LEN_FULL, "RAW adjust       : %4dx %4dy", o.xadj, o.yadj);
    }
    else if   (strncmp (a_question, "bounds"    , 20)  == 0) {
       if (o.nraw < 1)  { x_end = o.raw [0].x_raw; y_end = o.raw [0].y_raw; }
       else             { x_end = o.raw [o.nraw - 1].x_raw; y_end = o.raw [o.nraw - 1].y_raw; }
-      snprintf (unit_answer, LEN_STR, "RAW bounds       : beg %4dx %4dy   end %4dx %4dy   min %4.0fx %4.0fy   max %4.0fx %4.0fy",
+      snprintf (unit_answer, LEN_FULL, "RAW bounds       : beg %4dx %4dy   end %4dx %4dy   min %4.0fx %4.0fy   max %4.0fx %4.0fy",
             o.raw[0].x_raw, o.raw[0].y_raw,
             x_end         , y_end,
             o.xmin        , o.ymin,
