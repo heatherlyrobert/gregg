@@ -185,7 +185,14 @@ LETTER_detail           (uchar n)
 {
    strcpy  (g_print, "n/a");
    if (n < g_nletter) {
-      sprintf (g_print, "%-2d  %-2d  %-10.10s  %6.1fx  %6.1fy  %6.1fr  %6.1fb  %6.1fa  %2d  %c", n, g_letter [n].l_line, g_letter [n].l_label, g_letter [n].l_xrad, g_letter [n].l_yrad, g_letter [n].l_rot, g_letter [n].l_beg, g_letter [n].l_arc, g_letter [n].l_cat, g_letter [n].l_code);
+      sprintf (g_print, "%-2d  %-2d  %-10.10s ´ %6.1fx  %6.1fy  %6.1fr  %6.1fb  %6.1fa ´ %2d  %c ´ %6.1fx  %6.1fy  %6.1fd  %6.1fl ´ %6.1fl  %6.1fr  %6.1ft  %6.1fb ´ %3dp  %3db  %3du ´",
+            n, g_letter [n].l_line, g_letter [n].l_label,
+            g_letter [n].l_xrad , g_letter [n].l_yrad , g_letter [n].l_rot  , g_letter [n].l_beg  , g_letter [n].l_arc  ,
+            g_letter [n].l_cat  , g_letter [n].l_code ,
+            g_letter [n].l_xend , g_letter [n].l_yend , g_letter [n].l_deg  , g_letter [n].l_xylen,
+            g_letter [n].l_lef  , g_letter [n].l_rig  , g_letter [n].l_top  , g_letter [n].l_bot  ,
+            g_letter [n].l_points,
+            g_letter [n].l_base , g_letter [n].l_used );
    }
    return g_print;
 }

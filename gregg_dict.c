@@ -154,9 +154,14 @@ DICT__wipe              (void *a_dict)
    x_dict = (tDICT *) a_dict;
    /*---(header)-------------------------*/
    x_dict->d_english [0] = '\0';
+   x_dict->d_gregg   [0] = '\0';
+   /*---(pointers)-----------------------*/
    x_dict->d_prefix  = NULL;
    x_dict->d_base    = NULL;
    x_dict->d_suffix  = NULL;
+   /*---(within base)----------*/
+   x_dict->d_prev    = NULL;
+   x_dict->d_next    = NULL;
    /*---(ysort)----------------*/
    x_dict->d_ysort   = NULL;
    /*---(complete)-------------*/
@@ -240,9 +245,67 @@ DICT__unhook            (void *a_old)
 static void  o___SEARCH__________o () { return; }
 
 short  DICT__count         (void)                            { return ySORT_count     (B_DICT); }
-char   DICT__by_english    (char *a_text, tDICT **r_dict)    { return ySORT_by_name   (B_DICT, a_text, r_dict); }
-char   DICT__by_index      (int n, tDICT **r_dict)           { return ySORT_by_index  (B_DICT, n, r_dict); }
-char   DICT__by_cursor     (char a_dir, tDICT **r_dict)      { return ySORT_by_cursor (B_DICT, a_dir, r_dict); }
+char   DICT__by_english    (char *a_text, void **r_dict)     { return ySORT_by_name   (B_DICT, a_text, r_dict); }
+char   DICT__by_index      (int n, void **r_dict)            { return ySORT_by_index  (B_DICT, n, r_dict); }
+char   DICT__by_cursor     (char a_dir, void **r_dict)       { return ySORT_by_cursor (B_DICT, a_dir, r_dict); }
+
+
+
+/*====================------------------------------------====================*/
+/*===----                         debugging                            ----===*/
+/*====================------------------------------------====================*/
+static void  o___DEBUGGING_______o () { return; }
+
+char
+DICT__detail            (void *a_dict, char a_out [LEN_FULL])
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   tDICT      *x_dict      = NULL;
+   char        s           [LEN_TITLE] = " ·åæ";
+   char        t           [LEN_TITLE] = " ·åæ";
+   char        u           [LEN_DESC]  = " ·åæ";
+   char        v           [LEN_TITLE] = "·";
+   char        w           [LEN_TITLE] = "·";
+   /*---(defense)------------------------*/
+   --rce;  if (a_out  == NULL)  return rce;
+   strcpy (a_out, "");
+   if (a_dict == NULL)          return 0;
+   /*---(cast)---------------------------*/
+   x_dict  = (tDICT *) a_dict;
+   /*---(prepare)------------------------*/
+   sprintf  (s, "%2då%.20sæ", strlen (x_dict->d_english), x_dict->d_english);
+   sprintf  (t, "%2då%.20sæ", strlen (x_dict->d_gregg)  , x_dict->d_gregg);
+   sprintf  (u, "%-3.3sp %-3.3sb %-3.3ss", (x_dict->d_prefix == NULL) ? "···" : "SET", (x_dict->d_base == NULL) ? "···" : "SET", (x_dict->d_suffix == NULL) ? "···" : "SET");
+   if (x_dict->d_prev != NULL)  strlcpy (v, x_dict->d_prev->d_english, LEN_TITLE);
+   if (x_dict->d_next != NULL)  strlcpy (w, x_dict->d_next->d_english, LEN_TITLE);
+   /*---(consolidate)--------------------*/
+   sprintf (a_out, "%-24.24s  %-24.24s ´ %-14.14s ´ %-20.20s ´ %-20.20s ´", s, t, u, v, w);
+   /*---(complete)-----------------------*/
+   return 0;
+}
+
+char*
+DICT__pointer           (short n, void *a_dict)
+{
+   char        t           [LEN_FULL]  = "";
+   DICT__detail (a_dict, t);
+   if (strcmp (g_print, "") == 0)  strcpy  (g_print, "n/a");
+   else                            sprintf (g_print, "%-5d %s", n, t);
+   return g_print;
+}
+
+char*
+DICT__entry             (int n)
+{
+   tDICT      *x_dict      = NULL;
+   char        t           [LEN_FULL]  = "";
+   DICT__by_index (n, &x_dict);
+   DICT__detail (x_dict, t);
+   if (strcmp (t, "") == 0)  strcpy  (g_print, "n/a");
+   else                      sprintf (g_print, "%-5d %s", n, t);
+   return g_print;
+}
 
 
 
@@ -252,7 +315,7 @@ char   DICT__by_cursor     (char a_dir, tDICT **r_dict)      { return ySORT_by_c
 static void  o___DRIVER__________o () { return; }
 
 char
-DICT_create             (cchar a_english [LEN_TITLE], void *a_prefix, void *a_base, void *a_suffix, tDICT **r_dict)
+DICT_create             (cchar a_english [LEN_TITLE], cchar a_gregg [LEN_TITLE], void *a_prefix, void *a_base, void *a_suffix, void **r_dict)
 {
    /*---(locals)-----------+-----------+-*/
    char        rce         =  -10;
@@ -262,15 +325,17 @@ DICT_create             (cchar a_english [LEN_TITLE], void *a_prefix, void *a_ba
    DEBUG_CONF   yLOG_enter   (__FUNCTION__);
    /*---(defense)------------------------*/
    DEBUG_CONF   yLOG_point   ("a_english" , a_english);
-   --rce;  if (a_english == NULL) {
+   --rce;  if (a_english == NULL || a_english [0] == '\0') {
       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
    DEBUG_CONF   yLOG_info    ("a_english" , a_english);
-   --rce;  if (a_english [0] == '\0') {
+   DEBUG_CONF   yLOG_point   ("a_gregg"   , a_gregg);
+   --rce;  if (a_gregg   == NULL || a_gregg   [0] == '\0') {
       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
+   DEBUG_CONF   yLOG_info    ("a_english" , a_english);
    DEBUG_CONF   yLOG_point   ("a_base"    , a_base);
    --rce;  if (a_base    == NULL) {
       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
@@ -285,9 +350,18 @@ DICT_create             (cchar a_english [LEN_TITLE], void *a_prefix, void *a_ba
    }
    /*---(key data)-----------------------*/
    strlcpy (x_new->d_english, a_english, LEN_TITLE);
+   strlcpy (x_new->d_gregg  , a_gregg  , LEN_TITLE);
    x_new->d_prefix  = a_prefix;
    x_new->d_base    = a_base;
    x_new->d_suffix  = a_suffix;
+   /*---(sort)---------------------------*/
+   rc = BASE_add_dict  (a_base, x_new);
+   DEBUG_CONF   yLOG_value   ("add dict"  , rc);
+   --rce;  if (rc < 0) {
+      DICT__free     (&x_new);
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
    /*---(sort)---------------------------*/
    rc = DICT__hook     (x_new);
    DEBUG_CONF   yLOG_value   ("hook"      , rc);
@@ -302,13 +376,6 @@ DICT_create             (cchar a_english [LEN_TITLE], void *a_prefix, void *a_ba
    DEBUG_CONF   yLOG_exit    (__FUNCTION__);
    return 0;
 }
-
-
-
-
-
-
-
 
 
 
@@ -354,6 +421,68 @@ DICT__split             (uchar *a_recd)
    }
    /*---(check count)--------------------*/
    --rce;  if (s_nfield < 2) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(complete)-----------------------*/
+   DEBUG_CONF   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+DICT__base              (short a_line, cchar a_recd [LEN_RECD], char r_english [LEN_TITLE], char r_gregg [LEN_TITLE], void **r_base)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
+   char        x_revised   =  '-';
+   /*---(header)-------------------------*/
+   DEBUG_CONF   yLOG_enter   (__FUNCTION__);
+   /*---(default)------------------------*/
+   if (r_english != NULL)  strcpy (r_english, "");
+   if (r_gregg   != NULL)  strcpy (r_gregg  , "");
+   if (r_base    != NULL)  *r_base = NULL;
+   /*---(defense)------------------------*/
+   DEBUG_CONF   yLOG_point   ("a_recd"    , a_recd);
+   --rce;  if (a_recd    == NULL) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_CONF   yLOG_info    ("a_recd"    , a_recd);
+   DEBUG_CONF   yLOG_point   ("r_english" , r_english);
+   --rce;  if (r_english == NULL) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_CONF   yLOG_point   ("r_gregg"   , r_gregg);
+   --rce;  if (r_gregg   == NULL) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(split)--------------------------*/
+   rc = DICT__split (a_recd);
+   DEBUG_CONF   yLOG_value   ("split"     , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(prepare base words)-------------*/
+   strlcpy (r_english, s_fields [0], LEN_TITLE);
+   if (s_nfield >= 5 && (strcmp (s_fields [4], "·") != 0 && strcmp (s_fields [4], "") != 0))   x_revised = 'y';
+   if (x_revised != 'y')  strlcpy (r_gregg, s_fields [2], LEN_TITLE);
+   else                   strlcpy (r_gregg, s_fields [4], LEN_TITLE);
+   DEBUG_CONF   yLOG_complex ("gregg base", "%c, %-20.20s, %s", x_revised, r_english, r_gregg);
+   /*---(base, sans-prefix)--------------*/
+   rc = BASE_create (my.r_nfile, a_line, r_english, r_gregg, s_fields [3], r_base);
+   DEBUG_CONF   yLOG_value   ("base"      , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(base dictionary entry)----------*/
+   rc = DICT_create (r_english, r_gregg, NULL, *r_base, NULL, NULL);
+   DEBUG_CONF   yLOG_value   ("root"      , rc);
+   --rce;  if (rc < 0) {
       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
@@ -666,7 +795,7 @@ DICT__variation         (tWORD *a_base, tWORD *a_last, cchar a_english [LEN_TERS
    sprintf (x_english, "%s%s"   , a_english, p + 2);
    /*---(find variation)-----------------*/
    /*> x_action = DICT__find_variation (x_type, x_suffix, x_endings, x_base, x_change);   <*/
-   rc = SUFFIX_by_name (x_type, &x_action, x_suffix, x_base, x_change);
+   rc = SUFFIX_by_name (x_type, &x_action, x_suffix, x_base, x_change, NULL);
    DEBUG_CONF   yLOG_value   ("suffix"    , rc);
    --rce;  if (rc < 0) {
       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
@@ -686,7 +815,7 @@ DICT__variation         (tWORD *a_base, tWORD *a_last, cchar a_english [LEN_TERS
       if (rc >= 0)  x_save = x_vary;
       /*---(make base)-------------------*/
       /*> DICT__find_variation (x_base, x_suffix, NULL, NULL, NULL);                  <*/
-      SUFFIX_by_name (x_base, NULL, x_suffix, NULL, NULL);
+      SUFFIX_by_name (x_base, NULL, x_suffix, NULL, NULL, NULL);
       rc = DICT__variation_quick (a_base, x_save, x_english, x_base, a_gregg, x_suffix, &x_vary);
       if (rc >= 0)  x_save = x_vary;
    }
@@ -695,7 +824,7 @@ DICT__variation         (tWORD *a_base, tWORD *a_last, cchar a_english [LEN_TERS
       /*---(make first/base)-------------*/
       p = strtok_r (x_base, q, &r);
       /*> DICT__find_variation (p, x_suffix, NULL, NULL, NULL);                       <*/
-      rc = SUFFIX_by_name (p, NULL, x_suffix, NULL, NULL);
+      rc = SUFFIX_by_name (p, NULL, x_suffix, NULL, NULL, NULL);
       if (rc >= 0)  rc = DICT__variation_quick (a_base, a_last, x_english, p, a_gregg, x_suffix, &x_vary);
       if (rc >= 0)  x_save = x_vary;
       /*---(cycle others)----------------*/
@@ -703,7 +832,7 @@ DICT__variation         (tWORD *a_base, tWORD *a_last, cchar a_english [LEN_TERS
       while (p != NULL) {
          /*---(find)---------------------*/
          /*> DICT__find_variation (p, x_suffix, NULL, NULL, x_change);                <*/
-         rc = SUFFIX_by_name (p, NULL, x_suffix, NULL, NULL);
+         rc = SUFFIX_by_name (p, NULL, x_suffix, NULL, NULL, NULL);
          DEBUG_CONF   yLOG_complex ("variation" , "%s, %s", p, x_suffix);
          /*---(update)-------------------*/
          SUFFIX_english_change (x_english, x_change, t);
@@ -724,7 +853,7 @@ DICT__variation         (tWORD *a_base, tWORD *a_last, cchar a_english [LEN_TERS
 }
 
 char
-DICT__parse             (short a_line, cchar a_eprefix [LEN_LABEL], cchar a_recd [LEN_RECD])
+DICT__parse_OLD         (short a_line, cchar a_eprefix [LEN_LABEL], cchar a_recd [LEN_RECD])
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
@@ -753,7 +882,7 @@ DICT__parse             (short a_line, cchar a_eprefix [LEN_LABEL], cchar a_recd
    strlcpy (x_base  , s_fields [0], LEN_TITLE);
    if (strcmp (x_eprefix, "") != NULL) {
       /*> rc = DICT__pre_update  (x_eprefix, x_base);                                 <*/
-      n  = PREFIX__by_name (x_eprefix, x_english, x_gregg);
+      n  = PREFIX__by_name (x_eprefix, x_english, x_gregg, NULL);
       DEBUG_CONF   yLOG_complex ("find"      , "%4d, %s, %s", n, x_english, x_gregg);
       --rce;  if (n < 0) {
          DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
@@ -805,27 +934,174 @@ DICT__parse             (short a_line, cchar a_eprefix [LEN_LABEL], cchar a_recd
 }
 
 char
+DICT__parse             (short a_line, cchar a_prefix [LEN_LABEL], cchar a_recd [LEN_RECD])
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
+   char        x_english   [LEN_TITLE] = "";
+   char        x_gregg     [LEN_TITLE] = "";
+
+
+   int         i           =    0;
+   char        x_eprefix   [LEN_LABEL] = "";
+   char        x_gprefix   [LEN_LABEL] = "";
+
+   char        x_base      [LEN_TITLE] = "";
+   char        x_revised   =  '-';
+   tWORD      *x_new       = NULL;
+   tWORD      *x_last      = NULL;
+   tWORD      *x_vary      = NULL;
+   short       n           =    0;
+   /*---(header)-------------------------*/
+   DEBUG_CONF   yLOG_enter   (__FUNCTION__);
+   /*---(split)--------------------------*/
+   rc = DICT__split (a_recd);
+   DEBUG_CONF   yLOG_value   ("split"     , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(prepare base words)-------------*/
+   strlcpy (x_english, s_fields [0], LEN_TITLE);
+   if (s_nfield >= 5 && (strcmp (s_fields [4], "·") != 0 && strcmp (s_fields [4], "") != 0))   x_revised = 'y';
+   DEBUG_CONF   yLOG_value   ("x_revised" , x_revised);
+   if (x_revised != 'y')  strlcpy (x_gregg, s_fields [2], LEN_TITLE);
+   else                   strlcpy (x_gregg, s_fields [4], LEN_TITLE);
+   DEBUG_CONF   yLOG_complex ("gregg base", "%c, %-20.20s, %s", x_revised, x_english, x_gregg);
+   /*---(base, sans-prefix)--------------*/
+   rc = BASE_create (my.r_nfile, a_line, x_english, x_gregg, s_fields [3], &x_new);
+   DEBUG_CONF   yLOG_value   ("base"      , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(prefix update)------------------*/
+   rc = PREFIX_driver (a_prefix, x_english, x_gregg, NULL);
+   DEBUG_CONF   yLOG_complex ("prefix"    , "%4d, %-20.20s, %s", rc, x_english, x_gregg);
+   --rce;  if (rc < 0) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(primary)------------------------*/
+   rc = BASE_create (my.r_nfile, a_line, x_english, x_gregg, s_fields [3], &x_new);
+   DEBUG_CONF   yLOG_value   ("base"      , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*> if (x_revised != 'y')  x_new->official = x_new->w_gregg;                       <* 
+    *> else                   x_new->official  = strdup (s_fields [2]);               <*/
+   x_new->w_nvary = 1;
+   /*---(categories)---------------------*/
+   /*> if (s_nfield > 3) {                                                            <* 
+    *>    rc = DICT__category (x_new, s_fields [3]);                                  <* 
+    *>    DEBUG_CONF   yLOG_value   ("primary"   , rc);                               <* 
+    *>    --rce;  if (rc < 0) {                                                       <* 
+    *>       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);                           <* 
+    *>       return rce;                                                              <* 
+    *>    }                                                                           <* 
+    *> }                                                                              <*/
+   /*---(variations)---------------------*/
+   x_last = x_new;
+   for (i = 5; i <= MAX_FIELD; ++i) {
+      if (strlen (s_fields [i]) == 0)  continue;
+      rc = DICT__variation (x_new, x_last, x_eprefix, x_gregg, s_fields [i], &x_vary);
+      DEBUG_CONF   yLOG_value   ("variation" , rc);
+      --rce;  if (rc < 0) {
+         DEBUG_CONF   yLOG_note    ("variation failed, continuing");
+      }
+      x_last = x_vary;
+   }
+   /*---(complete)-----------------------*/
+   DEBUG_CONF   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
 DICT__parse_easy        (short a_line, cchar a_recd [LEN_RECD])
 {
    return DICT__parse (a_line, "", a_recd);
 }
 
+char         /*-> create a new dictionary entry ------------------------------*/
+DICT__single            (void *a_base, cchar a_english [LEN_TITLE], cchar a_gregg [LEN_TITLE])
+{
+}
+
 char
-DICT__parse_all         (short a_line, cchar a_prefixes [LEN_HUND], cchar a_recd [LEN_RECD])
+DICT__suffixes          (void *a_base, void *a_prefix, cchar a_english [LEN_TITLE], cchar a_gregg [LEN_TITLE])
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
+   int         i           =    0;
+   /*---(begin)----------------------------*/
+   DEBUG_CONF   yLOG_enter   (__FUNCTION__);
+   /*---(defense)------------------------*/
+   DEBUG_CONF   yLOG_point   ("a_base"    , a_base);
+   --rce;  if (a_base     == NULL) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_CONF   yLOG_point   ("a_prefix"  , a_prefix);
+   DEBUG_CONF   yLOG_point   ("a_english" , a_english);
+   --rce;  if (a_english == NULL) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_CONF   yLOG_point   ("a_gregg"   , a_gregg);
+   --rce;  if (a_gregg   == NULL) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(cycle fields)-------------------*/
+   for (i = 5; i <= MAX_FIELD; ++i) {
+      if (strlen (s_fields [i]) == 0)  continue;
+      /*> rc = DICT__variation (x_new, x_last, x_eprefix, x_gregg, s_fields [i], &x_vary);   <*/
+      DEBUG_CONF   yLOG_value   ("variation" , rc);
+      --rce;  if (rc < 0) {
+         DEBUG_CONF   yLOG_note    ("variation failed, continuing");
+      }
+   }
+   /*---(complete)-----------------------*/
+   DEBUG_CONF   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+DICT__prefixes          (void *a_base, cchar a_english [LEN_TITLE], cchar a_gregg [LEN_TITLE], cchar a_prefixes [LEN_HUND])
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
    char        rc          =    0;
    char        x_prefixes  [LEN_HUND]  = "";
    char        x_prefix    [LEN_TERSE] = "";
-   char        x_english   [LEN_TERSE] = "";
-   char        t           [LEN_TERSE] = "";
+   char        x_english   [LEN_TITLE] = "";
+   char        x_gregg     [LEN_TITLE] = "";
+   char        t           [LEN_TITLE] = "";
    char       *p           = NULL;
-   char       *q           =  ","; 
+   char       *q           =  ",";
    char       *r           = NULL;
+   void       *x_point     = NULL;
    /*---(begin)----------------------------*/
    DEBUG_CONF   yLOG_enter   (__FUNCTION__);
    /*---(defense)------------------------*/
+   DEBUG_CONF   yLOG_point   ("a_base"    , a_base);
+   --rce;  if (a_base     == NULL) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_CONF   yLOG_point   ("a_english" , a_english);
+   --rce;  if (a_english == NULL) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_CONF   yLOG_point   ("a_gregg"   , a_gregg);
+   --rce;  if (a_gregg   == NULL) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
    DEBUG_CONF   yLOG_point   ("a_prefixes", a_prefixes);
    --rce;  if (a_prefixes == NULL) {
       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
@@ -833,15 +1109,10 @@ DICT__parse_all         (short a_line, cchar a_prefixes [LEN_HUND], cchar a_recd
    }
    DEBUG_CONF   yLOG_info    ("a_prefixes", a_prefixes);
    strlcpy (x_prefixes, a_prefixes, LEN_HUND);
-   DEBUG_CONF   yLOG_point   ("a_recd"    , a_recd);
-   --rce;  if (a_recd == NULL) {
-      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
    /*---(short-cut)----------------------*/
    if (strcmp (x_prefixes, "") == 0  || strcmp (x_prefixes, "·") == 0) {
       DEBUG_CONF   yLOG_note    ("no prefixes passed, simple");
-      rc = DICT__parse_easy (a_line, a_recd);
+      /*> rc = DICT__suffixes (a_base, a_english, a_gregg);                           <*/
       DEBUG_CONF   yLOG_exit    (__FUNCTION__);
       return rc;
    }
@@ -854,10 +1125,19 @@ DICT__parse_all         (short a_line, cchar a_prefixes [LEN_HUND], cchar a_recd
       DEBUG_CONF   yLOG_info    ("x_prefix"  , x_prefix);
       if (strcmp (x_prefix, "´") == 0) {
          DEBUG_CONF   yLOG_note    ("requested base prefix also");
-         rc = DICT__parse_easy (a_line, a_recd);
+         /*> rc = DICT__suffixes (a_base, a_english, a_gregg);                        <*/
       } else {
          DEBUG_CONF   yLOG_note    ("handling prefix");
-         rc = DICT__parse (a_line, x_prefix, a_recd);
+         strlcpy (x_english, a_english, LEN_TITLE);
+         strlcpy (x_gregg  , a_gregg  , LEN_TITLE);
+         rc = PREFIX_driver (p, x_english, x_gregg, x_point);
+         if (rc >= 0) {
+            DEBUG_CONF   yLOG_complex ("prefix"    , "%4d, %-20.20s, %-20.20s, %p", rc, x_english, x_gregg, x_point);
+            /*> rc = DICT__suffixes (a_base, x_point, x_english, x_gregg);            <*/
+            DEBUG_CONF   yLOG_value   ("suffixes"  , rc);
+         } else {
+            DEBUG_CONF   yLOG_complex ("FAILED"    , "%d, to find prefix", rc);
+         }
       }
       p = strtok_r (NULL  , q, &r);
    }
@@ -954,6 +1234,9 @@ DICT_import             (cchar a_name [LEN_PATH])
    char        x_recd      [LEN_RECD]  = "";
    short       x_line      =    0;
    char        x_prefixes  [LEN_HUND]  = "";
+   void       *x_base      = NULL;
+   char        x_english   [LEN_TITLE] = "";
+   char        x_gregg     [LEN_TITLE] = "";
    /*---(begin)----------s-----------------*/
    DEBUG_CONF   yLOG_enter   (__FUNCTION__);
    yURG_msg ('>', "source å%sæ", a_name);
@@ -968,10 +1251,12 @@ DICT_import             (cchar a_name [LEN_PATH])
    /*---(process)--------------------------*/
    while (1) {
       /*---(next)----------------*/
-      rc = DICT__read      (f, &x_line, x_prefixes, x_recd);
+      rc = DICT__read     (f, &x_line, x_prefixes, x_recd);
       if (rc < 0)  break;
-      /*---(parse)---------------*/
-      rc = DICT__parse_all (x_line, x_prefixes, x_recd);
+      /*---(create base)---------*/
+      rc = DICT__base     (x_line, x_recd, x_english, x_gregg, &x_base);
+      /*---(create base)---------*/
+      rc = DICT__prefixes (x_base, x_english, x_gregg, x_prefixes);
       /*---(done)----------------*/
    }
    /*---(close dictionary)-----------------*/

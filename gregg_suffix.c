@@ -42,7 +42,7 @@ static short    s_nsuffix = 0;
 static void o___PROGRAM___________________o (void) {;}
 
 char
-SUFFIX_purge            (void)
+SUFFIX__purge           (void)
 {
    /*---(locals)-----------+-----------+-*/
    int         i           =    0;
@@ -77,10 +77,10 @@ char
 SUFFIX_init             (void)
 {
    strlcpy (my.n_suffix, "/var/lib/gregg/suffix.txt", LEN_HUND);
-   return SUFFIX_purge ();
+   return SUFFIX__purge ();
 }
 
-char SUFFIX_wrap     (void)  { return SUFFIX_purge (); }
+char SUFFIX_wrap     (void)  { return SUFFIX__purge (); }
 
 
 
@@ -90,7 +90,7 @@ char SUFFIX_wrap     (void)  { return SUFFIX_purge (); }
 static void o___LOAD______________________o (void) {;}
 
 char
-SUFFIX_handler          (int n, char a_verb [LEN_LABEL], char a_exist, void *a_handler)
+SUFFIX__handler         (int n, char a_verb [LEN_LABEL], char a_exist, void *a_handler)
 {
    /*---(locals)-----------+-----------+-*/
    char        rce         =  -10;
@@ -177,7 +177,7 @@ SUFFIX_load             (char a_fname [LEN_HUND])
    DEBUG_INPT   yLOG_info    ("a_fname"   , a_fname);
    /*---(read all lines)-----------------*/
    yURG_msg ('-', "calling auto-reader in yPARSE");
-   rc = yPARSE_autoread (a_fname, NULL, SUFFIX_handler);
+   rc = yPARSE_autoread (a_fname, NULL, SUFFIX__handler);
    DEBUG_PROG  yLOG_value   ("read"      , rc);
    /*---(trouble)------------------------*/
    --rce;  if (rc <  0) {
@@ -202,30 +202,41 @@ SUFFIX_load             (char a_fname [LEN_HUND])
 /*============================--------------------============================*/
 static void o___DEBUG_____________________o (void) {;}
 
-short    SUFFIX_count   (void)   { return s_nsuffix; }
+short    SUFFIX__count   (void)   { return s_nsuffix; }
 
 char*
-SUFFIX_detail           (uchar n)
+SUFFIX__detail_by_ptr   (short n, void *a_suffix)
 {
+   tSUFFIX    *x_suffix    = NULL;
    char        r           [LEN_LABEL] = "·åæ";
    char        s           [LEN_LABEL] = "·åæ";
    char        t           [LEN_LABEL] = "·åæ";
    char        u           [LEN_LABEL] = "·  ";
    char        v           [LEN_LABEL] = "·";
    char        w           [LEN_LABEL] = "·";
-   strcpy  (g_print, "n/a");
-   if (n < s_nsuffix) {
-      strldisp (s_suffix [n].s_name  ,  9, r, 12);
-      strldisp (s_suffix [n].s_gregg ,  9, t, 12);
-      if (s_suffix [n].s_page > 0)  sprintf  (u, "%-3d", s_suffix [n].s_page);
-      if (s_suffix [n].s_used > 0)  sprintf  (v, "%d", s_suffix [n].s_used);
-      strldisp (s_suffix [n].s_change,  9, s, 12);
-      strldisp (s_suffix [n].s_base  ,  9, w, 12);
-      sprintf (g_print, "%-3d  %-3d  %-12.12s  %c  %c %c  %c %c %-3.3s  %-12.12s  %-12.12s  %-12.12s  %s",
-            n, s_suffix [n].s_line, r, s_suffix [n].s_type,
-            s_suffix [n].s_part, s_suffix [n].s_sub,  s_suffix [n].s_src, s_suffix [n].s_cat, u,
-            t, w, s, v);
+   if (a_suffix == NULL) {
+      strcpy  (g_print, "n/a");
+      return g_print;
    }
+   x_suffix = (tSUFFIX *) a_suffix;
+   strldisp (x_suffix->s_name  ,  9, r, 12);
+   strldisp (x_suffix->s_gregg ,  9, t, 12);
+   if (x_suffix->s_page > 0)  sprintf  (u, "%-3d", x_suffix->s_page);
+   if (x_suffix->s_used > 0)  sprintf  (v, "%d", x_suffix->s_used);
+   strldisp (x_suffix->s_change,  9, s, 12);
+   strldisp (x_suffix->s_base  ,  9, w, 12);
+   sprintf (g_print, "%-3d  %-3d  %-12.12s  %c  %c %c  %c %c %-3.3s  %-12.12s  %-12.12s  %-12.12s  %s",
+         n, x_suffix->s_line, r, x_suffix->s_type,
+         x_suffix->s_part, x_suffix->s_sub,  x_suffix->s_src, x_suffix->s_cat, u,
+         t, w, s, v);
+   return g_print;
+}
+
+char*
+SUFFIX__detail          (short n)
+{
+   strcpy  (g_print, "n/a");
+   if (n >= 0 && n < s_nsuffix)  SUFFIX__detail_by_ptr (n, &(s_suffix [n]));
    return g_print;
 }
 
@@ -237,7 +248,7 @@ SUFFIX_detail           (uchar n)
 static void o___FIND______________________o (void) {;}
 
 short
-SUFFIX_by_name          (char a_suffix [LEN_LABEL], char *r_type, char r_gregg [LEN_LABEL], char r_base [LEN_TITLE], char r_change [LEN_LABEL])
+SUFFIX_by_name          (char a_request [LEN_LABEL], char *r_type, char r_gregg [LEN_LABEL], char r_base [LEN_TITLE], char r_change [LEN_LABEL], void **r_point)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
@@ -247,16 +258,18 @@ SUFFIX_by_name          (char a_suffix [LEN_LABEL], char *r_type, char r_gregg [
    if (r_gregg   != NULL)  strcpy (r_gregg  , "");
    if (r_base    != NULL)  strcpy (r_base   , "");
    if (r_change  != NULL)  strcpy (r_change , "");
+   if (r_point   != NULL)  *r_point  = NULL;
    /*---(defense)------------------------*/
-   --rce;  if (a_suffix == NULL)  return rce;
+   --rce;  if (a_request == NULL)  return rce;
    /*---(search)-------------------------*/
    for (i = 0; i < s_nsuffix; ++i) {
       /*---(filter)----------------------*/
-      if (s_suffix [i].s_name [0] != a_suffix [0])       continue;  /* quick check first           */
-      if (strcmp (s_suffix [i].s_name, a_suffix) != 0)   continue;  /*    then longer if necessary */
+      if (s_suffix [i].s_name [0] != a_request [0])       continue;  /* quick check first           */
+      if (strcmp (s_suffix [i].s_name, a_request) != 0)   continue;  /*    then longer if necessary */
       /*---(suffix)----------------------*/
       if (r_gregg != NULL)  strlcpy (r_gregg, s_suffix [i].s_gregg  , LEN_LABEL);
-      if (r_type  != NULL)  *r_type = s_suffix [i].s_type;
+      if (r_type  != NULL)  *r_type  = s_suffix [i].s_type;
+      if (r_point != NULL)  *r_point = &(s_suffix [i]);
       ++(s_suffix [i].s_used);
       /*---(group)-----------------------*/
       if      (s_suffix [i].s_type == '+') {
@@ -314,7 +327,7 @@ SUFFIX_english_change   (cchar a_english [LEN_TITLE], cchar a_change [LEN_LABEL]
 }
 
 short
-SUFFIX__field           (cchar a_eprefix [LEN_TERSE], cchar a_field [LEN_TITLE], char r_vary [LEN_TERSE], char r_english [LEN_TITLE], char *r_type, char r_gsuffix [LEN_LABEL], char r_base [LEN_TITLE], char r_change [LEN_LABEL])
+SUFFIX__field_OLD       (cchar a_eprefix [LEN_TERSE], cchar a_field [LEN_TITLE], char r_vary [LEN_TERSE], char r_english [LEN_TITLE], char *r_type, char r_gsuffix [LEN_LABEL], char r_base [LEN_TITLE], char r_change [LEN_LABEL])
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
@@ -365,7 +378,7 @@ SUFFIX__field           (cchar a_eprefix [LEN_TERSE], cchar a_field [LEN_TITLE],
    if (a_eprefix == NULL)   sprintf (x_english, "%s"   , p + 2);
    else                     sprintf (x_english, "%s%s"   , a_eprefix, p + 2);
    /*---(find variation)-----------------*/
-   n = SUFFIX_by_name (x_request, &x_type, x_gregg, x_base, x_change);
+   n = SUFFIX_by_name (x_request, &x_type, x_gregg, x_base, x_change, NULL);
    DEBUG_CONF   yLOG_value   ("suffix"    , n);
    --rce;  if (n < 0) {
       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
@@ -384,15 +397,99 @@ SUFFIX__field           (cchar a_eprefix [LEN_TERSE], cchar a_field [LEN_TITLE],
 }
 
 char
-SUFFIX__simple          (tWORD *a_base, tWORD *a_last, cchar a_vary [LEN_TERSE], cchar a_english [LEN_TITLE], cchar a_gprefix [LEN_LABEL], cchar a_gsuffix [LEN_LABEL], tWORD **r_new)
+SUFFIX__field           (cchar a_field [LEN_TITLE], char r_request [LEN_TERSE], char r_english [LEN_TITLE])
 {
    /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
    char        rc          =    0;
+   char       *p           = NULL;
+   char        l           =    0;
+   char        x_left      =    0;
+   char        x_request   [LEN_TERSE]  = "";
+   char        x_english   [LEN_TITLE]  = "";
    /*---(header)-------------------------*/
    DEBUG_CONF   yLOG_enter   (__FUNCTION__);
+   /*---(default)------------------------*/
+   if (r_request != NULL)  strcpy (r_request, "");
+   if (r_english != NULL)  strcpy (r_english, "");
+   /*---(defenses)-----------------------*/
+   DEBUG_CONF   yLOG_point   ("a_field"   , a_field);
+   --rce;  if (a_field == NULL || a_field [0] == '\0') {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_CONF   yLOG_info    ("a_field"   , a_field);
+   l = strlen (a_field);
+   DEBUG_CONF   yLOG_point   ("l"         , l);
+   --rce;  if (l < 4) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(get request)--------------------*/
+   p = strchr (a_field, ')');
+   DEBUG_CONF   yLOG_point   ("paren"     , p);
+   --rce;  if (p == NULL) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   l = p - a_field;
+   DEBUG_CONF   yLOG_value   ("l"         , l);
+   --rce;  if (l < 1 || l > 4) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   sprintf  (x_request, "%*.*s", l, l, a_field);
+   strltrim (x_request, ySTR_BOTH, LEN_LABEL);
+   /*---(get english)--------------------*/
+   l = strlen (a_field);
+   DEBUG_CONF   yLOG_value   ("l"         , l);
+   sprintf (x_english, "%s"   , p + 2);
+   strltrim (x_english, ySTR_BOTH, LEN_TITLE);
+   /*---(save-back)----------------------*/
+   if (r_request != NULL)  strlcpy (r_request, x_request, LEN_TERSE);
+   if (r_english != NULL)  strlcpy (r_english, x_english, LEN_TITLE);
+   /*---(complete)-----------------------*/
+   DEBUG_CONF   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+SUFFIX__single          (void *a_base, void *a_prefix, void *a_suffix, cchar a_english [LEN_TITLE], cchar a_gregg [LEN_TITLE])
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
+   char        x_prefix    [LEN_LABEL] = "";
+   tSUFFIX    *x_suffix    = NULL;
+   char        x_english   [LEN_TITLE] = "";
+   char        x_updated   [LEN_TITLE] = "";
+   char        x_gregg     [LEN_TITLE] = "";
+   /*---(header)-------------------------*/
+   DEBUG_CONF   yLOG_enter   (__FUNCTION__);
+   /*---(defenses)-----------------------*/
+   DEBUG_CONF   yLOG_point   ("a_base"    , a_base);
+   --rce;  if (a_base    == NULL) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_CONF   yLOG_point   ("a_suffix"  , a_suffix);
+   --rce;  if (a_suffix  == NULL) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(add prefix)------------------*/
+   PREFIX_english (a_prefix, x_prefix);
+   sprintf (x_english, "%s%s", x_prefix, a_english);
    /*---(make variation)--------------*/
-   rc = DICT__variation_quick (a_base, a_last, a_english, a_vary, a_gprefix, a_gsuffix, r_new);
-   DEBUG_CONF   yLOG_value   ("variation" , rc);
+   x_suffix = (tSUFFIX *) a_suffix;
+   rc = SUFFIX_english_change (x_english, x_suffix->s_change, x_updated);
+   DEBUG_CONF   yLOG_value   ("english"   , rc);
+   /*---(update gregg)----------------*/
+   sprintf (x_gregg, "%s%s", a_gregg, x_suffix->s_gregg);
+   DEBUG_CONF   yLOG_info    ("x_gregg"   , x_gregg);
+   /*---(create dictionary entry)-----*/
+   rc = DICT_create (x_updated, x_gregg, a_prefix, a_base, x_suffix, NULL);
+   DEBUG_CONF   yLOG_value   ("creator"   , rc);
    /*---(complete)-----------------------*/
    DEBUG_CONF   yLOG_exit    (__FUNCTION__);
    return rc;
@@ -463,63 +560,92 @@ SUFFIX__simple          (tWORD *a_base, tWORD *a_last, cchar a_vary [LEN_TERSE],
  *> DEBUG_CONF   yLOG_exit    (__FUNCTION__);                                         <* 
  *> return 0;                                                                         <*/
 
-
 char
-SUFFIX_driver           (tWORD *a_base, tWORD *a_last, cchar a_eprefix [LEN_TERSE], cchar a_gprefix [LEN_TERSE], cchar *a_vary, tWORD **r_new)
+SUFFIX_driver           (void *a_base, void *a_prefix, cchar a_field [LEN_TITLE], cchar a_gregg [LEN_TITLE])
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
    char        rc          =    0;
-   char        x_action    =  '-';
-   char       *p           = NULL;
-   char        l           =    0;
-   char        x_left      =    0;
-   char        x_type      [LEN_TERSE] = "";
+   char        x_request   [LEN_TERSE] = "";
    char        x_english   [LEN_TITLE] = "";
-   char        x_suffix    [LEN_LABEL] = "";
+   char        x_action    =  '-';
+   tSUFFIX    *x_suffix    = NULL;
+   tSUFFIX    *x_other     = NULL;
    char        x_base      [LEN_LABEL] = "";
-   char        x_change    [LEN_LABEL] = "";
+   short       n           =    0;
+   char       *p           = NULL;
+   char       *q           =  ",";
+   char       *r           = NULL;
    /*---(header)-------------------------*/
    DEBUG_CONF   yLOG_enter   (__FUNCTION__);
    /*---(defenses)-----------------------*/
    DEBUG_CONF   yLOG_point   ("a_base"    , a_base);
-   --rce;  if (a_base == NULL) {
+   --rce;  if (a_base    == NULL) {
       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   DEBUG_CONF   yLOG_point   ("a_vary"    , a_vary);
-   --rce;  if (a_vary == NULL) {
+   DEBUG_CONF   yLOG_point   ("a_field"   , a_field);
+   --rce;  if (a_field   == NULL) {
       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   DEBUG_CONF   yLOG_info    ("a_vary"    , a_vary);
+   DEBUG_CONF   yLOG_info    ("a_field"   , a_field);
    /*---(parse)--------------------------*/
-   p = strchr (a_vary, ')');
-   DEBUG_CONF   yLOG_point   ("paren"     , p);
-   --rce;  if (p == NULL) {
-      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   l = p - a_vary;
-   DEBUG_CONF   yLOG_value   ("l"         , l);
-   --rce;  if (l < 1 || l > 4) {
-      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   sprintf (x_type   , "%*.*s", l, l, a_vary);
-   l = strlen (a_vary);
-   x_left = l - (p - a_vary) - 2;
-   DEBUG_CONF   yLOG_value   ("l"         , l);
-   DEBUG_CONF   yLOG_value   ("x_left"    , x_left);
-   --rce;  if (x_left < 2) {
-      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   sprintf (x_english, "%s%s"   , a_eprefix, p + 2);
-   /*---(find variation)-----------------*/
-   rc = SUFFIX_by_name (x_type, &x_action, x_suffix, x_base, x_change);
-   DEBUG_CONF   yLOG_value   ("suffix"    , rc);
+   rc = SUFFIX__field  (a_field, x_request, x_english);
+   DEBUG_CONF   yLOG_value   ("parse"     , rc);
    --rce;  if (rc < 0) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(find variation)-----------------*/
+   n = SUFFIX_by_name (x_request, &x_action, NULL, x_base, NULL, &x_suffix);
+   DEBUG_CONF   yLOG_value   ("suffix"    , n);
+   --rce;  if (n < 0) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_CONF   yLOG_char    ("x_action"  , x_action);
+   /*---(handle simple)------------------*/
+   --rce;  if (x_action == '·') {
+      rc = SUFFIX__single (a_base, a_prefix, x_suffix, x_english, a_gregg);
+      DEBUG_CONF   yLOG_value   ("simple"    , rc);
+   }
+   /*---(handle add-on)------------------*/
+   else if (x_action == 'a') {
+      /*---(handle base)-----------------*/
+      n = SUFFIX_by_name (x_base, NULL, NULL, NULL, NULL, &x_other);
+      DEBUG_CONF   yLOG_value   ("suffix"    , n);
+      rc = SUFFIX__single (a_base, a_prefix, x_other , x_english, a_gregg);
+      DEBUG_CONF   yLOG_value   ("base one"  , rc);
+      /*---(then request)----------------*/
+      rc = SUFFIX__single (a_base, a_prefix, x_suffix, x_english, a_gregg);
+      DEBUG_CONF   yLOG_value   ("add-on"    , rc);
+      /*---(done)------------------------*/
+   }
+   /*---(handle groups)------------------*/
+   else if (x_action == '+') {
+      /*---(handle base)-----------------*/
+      p = strtok_r (x_base, q, &r);
+      n = SUFFIX_by_name (p, NULL, NULL, NULL, NULL, &x_other);
+      DEBUG_CONF   yLOG_value   ("suffix"    , n);
+      rc = SUFFIX__single (a_base, a_prefix, x_other, x_english, a_gregg);
+      DEBUG_CONF   yLOG_value   ("base one"  , rc);
+      /*---(work through others)---------*/
+      p = strtok_r (NULL, q, &r);
+      DEBUG_CONF   yLOG_point   ("next"      , p);
+      while (p != NULL) {
+         n = SUFFIX_by_name (p, NULL, NULL, NULL, NULL, &x_suffix);
+         DEBUG_CONF   yLOG_value   ("suffix"    , n);
+         rc = SUFFIX__single (a_base, a_prefix, x_suffix, x_english, a_gregg);
+         DEBUG_CONF   yLOG_value   ("add-on"    , rc);
+         p = strtok_r (NULL, q, &r);
+         DEBUG_CONF   yLOG_point   ("next"      , p);
+      }
+      /*---(done)------------------------*/
+   }
+   /*---(handle errors)------------------*/
+   else {
+      DEBUG_CONF   yLOG_note    ("unknown suffix action");
       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
@@ -544,7 +670,7 @@ SUFFIX_dump             (FILE *f)
    /*---(search)-------------------------*/
    for (i = 0; i < s_nsuffix; ++i) {
       if (s_suffix [i].s_gregg [2] != x_save)  fprintf (f, "\n");
-      fprintf (f, "%s\n", SUFFIX_detail (i));
+      fprintf (f, "%s\n", SUFFIX__detail (i));
       x_save = s_suffix [i].s_gregg [2];
    }
    /*---(done)------------------------*/

@@ -1,8 +1,10 @@
 /*=================================(beg-code)=================================*/
 
+typedef struct cBASE  tBASE;
+typedef struct cDICT  tDICT;
+
 
 /*---(BASE structure)---------------------------*/
-typedef struct cBASE  tBASE;
 struct cBASE {
    /*---(header)---------------*/
    char        b_english   [LEN_TITLE];     /* english word                   */
@@ -16,8 +18,9 @@ struct cBASE {
    char        b_file;                      /* source file                    */
    short       b_line;                      /* input line                     */
    /*---(variations)-----------*/
-   tWORD      *b_head;                      /* first variation                */
-   char        b_nvary;                     /* count of variations            */
+   tDICT      *b_head;                      /* first dictionary variation     */
+   tDICT      *b_tail;                      /* last dictionary variation      */
+   char        b_ndict;                     /* count of dictinoary entries    */
    /*---(part-of-speech)-------*/
    char        b_part;                      /* primary part of speech         */
    char        b_sub;                       /* sub-part                       */
@@ -35,7 +38,6 @@ struct cBASE {
 
 
 
-typedef struct cDICT  tDICT;
 struct cDICT {
    /*---(main)--------------*/
    char        d_english   [LEN_TITLE];     /* english word                   */
@@ -44,6 +46,11 @@ struct cDICT {
    void       *d_prefix;                    /* english prefix                 */
    void       *d_base;                      /* english base                   */
    void       *d_suffix;                    /* english suffix                 */
+   /*---(within base)-------*/
+   tDICT      *d_prev;                      /* prev base/root variation       */
+   tDICT      *d_next;                      /* next base/root variation       */
    /*---(btree)-------------*/
    tSORT      *d_ysort;                     /* english sort                   */
 };
+
+

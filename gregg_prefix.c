@@ -274,7 +274,7 @@ PREFIX__english_change  (cchar a_base [LEN_TITLE], cchar a_change [LEN_LABEL], c
 }
 
 short
-PREFIX__by_name         (char a_prefix [LEN_LABEL], char r_english [LEN_LABEL], char r_gregg [LEN_LABEL])
+PREFIX__by_name         (char a_prefix [LEN_LABEL], char r_english [LEN_LABEL], char r_gregg [LEN_LABEL], void **r_point)
 {
    /*---(locals)-------------------------*/
    char        rce         =  -10;
@@ -282,6 +282,7 @@ PREFIX__by_name         (char a_prefix [LEN_LABEL], char r_english [LEN_LABEL], 
    /*---(default)------------------------*/
    if (r_english != NULL)  strcpy (r_english, "");
    if (r_gregg   != NULL)  strcpy (r_gregg  , "");
+   if (r_point   != NULL)  *r_point = NULL;
    /*---(defense)------------------------*/
    --rce;  if (a_prefix  == NULL)  return rce;
    /*---(search)-------------------------*/
@@ -292,6 +293,7 @@ PREFIX__by_name         (char a_prefix [LEN_LABEL], char r_english [LEN_LABEL], 
       /*---(save-back)-------------------*/
       if (r_english != NULL)  strlcpy (r_english, s_prefix [i].p_english, LEN_LABEL);
       if (r_gregg   != NULL)  strlcpy (r_gregg  , s_prefix [i].p_gregg  , LEN_LABEL);
+      if (r_point   != NULL)  *r_point = &(s_prefix [i]);
       return i;
       /*---(done)------------------------*/
    }
@@ -342,7 +344,7 @@ PREFIX_driver           (cchar a_prefix [LEN_LABEL], char b_english [LEN_TITLE],
       return rce;
    }
    /*---(short-cut)----------------------*/
-   if (strlen (a_prefix)  == 0 || strcmp (a_prefix, "´") == 0) {
+   if (strlen (a_prefix)  == 0 || strcmp (a_prefix, "·") == 0 || strcmp (a_prefix, "´") == 0) {
       DEBUG_INPT  yLOG_note    ("nothing to do");
       DEBUG_INPT  yLOG_exit    (__FUNCTION__);
       return 0;
@@ -358,7 +360,7 @@ PREFIX_driver           (cchar a_prefix [LEN_LABEL], char b_english [LEN_TITLE],
       return rce;
    }
    /*---(real prefix)--------------------*/
-   n  = PREFIX__by_name         (x_prefix, x_pretty, x_gregg);
+   n  = PREFIX__by_name         (x_prefix, x_pretty, x_gregg, r_point);
    DEBUG_INPT  yLOG_value   ("prefix"    , n);
    --rce;  if (n < 0) {
       DEBUG_INPT  yLOG_exitr   (__FUNCTION__, rce);
@@ -371,9 +373,25 @@ PREFIX_driver           (cchar a_prefix [LEN_LABEL], char b_english [LEN_TITLE],
    /*---(save-back)----------------------*/
    sprintf (b_english, "%s%s", x_pretty, x_english);
    sprintf (b_gregg  , "%s%s", x_gregg , x_gbase);
-   if (n > 0)   *r_point = &(s_prefix [n]);
    /*---(complete)-----------------------*/
    DEBUG_INPT  yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+PREFIX_english          (void *a_prefix, char r_english [LEN_LABEL])
+{
+   /*---(locals)-------------------------*/
+   char        rce         =  -10;
+   tPREFIX    *x_prefix    = NULL;
+   /*---(default)------------------------*/
+   if (r_english != NULL)  strcpy (r_english, "");
+   /*---(defense)------------------------*/
+   --rce;  if (a_prefix  == NULL)  return rce;
+   /*---(save-back)----------------------*/
+   x_prefix = (tPREFIX *) a_prefix;
+   strlcpy (r_english, x_prefix->p_english, LEN_LABEL);
+   /*---(complete)-----------------------*/
    return 0;
 }
 

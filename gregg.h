@@ -37,8 +37,8 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "5.--= generalization for broader use"
 #define     P_VERMINOR  "5.6 = build out for fast, focused database"
-#define     P_VERNUM    "5.6b"
-#define     P_VERTXT    "prefix coding is looking sweet and unit tested"
+#define     P_VERNUM    "5.6c"
+#define     P_VERTXT    "suffix coding is looking sweet and unit tested"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -1341,10 +1341,35 @@ char        api_ymap_done           (void);
 /*---(done)-----------------*/
 
 
-/*> char        DICT__open              (char a_name [LEN_PATH], FILE **r_file);      <*/
-/*> char        DICT__close             (FILE **b_file);                              <*/
+/*---(program)--------------*/
+char        DICT_init               (void);
+char        DICT__purge             (void);
+char        DICT_wrap               (void);
+/*---(memory)---------------*/
+char        DICT__wipe              (void *a_base);
+char        DICT__new               (void **r_new);
+char        DICT__force             (void **r_new);
+char        DICT__free              (void **r_old);
+/*---(hooking)--------------*/
+char        DICT__hook              (void *a_new);
+char        DICT__unhook            (void *a_old);
+/*---(find)-----------------*/
+short       DICT__count             (void);
+char        DICT__by_english        (char *a_text, void **r_dict);
+char        DICT__by_index          (int n, void **r_dict);
+char        DICT__by_cursor         (char a_dir, void **r_dict);
+/*---(debugging)------------*/
+char        DICT__detail            (void *a_dict, char a_out [LEN_FULL]);
+char*       DICT__pointer           (short n, void *a_dict);
+char*       DICT__entry             (int n);
+/*---(creation)-------------*/
+char        DICT_create             (cchar a_english [LEN_TITLE], cchar a_gregg [LEN_TITLE], void *a_prefix, void *a_base, void *a_suffix, void **r_dict);
+/*---(reading)--------------*/
 char        DICT__read              (FILE *a_file, short *r_line, char r_prefixes [LEN_HUND], char r_recd [LEN_RECD]);
 char        DICT__split             (uchar *a_recd);
+char        DICT__base              (short a_line, cchar a_recd [LEN_RECD], char r_english [LEN_TITLE], char r_gregg [LEN_TITLE], void **r_base);
+char        DICT__prefixes          (void *a_base, cchar a_english [LEN_TITLE], cchar a_gregg [LEN_TITLE], cchar a_prefixes [LEN_HUND]);
+/*---(done)-----------------*/
 char        DICT__primary           (short a_line, cchar a_english [LEN_TITLE], cchar a_gregg [LEN_TITLE], cchar a_cats [LEN_TITLE], tWORD **r_word);
 /*> char        DICT__category_five     (tWORD *a_new, char l, cchar *a_cats);        <* 
  *> char        DICT__category_six      (tWORD *a_new, char l, cchar *a_cats);        <* 
@@ -1356,7 +1381,6 @@ char        DICT__variation         (tWORD *a_base, tWORD *a_last, cchar a_engli
 char        DICT__parse             (short a_line, cchar a_eprefix [LEN_LABEL], cchar a_recd [LEN_RECD]);
 char        DICT__parse_easy        (short a_line, cchar a_recd [LEN_RECD]);
 char        DICT__pre_update        (char b_prefix [LEN_LABEL], char b_english [LEN_TITLE]);
-char        DICT__parse_all         (short a_line, cchar a_prefixes [LEN_HUND], cchar a_recd [LEN_RECD]);
 char        DICT_import             (cchar a_name [LEN_PATH]);
 char        DICT_list               (void);
 char        DICT_list_all           (void);
@@ -1512,8 +1536,9 @@ char*       PREFIX__detail_by_ptr   (short n, void *a_prefix);
 char*       PREFIX__detail          (uchar n);
 /*---(find)-----------------*/
 char        PREFIX__english_change  (cchar a_base [LEN_TITLE], cchar a_change [LEN_LABEL], char r_update [LEN_TITLE], char r_prefix [LEN_LABEL], char *r_trunc);
-short       PREFIX__by_name         (char a_prefix [LEN_LABEL], char r_english [LEN_LABEL], char r_gregg [LEN_LABEL]);
+short       PREFIX__by_name         (char a_prefix [LEN_LABEL], char r_english [LEN_LABEL], char r_gregg [LEN_LABEL], void **r_point);
 char        PREFIX_driver           (cchar a_prefix [LEN_LABEL], char b_english [LEN_TITLE], char b_gregg [LEN_TITLE], void **r_point);
+char        PREFIX_english          (void *a_prefix, char r_english [LEN_LABEL]);
 /*---(done)-----------------*/
 
 
@@ -1540,22 +1565,24 @@ char        LETTER_sizing           (short n, float *r_xend, float *r_yend, floa
 /*===[[ gregg_suffix.c ]]=====================================================*/
 /*········· ´······················ ´·········································*/
 /*---(program)--------------*/
-char        SUFFIX_purge            (void);
+char        SUFFIX__purge           (void);
 char        SUFFIX_init             (void);
 char        SUFFIX_wrap             (void);
 /*---(load)-----------------*/
-char        SUFFIX_handler          (int n, char a_verb [LEN_LABEL], char a_exist, void *a_handler);
+char        SUFFIX__handler         (int n, char a_verb [LEN_LABEL], char a_exist, void *a_handler);
 char        SUFFIX_load             (char a_fname [LEN_HUND]);
 /*---(debug)----------------*/
-short       SUFFIX_count            (void);
-char*       SUFFIX_detail           (uchar n);
+short       SUFFIX__count           (void);
+char*       SUFFIX__detail          (short n);
 /*---(find)-----------------*/
-short       SUFFIX_by_name          (char a_suffix [LEN_LABEL], char *r_type, char r_gregg [LEN_LABEL], char r_base [LEN_TITLE], char r_change [LEN_LABEL]);
+short       SUFFIX_by_name          (char a_request [LEN_LABEL], char *r_type, char r_gregg [LEN_LABEL], char r_base [LEN_TITLE], char r_change [LEN_LABEL], void **r_point);
 /*---(support)--------------*/
 char        SUFFIX_english_change   (cchar a_english [LEN_TITLE], cchar a_change [LEN_LABEL], char r_update [LEN_TITLE]);
 /*---(driver)---------------*/
-short       SUFFIX__field           (cchar a_eprefix [LEN_TERSE], cchar a_field [LEN_TITLE], char r_vary [LEN_TERSE], char r_english [LEN_TITLE], char *r_type, char r_gsuffix [LEN_LABEL], char r_base [LEN_TITLE], char r_change [LEN_LABEL]);
-char        SUFFIX__simple          (tWORD *a_base, tWORD *a_last, cchar a_vary [LEN_TERSE], cchar a_english [LEN_TITLE], cchar a_gprefix [LEN_LABEL], cchar a_gsuffix [LEN_LABEL], tWORD **r_new);
+/*> short       SUFFIX__field           (cchar a_eprefix [LEN_TERSE], cchar a_field [LEN_TITLE], char r_vary [LEN_TERSE], char r_english [LEN_TITLE], char *r_type, char r_gsuffix [LEN_LABEL], char r_base [LEN_TITLE], char r_change [LEN_LABEL]);   <*/
+char        SUFFIX__field           (cchar a_field [LEN_TITLE], char r_request [LEN_TERSE], char r_english [LEN_TITLE]);
+char        SUFFIX__single          (void *a_base, void *a_prefix, void *a_suffix, cchar a_english [LEN_TITLE], cchar a_gregg [LEN_TITLE]);
+char        SUFFIX_driver           (void *a_base, void *a_prefix, cchar a_field [LEN_TITLE], cchar a_gregg [LEN_TITLE]);
 /*---(report)---------------*/
 char        SUFFIX_dump             (FILE *f);
 /*---(done)-----------------*/
@@ -1591,30 +1618,15 @@ short       BASE__count             (void);
 char        BASE__by_index          (int n, void **r_base);
 char        BASE__by_cursor         (char a_dir, void **r_base);
 char        BASE__detail            (void *a_base, char a_out [LEN_FULL]);
+char*       BASE__pointer           (short n, void *a_base);
 char*       BASE__entry             (int n);
 /*---(driver)---------------*/
 char        BASE__prepare           (short a_line, cchar a_english [LEN_TITLE], cchar a_gregg [LEN_TITLE]);
 char        BASE__populate          (void *a_new, char a_file, short a_line, char a_english [LEN_TITLE], char a_gregg [LEN_TITLE]);
 char        BASE_create             (char a_file, short a_line, cchar a_english [LEN_TITLE], cchar a_gregg [LEN_TITLE], cchar a_cats [LEN_TITLE], void **r_base);
+char        BASE_add_dict           (void *a_base, void *a_dict);
 /*---(done)-----------------*/
 
-
-
-/*===[[ gregg_english.c ]]====================================================*/
-/*········· ´······················ ´·········································*/
-/*---(program)--------------*/
-char        DICT_init               (void);
-char        DICT__purge             (void);
-char        DICT_wrap               (void);
-/*---(memory)---------------*/
-char        DICT__wipe              (void *a_base);
-char        DICT__new               (void **r_new);
-char        DICT__force             (void **r_new);
-char        DICT__free              (void **r_old);
-/*---(hooking)--------------*/
-char        DICT__hook              (void *a_new);
-char        DICT__unhook            (void *a_old);
-/*---(done)-----------------*/
 
 
 

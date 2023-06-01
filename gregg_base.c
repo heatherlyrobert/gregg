@@ -88,7 +88,8 @@ BASE__wipe              (void *a_base)
    x_base->b_line    = -1; 
    /*---(variations)-----------*/
    x_base->b_head    = NULL;
-   x_base->b_nvary   = 0;
+   x_base->b_tail    = NULL;
+   x_base->b_ndict   = 0;
    /*---(part-of-speech)-------*/
    x_base->b_part    = '·';
    x_base->b_sub     = '·';
@@ -105,8 +106,8 @@ BASE__wipe              (void *a_base)
    return 1;
 }
 
-char  BASE__new            (void **r_new)  { return SHARED_new  (B_BASE, '-', sizeof (void), BASE__wipe, r_new); }
-char  BASE__force          (void **r_new)  { return SHARED_new  (B_BASE, 'y', sizeof (void), BASE__wipe, r_new); }
+char  BASE__new            (void **r_new)  { return SHARED_new  (B_BASE, '-', sizeof (tBASE), BASE__wipe, r_new); }
+char  BASE__force          (void **r_new)  { return SHARED_new  (B_BASE, 'y', sizeof (tBASE), BASE__wipe, r_new); }
 char  BASE__free           (void **r_old)  { return SHARED_free (B_BASE, r_old); }
 
 
@@ -198,7 +199,7 @@ BASE__detail            (void *a_base, char a_out [LEN_FULL])
    /*---(defense)------------------------*/
    --rce;  if (a_out  == NULL)  return rce;
    strcpy (a_out, "");
-   if (a_base == NULL)           return 0;
+   if (a_base == NULL)          return 0;
    /*---(cast)---------------------------*/
    x_base  = (tBASE *) a_base;
    /*---(prepare)------------------------*/
@@ -207,9 +208,19 @@ BASE__detail            (void *a_base, char a_out [LEN_FULL])
    if (x_base->b_line >= 0)  sprintf (v, "%2d/%3d", x_base->b_file, x_base->b_line);
    sprintf  (u, "%2då%.30sæ", strlen (x_base->b_shown), x_base->b_shown);
    /*---(consolidate)--------------------*/
-   sprintf (a_out, "%-24.24s  %s  %-3d  %c %c  %c %c %-3d  %c %-4d  %-24.24s  %-34.34s  %s", s, v, x_base->b_nvary, x_base->b_part, x_base->b_sub, x_base->b_src, x_base->b_cat, x_base->b_page, x_base->b_grp, x_base->b_freq, t, u, x_base->b_sort);
+   sprintf (a_out, "%-24.24s  %s  %-3d  %c %c  %c %c %-3d  %c %-4d  %-24.24s  %-34.34s  %s", s, v, x_base->b_ndict, x_base->b_part, x_base->b_sub, x_base->b_src, x_base->b_cat, x_base->b_page, x_base->b_grp, x_base->b_freq, t, u, x_base->b_sort);
    /*---(complete)-----------------------*/
    return 0;
+}
+
+char*
+BASE__pointer           (short n, void *a_base)
+{
+   char        t           [LEN_FULL]  = "";
+   BASE__detail (a_base, t);
+   if (strcmp (g_print, "") == 0)  strcpy  (g_print, "n/a");
+   else                            sprintf (g_print, "%-5d %s", n, t);
+   return g_print;
 }
 
 char*
@@ -342,6 +353,52 @@ BASE_create             (char a_file, short a_line, cchar a_english [LEN_TITLE],
    DEBUG_CONF   yLOG_value   ("cats"      , rc);
    /*---(save-back)----------------------*/
    if (r_base != NULL)  *r_base = x_new;
+   /*---(complete)-----------------------*/
+   DEBUG_CONF   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+BASE_add_dict           (void *a_base, void *a_dict)
+{
+   /*---(locals)-----------+-----------+-*/
+   char        rce         =  -10;
+   char        rc          =  -10;
+   tBASE      *x_base      = NULL;
+   tDICT      *x_dict      = NULL;
+   /*---(begin)--------------------------*/
+   DEBUG_CONF   yLOG_enter   (__FUNCTION__);
+   /*---(defense)------------------------*/
+   DEBUG_CONF   yLOG_point   ("a_base"    , a_base);
+   --rce;  if (a_base    == NULL) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_CONF   yLOG_point   ("a_dict"    , a_dict);
+   --rce;  if (a_dict    == NULL) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(prepare)------------------------*/
+   x_base = (tBASE *) a_base;
+   x_dict = (tDICT *) a_dict;
+   /*---(set/ground)---------------------*/
+   x_dict->d_base = x_base;
+   x_dict->d_prev = NULL;
+   x_dict->d_next = NULL;
+   /*---(check for first)----------------*/
+   if (x_base->b_head == NULL) {
+      x_base->b_head  = x_dict;
+      x_base->b_tail  = x_dict;
+      x_base->b_ndict = 1;
+   }
+   /*---(handle append)------------------*/
+   else {
+      x_dict->d_prev         = x_base->b_tail;
+      x_base->b_tail->d_next = x_dict;
+      x_base->b_tail         = x_dict;
+      ++(x_base->b_ndict);
+   }
    /*---(complete)-----------------------*/
    DEBUG_CONF   yLOG_exit    (__FUNCTION__);
    return 0;
