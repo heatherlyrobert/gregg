@@ -10,9 +10,6 @@ GLuint    dl_back    = NULL;
 
 
 
-tWORD    *g_pages [MAX_PAGES];
-tWORD    *g_lasts [MAX_PAGES];
-
 
 
 char
@@ -763,60 +760,6 @@ DLIST__back_edging      (void)
 }
 
 char
-DLIST_paginate          (void)
-{
-   tWORD      *x_word      = NULL;
-   tWORD      *x_last      = NULL;
-   short       i           =    0;
-   short       c           =    0;
-   short       p           =    0;
-   /*---(header)-------------------------*/
-   DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
-   /*---(basic inputs)-------------------*/
-   DEBUG_GRAF   yLOG_value   ("ppage"     , my.w_ppage);
-   /*---(clear paging)-------------------*/
-   for (i = 0; i < MAX_PAGES; ++i)  g_pages [i] = g_lasts [i] = NULL;
-   /*---(paginate)-----------------------*/
-   WORDS_eng_by_cursor (YDLST_HEAD, &x_word);
-   i = 0;
-   while (x_word != NULL) {
-      DEBUG_GRAF   yLOG_complex ("x_word"    , "%4d %4d %4d %-15.15s %-5.5s %-15.15s %s", p, i++, c, x_word->w_english, x_word->w_vary, x_word->w_gregg, x_word->w_shown);
-      if (my.baseonly == '-' || x_word->w_vary [0] == '<') {
-         if (my.nopre == '-' || strchr (x_word->w_gregg, '<') == NULL)  {
-            if (c % my.w_ppage == 0) {
-               DEBUG_GRAF   yLOG_complex ("NEW PAGE"  , "%4d, %s", p, x_word->w_english);
-               g_pages [p] = x_word;
-               if (p > 0) {
-                  DEBUG_GRAF   yLOG_complex ("add last"  , "%4d, %s", p - 1, x_last->w_english);
-                  g_lasts [p - 1] = x_last;
-               }
-               ++p;
-            }
-            x_last = x_word;
-            DEBUG_GRAF   yLOG_info    ("x_last"    , x_last->w_english);
-            ++c;
-         } else {
-            DEBUG_GRAF   yLOG_note    ("SKIP, prefixed base");
-         }
-      } else {
-         DEBUG_GRAF   yLOG_note    ("SKIP, not a base");
-      }
-      WORDS_eng_by_cursor (YDLST_NEXT, &x_word);
-   }
-   if (p > 0) {
-      g_lasts [p - 1] = x_last;
-      DEBUG_GRAF   yLOG_complex ("add last"  , "%4d, %s", p - 1, x_last->w_english);
-   }
-   /*---(update globals)-----------------*/
-   my.w_npage   = p;
-   my.w_entries = c;
-   DEBUG_GRAF   yLOG_complex ("dict page" , "%3dp, %3dn, %3dc, %3de", my.w_ppage, my.w_npage, my.w_cpage, my.w_entries);
-   /*---(complete)-----------------------*/
-   DEBUG_GRAF   yLOG_exit    (__FUNCTION__);
-   return 0;
-}
-
-char
 DLIST_dict              (void)
 {
    /*---(locals)-----------+-----+-----+-*/
@@ -828,6 +771,7 @@ DLIST_dict              (void)
    int         x_save      =    0;
    float       x           =    0;
    float       y           =    0;
+   char        x_beg       [LEN_TITLE] = "";
    char        t           [LEN_TITLE] = "";
    int         x_max       =    0;
    static int  x_times     =    0;
@@ -848,10 +792,17 @@ DLIST_dict              (void)
    }
    DEBUG_GRAF   yLOG_complex ("bounds"    , "%4d lef, %4d rig, %4d xlen,  %4d bot, %4d top, %4d ylen", my.t_lef, my.t_rig, my.t_xlen, my.t_bot, my.t_top, my.t_ylen);
    x_left = my.p_left + 0.5 * my.p_spacing;
+   rc = DICT_page_ends (my.w_cpage, x_beg, NULL);
+   DEBUG_GRAF   yLOG_value   ("beg"       , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_GRAF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_GRAF   yLOG_info    ("x_beg"     , x_beg);
    glPushMatrix    (); {
       x = x_left;
       y =  -75;
-      WORDS_eng_by_name  (g_pages [my.w_cpage]->w_english, &x_word);
+      WORDS_eng_by_name  (x_beg, &x_word);
       while (x_word != NULL) {
          DEBUG_GRAF   yLOG_complex ("x_word"    , "%4d %-15.15s %-5.5s %-15.15s %s", i, x_word->w_english, x_word->w_vary, x_word->w_gregg, x_word->w_shown);
          if (my.baseonly == '-' || x_word->w_vary [0] == '<') {

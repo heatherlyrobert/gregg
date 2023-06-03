@@ -1,7 +1,10 @@
 /*=================================(beg-code)=================================*/
 
+
+
 typedef struct cBASE  tBASE;
 typedef struct cDICT  tDICT;
+
 
 
 /*---(BASE structure)---------------------------*/
@@ -38,6 +41,7 @@ struct cBASE {
 
 
 
+/*---(DICTIONARY structure)---------------------*/
 struct cDICT {
    /*---(main)--------------*/
    char        d_english   [LEN_TITLE];     /* english word                   */

@@ -73,6 +73,9 @@ char   s_nfield  = 0;
 
 
 
+void     *g_pages [MAX_PAGES];
+void     *g_lasts [MAX_PAGES];
+
 
 
 
@@ -117,8 +120,16 @@ DICT__purge             (void)
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
    char        rc          =    0;
+   tDICT      *x_curr      =    0;
    /*---(header)-------------------------*/
    DEBUG_CONF   yLOG_enter   (__FUNCTION__);
+   /*---(purging)------------------------*/
+   DICT__by_cursor (YDLST_TAIL, &x_curr);
+   while (x_curr != NULL) {
+      DICT__unhook (x_curr);
+      DICT__free   (&x_curr);
+      DICT__by_cursor (YDLST_TAIL, &x_curr);
+   }
    /*---(complete)-----------------------*/
    DEBUG_CONF   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -249,6 +260,34 @@ char   DICT__by_english    (char *a_text, void **r_dict)     { return ySORT_by_n
 char   DICT__by_index      (int n, void **r_dict)            { return ySORT_by_index  (B_DICT, n, r_dict); }
 char   DICT__by_cursor     (char a_dir, void **r_dict)       { return ySORT_by_cursor (B_DICT, a_dir, r_dict); }
 
+/*> char                                                                                     <* 
+ *> DICT__walk_by_bases     (FILE *a_file, char *f_callback (FILE *a_file, tWORD *a_curr))   <* 
+ *> {                                                                                        <* 
+ *>    /+---(locals)-----------+-----+-----+-+/                                              <* 
+ *>    int         a           =    0;                                                       <* 
+ *>    tDICT      *x_curr      = NULL;                                                       <* 
+ *>    tDICT      *x_sub       = NULL;                                                       <* 
+ *>    /+---(header)---------------------------+/                                            <* 
+ *>    DEBUG_CONF   yLOG_enter   (__FUNCTION__);                                             <* 
+ *>    WORDS_eng_by_index  (a, &x_curr);                                                     <* 
+ *>    while (x_curr != NULL) {                                                              <* 
+ *>       if (strcmp (x_curr->w_vary, "<") == 0) {                                           <* 
+ *>          DEBUG_CONF   yLOG_info    ("base"      , x_curr->w_english);                    <* 
+ *>          f_callback (a_file, x_curr);                                                    <* 
+ *>          x_sub = x_curr->w_next;                                                         <* 
+ *>          while (x_sub != NULL) {                                                         <* 
+ *>             DEBUG_CONF   yLOG_info    ("vary"      , x_sub->w_english);                  <* 
+ *>             f_callback (a_file, x_sub);                                                  <* 
+ *>             x_sub  = x_sub->w_next;                                                      <* 
+ *>          }                                                                               <* 
+ *>       }                                                                                  <* 
+ *>       ++a;                                                                               <* 
+ *>       WORDS_eng_by_index (a, &x_curr);                                                   <* 
+ *>    }                                                                                     <* 
+ *>    /+---(complete)-------------------------+/                                            <* 
+ *>    DEBUG_CONF   yLOG_exit    (__FUNCTION__);                                             <* 
+ *>    return 0;                                                                             <* 
+ *> }                                                                                        <*/
 
 
 /*====================------------------------------------====================*/
@@ -275,18 +314,18 @@ DICT__detail            (void *a_dict, char a_out [LEN_FULL])
    x_dict  = (tDICT *) a_dict;
    /*---(prepare)------------------------*/
    sprintf  (s, "%2då%.20sæ", strlen (x_dict->d_english), x_dict->d_english);
-   sprintf  (t, "%2då%.20sæ", strlen (x_dict->d_gregg)  , x_dict->d_gregg);
+   sprintf  (t, "%2då%.30sæ", strlen (x_dict->d_gregg)  , x_dict->d_gregg);
    sprintf  (u, "%-3.3sp %-3.3sb %-3.3ss", (x_dict->d_prefix == NULL) ? "···" : "SET", (x_dict->d_base == NULL) ? "···" : "SET", (x_dict->d_suffix == NULL) ? "···" : "SET");
    if (x_dict->d_prev != NULL)  strlcpy (v, x_dict->d_prev->d_english, LEN_TITLE);
    if (x_dict->d_next != NULL)  strlcpy (w, x_dict->d_next->d_english, LEN_TITLE);
    /*---(consolidate)--------------------*/
-   sprintf (a_out, "%-24.24s  %-24.24s ´ %-14.14s ´ %-20.20s ´ %-20.20s ´", s, t, u, v, w);
+   sprintf (a_out, "%-24.24s  %-34.34s ´ %-14.14s ´ %-20.20s ´ %-20.20s ´", s, t, u, v, w);
    /*---(complete)-----------------------*/
    return 0;
 }
 
 char*
-DICT__pointer           (short n, void *a_dict)
+DICT__pointer           (int n, void *a_dict)
 {
    char        t           [LEN_FULL]  = "";
    DICT__detail (a_dict, t);
@@ -300,10 +339,13 @@ DICT__entry             (int n)
 {
    tDICT      *x_dict      = NULL;
    char        t           [LEN_FULL]  = "";
+   static int  x_prev      =    0;
+   if (n == YDLST_INC)  n = x_prev + 1;
    DICT__by_index (n, &x_dict);
    DICT__detail (x_dict, t);
    if (strcmp (t, "") == 0)  strcpy  (g_print, "n/a");
    else                      sprintf (g_print, "%-5d %s", n, t);
+   x_prev = n;
    return g_print;
 }
 
@@ -312,7 +354,7 @@ DICT__entry             (int n)
 /*====================------------------------------------====================*/
 /*===----                        main driver                           ----===*/
 /*====================------------------------------------====================*/
-static void  o___DRIVER__________o () { return; }
+static void  o___EXISTANCE_______o () { return; }
 
 char
 DICT_create             (cchar a_english [LEN_TITLE], cchar a_gregg [LEN_TITLE], void *a_prefix, void *a_base, void *a_suffix, void **r_dict)
@@ -379,10 +421,10 @@ DICT_create             (cchar a_english [LEN_TITLE], cchar a_gregg [LEN_TITLE],
 
 
 
-/*============================--------------------============================*/
-/*===----                          dictionary                          ----===*/
-/*============================--------------------============================*/
-static void      o___DICTIONARY______________o (void) {;}
+/*====================------------------------------------====================*/
+/*===----                      driver support                          ----===*/
+/*====================------------------------------------====================*/
+static void  o___DRIVER__________o () { return; }
 
 char
 DICT__split             (uchar *a_recd)
@@ -492,545 +534,7 @@ DICT__base              (short a_line, cchar a_recd [LEN_RECD], char r_english [
 }
 
 char
-DICT__primary           (short a_line, cchar a_english [LEN_TITLE], cchar a_gregg [LEN_TITLE], cchar a_cats [LEN_TITLE], tWORD **r_word)
-{
-   /*---(locals)-----------+-----+-----+-*/
-   char        rce         =  -10;
-   char        rc          =    0;
-   char        x_gregg     [LEN_TITLE] = "";
-   tWORD      *x_new       = NULL;
-   char        x_part      =  '¢';
-   /*---(header)-------------------------*/
-   DEBUG_CONF   yLOG_enter   (__FUNCTION__);
-   /*---(defense)------------------------*/
-   DEBUG_CONF   yLOG_point   ("a_english" , a_english);
-   --rce;  if (a_english == NULL) {
-      yURG_err ('w', "%d primary english word is null/empty", a_line);
-      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   DEBUG_CONF   yLOG_info    ("a_english" , a_english);
-   DEBUG_CONF   yLOG_point   ("a_gregg"   , a_gregg);
-   --rce;  if (a_gregg   == NULL) {
-      yURG_err ('w', "%d primary gregg word is null/empty", a_line);
-      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   /*---(check gregg)--------------------*/
-   if (a_gregg [0] == '>')   strlcpy (x_gregg, a_gregg + 2, LEN_TITLE);
-   else                      strlcpy (x_gregg, a_gregg    , LEN_TITLE);
-   strldchg (x_gregg, '.', '·' , LEN_TITLE);
-   DEBUG_CONF   yLOG_info    ("x_gregg"   , x_gregg);
-   /*---(preview part of speech)---------*/
-   /*> x_part = DICT__category_preview (a_cats);                                      <*/
-   /*---(add word)-----------------------*/
-   rc = WORDS_new_base (a_english, x_gregg, x_part, &x_new);
-   DEBUG_CONF   yLOG_value   ("new"       , rc);
-   --rce;  if (rc < 0) {
-      yURG_err ('w', "%d primary word å%sæ could not be created", a_line, a_english);
-      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   /*---(hook to lists)------------------*/
-   rc = WORDS_hook (x_new);
-   DEBUG_CONF   yLOG_value   ("hook"      , rc);
-   --rce;  if (rc < 0) {
-      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   /*---(save-back)----------------------*/
-   x_new->w_file = my.r_nfile;
-   x_new->w_line = a_line;
-   if (r_word != NULL)  *r_word = x_new;
-   /*---(status)-------------------------*/
-   yURG_msg ('-', "%d primary word å%sæ å%sæ successful", a_line, a_english, x_gregg);
-   /*---(complete)-----------------------*/
-   DEBUG_CONF   yLOG_exit    (__FUNCTION__);
-   return 0;
-}
-
-/*> char                                                                              <* 
- *> DICT__category_five     (tWORD *a_new, char l, cchar *a_cats)                     <* 
- *> {                                                                                 <* 
- *>    /+---(header)-------------------------+/                                       <* 
- *>    DEBUG_CONF   yLOG_enter   (__FUNCTION__);                                      <* 
- *>    /+---(part-of-speech)-----------------+/                                       <* 
- *>    if (l >= 1)  a_new->w_part = CATS__find_speech (a_cats [0]);                   <* 
- *>    else         a_new->w_part = CATS__find_speech ('¢');                          <* 
- *>    /+---(sub part-of-speech)-------------+/                                       <* 
- *>    if (l >= 3)  a_new->w_sub  = CATS__find_sub    (a_new->w_part, a_cats [2]);    <* 
- *>    else         a_new->w_sub  = CATS__find_sub    (a_new->w_part, '¢');           <* 
- *>    /+---(source group)-------------------+/                                       <* 
- *>    if (l >= 5)  a_new->w_grp  = CATS__find_grp    (a_cats [4]);                   <* 
- *>    else         a_new->w_grp  = CATS__find_grp    ('¢');                          <* 
- *>    /+---(source)-------------------------+/                                       <* 
- *>    if (l >= 7)  a_new->w_src  = CATS__find_source (a_cats [6]);                   <* 
- *>    else         a_new->w_src  = CATS__find_source ('¢');                          <* 
- *>    /+---(category)-----------------------+/                                       <* 
- *>    if (l >= 9)  a_new->w_cat  = CATS__find_type   (a_cats [8]);                   <* 
- *>    else         a_new->w_cat  = CATS__find_type   ('¢');                          <* 
- *>    /+---(complete)-----------------------+/                                       <* 
- *>    DEBUG_CONF   yLOG_exit    (__FUNCTION__);                                      <* 
- *>    return 0;                                                                      <* 
- *> }                                                                                 <*/
-
-/*> char                                                                              <* 
- *> DICT__category_six      (tWORD *a_new, char l, cchar *a_cats)                     <* 
- *> {                                                                                 <* 
- *>    /+---(locals)-----------+-----+-----+-+/                                       <* 
- *>    short       x_page      =    0;                                                <* 
- *>    /+---(header)-------------------------+/                                       <* 
- *>    DEBUG_CONF   yLOG_enter   (__FUNCTION__);                                      <* 
- *>    /+---(part-of-speech)-----------------+/                                       <* 
- *>    if (l >= 1)  a_new->w_part = CATS__find_speech (a_cats [0]);                   <* 
- *>    else         a_new->w_part = CATS__find_speech ('¢');                          <* 
- *>    /+---(sub part-of-speech)-------------+/                                       <* 
- *>    if (l >= 3)  a_new->w_sub  = CATS__find_sub    (a_new->w_part, a_cats [2]);    <* 
- *>    else         a_new->w_sub  = CATS__find_sub    (a_new->w_part, '¢');           <* 
- *>    /+---(source group)-------------------+/                                       <* 
- *>    if (l >= 5)  a_new->w_grp  = CATS__find_grp    (a_cats [4]);                   <* 
- *>    else         a_new->w_grp  = CATS__find_grp    ('¢');                          <* 
- *>    /+---(source)-------------------------+/                                       <* 
- *>    if (l >= 8)  a_new->w_src  = CATS__find_source (a_cats [7]);                   <* 
- *>    else         a_new->w_src  = CATS__find_source ('¢');                          <* 
- *>    /+---(category)-----------------------+/                                       <* 
- *>    if (l >= 10) a_new->w_cat  = CATS__find_type   (a_cats [9]);                   <* 
- *>    else         a_new->w_cat  = CATS__find_type   ('¢');                          <* 
- *>    /+---(page)---------------------------+/                                       <* 
- *>    if (l >= 12) a_new->w_page = atoi (a_cats + 11);                               <* 
- *>    /+---(complete)-----------------------+/                                       <* 
- *>    DEBUG_CONF   yLOG_exit    (__FUNCTION__);                                      <* 
- *>    return 0;                                                                      <* 
- *> }                                                                                 <*/
-
-/*> char                                                                              <* 
- *> DICT__category_seven    (tWORD *a_new, char l, cchar *a_cats)                     <* 
- *> {                                                                                 <* 
- *>    /+---(locals)-----------+-----+-----+-+/                                       <* 
- *>    char        t           [LEN_TERSE] = "";                                      <* 
- *>    /+---(header)-------------------------+/                                       <* 
- *>    DEBUG_CONF   yLOG_enter   (__FUNCTION__);                                      <* 
- *>    /+---(part-of-speech)-----------------+/                                       <* 
- *>    if (l >= 1)  a_new->w_part = CATS__find_speech (a_cats [0]);                   <* 
- *>    else         a_new->w_part = CATS__find_speech ('¢');                          <* 
- *>    if (l >= 3)  a_new->w_sub  = CATS__find_sub    (a_new->w_part, a_cats [2]);    <* 
- *>    else         a_new->w_sub  = CATS__find_sub    (a_new->w_part, '¢');           <* 
- *>    /+---(source)-------------------------+/                                       <* 
- *>    if (l >= 6)  a_new->w_src  = CATS__find_source (a_cats [5]);                   <* 
- *>    else         a_new->w_src  = CATS__find_source ('¢');                          <* 
- *>    if (l >= 8)  a_new->w_cat  = CATS__find_type   (a_cats [7]);                   <* 
- *>    else         a_new->w_cat  = CATS__find_type   ('¢');                          <* 
- *>    if (l >= 10) {                                                                 <* 
- *>       sprintf (t, "%-3.3s", a_cats + 9);                                          <* 
- *>       a_new->w_page = atoi (t);                                                   <* 
- *>    }                                                                              <* 
- *>    /+---(frequency)----------------------+/                                       <* 
- *>    if (l >= 14) a_new->w_grp  = CATS__find_grp    (a_cats [13]);                  <* 
- *>    else         a_new->w_grp  = CATS__find_grp    ('¢');                          <* 
- *>    if (l >= 16) a_new->w_freq = atoi (a_cats + 15);                               <* 
- *>    /+---(complete)-----------------------+/                                       <* 
- *>    DEBUG_CONF   yLOG_exit    (__FUNCTION__);                                      <* 
- *>    return 0;                                                                      <* 
- *> }                                                                                 <*/
-
-/*> char                                                                              <* 
- *> DICT__category_preview  (cchar *a_cats)                                           <* 
- *> {                                                                                 <* 
- *>    /+---(locals)-----------+-----+-----+-+/                                       <* 
- *>    char        rce         =  -10;                                                <* 
- *>    char        l           =    0;                                                <* 
- *>    /+---(defenses)-----------------------+/                                       <* 
- *>    if (a_cats == NULL)  return '¢';                                               <* 
- *>    /+---(defenses)-----------------------+/                                       <* 
- *>    l = strlen (a_cats);                                                           <* 
- *>    if (l >= 1)  return CATS__find_speech (a_cats [0]);                            <* 
- *>    /+---(complete)-----------------------+/                                       <* 
- *>    return '¢';                                                                    <* 
- *> }                                                                                 <*/
-
-/*> char                                                                              <* 
- *> DICT__category          (tWORD *a_new, cchar *a_cats)                             <* 
- *> {                                                                                 <* 
- *>    /+---(locals)-----------+-----+-----+-+/                                       <* 
- *>    char        rce         =  -10;                                                <* 
- *>    char        rc          =    0;                                                <* 
- *>    char        l           =    0;                                                <* 
- *>    /+---(header)-------------------------+/                                       <* 
- *>    DEBUG_CONF   yLOG_enter   (__FUNCTION__);                                      <* 
- *>    /+---(defenses)-----------------------+/                                       <* 
- *>    DEBUG_CONF   yLOG_point   ("a_new"     , a_new);                               <* 
- *>    --rce;  if (a_new == NULL) {                                                   <* 
- *>       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);                              <* 
- *>       return rce;                                                                 <* 
- *>    }                                                                              <* 
- *>    DEBUG_CONF   yLOG_point   ("a_cats"    , a_cats);                              <* 
- *>    --rce;  if (a_cats == NULL) {                                                  <* 
- *>       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);                              <* 
- *>       return rce;                                                                 <* 
- *>    }                                                                              <* 
- *>    l = strlen (a_cats);                                                           <* 
- *>    /+---(part-of-speech)-----------------+/                                       <* 
- *>    if (l <= 9) {                                                                  <* 
- *>       DICT__category_five  (a_new, l, a_cats);                                    <* 
- *>    } else if (l <= 13) {                                                          <* 
- *>       DICT__category_six   (a_new, l, a_cats);                                    <* 
- *>    } else {                                                                       <* 
- *>       DICT__category_seven (a_new, l, a_cats);                                    <* 
- *>    }                                                                              <* 
- *>    /+---(complete)-----------------------+/                                       <* 
- *>    DEBUG_CONF   yLOG_exit    (__FUNCTION__);                                      <* 
- *>    return 0;                                                                      <* 
- *> }                                                                                 <*/
-
-char
-DICT__variation_quick   (tWORD *a_base, tWORD *a_last, char a_english [LEN_TITLE], char a_vary [LEN_TERSE], char a_prefix [LEN_TERSE], char a_suffix [LEN_TERSE], tWORD **r_new)
-{
-   /*---(locals)-----------+-----+-----+-*/
-   char        rce         =  -10;
-   char        rc          =    0;
-   char        x_gregg     [LEN_TITLE] = "";
-   tWORD      *x_new       = NULL;
-   /*---(header)-------------------------*/
-   DEBUG_CONF   yLOG_enter   (__FUNCTION__);
-   /*---(build gregg)--------------------*/
-   sprintf (x_gregg, "%s·%s", a_base->w_gregg, a_suffix);
-   DEBUG_CONF   yLOG_info    ("x_gregg"   , x_gregg);
-   /*---(add word)-----------------------*/
-   rc = WORDS_new_vary (a_english, x_gregg, a_base->w_part, &x_new);
-   DEBUG_CONF   yLOG_value   ("new"       , rc);
-   --rce;  if (rc < 0) {
-      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   /*---(hook to lists)------------------*/
-   rc = WORDS_hook (x_new);
-   DEBUG_CONF   yLOG_value   ("hook"      , rc);
-   --rce;  if (rc < 0) {
-      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   /*---(carry-over)---------------------*/
-   x_new->w_file = a_base->w_file;
-   x_new->w_line = a_base->w_line;
-   strlcpy (x_new->w_vary, a_vary, LEN_TERSE);
-   /*---(past-of-speech)-----------------*/
-   x_new->w_part = a_base->w_part;
-   x_new->w_sub  = a_base->w_sub;
-   /*---(source)-------------------------*/
-   x_new->w_src  = a_base->w_src;
-   x_new->w_cat  = a_base->w_cat;
-   x_new->w_page = a_base->w_page;
-   /*---(frequency)----------------------*/
-   x_new->w_grp  = a_base->w_grp;
-   x_new->w_freq = a_base->w_freq;
-   /*---(connect to chain)---------------*/
-   x_new->w_base = a_base;
-   ++(x_new->w_base->w_nvary);
-   if (a_last != NULL)  a_last->w_next = x_new;
-   /*---(save-back)----------------------*/
-   if (r_new  != NULL)  *r_new = x_new;
-   /*---(complete)-----------------------*/
-   DEBUG_CONF   yLOG_exit    (__FUNCTION__);
-   return 0;
-}
-
-
-char
-DICT__variation         (tWORD *a_base, tWORD *a_last, cchar a_english [LEN_TERSE], cchar a_gregg [LEN_TERSE], cchar *a_vary, tWORD **r_new)
-{
-   /*---(locals)-----------+-----+-----+-*/
-   char        rce         =  -10;
-   char        rc          =    0;
-   char        x_action    =  '-';
-   char       *p           = NULL;
-   char       *q           =  ",";
-   char       *r           = NULL;
-   char        l           =    0;
-   char        x_left      =    0;
-   char        x_type      [LEN_TERSE]  = "";
-   char        x_english   [LEN_TITLE]  = "";
-   char        t           [LEN_TITLE]  = "";
-   char        x_suffix    [LEN_LABEL] = "";
-   char        x_base      [LEN_LABEL] = "";
-   char        x_change    [LEN_LABEL] = "";
-   tWORD     *x_vary      = NULL;
-   tWORD     *x_save      = NULL;
-   uchar       x_check     [LEN_LABEL] = "";
-   /*---(header)-------------------------*/
-   DEBUG_CONF   yLOG_enter   (__FUNCTION__);
-   /*---(defenses)-----------------------*/
-   DEBUG_CONF   yLOG_point   ("a_base"    , a_base);
-   --rce;  if (a_base == NULL) {
-      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   DEBUG_CONF   yLOG_point   ("a_vary"    , a_vary);
-   --rce;  if (a_vary == NULL) {
-      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   DEBUG_CONF   yLOG_info    ("a_vary"    , a_vary);
-   /*---(parse)--------------------------*/
-   p = strchr (a_vary, ')');
-   DEBUG_CONF   yLOG_point   ("paren"     , p);
-   --rce;  if (p == NULL) {
-      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   l = p - a_vary;
-   DEBUG_CONF   yLOG_value   ("l"         , l);
-   --rce;  if (l < 1 || l > 4) {
-      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   sprintf (x_type   , "%*.*s", l, l, a_vary);
-   l = strlen (a_vary);
-   x_left = l - (p - a_vary) - 2;
-   DEBUG_CONF   yLOG_value   ("l"         , l);
-   DEBUG_CONF   yLOG_value   ("x_left"    , x_left);
-   --rce;  if (x_left < 2) {
-      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   sprintf (x_english, "%s%s"   , a_english, p + 2);
-   /*---(find variation)-----------------*/
-   /*> x_action = DICT__find_variation (x_type, x_suffix, x_endings, x_base, x_change);   <*/
-   rc = SUFFIX_by_name (x_type, &x_action, x_suffix, x_base, x_change, NULL);
-   DEBUG_CONF   yLOG_value   ("suffix"    , rc);
-   --rce;  if (rc < 0) {
-      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   /*---(simple)-------------------------*/
-   if (x_action == '·') {
-      rc = DICT__variation_quick (a_base, a_last, x_english, x_type, a_gregg, x_suffix, &x_vary);
-      if (rc >= 0)  x_save = x_vary;
-   }
-   /*---(also version)-------------------*/
-   else if (x_action == 'a') {
-      /*---(make variation)--------------*/
-      SUFFIX_english_change (x_english, x_change, t);
-      DEBUG_CONF   yLOG_complex ("english"   , "%s, %s, %s", x_english, x_change, t);
-      rc = DICT__variation_quick (a_base, a_last, t, x_type, a_gregg, x_suffix, &x_vary);
-      if (rc >= 0)  x_save = x_vary;
-      /*---(make base)-------------------*/
-      /*> DICT__find_variation (x_base, x_suffix, NULL, NULL, NULL);                  <*/
-      SUFFIX_by_name (x_base, NULL, x_suffix, NULL, NULL, NULL);
-      rc = DICT__variation_quick (a_base, x_save, x_english, x_base, a_gregg, x_suffix, &x_vary);
-      if (rc >= 0)  x_save = x_vary;
-   }
-   /*---(group version)------------------*/
-   else if (x_action == '+') {
-      /*---(make first/base)-------------*/
-      p = strtok_r (x_base, q, &r);
-      /*> DICT__find_variation (p, x_suffix, NULL, NULL, NULL);                       <*/
-      rc = SUFFIX_by_name (p, NULL, x_suffix, NULL, NULL, NULL);
-      if (rc >= 0)  rc = DICT__variation_quick (a_base, a_last, x_english, p, a_gregg, x_suffix, &x_vary);
-      if (rc >= 0)  x_save = x_vary;
-      /*---(cycle others)----------------*/
-      p = strtok_r (NULL, q, &r);
-      while (p != NULL) {
-         /*---(find)---------------------*/
-         /*> DICT__find_variation (p, x_suffix, NULL, NULL, x_change);                <*/
-         rc = SUFFIX_by_name (p, NULL, x_suffix, NULL, NULL, NULL);
-         DEBUG_CONF   yLOG_complex ("variation" , "%s, %s", p, x_suffix);
-         /*---(update)-------------------*/
-         SUFFIX_english_change (x_english, x_change, t);
-         DEBUG_CONF   yLOG_complex ("english"   , "%s, %s, %s", x_english, x_change, t);
-         /*---(add)----------------------*/
-         rc = DICT__variation_quick (a_base, x_save, t, p, a_gregg, x_suffix, &x_vary);
-         if (rc >= 0)  x_save = x_vary;
-         /*---(next)---------------------*/
-         p = strtok_r (NULL, q, &r);
-      }
-      /*---(done)------------------------*/
-   }
-   /*---(save-back)----------------------*/
-   if (r_new  != NULL)  *r_new = x_vary;
-   /*---(complete)-----------------------*/
-   DEBUG_CONF   yLOG_exit    (__FUNCTION__);
-   return 0;
-}
-
-char
-DICT__parse_OLD         (short a_line, cchar a_eprefix [LEN_LABEL], cchar a_recd [LEN_RECD])
-{
-   /*---(locals)-----------+-----+-----+-*/
-   char        rce         =  -10;
-   char        rc          =    0;
-   int         i           =    0;
-   char        x_eprefix   [LEN_LABEL] = "";
-   char        x_base      [LEN_TITLE] = "";
-   char        x_revised   =  '-';
-   char        x_english   [LEN_TITLE] = "";
-   char        x_gregg     [LEN_TITLE] = "";
-   tWORD      *x_new       = NULL;
-   tWORD      *x_last      = NULL;
-   tWORD      *x_vary      = NULL;
-   short       n           =    0;
-   /*---(header)-------------------------*/
-   DEBUG_CONF   yLOG_enter   (__FUNCTION__);
-   /*---(split)--------------------------*/
-   rc = DICT__split (a_recd);
-   DEBUG_CONF   yLOG_value   ("split"     , rc);
-   --rce;  if (rc < 0) {
-      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   /*---(preprare english)---------------*/
-   strlcpy (x_eprefix, a_eprefix   , LEN_LABEL);
-   strlcpy (x_base  , s_fields [0], LEN_TITLE);
-   if (strcmp (x_eprefix, "") != NULL) {
-      /*> rc = DICT__pre_update  (x_eprefix, x_base);                                 <*/
-      n  = PREFIX__by_name (x_eprefix, x_english, x_gregg, NULL);
-      DEBUG_CONF   yLOG_complex ("find"      , "%4d, %s, %s", n, x_english, x_gregg);
-      --rce;  if (n < 0) {
-         DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
-         return rce;
-      }
-   }
-   sprintf (x_english, "%s%s", x_eprefix, x_base);
-   /*---(update with prefix)-------------*/
-   if (s_nfield >= 5 && (strcmp (s_fields [4], "·") != 0 && strcmp (s_fields [4], "") != 0))   x_revised = 'y';
-   DEBUG_CONF   yLOG_value   ("x_revised" , x_revised);
-   /*---(preprare gregg)-----------------*/
-   if (x_revised != 'y')  sprintf (x_gregg  , "%s%s", x_gregg, s_fields [2]);
-   else                   sprintf (x_gregg  , "%s%s", x_gregg, s_fields [4]);
-   DEBUG_CONF   yLOG_complex ("words"     , "%-20.20s, %s", x_english, x_gregg);
-   /*---(primary)------------------------*/
-   /*> rc = DICT__primary (a_line, x_english, x_gregg, s_fields [3], &x_new);         <*/
-   rc = BASE_create (my.r_nfile, a_line, x_english, x_gregg, s_fields [3], &x_new);
-   DEBUG_CONF   yLOG_value   ("base"      , rc);
-   --rce;  if (rc < 0) {
-      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   /*> if (x_revised != 'y')  x_new->official = x_new->w_gregg;                       <* 
-    *> else                   x_new->official  = strdup (s_fields [2]);               <*/
-   x_new->w_nvary = 1;
-   /*---(categories)---------------------*/
-   /*> if (s_nfield > 3) {                                                            <* 
-    *>    rc = DICT__category (x_new, s_fields [3]);                                  <* 
-    *>    DEBUG_CONF   yLOG_value   ("primary"   , rc);                               <* 
-    *>    --rce;  if (rc < 0) {                                                       <* 
-    *>       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);                           <* 
-    *>       return rce;                                                              <* 
-    *>    }                                                                           <* 
-    *> }                                                                              <*/
-   /*---(variations)---------------------*/
-   x_last = x_new;
-   for (i = 5; i <= MAX_FIELD; ++i) {
-      if (strlen (s_fields [i]) == 0)  continue;
-      rc = DICT__variation (x_new, x_last, x_eprefix, x_gregg, s_fields [i], &x_vary);
-      DEBUG_CONF   yLOG_value   ("variation" , rc);
-      --rce;  if (rc < 0) {
-         DEBUG_CONF   yLOG_note    ("variation failed, continuing");
-      }
-      x_last = x_vary;
-   }
-   /*---(complete)-----------------------*/
-   DEBUG_CONF   yLOG_exit    (__FUNCTION__);
-   return 0;
-}
-
-char
-DICT__parse             (short a_line, cchar a_prefix [LEN_LABEL], cchar a_recd [LEN_RECD])
-{
-   /*---(locals)-----------+-----+-----+-*/
-   char        rce         =  -10;
-   char        rc          =    0;
-   char        x_english   [LEN_TITLE] = "";
-   char        x_gregg     [LEN_TITLE] = "";
-
-
-   int         i           =    0;
-   char        x_eprefix   [LEN_LABEL] = "";
-   char        x_gprefix   [LEN_LABEL] = "";
-
-   char        x_base      [LEN_TITLE] = "";
-   char        x_revised   =  '-';
-   tWORD      *x_new       = NULL;
-   tWORD      *x_last      = NULL;
-   tWORD      *x_vary      = NULL;
-   short       n           =    0;
-   /*---(header)-------------------------*/
-   DEBUG_CONF   yLOG_enter   (__FUNCTION__);
-   /*---(split)--------------------------*/
-   rc = DICT__split (a_recd);
-   DEBUG_CONF   yLOG_value   ("split"     , rc);
-   --rce;  if (rc < 0) {
-      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   /*---(prepare base words)-------------*/
-   strlcpy (x_english, s_fields [0], LEN_TITLE);
-   if (s_nfield >= 5 && (strcmp (s_fields [4], "·") != 0 && strcmp (s_fields [4], "") != 0))   x_revised = 'y';
-   DEBUG_CONF   yLOG_value   ("x_revised" , x_revised);
-   if (x_revised != 'y')  strlcpy (x_gregg, s_fields [2], LEN_TITLE);
-   else                   strlcpy (x_gregg, s_fields [4], LEN_TITLE);
-   DEBUG_CONF   yLOG_complex ("gregg base", "%c, %-20.20s, %s", x_revised, x_english, x_gregg);
-   /*---(base, sans-prefix)--------------*/
-   rc = BASE_create (my.r_nfile, a_line, x_english, x_gregg, s_fields [3], &x_new);
-   DEBUG_CONF   yLOG_value   ("base"      , rc);
-   --rce;  if (rc < 0) {
-      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   /*---(prefix update)------------------*/
-   rc = PREFIX_driver (a_prefix, x_english, x_gregg, NULL);
-   DEBUG_CONF   yLOG_complex ("prefix"    , "%4d, %-20.20s, %s", rc, x_english, x_gregg);
-   --rce;  if (rc < 0) {
-      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   /*---(primary)------------------------*/
-   rc = BASE_create (my.r_nfile, a_line, x_english, x_gregg, s_fields [3], &x_new);
-   DEBUG_CONF   yLOG_value   ("base"      , rc);
-   --rce;  if (rc < 0) {
-      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   /*> if (x_revised != 'y')  x_new->official = x_new->w_gregg;                       <* 
-    *> else                   x_new->official  = strdup (s_fields [2]);               <*/
-   x_new->w_nvary = 1;
-   /*---(categories)---------------------*/
-   /*> if (s_nfield > 3) {                                                            <* 
-    *>    rc = DICT__category (x_new, s_fields [3]);                                  <* 
-    *>    DEBUG_CONF   yLOG_value   ("primary"   , rc);                               <* 
-    *>    --rce;  if (rc < 0) {                                                       <* 
-    *>       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);                           <* 
-    *>       return rce;                                                              <* 
-    *>    }                                                                           <* 
-    *> }                                                                              <*/
-   /*---(variations)---------------------*/
-   x_last = x_new;
-   for (i = 5; i <= MAX_FIELD; ++i) {
-      if (strlen (s_fields [i]) == 0)  continue;
-      rc = DICT__variation (x_new, x_last, x_eprefix, x_gregg, s_fields [i], &x_vary);
-      DEBUG_CONF   yLOG_value   ("variation" , rc);
-      --rce;  if (rc < 0) {
-         DEBUG_CONF   yLOG_note    ("variation failed, continuing");
-      }
-      x_last = x_vary;
-   }
-   /*---(complete)-----------------------*/
-   DEBUG_CONF   yLOG_exit    (__FUNCTION__);
-   return 0;
-}
-
-char
-DICT__parse_easy        (short a_line, cchar a_recd [LEN_RECD])
-{
-   return DICT__parse (a_line, "", a_recd);
-}
-
-char         /*-> create a new dictionary entry ------------------------------*/
-DICT__single            (void *a_base, cchar a_english [LEN_TITLE], cchar a_gregg [LEN_TITLE])
-{
-}
-
-char
-DICT__suffixes          (void *a_base, void *a_prefix, cchar a_english [LEN_TITLE], cchar a_gregg [LEN_TITLE])
+DICT__suffixes          (void *a_base, void *a_prefix, cchar a_gregg [LEN_TITLE])
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
@@ -1045,11 +549,6 @@ DICT__suffixes          (void *a_base, void *a_prefix, cchar a_english [LEN_TITL
       return rce;
    }
    DEBUG_CONF   yLOG_point   ("a_prefix"  , a_prefix);
-   DEBUG_CONF   yLOG_point   ("a_english" , a_english);
-   --rce;  if (a_english == NULL) {
-      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
    DEBUG_CONF   yLOG_point   ("a_gregg"   , a_gregg);
    --rce;  if (a_gregg   == NULL) {
       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
@@ -1058,7 +557,7 @@ DICT__suffixes          (void *a_base, void *a_prefix, cchar a_english [LEN_TITL
    /*---(cycle fields)-------------------*/
    for (i = 5; i <= MAX_FIELD; ++i) {
       if (strlen (s_fields [i]) == 0)  continue;
-      /*> rc = DICT__variation (x_new, x_last, x_eprefix, x_gregg, s_fields [i], &x_vary);   <*/
+      rc = SUFFIX_driver (a_base, a_prefix, s_fields [i], a_gregg);
       DEBUG_CONF   yLOG_value   ("variation" , rc);
       --rce;  if (rc < 0) {
          DEBUG_CONF   yLOG_note    ("variation failed, continuing");
@@ -1112,7 +611,7 @@ DICT__prefixes          (void *a_base, cchar a_english [LEN_TITLE], cchar a_greg
    /*---(short-cut)----------------------*/
    if (strcmp (x_prefixes, "") == 0  || strcmp (x_prefixes, "·") == 0) {
       DEBUG_CONF   yLOG_note    ("no prefixes passed, simple");
-      /*> rc = DICT__suffixes (a_base, a_english, a_gregg);                           <*/
+      rc = DICT__suffixes (a_base, NULL, a_gregg);
       DEBUG_CONF   yLOG_exit    (__FUNCTION__);
       return rc;
    }
@@ -1125,15 +624,16 @@ DICT__prefixes          (void *a_base, cchar a_english [LEN_TITLE], cchar a_greg
       DEBUG_CONF   yLOG_info    ("x_prefix"  , x_prefix);
       if (strcmp (x_prefix, "´") == 0) {
          DEBUG_CONF   yLOG_note    ("requested base prefix also");
-         /*> rc = DICT__suffixes (a_base, a_english, a_gregg);                        <*/
+         rc = DICT__suffixes (a_base, NULL, a_gregg);
       } else {
          DEBUG_CONF   yLOG_note    ("handling prefix");
          strlcpy (x_english, a_english, LEN_TITLE);
          strlcpy (x_gregg  , a_gregg  , LEN_TITLE);
-         rc = PREFIX_driver (p, x_english, x_gregg, x_point);
+         rc = PREFIX_driver (p, x_english, x_gregg, &x_point);
+         rc = DICT_create   (x_english, x_gregg, x_point, a_base, NULL, NULL);
+         DEBUG_CONF   yLOG_complex ("prefix"    , "%4d, %-20.20s, %-20.20s, %p", rc, x_english, x_gregg, x_point);
          if (rc >= 0) {
-            DEBUG_CONF   yLOG_complex ("prefix"    , "%4d, %-20.20s, %-20.20s, %p", rc, x_english, x_gregg, x_point);
-            /*> rc = DICT__suffixes (a_base, x_point, x_english, x_gregg);            <*/
+            rc = DICT__suffixes (a_base, x_point, x_gregg);
             DEBUG_CONF   yLOG_value   ("suffixes"  , rc);
          } else {
             DEBUG_CONF   yLOG_complex ("FAILED"    , "%d, to find prefix", rc);
@@ -1268,7 +768,7 @@ DICT_import             (cchar a_name [LEN_PATH])
    }
    yURG_msg ('-', "data source closed successfully");
    /*---(paginate)-------------------------*/
-   DLIST_paginate ();
+   DICT_paginate ();
    yURG_msg ('-', "data paginated");
    /*---(done)-----------------------------*/
    yURG_msg ('·', "");
@@ -1277,192 +777,263 @@ DICT_import             (cchar a_name [LEN_PATH])
    return 0;
 }
 
-int
-WORDS_find           (char *a_word)
-{
-   /*> /+---(locals)-----------+-----+-----+-+/                                           <* 
-    *> char        rce         =  -10;                                                    <* 
-    *> int         i           =    0;                                                    <* 
-    *> /+---(defense)------------------------+/                                           <* 
-    *> --rce;  if (a_word == NULL)  return rce;                                           <* 
-    *> /+---(search)-------------------------+/                                           <* 
-    *> for (i = 0; i < MAX_WORDS; ++i) {                                                  <* 
-    *>    printf ("reviewing %d, %s, %s\n", i, s_words [i].english, s_words [i].gregg);   <* 
-    *>    if (strncmp (s_words[i].english, "EOF",  MAX_LEN) == 0)  return -1;             <* 
-    *>    if (strncmp (s_words[i].english, a_word, MAX_LEN) != 0)  continue;              <* 
-    *>    printf ("FOUND     %d, %s, %s\n", i, s_words [i].english, s_words [i].gregg);   <* 
-    *>    return  i;                                                                      <* 
-    *> }                                                                                  <* 
-    *> /+---(complete)-----------------------+/                                           <* 
-    *> return 0;                                                                          <*/
-}
+
+
+/*====================------------------------------------====================*/
+/*===----                       reporting                              ----===*/
+/*====================------------------------------------====================*/
+static void  o___REPORTING_______o () { return; }
 
 char
 DICT_list          (void)
 {
-   /*---(locals)-----------+-----+-----+-*/
-   int         i           =    0;
-   int         a           =    0;
-   int         c           =    0;
-   char        t           [LEN_FULL]  = "";
-   char        n           [LEN_SHORT] = "";
-   char        e           [LEN_TITLE] = "";
-   char        g           [LEN_TITLE] = "";
-   char        x_col       =    0;
-   tWORD      *x_curr      = NULL;
-   tWORD      *x_sub       = NULL;
-   /*---(search)-------------------------*/
-   WORDS_eng_by_index  (a, &x_curr);
-   while (x_curr != NULL) {
-      if (strcmp (x_curr->w_vary, "<") == 0) {
-         WORDS_detail (x_curr, t);
-         strlpadn (++c, n, '.', '<', 5);
-         printf ("%5.5s··%s\n", n, t);
-         x_sub = x_curr->w_next;
-         x_col = 0;
-         while (x_sub != NULL) {
-            WORDS_detail (x_sub, t);
-            printf ("    %c  %s\n", ++x_col + 'a', t);
-            x_sub  = x_sub->w_next;
-         }
-      }
-      ++a;
-      WORDS_eng_by_index (a, &x_curr);
-   }
-   printf ("## found %d primaries and %d total words (%4.2fx)\n", c, a, (float) a / (float) c);
-   /*---(complete)-----------------------*/
-   return 0;
+   /*> /+---(locals)-----------+-----+-----+-+/                                                       <* 
+    *> int         i           =    0;                                                                <* 
+    *> int         a           =    0;                                                                <* 
+    *> int         c           =    0;                                                                <* 
+    *> char        t           [LEN_FULL]  = "";                                                      <* 
+    *> char        n           [LEN_SHORT] = "";                                                      <* 
+    *> char        e           [LEN_TITLE] = "";                                                      <* 
+    *> char        g           [LEN_TITLE] = "";                                                      <* 
+    *> char        x_col       =    0;                                                                <* 
+    *> tWORD      *x_curr      = NULL;                                                                <* 
+    *> tWORD      *x_sub       = NULL;                                                                <* 
+    *> /+---(search)-------------------------+/                                                       <* 
+    *> WORDS_eng_by_index  (a, &x_curr);                                                              <* 
+    *> while (x_curr != NULL) {                                                                       <* 
+    *>    if (strcmp (x_curr->w_vary, "<") == 0) {                                                    <* 
+    *>       WORDS_detail (x_curr, t);                                                                <* 
+    *>       strlpadn (++c, n, '.', '<', 5);                                                          <* 
+    *>       printf ("%5.5s··%s\n", n, t);                                                            <* 
+    *>       x_sub = x_curr->w_next;                                                                  <* 
+    *>       x_col = 0;                                                                               <* 
+    *>       while (x_sub != NULL) {                                                                  <* 
+    *>          WORDS_detail (x_sub, t);                                                              <* 
+    *>          printf ("    %c  %s\n", ++x_col + 'a', t);                                            <* 
+    *>          x_sub  = x_sub->w_next;                                                               <* 
+    *>       }                                                                                        <* 
+    *>    }                                                                                           <* 
+    *>    ++a;                                                                                        <* 
+    *>    WORDS_eng_by_index (a, &x_curr);                                                            <* 
+    *> }                                                                                              <* 
+    *> printf ("## found %d primaries and %d total words (%4.2fx)\n", c, a, (float) a / (float) c);   <* 
+    *> /+---(complete)-----------------------+/                                                       <* 
+    *> return 0;                                                                                      <*/
 }
 
 char
 DICT_list_all      (void)
 {
-   /*---(locals)-----------+-----+-----+-*/
-   int         i           =    0;
-   int         a           =    0;
-   int         c           =    0;
-   char        t           [LEN_FULL]  = "";
-   char        n           [LEN_SHORT] = "";
-   char        e           [LEN_TITLE] = "";
-   char        g           [LEN_TITLE] = "";
-   tWORD       *x_curr      = NULL;
-   /*---(search)-------------------------*/
-   WORDS_eng_by_index  (a, &x_curr);
-   while (x_curr != NULL) {
-      WORDS_detail (x_curr, t);
-      strlpadn (++a, n, '.', '<', 5);
-      printf ("%5.5s··%s\n", n, t);
-      WORDS_eng_by_index (a, &x_curr);
-   }
-   /*---(complete)-----------------------*/
-   return 0;
+   /*> /+---(locals)-----------+-----+-----+-+/                                       <* 
+    *> int         i           =    0;                                                <* 
+    *> int         a           =    0;                                                <* 
+    *> int         c           =    0;                                                <* 
+    *> char        t           [LEN_FULL]  = "";                                      <* 
+    *> char        n           [LEN_SHORT] = "";                                      <* 
+    *> char        e           [LEN_TITLE] = "";                                      <* 
+    *> char        g           [LEN_TITLE] = "";                                      <* 
+    *> tWORD       *x_curr      = NULL;                                               <* 
+    *> /+---(search)-------------------------+/                                       <* 
+    *> WORDS_eng_by_index  (a, &x_curr);                                              <* 
+    *> while (x_curr != NULL) {                                                       <* 
+    *>    WORDS_detail (x_curr, t);                                                   <* 
+    *>    strlpadn (++a, n, '.', '<', 5);                                             <* 
+    *>    printf ("%5.5s··%s\n", n, t);                                               <* 
+    *>    WORDS_eng_by_index (a, &x_curr);                                            <* 
+    *> }                                                                              <* 
+    *> /+---(complete)-----------------------+/                                       <* 
+    *> return 0;                                                                      <*/
 }
-
-/*>                                                                                                                                                                                           <* 
- *>    /+--name-- --suffix---- --also-- ---source-- ---true-endings----------------------------------------- ---examples------------------------------------------------------------ cnt +/   <* 
- *>    { "´"     , ">·´"      , ""     , '5',  29  , "-ing, -thing"                                         , "observing, caring, drinking, knowing, liking, using, forgetting"     , 0 },    <* 
- *>                                                                                                                                                                                           <*/
-
 
 char
 DICT_dump_words         (FILE *f)
 {
-   /*---(locals)-----------+-----+-----+-*/
-   int         i           =    0;
-   int         a           =    0;
-   int         c           =    0;
-   char        t           [LEN_FULL]  = "";
-   char        n           [LEN_SHORT] = "";
-   char        e           [LEN_TITLE] = "";
-   char        g           [LEN_TITLE] = "";
-   char        x_col       =    0;
-   tWORD      *x_curr      = NULL;
-   tWORD      *x_sub       = NULL;
-   /*---(header)---------------------------*/
-   DEBUG_CONF   yLOG_enter   (__FUNCTION__);
-   fprintf (f, "##   %s %s\n", P_NAMESAKE, P_HERITAGE);
-   fprintf (f, "##   version %s, %s\n", P_VERNUM, P_VERTXT);
-   fprintf (f, "##   inventory of dictionary words\n");
-   fprintf (f, "\n");
-   fprintf (f, "#@ style     V = printable columnar values\n");
-   fprintf (f, "#@ x-parse  14åÏ---···Ï-----------------------··Ï---·Ï---·Ï·Ï··Ï·Ï·Ï--··Ï·Ï---··Ï-----------------------··Ï----------------------------------·æ\n");
-   fprintf (f, "#@ titles     åref····english···················line·var··p·s··s·c·pg···g·freq··gregg·····················shown·······························æ\n");
-   fprintf (f, "\n");
-   WORDS_eng_by_index  (a, &x_curr);
-   while (x_curr != NULL) {
-      if (strcmp (x_curr->w_vary, "<") == 0) {
-         DEBUG_CONF   yLOG_info    ("base"      , x_curr->w_english);
-         WORDS_detail (x_curr, t);
-         DEBUG_CONF   yLOG_info    ("t"         , t);
-         strlpadn (++c, n, '.', '<', 5);
-         if (i %  5 == 0)  fprintf (f, "\n");
-         if (i % 25 == 0)  fprintf (f, "##-····---english--------------··line·var··p·s··s·c·pg···g·freq··---gregg----------------··---shown---------------------------\n\n");
-         i++;
-         fprintf (f, "%5.5s··%s\n", n, t);
-         x_sub = x_curr->w_next;
-         x_col = 0;
-         while (x_sub != NULL) {
-            DEBUG_CONF   yLOG_info    ("vary"      , x_sub->w_english);
-            WORDS_detail (x_sub, t);
-            DEBUG_CONF   yLOG_info    ("t"         , t);
-            if (i %  5 == 0)  fprintf (f, "\n");
-            if (i % 25 == 0)  fprintf (f, "##-····---english--------------··line·var··p·s··s·c·pg···g·freq··---gregg----------------··---shown---------------------------\n\n");
-            i++;
-            fprintf (f, "    %c  %s\n", ++x_col + 'a', t);
-            x_sub  = x_sub->w_next;
+   /*> /+---(locals)-----------+-----+-----+-+/                                                                                                                                        <* 
+    *> int         i           =    0;                                                                                                                                                 <* 
+    *> int         a           =    0;                                                                                                                                                 <* 
+    *> int         c           =    0;                                                                                                                                                 <* 
+    *> char        t           [LEN_FULL]  = "";                                                                                                                                       <* 
+    *> char        n           [LEN_SHORT] = "";                                                                                                                                       <* 
+    *> char        e           [LEN_TITLE] = "";                                                                                                                                       <* 
+    *> char        g           [LEN_TITLE] = "";                                                                                                                                       <* 
+    *> char        x_col       =    0;                                                                                                                                                 <* 
+    *> tWORD      *x_curr      = NULL;                                                                                                                                                 <* 
+    *> tWORD      *x_sub       = NULL;                                                                                                                                                 <* 
+    *> /+---(header)---------------------------+/                                                                                                                                      <* 
+    *> DEBUG_CONF   yLOG_enter   (__FUNCTION__);                                                                                                                                       <* 
+    *> fprintf (f, "##   %s %s\n", P_NAMESAKE, P_HERITAGE);                                                                                                                            <* 
+    *> fprintf (f, "##   version %s, %s\n", P_VERNUM, P_VERTXT);                                                                                                                       <* 
+    *> fprintf (f, "##   inventory of dictionary words\n");                                                                                                                            <* 
+    *> fprintf (f, "\n");                                                                                                                                                              <* 
+    *> fprintf (f, "#@ style     V = printable columnar values\n");                                                                                                                    <* 
+    *> fprintf (f, "#@ x-parse  14åÏ---···Ï-----------------------··Ï---·Ï---·Ï·Ï··Ï·Ï·Ï--··Ï·Ï---··Ï-----------------------··Ï----------------------------------·æ\n");               <* 
+    *> fprintf (f, "#@ titles     åref····english···················line·var··p·s··s·c·pg···g·freq··gregg·····················shown·······························æ\n");               <* 
+    *> fprintf (f, "\n");                                                                                                                                                              <* 
+    *> WORDS_eng_by_index  (a, &x_curr);                                                                                                                                               <* 
+    *> while (x_curr != NULL) {                                                                                                                                                        <* 
+    *>    if (strcmp (x_curr->w_vary, "<") == 0) {                                                                                                                                     <* 
+    *>       DEBUG_CONF   yLOG_info    ("base"      , x_curr->w_english);                                                                                                              <* 
+    *>       WORDS_detail (x_curr, t);                                                                                                                                                 <* 
+    *>       DEBUG_CONF   yLOG_info    ("t"         , t);                                                                                                                              <* 
+    *>       strlpadn (++c, n, '.', '<', 5);                                                                                                                                           <* 
+    *>       if (i %  5 == 0)  fprintf (f, "\n");                                                                                                                                      <* 
+    *>       if (i % 25 == 0)  fprintf (f, "##-····---english--------------··line·var··p·s··s·c·pg···g·freq··---gregg----------------··---shown---------------------------\n\n");      <* 
+    *>       i++;                                                                                                                                                                      <* 
+    *>       fprintf (f, "%5.5s··%s\n", n, t);                                                                                                                                         <* 
+    *>       x_sub = x_curr->w_next;                                                                                                                                                   <* 
+    *>       x_col = 0;                                                                                                                                                                <* 
+    *>       while (x_sub != NULL) {                                                                                                                                                   <* 
+    *>          DEBUG_CONF   yLOG_info    ("vary"      , x_sub->w_english);                                                                                                            <* 
+    *>          WORDS_detail (x_sub, t);                                                                                                                                               <* 
+    *>          DEBUG_CONF   yLOG_info    ("t"         , t);                                                                                                                           <* 
+    *>          if (i %  5 == 0)  fprintf (f, "\n");                                                                                                                                   <* 
+    *>          if (i % 25 == 0)  fprintf (f, "##-····---english--------------··line·var··p·s··s·c·pg···g·freq··---gregg----------------··---shown---------------------------\n\n");   <* 
+    *>          i++;                                                                                                                                                                   <* 
+    *>          fprintf (f, "    %c  %s\n", ++x_col + 'a', t);                                                                                                                         <* 
+    *>          x_sub  = x_sub->w_next;                                                                                                                                                <* 
+    *>       }                                                                                                                                                                         <* 
+    *>    }                                                                                                                                                                            <* 
+    *>    ++a;                                                                                                                                                                         <* 
+    *>    WORDS_eng_by_index (a, &x_curr);                                                                                                                                             <* 
+    *> }                                                                                                                                                                               <* 
+    *> fprintf (f, "\n");                                                                                                                                                              <* 
+    *> fprintf (f, "##-····---english--------------··line·var··p·s··s·c·pg···g·freq··---gregg----------------··---shown---------------------------\n\n");                              <* 
+    *> fprintf (f, "## found %d primaries and %d total words (%4.2fx)\n", c, a, (float) a / (float) c);                                                                                <* 
+    *> /+---(complete)-------------------------+/                                                                                                                                      <* 
+    *> DEBUG_CONF   yLOG_exit    (__FUNCTION__);                                                                                                                                       <* 
+    *> return 0;                                                                                                                                                                       <*/
+}
+
+/*> char                                                                                                                                                                         <* 
+ *> DICT_paginate_OLD       (void)                                                                                                                                               <* 
+ *> {                                                                                                                                                                            <* 
+ *>    tWORD      *x_word      = NULL;                                                                                                                                           <* 
+ *>    tWORD      *x_last      = NULL;                                                                                                                                           <* 
+ *>    short       i           =    0;                                                                                                                                           <* 
+ *>    short       c           =    0;                                                                                                                                           <* 
+ *>    short       p           =    0;                                                                                                                                           <* 
+ *>    /+---(header)-------------------------+/                                                                                                                                  <* 
+ *>    DEBUG_GRAF   yLOG_enter   (__FUNCTION__);                                                                                                                                 <* 
+ *>    /+---(basic inputs)-------------------+/                                                                                                                                  <* 
+ *>    DEBUG_GRAF   yLOG_value   ("ppage"     , my.w_ppage);                                                                                                                     <* 
+ *>    /+---(clear paging)-------------------+/                                                                                                                                  <* 
+ *>    for (i = 0; i < MAX_PAGES; ++i)  g_pages [i] = g_lasts [i] = NULL;                                                                                                        <* 
+ *>    /+---(paginate)-----------------------+/                                                                                                                                  <* 
+ *>    WORDS_eng_by_cursor (YDLST_HEAD, &x_word);                                                                                                                                <* 
+ *>    i = 0;                                                                                                                                                                    <* 
+ *>    while (x_word != NULL) {                                                                                                                                                  <* 
+ *>       DEBUG_GRAF   yLOG_complex ("x_word"    , "%4d %4d %4d %-15.15s %-5.5s %-15.15s %s", p, i++, c, x_word->w_english, x_word->w_vary, x_word->w_gregg, x_word->w_shown);   <* 
+ *>       if (my.baseonly == '-' || x_word->w_vary [0] == '<') {                                                                                                                 <* 
+ *>          if (my.nopre == '-' || strchr (x_word->w_gregg, '<') == NULL)  {                                                                                                    <* 
+ *>             if (c % my.w_ppage == 0) {                                                                                                                                       <* 
+ *>                DEBUG_GRAF   yLOG_complex ("NEW PAGE"  , "%4d, %s", p, x_word->w_english);                                                                                    <* 
+ *>                g_pages [p] = x_word;                                                                                                                                         <* 
+ *>                if (p > 0) {                                                                                                                                                  <* 
+ *>                   DEBUG_GRAF   yLOG_complex ("add last"  , "%4d, %s", p - 1, x_last->w_english);                                                                             <* 
+ *>                   g_lasts [p - 1] = x_last;                                                                                                                                  <* 
+ *>                }                                                                                                                                                             <* 
+ *>                ++p;                                                                                                                                                          <* 
+ *>             }                                                                                                                                                                <* 
+ *>             x_last = x_word;                                                                                                                                                 <* 
+ *>             DEBUG_GRAF   yLOG_info    ("x_last"    , x_last->w_english);                                                                                                     <* 
+ *>             ++c;                                                                                                                                                             <* 
+ *>          } else {                                                                                                                                                            <* 
+ *>             DEBUG_GRAF   yLOG_note    ("SKIP, prefixed base");                                                                                                               <* 
+ *>          }                                                                                                                                                                   <* 
+ *>       } else {                                                                                                                                                               <* 
+ *>          DEBUG_GRAF   yLOG_note    ("SKIP, not a base");                                                                                                                     <* 
+ *>       }                                                                                                                                                                      <* 
+ *>       WORDS_eng_by_cursor (YDLST_NEXT, &x_word);                                                                                                                             <* 
+ *>    }                                                                                                                                                                         <* 
+ *>    if (p > 0) {                                                                                                                                                              <* 
+ *>       g_lasts [p - 1] = x_last;                                                                                                                                              <* 
+ *>       DEBUG_GRAF   yLOG_complex ("add last"  , "%4d, %s", p - 1, x_last->w_english);                                                                                         <* 
+ *>    }                                                                                                                                                                         <* 
+ *>    /+---(update globals)-----------------+/                                                                                                                                  <* 
+ *>    my.w_npage   = p;                                                                                                                                                         <* 
+ *>    my.w_entries = c;                                                                                                                                                         <* 
+ *>    DEBUG_GRAF   yLOG_complex ("dict page" , "%3dp, %3dn, %3dc, %3de", my.w_ppage, my.w_npage, my.w_cpage, my.w_entries);                                                     <* 
+ *>    /+---(complete)-----------------------+/                                                                                                                                  <* 
+ *>    DEBUG_GRAF   yLOG_exit    (__FUNCTION__);                                                                                                                                 <* 
+ *>    return 0;                                                                                                                                                                 <* 
+ *> }                                                                                                                                                                            <*/
+
+char
+DICT_paginate           (void)
+{
+   tDICT      *x_word      = NULL;
+   tDICT      *x_last      = NULL;
+   short       i           =    0;
+   short       c           =    0;
+   short       p           =    0;
+   /*---(header)-------------------------*/
+   DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
+   /*---(basic inputs)-------------------*/
+   DEBUG_GRAF   yLOG_value   ("ppage"     , my.w_ppage);
+   /*---(clear paging)-------------------*/
+   for (i = 0; i < MAX_PAGES; ++i)  g_pages [i] = g_lasts [i] = NULL;
+   /*---(paginate)-----------------------*/
+   DICT__by_cursor (YDLST_HEAD, &x_word);
+   i = 0;
+   while (x_word != NULL) {
+      DEBUG_GRAF   yLOG_complex ("x_word"    , "%4d %4d %4d %-15.15s %-15.15s", p, i++, c, x_word->d_english, x_word->d_gregg);
+      /*---(prefix filtering)------------*/
+      /*> if (my.nopre    == 'y' || x_word->d_prefix != NULL)  {                      <* 
+       *>    DEBUG_GRAF   yLOG_note    ("SKIP, prefixed word");                       <* 
+       *>    DICT__by_cursor (YDLST_NEXT, &x_word);                                   <* 
+       *>    continue;                                                                <* 
+       *> }                                                                           <*/
+      /*---(suffix filtering)------------*/
+      /*> if (my.baseonly == 'y' || x_word->d_suffix != NULL) {                       <* 
+       *>    DEBUG_GRAF   yLOG_note    ("SKIP, not a base/root");                     <* 
+       *>    DICT__by_cursor (YDLST_NEXT, &x_word);                                   <* 
+       *>    continue;                                                                <* 
+       *> }                                                                           <*/
+      /*---(check for new page)----------*/
+      if (c % my.w_ppage == 0) {
+         DEBUG_GRAF   yLOG_complex ("NEW PAGE"  , "%4d, %s", p, x_word->d_english);
+         g_pages [p] = x_word;
+         /*---(end of prev page)---------*/
+         if (p > 0) {
+            DEBUG_GRAF   yLOG_complex ("add last"  , "%4d, %s", p - 1, x_last->d_english);
+            g_lasts [p - 1] = x_last;
          }
+         ++p;
       }
-      ++a;
-      WORDS_eng_by_index (a, &x_curr);
+      /*---(next word)-------------------*/
+      x_last = x_word;
+      ++c;
+      DICT__by_cursor (YDLST_NEXT, &x_word);
+      /*---(done)------------------------*/
    }
-   fprintf (f, "\n");
-   fprintf (f, "##-····---english--------------··line·var··p·s··s·c·pg···g·freq··---gregg----------------··---shown---------------------------\n\n");
-   fprintf (f, "## found %d primaries and %d total words (%4.2fx)\n", c, a, (float) a / (float) c);
-   /*---(complete)-------------------------*/
-   DEBUG_CONF   yLOG_exit    (__FUNCTION__);
+   /*---(finish last page)---------------*/
+   if (p > 0) {
+      g_lasts [p - 1] = x_last;
+      DEBUG_GRAF   yLOG_complex ("add last"  , "%4d, %s", p - 1, x_last->d_english);
+   }
+   /*---(update globals)-----------------*/
+   my.w_npage   = p;
+   my.w_entries = c;
+   DEBUG_GRAF   yLOG_complex ("dict page" , "%3dp, %3dn, %3dc, %3de", my.w_ppage, my.w_npage, my.w_cpage, my.w_entries);
+   /*---(complete)-----------------------*/
+   DEBUG_GRAF   yLOG_exit    (__FUNCTION__);
    return 0;
 }
 
 char
-DICT_dump_gregg         (FILE *f)
+DICT_page_ends          (int a_page, char r_beg [LEN_TITLE], char r_end [LEN_TITLE])
 {
-   /*---(locals)-----------+-----+-----+-*/
-   int         x_pos       =    0;
-   int         x_gregg     =    0;
-   int         i           =    0;
-   int         a           =    0;
-   int         c           =    0;
-   char        r           [LEN_SHORT] = "";
-   char        s           [LEN_SHORT] = "";
-   char        t           [LEN_SHORT] = "";
-   char        u           [LEN_SHORT] = "";
-   char        v           [LEN_SHORT] = "";
-   char        x_col       =    0;
-   tWORD      *x_curr      = NULL;
-   /*---(header)-------------------------*/
-   DEBUG_CONF   yLOG_enter   (__FUNCTION__);
-   WORDS_eng_by_index  (a, &x_curr);
-   while (x_curr != NULL) {
-      if (strcmp (x_curr->w_vary, "<") != 0) {
-         WORDS_eng_by_index (++a, &x_curr);
-         continue;
-      }
-      if (x_curr->w_tree [0] > 0)  sprintf (r, "%02d" , x_curr->w_tree [0]);
-      else                         strcpy  (r, "  ");
-      if (x_curr->w_tree [1] > 0)  sprintf (s, "·%02d", x_curr->w_tree [1]);
-      else                         strcpy  (s, "   ");
-      if (x_curr->w_tree [2] > 0)  sprintf (t, "·%02d", x_curr->w_tree [2]);
-      else                         strcpy  (t, "   ");
-      if (x_curr->w_tree [3] > 0)  sprintf (u, "·%02d", x_curr->w_tree [3]);
-      else                         strcpy  (u, "   ");
-      if (x_curr->w_tree [4] > 0)  sprintf (v, "·%02d", x_curr->w_tree [4]);
-      else                         strcpy  (v, "   ");
-      fprintf (f, "%2s%2s%2s%2s%2s  %-20.20s  %s\n", r, s, t, u, v, x_curr->w_gregg, x_curr->w_english);
-      WORDS_eng_by_index (++a, &x_curr);
-   }
-   /*---(complete)-----------------------*/
-   DEBUG_CONF   yLOG_exit    (__FUNCTION__);
-   return 0;
+   char        rce         =  -10;
+   tDICT      *x_end       = NULL;
+   if (r_beg != NULL)  strcpy (r_beg, "");
+   if (r_end != NULL)  strcpy (r_end, "");
+   --rce;  if (a_page < 0)              return rce;
+   --rce;  if (a_page >= my.w_npage)    return rce;
+   x_end = (tDICT *) g_pages [a_page];
+   if (r_beg != NULL)  strlcpy (r_beg, x_end->d_english, LEN_TITLE);
+   x_end = (tDICT *) g_lasts [a_page];
+   if (r_end != NULL)  strlcpy (r_end, x_end->d_english, LEN_TITLE);
+   return my.w_ppage;
 }
 
 

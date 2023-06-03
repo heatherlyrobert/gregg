@@ -37,8 +37,8 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "5.--= generalization for broader use"
 #define     P_VERMINOR  "5.6 = build out for fast, focused database"
-#define     P_VERNUM    "5.6c"
-#define     P_VERTXT    "suffix coding is looking sweet and unit tested"
+#define     P_VERNUM    "5.6d"
+#define     P_VERTXT    "dictionary unit testing is successful"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -268,7 +268,6 @@
 #include    <yJOBS.h>             /* heatherly job execution and control      */
 #include    <yEXEC.h>             /* heatherly job execution and control      */
 #include    <yDLST_solo.h>   /* heatherly                                     */
-
 
 
 #define     B_BASE         'b'
@@ -928,8 +927,8 @@ struct cWORD {
 
 
 #define   MAX_PAGES      100
-extern tWORD    *g_pages [MAX_PAGES];
-extern tWORD    *g_lasts [MAX_PAGES];
+extern void     *g_pages [MAX_PAGES];
+extern void     *g_lasts [MAX_PAGES];
 
 extern     char      g_print     [LEN_RECD];
 
@@ -1236,7 +1235,6 @@ char        WORDS_drawn_fix_OLD     (uchar *a_index, short a_drawn []);
 
 int         words_outstring         (char *);
 
-int         WORDS_find             (char* a_word);
 char        WORDS_start            (void);
 char        WORDS_outline          (int   a_index, char a_base);
 char        WORDS_display          (char* a_words, char a_base);
@@ -1360,32 +1358,24 @@ char        DICT__by_index          (int n, void **r_dict);
 char        DICT__by_cursor         (char a_dir, void **r_dict);
 /*---(debugging)------------*/
 char        DICT__detail            (void *a_dict, char a_out [LEN_FULL]);
-char*       DICT__pointer           (short n, void *a_dict);
+char*       DICT__pointer           (int n, void *a_dict);
 char*       DICT__entry             (int n);
 /*---(creation)-------------*/
 char        DICT_create             (cchar a_english [LEN_TITLE], cchar a_gregg [LEN_TITLE], void *a_prefix, void *a_base, void *a_suffix, void **r_dict);
 /*---(reading)--------------*/
-char        DICT__read              (FILE *a_file, short *r_line, char r_prefixes [LEN_HUND], char r_recd [LEN_RECD]);
+char        DICT__suffixes          (void *a_base, void *a_prefix, cchar a_gregg [LEN_TITLE]);
+char        DICT__prefixes          (void *a_base, cchar a_english [LEN_TITLE], cchar a_gregg [LEN_TITLE], cchar a_prefixes [LEN_HUND]);
 char        DICT__split             (uchar *a_recd);
 char        DICT__base              (short a_line, cchar a_recd [LEN_RECD], char r_english [LEN_TITLE], char r_gregg [LEN_TITLE], void **r_base);
-char        DICT__prefixes          (void *a_base, cchar a_english [LEN_TITLE], cchar a_gregg [LEN_TITLE], cchar a_prefixes [LEN_HUND]);
-/*---(done)-----------------*/
-char        DICT__primary           (short a_line, cchar a_english [LEN_TITLE], cchar a_gregg [LEN_TITLE], cchar a_cats [LEN_TITLE], tWORD **r_word);
-/*> char        DICT__category_five     (tWORD *a_new, char l, cchar *a_cats);        <* 
- *> char        DICT__category_six      (tWORD *a_new, char l, cchar *a_cats);        <* 
- *> char        DICT__category_preview  (cchar *a_cats);                              <* 
- *> char        DICT__category          (tWORD *a_new, cchar *a_cats);                <*/
-char        DICT__variation_quick   (tWORD *a_base, tWORD *a_last, char a_english [LEN_TITLE], char a_vary [LEN_TERSE], char a_prefix [LEN_TERSE], char a_suffix [LEN_TERSE], tWORD **r_new);
-/*> char        DICT__var_english       (char a_english [LEN_TITLE], char a_change [LEN_TERSE], char r_update [LEN_TITLE]);   <*/
-char        DICT__variation         (tWORD *a_base, tWORD *a_last, cchar a_english [LEN_TERSE], cchar a_gregg [LEN_TERSE], cchar *a_vary, tWORD **r_new);
-char        DICT__parse             (short a_line, cchar a_eprefix [LEN_LABEL], cchar a_recd [LEN_RECD]);
-char        DICT__parse_easy        (short a_line, cchar a_recd [LEN_RECD]);
-char        DICT__pre_update        (char b_prefix [LEN_LABEL], char b_english [LEN_TITLE]);
+char        DICT__read              (FILE *a_file, short *r_line, char r_prefixes [LEN_HUND], char r_recd [LEN_RECD]);
 char        DICT_import             (cchar a_name [LEN_PATH]);
+/*---(reporting)------------*/
 char        DICT_list               (void);
 char        DICT_list_all           (void);
 char        DICT_dump_words         (FILE *f);
-char        DICT_dump_gregg         (FILE *f);
+char        DICT_paginate           (void);
+char        DICT_page_ends          (int a_page, char r_beg [LEN_TITLE], char r_end [LEN_TITLE]);
+/*---(done)-----------------*/
 
 
 char        gregg_yjobs             (cchar a_req, cchar *a_data);
@@ -1625,6 +1615,8 @@ char        BASE__prepare           (short a_line, cchar a_english [LEN_TITLE], 
 char        BASE__populate          (void *a_new, char a_file, short a_line, char a_english [LEN_TITLE], char a_gregg [LEN_TITLE]);
 char        BASE_create             (char a_file, short a_line, cchar a_english [LEN_TITLE], cchar a_gregg [LEN_TITLE], cchar a_cats [LEN_TITLE], void **r_base);
 char        BASE_add_dict           (void *a_base, void *a_dict);
+/*---(reporting)------------*/
+char        BASE_dump_tree          (FILE *f);
 /*---(done)-----------------*/
 
 

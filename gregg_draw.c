@@ -211,7 +211,7 @@ DRAW_wrap            (void)
    DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
    /*---(stuff)--------------------------*/
    rc = PAGE_free    ();
-   rc = FONT__free       ();
+   rc = FONT__free   ();
    /*---(complete)-----------------------*/
    DEBUG_GRAF   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -227,10 +227,13 @@ static void      o___PANELS__________________o (void) {;}
 char
 DRAW_dictionary         (void)
 {
+   char        rc         = 0;
    short       x_min, x_max, x_wide, y_min, y_max, y_tall;
    short       x_cen, y_mid;
    short       z           = 0;
    char        t           [LEN_TITLE] = "";
+   char        x_beg       [LEN_TITLE] = "";
+   char        x_end       [LEN_TITLE] = "";
    yVIEW_bounds  (YVIEW_MAIN, NULL, NULL, &x_min, &x_max, &x_wide, &y_min, &y_max, &y_tall);
    x_cen = x_min + (x_max - x_min) / 2.0;
    y_mid = y_min + (y_max - y_min) / 2.0;
@@ -313,13 +316,8 @@ DRAW_dictionary         (void)
          glVertex3f (x_cen     , y_mid - 10, z);
       } glEnd();
    } glPopMatrix   ();
-   if (g_pages [my.w_cpage] != NULL) {
-      strlcpy (t, g_pages [my.w_cpage]->w_english, LEN_TITLE);
-   }
-   if (g_lasts [my.w_cpage] != NULL) {
-      strlcat (t, " - "               , LEN_TITLE);
-      strlcat (t, g_lasts [my.w_cpage]->w_english, LEN_TITLE);
-   }
+   rc = DICT_page_ends (my.w_cpage, x_beg, x_end);
+   if (rc >= 0)  sprintf (t, "%s - %s", x_beg, x_end);
    /*> glColor4f (0.0, 0.0, 0.0, 1.0);                                                <*/
    glPushMatrix    (); {
       glTranslatef (x_cen, y_max - 15, 150);

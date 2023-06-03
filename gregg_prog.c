@@ -412,7 +412,7 @@ PROG_dawn          (void)
    }
    rc = yFILE_dump_add  ("suffix", "", "inventory of all allowed word suffixes", SUFFIX_dump);
    rc = yFILE_dump_add  ("words" , "", "all words in dictionary"               , DICT_dump_words);
-   rc = yFILE_dump_add  ("gregg" , "", "word tree by gregg letters"            , DICT_dump_gregg);
+   rc = yFILE_dump_add  ("gregg" , "", "base word tree by gregg letters"       , BASE_dump_tree);
    yCMD_direct (":layout min");
    /*> yVIKEYS_view_option (YVIKEYS_BUFFER, "file" , OUT_status, "current file name and stats");   <*/
    /*> yCMDS_direct (":buffer file");                                                 <*/

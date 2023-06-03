@@ -488,7 +488,7 @@ DB_read                 (void)
    DEBUG_OUTP   yLOG_complex ("actual"    , "A  %4df  %4db  %4dw  /  R  %4df  %4db  %4dw  /  Y  %4de  %4dg  %4du  %4dt", my.a_nfile, my.a_nbase, my.a_nword, my.r_nfile, my.r_nbase, my.r_nword, ySORT_count (B_ENGLISH), ySORT_count (B_GREGG), ySORT_count (B_UNIQUE), ySORT_count (B_BASE));
    yURG_msg ('-', "actual %4df  %4db  %4dw", my.a_nfile, my.a_nbase, my.a_nword);
    /*---(paginate)-----------------------*/
-   DLIST_paginate ();
+   DICT_paginate ();
    yURG_msg ('-', "data paginated");
    yMAP_refresh_full ();
    yURG_msg ('-', "refresh mapping");
