@@ -2,9 +2,12 @@
 #include "gregg.h"
 
 
-
-char  g_files       [LEN_DESC][LEN_HUND];
-
+typedef   struct cFILES tFILES;
+struct cFILES {
+   char        name        [LEN_HUND];
+   short       count;
+};
+static tFILES  s_files       [LEN_DESC];
 
 
 /*====================------------------------------------====================*/
@@ -51,7 +54,8 @@ DB_source_add           (char a_file [LEN_HUND])
       return rce;
    }
    /*---(copy)---------------------------*/
-   strlcpy (g_files [my.r_nfile], a_file, LEN_HUND);
+   strlcpy (s_files [my.r_nfile].name, a_file, LEN_HUND);
+   s_files [my.r_nfile].count = 0;
    ++my.r_nfile;
    /*---(complete)-----------------------*/
    DEBUG_CONF   yLOG_exit    (__FUNCTION__);
@@ -67,14 +71,14 @@ DB_source_purge         (void)
    DEBUG_CONF   yLOG_enter   (__FUNCTION__);
    /*---(remove)-------------------------*/
    for (i = 0; i < LEN_DESC; ++i) {
-      strlcpy (g_files [i], "", LEN_HUND);
+      strlcpy (s_files [i].name, "", LEN_HUND);
+      s_files [i].count = 0;
    }
    my.r_nfile = 0;
    /*---(complete)-----------------------*/
    DEBUG_CONF   yLOG_exit    (__FUNCTION__);
    return 0;
 }
-
 
 char
 DB__source_write        (FILE *a_file)
@@ -87,13 +91,15 @@ DB__source_write        (FILE *a_file)
    /*---(remove)-------------------------*/
    DEBUG_OUTP   yLOG_value   ("r_nfile"   , my.r_nfile);
    for (i = 0; i < my.r_nfile; ++i) {
-      DEBUG_OUTP   yLOG_info    ("write"     , g_files [i]);
-      fwrite (g_files [i], LEN_HUND, 1, a_file);
+      DEBUG_OUTP   yLOG_info    ("write"     , s_files [i].name);
+      fwrite (s_files [i].name, LEN_HUND, 1, a_file);
    }
    /*---(complete)-----------------------*/
    DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
    return 0;
 }
+
+short DB_source_inc      (void)  { return ++(s_files [my.r_nfile - 1].count); }
 
 char
 DB__source_read         (int n, FILE *a_file)
@@ -543,6 +549,29 @@ DB_stats                (void)
    /*---(complete)-----------------------*/
    DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
    return 0;
+}
+
+
+
+/*====================------------------------------------====================*/
+/*===----                         debugging                            ----===*/
+/*====================------------------------------------====================*/
+static void  o___DEBUGGING_______o () { return; }
+
+char DB__source_count   (void)  { return my.r_nfile; }
+
+char*
+DB__source_detail       (char n)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   /*---(defense)------------------------*/
+   strcpy (g_print, "n/a");
+   if (n <  0 || n >= my.r_nfile)  return g_print;
+   /*---(prepare)------------------------*/
+   sprintf (g_print, "%-2d  %-5d  %s", n, s_files [n].count, s_files [n].name);
+   /*---(complete)-----------------------*/
+   return g_print;
 }
 
 

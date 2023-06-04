@@ -37,8 +37,8 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "5.--= generalization for broader use"
 #define     P_VERMINOR  "5.6 = build out for fast, focused database"
-#define     P_VERNUM    "5.6d"
-#define     P_VERTXT    "dictionary unit testing is successful"
+#define     P_VERNUM    "5.6e"
+#define     P_VERTXT    "sources and dictionary importing user tested"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -880,11 +880,6 @@ extern tOUTLINE  o;
 
 
 
-
-extern char  g_files     [LEN_DESC][LEN_HUND];
-
-
-
 /*---(words structure)--------------------------*/
 #define  MAX_WORDS      5000
 #define  MAX_LEN          30
@@ -926,9 +921,6 @@ struct cWORD {
 };
 
 
-#define   MAX_PAGES      100
-extern void     *g_pages [MAX_PAGES];
-extern void     *g_lasts [MAX_PAGES];
 
 extern     char      g_print     [LEN_RECD];
 
@@ -1366,7 +1358,7 @@ char        DICT_create             (cchar a_english [LEN_TITLE], cchar a_gregg 
 char        DICT__suffixes          (void *a_base, void *a_prefix, cchar a_gregg [LEN_TITLE]);
 char        DICT__prefixes          (void *a_base, cchar a_english [LEN_TITLE], cchar a_gregg [LEN_TITLE], cchar a_prefixes [LEN_HUND]);
 char        DICT__split             (uchar *a_recd);
-char        DICT__base              (short a_line, cchar a_recd [LEN_RECD], char r_english [LEN_TITLE], char r_gregg [LEN_TITLE], void **r_base);
+char        DICT__base              (char a_file, short a_line, cchar a_recd [LEN_RECD], char r_english [LEN_TITLE], char r_gregg [LEN_TITLE], void **r_base);
 char        DICT__read              (FILE *a_file, short *r_line, char r_prefixes [LEN_HUND], char r_recd [LEN_RECD]);
 char        DICT_import             (cchar a_name [LEN_PATH]);
 /*---(reporting)------------*/
@@ -1494,6 +1486,7 @@ char        DB__head_write          (FILE *a_file, char a_label [LEN_TERSE], int
 char        DB__head_read           (FILE *a_file, char a_label [LEN_TERSE], int *a_var);
 /*---(sources)--------------*/
 char        DB_source_add           (char a_file [LEN_HUND]);
+short       DB_source_inc           (void);
 char        DB_source_purge         (void);
 char        DB__source_write        (FILE *a_file);
 char        DB__source_read         (int n, FILE *a_file);
@@ -1507,8 +1500,10 @@ char        DB__close               (FILE **b_file);
 /*---(driver)---------------*/
 char        DB_write                (void);
 char        DB_read                 (void);
+/*---(debugging)------------*/
+char        DB__source_count        (void);
+char*       DB__source_detail       (char n);
 /*---(done)-----------------*/
-
 
 
 /*===[[ gregg_prefix.c ]]=====================================================*/

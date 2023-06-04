@@ -68,13 +68,16 @@
 
 static char    s_name   [LEN_PATH]  = "/var/lib/gregg/gregg_manual.dict";
 
+
+
 char   s_fields  [MAX_FIELD][LEN_TITLE];
 char   s_nfield  = 0;
 
 
 
-void     *g_pages [MAX_PAGES];
-void     *g_lasts [MAX_PAGES];
+#define   MAX_PAGES      100
+static void     *s_pages [MAX_PAGES];
+static void     *s_lasts [MAX_PAGES];
 
 
 
@@ -100,6 +103,7 @@ DICT_init               (void)
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
    char        rc          =    0;
+   int         i           =    0;
    /*---(header)-------------------------*/
    DEBUG_CONF   yLOG_enter   (__FUNCTION__);
    /*---(initialize)---------------------*/
@@ -109,6 +113,8 @@ DICT_init               (void)
       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
+   /*---(files)--------------------------*/
+   DB_source_purge ();
    /*---(complete)-----------------------*/
    DEBUG_CONF   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -296,39 +302,61 @@ char   DICT__by_cursor     (char a_dir, void **r_dict)       { return ySORT_by_c
 static void  o___DEBUGGING_______o () { return; }
 
 char
-DICT__detail            (void *a_dict, char a_out [LEN_FULL])
+DICT__detail_full       (void *a_dict, char a_style, char a_out [LEN_FULL])
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
    tDICT      *x_dict      = NULL;
+   tBASE      *x_base      = NULL;
    char        s           [LEN_TITLE] = " ·åæ";
    char        t           [LEN_TITLE] = " ·åæ";
    char        u           [LEN_DESC]  = " ·åæ";
    char        v           [LEN_TITLE] = "·";
    char        w           [LEN_TITLE] = "·";
+   char        x           [LEN_TITLE] = "·";
    /*---(defense)------------------------*/
    --rce;  if (a_out  == NULL)  return rce;
    strcpy (a_out, "");
    if (a_dict == NULL)          return 0;
    /*---(cast)---------------------------*/
    x_dict  = (tDICT *) a_dict;
+   x_base  = (tBASE *) (x_dict->d_base);
    /*---(prepare)------------------------*/
-   sprintf  (s, "%2då%.20sæ", strlen (x_dict->d_english), x_dict->d_english);
-   sprintf  (t, "%2då%.30sæ", strlen (x_dict->d_gregg)  , x_dict->d_gregg);
+   switch (a_style) {
+   case  't' :
+      sprintf  (s, "%2då%.20sæ", strlen (x_dict->d_english), x_dict->d_english);
+      sprintf  (t, "%2då%.30sæ", strlen (x_dict->d_gregg)  , x_dict->d_gregg);
+      break;
+   case  '-' :
+      sprintf  (s, "%.20s", x_dict->d_english);
+      sprintf  (t, "%.30s", x_dict->d_gregg);
+      break;
+   }
    sprintf  (u, "%-3.3sp %-3.3sb %-3.3ss", (x_dict->d_prefix == NULL) ? "···" : "SET", (x_dict->d_base == NULL) ? "···" : "SET", (x_dict->d_suffix == NULL) ? "···" : "SET");
    if (x_dict->d_prev != NULL)  strlcpy (v, x_dict->d_prev->d_english, LEN_TITLE);
    if (x_dict->d_next != NULL)  strlcpy (w, x_dict->d_next->d_english, LEN_TITLE);
+   if (x_base         != NULL)  strlcpy (x, x_base->b_english        , LEN_TITLE);
    /*---(consolidate)--------------------*/
-   sprintf (a_out, "%-24.24s  %-34.34s ´ %-14.14s ´ %-20.20s ´ %-20.20s ´", s, t, u, v, w);
+   switch (a_style) {
+   case  't' :
+      sprintf (a_out, "%-24.24s  %-34.34s ´ %-20.20s ´ %-14.14s ´ %-20.20s ´ %-20.20s ´", s, t, x, u, v, w);
+      break;
+   case  '-' :
+      sprintf (a_out, "%-20.20s  %-30.30s ´ %-20.20s ´ %-14.14s ´ %-20.20s ´ %-20.20s ´", s, t, x, u,  v, w);
+      break;
+   }
    /*---(complete)-----------------------*/
    return 0;
 }
+
+char DICT__detail       (void *a_dict, char a_out [LEN_FULL])   { return DICT__detail_full (a_dict, 't', a_out); }
+char DICT__dumper       (void *a_dict, char a_out [LEN_FULL])   { return DICT__detail_full (a_dict, '-', a_out); }
 
 char*
 DICT__pointer           (int n, void *a_dict)
 {
    char        t           [LEN_FULL]  = "";
-   DICT__detail (a_dict, t);
+   DICT__detail_full (a_dict, 't', t);
    if (strcmp (g_print, "") == 0)  strcpy  (g_print, "n/a");
    else                            sprintf (g_print, "%-5d %s", n, t);
    return g_print;
@@ -342,7 +370,7 @@ DICT__entry             (int n)
    static int  x_prev      =    0;
    if (n == YDLST_INC)  n = x_prev + 1;
    DICT__by_index (n, &x_dict);
-   DICT__detail (x_dict, t);
+   DICT__detail_full (x_dict, 't', t);
    if (strcmp (t, "") == 0)  strcpy  (g_print, "n/a");
    else                      sprintf (g_print, "%-5d %s", n, t);
    x_prev = n;
@@ -412,6 +440,8 @@ DICT_create             (cchar a_english [LEN_TITLE], cchar a_gregg [LEN_TITLE],
       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
+   /*---(add to source)------------------*/
+   DB_source_inc ();
    /*---(save-back)----------------------*/
    if (r_dict != NULL)  *r_dict = x_new;
    /*---(complete)-----------------------*/
@@ -472,7 +502,7 @@ DICT__split             (uchar *a_recd)
 }
 
 char
-DICT__base              (short a_line, cchar a_recd [LEN_RECD], char r_english [LEN_TITLE], char r_gregg [LEN_TITLE], void **r_base)
+DICT__base              (char a_file, short a_line, cchar a_recd [LEN_RECD], char r_english [LEN_TITLE], char r_gregg [LEN_TITLE], void **r_base)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
@@ -515,7 +545,7 @@ DICT__base              (short a_line, cchar a_recd [LEN_RECD], char r_english [
    else                   strlcpy (r_gregg, s_fields [4], LEN_TITLE);
    DEBUG_CONF   yLOG_complex ("gregg base", "%c, %-20.20s, %s", x_revised, r_english, r_gregg);
    /*---(base, sans-prefix)--------------*/
-   rc = BASE_create (my.r_nfile, a_line, r_english, r_gregg, s_fields [3], r_base);
+   rc = BASE_create (a_file, a_line, r_english, r_gregg, s_fields [3], r_base);
    DEBUG_CONF   yLOG_value   ("base"      , rc);
    --rce;  if (rc < 0) {
       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
@@ -629,12 +659,17 @@ DICT__prefixes          (void *a_base, cchar a_english [LEN_TITLE], cchar a_greg
          DEBUG_CONF   yLOG_note    ("handling prefix");
          strlcpy (x_english, a_english, LEN_TITLE);
          strlcpy (x_gregg  , a_gregg  , LEN_TITLE);
-         rc = PREFIX_driver (p, x_english, x_gregg, &x_point);
-         rc = DICT_create   (x_english, x_gregg, x_point, a_base, NULL, NULL);
+         rc = PREFIX_driver (x_prefix, x_english, x_gregg, &x_point);
          DEBUG_CONF   yLOG_complex ("prefix"    , "%4d, %-20.20s, %-20.20s, %p", rc, x_english, x_gregg, x_point);
          if (rc >= 0) {
-            rc = DICT__suffixes (a_base, x_point, x_gregg);
-            DEBUG_CONF   yLOG_value   ("suffixes"  , rc);
+            rc = DICT_create   (x_english, x_gregg, x_point, a_base, NULL, NULL);
+            DEBUG_CONF   yLOG_value   ("create"    , rc);
+            if (rc >= 0) {
+               rc = DICT__suffixes (a_base, x_point, x_gregg);
+               DEBUG_CONF   yLOG_value   ("suffixes"  , rc);
+            } else {
+               DEBUG_CONF   yLOG_complex ("FAILED"    , "%d, to create prefixed base word", rc);
+            }
          } else {
             DEBUG_CONF   yLOG_complex ("FAILED"    , "%d, to find prefix", rc);
          }
@@ -691,6 +726,11 @@ DICT__read              (FILE *a_file, short *r_line, char r_prefixes [LEN_HUND]
          return rce;
       }
       if (r_line != NULL)  ++(*r_line);
+      /*---(clean-up)--------------------*/
+      x_len = strlen (r_recd);
+      if (x_len < 20)          continue;
+      if (r_recd [x_len - 1] == '\n')  r_recd [--x_len] = '\0';
+      DEBUG_CONF   yLOG_info    ("r_recd"    , r_recd);
       /*---(filter)----------------------*/
       if (r_recd [0] == '\0')  continue;
       if (r_recd [0] == '#')   continue;
@@ -703,6 +743,7 @@ DICT__read              (FILE *a_file, short *r_line, char r_prefixes [LEN_HUND]
       if (p != NULL) {
          strlcpy (x_prefixes, p + 1, LEN_HUND);
          strltrim (x_prefixes, ySTR_BOTH, LEN_HUND);
+         DEBUG_CONF   yLOG_info    ("x_prefixes", x_prefixes);
          if (r_prefixes != NULL)   strlcpy (r_prefixes, x_prefixes, LEN_HUND);
          p [0] = '\0';
       }
@@ -711,11 +752,6 @@ DICT__read              (FILE *a_file, short *r_line, char r_prefixes [LEN_HUND]
       if (p != NULL)  p [0] = '\0';
       p = strchr (r_recd, '=');
       if (p != NULL)  p [0] = '\0';
-      /*---(clean-up)--------------------*/
-      x_len = strlen (r_recd);
-      if (x_len < 20)          continue;
-      if (r_recd [x_len - 1] == '\n')  r_recd [--x_len] = '\0';
-      DEBUG_CONF   yLOG_info    ("r_recd"    , r_recd);
       break;
       /*---(done)------------------------*/
    }
@@ -737,6 +773,7 @@ DICT_import             (cchar a_name [LEN_PATH])
    void       *x_base      = NULL;
    char        x_english   [LEN_TITLE] = "";
    char        x_gregg     [LEN_TITLE] = "";
+   char        x_file      =   0;
    /*---(begin)----------s-----------------*/
    DEBUG_CONF   yLOG_enter   (__FUNCTION__);
    yURG_msg ('>', "source å%sæ", a_name);
@@ -748,13 +785,16 @@ DICT_import             (cchar a_name [LEN_PATH])
       return rce;
    }
    yURG_msg ('-', "data source openned successfully");
+   /*---(add file)-------------------------*/
+   x_file = my.r_nfile;
+   DB_source_add (a_name);
    /*---(process)--------------------------*/
    while (1) {
       /*---(next)----------------*/
       rc = DICT__read     (f, &x_line, x_prefixes, x_recd);
       if (rc < 0)  break;
       /*---(create base)---------*/
-      rc = DICT__base     (x_line, x_recd, x_english, x_gregg, &x_base);
+      rc = DICT__base     (x_file, x_line, x_recd, x_english, x_gregg, &x_base);
       /*---(create base)---------*/
       rc = DICT__prefixes (x_base, x_english, x_gregg, x_prefixes);
       /*---(done)----------------*/
@@ -846,7 +886,7 @@ DICT_list_all      (void)
 }
 
 char
-DICT_dump_words         (FILE *f)
+DICT_dump_words_OLD     (FILE *f)
 {
    /*> /+---(locals)-----------+-----+-----+-+/                                                                                                                                        <* 
     *> int         i           =    0;                                                                                                                                                 <* 
@@ -904,59 +944,45 @@ DICT_dump_words         (FILE *f)
     *> return 0;                                                                                                                                                                       <*/
 }
 
-/*> char                                                                                                                                                                         <* 
- *> DICT_paginate_OLD       (void)                                                                                                                                               <* 
- *> {                                                                                                                                                                            <* 
- *>    tWORD      *x_word      = NULL;                                                                                                                                           <* 
- *>    tWORD      *x_last      = NULL;                                                                                                                                           <* 
- *>    short       i           =    0;                                                                                                                                           <* 
- *>    short       c           =    0;                                                                                                                                           <* 
- *>    short       p           =    0;                                                                                                                                           <* 
- *>    /+---(header)-------------------------+/                                                                                                                                  <* 
- *>    DEBUG_GRAF   yLOG_enter   (__FUNCTION__);                                                                                                                                 <* 
- *>    /+---(basic inputs)-------------------+/                                                                                                                                  <* 
- *>    DEBUG_GRAF   yLOG_value   ("ppage"     , my.w_ppage);                                                                                                                     <* 
- *>    /+---(clear paging)-------------------+/                                                                                                                                  <* 
- *>    for (i = 0; i < MAX_PAGES; ++i)  g_pages [i] = g_lasts [i] = NULL;                                                                                                        <* 
- *>    /+---(paginate)-----------------------+/                                                                                                                                  <* 
- *>    WORDS_eng_by_cursor (YDLST_HEAD, &x_word);                                                                                                                                <* 
- *>    i = 0;                                                                                                                                                                    <* 
- *>    while (x_word != NULL) {                                                                                                                                                  <* 
- *>       DEBUG_GRAF   yLOG_complex ("x_word"    , "%4d %4d %4d %-15.15s %-5.5s %-15.15s %s", p, i++, c, x_word->w_english, x_word->w_vary, x_word->w_gregg, x_word->w_shown);   <* 
- *>       if (my.baseonly == '-' || x_word->w_vary [0] == '<') {                                                                                                                 <* 
- *>          if (my.nopre == '-' || strchr (x_word->w_gregg, '<') == NULL)  {                                                                                                    <* 
- *>             if (c % my.w_ppage == 0) {                                                                                                                                       <* 
- *>                DEBUG_GRAF   yLOG_complex ("NEW PAGE"  , "%4d, %s", p, x_word->w_english);                                                                                    <* 
- *>                g_pages [p] = x_word;                                                                                                                                         <* 
- *>                if (p > 0) {                                                                                                                                                  <* 
- *>                   DEBUG_GRAF   yLOG_complex ("add last"  , "%4d, %s", p - 1, x_last->w_english);                                                                             <* 
- *>                   g_lasts [p - 1] = x_last;                                                                                                                                  <* 
- *>                }                                                                                                                                                             <* 
- *>                ++p;                                                                                                                                                          <* 
- *>             }                                                                                                                                                                <* 
- *>             x_last = x_word;                                                                                                                                                 <* 
- *>             DEBUG_GRAF   yLOG_info    ("x_last"    , x_last->w_english);                                                                                                     <* 
- *>             ++c;                                                                                                                                                             <* 
- *>          } else {                                                                                                                                                            <* 
- *>             DEBUG_GRAF   yLOG_note    ("SKIP, prefixed base");                                                                                                               <* 
- *>          }                                                                                                                                                                   <* 
- *>       } else {                                                                                                                                                               <* 
- *>          DEBUG_GRAF   yLOG_note    ("SKIP, not a base");                                                                                                                     <* 
- *>       }                                                                                                                                                                      <* 
- *>       WORDS_eng_by_cursor (YDLST_NEXT, &x_word);                                                                                                                             <* 
- *>    }                                                                                                                                                                         <* 
- *>    if (p > 0) {                                                                                                                                                              <* 
- *>       g_lasts [p - 1] = x_last;                                                                                                                                              <* 
- *>       DEBUG_GRAF   yLOG_complex ("add last"  , "%4d, %s", p - 1, x_last->w_english);                                                                                         <* 
- *>    }                                                                                                                                                                         <* 
- *>    /+---(update globals)-----------------+/                                                                                                                                  <* 
- *>    my.w_npage   = p;                                                                                                                                                         <* 
- *>    my.w_entries = c;                                                                                                                                                         <* 
- *>    DEBUG_GRAF   yLOG_complex ("dict page" , "%3dp, %3dn, %3dc, %3de", my.w_ppage, my.w_npage, my.w_cpage, my.w_entries);                                                     <* 
- *>    /+---(complete)-----------------------+/                                                                                                                                  <* 
- *>    DEBUG_GRAF   yLOG_exit    (__FUNCTION__);                                                                                                                                 <* 
- *>    return 0;                                                                                                                                                                 <* 
- *> }                                                                                                                                                                            <*/
+char
+DICT_dump_words         (FILE *f)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   int         a           =    0;
+   int         c           =    0;
+   char        t           [LEN_FULL]  = "";
+   char        n           [LEN_TERSE] = "";
+   tDICT      *x_curr      = NULL;
+   char       *x_break     = "##---··---english----------··---gregg----------------------···---base-------------···---pointers---···---prev-------------···---next-------------·´\n\n";
+   /*---(header)---------------------------*/
+   DEBUG_CONF   yLOG_enter   (__FUNCTION__);
+   fprintf (f, "##   %s %s\n", P_NAMESAKE, P_HERITAGE);
+   fprintf (f, "##   version %s, %s\n", P_VERNUM, P_VERTXT);
+   fprintf (f, "##   inventory of dictionary words\n");
+   fprintf (f, "\n");
+   fprintf (f, "#@ style     V = printable columnar values\n");
+   fprintf (f, "#@ x-parse  14åÏ----··Ï-------------------··Ï-----------------------------···Ï-------------------···Ï-------------···Ï-------------------···Ï-------------------·æ\n");
+   fprintf (f, "#@ titles     åref····english···············gregg····························base···················pointers·········prev···················next·················æ\n");
+   fprintf (f, "\n");
+   DICT__by_cursor  (YDLST_HEAD, &x_curr);
+   while (x_curr != NULL) {
+      DEBUG_CONF   yLOG_info    ("base"      , x_curr->d_english);
+      DICT__dumper (x_curr, t);
+      DEBUG_CONF   yLOG_info    ("t"         , t);
+      strlpadn (a, n, '.', '<', 5);
+      if (a %  5 == 0)  fprintf (f, "\n");
+      if (a % 25 == 0)  fprintf (f, x_break);
+      fprintf (f, "%-5d  %s\n", a, t);
+      ++a;
+      DICT__by_cursor (YDLST_NEXT, &x_curr);
+   }
+   fprintf (f, "\n");
+   fprintf (f, x_break);
+   fprintf (f, "## found %d total words\n", a);
+   /*---(complete)-------------------------*/
+   DEBUG_CONF   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
 
 char
 DICT_paginate           (void)
@@ -971,7 +997,7 @@ DICT_paginate           (void)
    /*---(basic inputs)-------------------*/
    DEBUG_GRAF   yLOG_value   ("ppage"     , my.w_ppage);
    /*---(clear paging)-------------------*/
-   for (i = 0; i < MAX_PAGES; ++i)  g_pages [i] = g_lasts [i] = NULL;
+   for (i = 0; i < MAX_PAGES; ++i)  s_pages [i] = s_lasts [i] = NULL;
    /*---(paginate)-----------------------*/
    DICT__by_cursor (YDLST_HEAD, &x_word);
    i = 0;
@@ -992,11 +1018,11 @@ DICT_paginate           (void)
       /*---(check for new page)----------*/
       if (c % my.w_ppage == 0) {
          DEBUG_GRAF   yLOG_complex ("NEW PAGE"  , "%4d, %s", p, x_word->d_english);
-         g_pages [p] = x_word;
+         s_pages [p] = x_word;
          /*---(end of prev page)---------*/
          if (p > 0) {
             DEBUG_GRAF   yLOG_complex ("add last"  , "%4d, %s", p - 1, x_last->d_english);
-            g_lasts [p - 1] = x_last;
+            s_lasts [p - 1] = x_last;
          }
          ++p;
       }
@@ -1008,7 +1034,7 @@ DICT_paginate           (void)
    }
    /*---(finish last page)---------------*/
    if (p > 0) {
-      g_lasts [p - 1] = x_last;
+      s_lasts [p - 1] = x_last;
       DEBUG_GRAF   yLOG_complex ("add last"  , "%4d, %s", p - 1, x_last->d_english);
    }
    /*---(update globals)-----------------*/
@@ -1029,9 +1055,9 @@ DICT_page_ends          (int a_page, char r_beg [LEN_TITLE], char r_end [LEN_TIT
    if (r_end != NULL)  strcpy (r_end, "");
    --rce;  if (a_page < 0)              return rce;
    --rce;  if (a_page >= my.w_npage)    return rce;
-   x_end = (tDICT *) g_pages [a_page];
+   x_end = (tDICT *) s_pages [a_page];
    if (r_beg != NULL)  strlcpy (r_beg, x_end->d_english, LEN_TITLE);
-   x_end = (tDICT *) g_lasts [a_page];
+   x_end = (tDICT *) s_lasts [a_page];
    if (r_end != NULL)  strlcpy (r_end, x_end->d_english, LEN_TITLE);
    return my.w_ppage;
 }

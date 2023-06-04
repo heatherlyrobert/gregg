@@ -785,8 +785,9 @@ DLIST_dict              (void)
    /*---(page)---------------------------*/
    /*> my.p_hinting = STYLE_HINTS;                                                    <*/
    DEBUG_GRAF   yLOG_value   ("cpage"     , my.w_cpage);
-   DEBUG_GRAF   yLOG_point   ("g_pages"   , g_pages [my.w_cpage]);
-   --rce;  if (g_pages [my.w_cpage] == NULL) {
+   DICT_page_ends (0, x_beg, NULL);
+   DEBUG_GRAF   yLOG_info    ("x_beg"     , x_beg);
+   --rce;  if (strcmp (x_beg, "") == 0) {
       DEBUG_GRAF   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
