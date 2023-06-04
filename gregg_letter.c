@@ -3,8 +3,43 @@
 
 
 
-tLETTER     g_letter [MAX_LETTERS];
-short       g_nletter;
+
+#define    MAX_LETTERS   1000
+typedef struct cLETTER tLETTER;
+static struct cLETTER
+{
+   /*---(header)------------*/
+   short     l_line;                             /* source file line  */
+   char      l_label       [LEN_TERSE];          /* name              */
+   /*---(creation)----------*/
+   char      l_type;                             /* draw function     */
+   float     l_xrad;                             /* ellipse x-radius  */
+   float     l_yrad;                             /* ellipse y-radius  */
+   float     l_rot;                              /* ellipse rotation  */
+   float     l_beg;                              /* arc begin         */
+   float     l_arc;                              /* arc length        */
+   /*---(grouping)----------*/
+   uchar     l_cat;                              /* letter group      */
+   char      l_code;                             /* single char id    */
+   /*---(trend)-------------*/
+   float     l_xend;                             /* ending x          */
+   float     l_yend;                             /* ending y          */
+   float     l_deg;                              /* degrees of slope  */
+   float     l_xylen;                            /* full length       */
+   /*---(bounds)------------*/
+   float     l_lef;                              /* leftmost          */
+   float     l_rig;                              /* rightmost         */
+   float     l_top;                              /* topmost           */
+   float     l_bot;                              /* bottommost        */
+   /*---(count)-------------*/
+   short     l_points;                           /* number of points  */
+   /*---(count)-------------*/
+   short     l_base;                             /* in how many bases */
+   short     l_used;                             /* in how many words */
+   /*---(done)--------------*/
+};
+static tLETTER     s_letter [MAX_LETTERS];
+static short       s_nletter;
 
 
 
@@ -21,36 +56,36 @@ LETTER_purge            (void)
    int         j           =    0;
    for (i = 0; i < LEN_FULL; ++i) {
       /*---(header)------------*/
-      g_letter [i].l_line   =   0;
-      strlcpy (g_letter [i].l_label  , "", LEN_TERSE);
+      s_letter [i].l_line   =   0;
+      strlcpy (s_letter [i].l_label  , "", LEN_TERSE);
       /*---(creation)----------*/
-      g_letter [i].l_type   = '·';
-      g_letter [i].l_xrad   = 0.0;
-      g_letter [i].l_yrad   = 0.0;
-      g_letter [i].l_rot    = 0.0;
-      g_letter [i].l_beg    = 0.0;
-      g_letter [i].l_arc    = 0.0;
+      s_letter [i].l_type   = '·';
+      s_letter [i].l_xrad   = 0.0;
+      s_letter [i].l_yrad   = 0.0;
+      s_letter [i].l_rot    = 0.0;
+      s_letter [i].l_beg    = 0.0;
+      s_letter [i].l_arc    = 0.0;
       /*---(grouping)----------*/
-      g_letter [i].l_cat    = '·';
-      g_letter [i].l_code   = '·';
+      s_letter [i].l_cat    = '·';
+      s_letter [i].l_code   = '·';
       /*---(trend)-------------*/
-      g_letter [i].l_xend   = 0.0;
-      g_letter [i].l_yend   = 0.0;
-      g_letter [i].l_deg    = 0.0;
-      g_letter [i].l_xylen  = 0.0;
+      s_letter [i].l_xend   = 0.0;
+      s_letter [i].l_yend   = 0.0;
+      s_letter [i].l_deg    = 0.0;
+      s_letter [i].l_xylen  = 0.0;
       /*---(bounds)------------*/
-      g_letter [i].l_lef    = 0.0;
-      g_letter [i].l_rig    = 0.0;
-      g_letter [i].l_top    = 0.0;
-      g_letter [i].l_bot    = 0.0;
+      s_letter [i].l_lef    = 0.0;
+      s_letter [i].l_rig    = 0.0;
+      s_letter [i].l_top    = 0.0;
+      s_letter [i].l_bot    = 0.0;
       /*---(count)-------------*/
-      g_letter [i].l_points =   0;
+      s_letter [i].l_points =   0;
       /*---(count)-------------*/
-      g_letter [i].l_base   =   0;
-      g_letter [i].l_used   =   0;
+      s_letter [i].l_base   =   0;
+      s_letter [i].l_used   =   0;
       /*---(done)--------------*/
    }
-   g_nletter = 0;
+   s_nletter = 0;
    /*---(complete)-----------------------*/
    return 0;
 }
@@ -116,7 +151,7 @@ LETTER_handler          (int n, char a_verb [LEN_LABEL], char a_exist, void *a_h
       return rce;
    }
    /*---(pull all)-----------------------*/
-   rc = yPARSE_scanf (a_verb, "CkkkkksC", &(g_letter [g_nletter].l_type), &(g_letter [g_nletter].l_xrad), &(g_letter [g_nletter].l_yrad), &(g_letter [g_nletter].l_rot), &(g_letter [g_nletter].l_beg), &(g_letter [g_nletter].l_arc), &s, &(g_letter [g_nletter].l_code));
+   rc = yPARSE_scanf (a_verb, "CkkkkksC", &(s_letter [s_nletter].l_type), &(s_letter [s_nletter].l_xrad), &(s_letter [s_nletter].l_yrad), &(s_letter [s_nletter].l_rot), &(s_letter [s_nletter].l_beg), &(s_letter [s_nletter].l_arc), &s, &(s_letter [s_nletter].l_code));
    DEBUG_INPT  yLOG_value   ("handler"   , rc);
    --rce;  if (rc < 0) {
       DEBUG_INPT  yLOG_exit    (__FUNCTION__);
@@ -124,12 +159,12 @@ LETTER_handler          (int n, char a_verb [LEN_LABEL], char a_exist, void *a_h
       return rce;
    }
    /*---(finish)-------------------------*/
-   g_letter [g_nletter].l_line = n;
-   strlcpy (g_letter [g_nletter].l_label, a_verb, LEN_TERSE);
-   g_letter [g_nletter].l_cat  = s;
-   DEBUG_INPT  yLOG_complex ("final"     , "%3d#  %3d  %-10.10s  %-6.1fx  %-6.1fy  %-6.1fr  %-6.1fb  %-6.1fa  %2d  %c", g_nletter, g_letter [g_nletter].l_line, g_letter [g_nletter].l_label, g_letter [g_nletter].l_xrad, g_letter [g_nletter].l_xrad, g_letter [g_nletter].l_arc, g_letter [g_nletter].l_beg, g_letter [g_nletter].l_arc, g_letter [g_nletter].l_cat, g_letter [g_nletter].l_code);
-   ++g_nletter;
-   DEBUG_INPT  yLOG_value   ("g_nletter" , g_nletter);
+   s_letter [s_nletter].l_line = n;
+   strlcpy (s_letter [s_nletter].l_label, a_verb, LEN_TERSE);
+   s_letter [s_nletter].l_cat  = s;
+   DEBUG_INPT  yLOG_complex ("final"     , "%3d#  %3d  %-10.10s  %-6.1fx  %-6.1fy  %-6.1fr  %-6.1fb  %-6.1fa  %2d  %c", s_nletter, s_letter [s_nletter].l_line, s_letter [s_nletter].l_label, s_letter [s_nletter].l_xrad, s_letter [s_nletter].l_xrad, s_letter [s_nletter].l_arc, s_letter [s_nletter].l_beg, s_letter [s_nletter].l_arc, s_letter [s_nletter].l_cat, s_letter [s_nletter].l_code);
+   ++s_nletter;
+   DEBUG_INPT  yLOG_value   ("s_nletter" , s_nletter);
    /*---(complete)-----------------------*/
    DEBUG_INPT  yLOG_exit    (__FUNCTION__);
    return rc;
@@ -166,7 +201,7 @@ LETTER_load             (char a_fname [LEN_HUND])
       return rce;
    }
    /*---(show success)-------------------*/
-   yURG_msg ('>', "all read correctly, SUCCESS, accepted %d", g_nletter);
+   yURG_msg ('>', "all read correctly, SUCCESS, accepted %d", s_nletter);
    yURG_msg (' ', "");
    /*---(complete)-----------------------*/
    DEBUG_INPT  yLOG_exit    (__FUNCTION__);
@@ -180,19 +215,21 @@ LETTER_load             (char a_fname [LEN_HUND])
 /*============================--------------------============================*/
 static void o___DEBUG_____________________o (void) {;}
 
+short  LETTER_count     (void)  { return s_nletter; }
+
 char*
 LETTER_detail           (uchar n)
 {
    strcpy  (g_print, "n/a");
-   if (n < g_nletter) {
+   if (n < s_nletter) {
       sprintf (g_print, "%-2d  %-2d  %-10.10s ´ %6.1fx  %6.1fy  %6.1fr  %6.1fb  %6.1fa ´ %2d  %c ´ %6.1fx  %6.1fy  %6.1fd  %6.1fl ´ %6.1fl  %6.1fr  %6.1ft  %6.1fb ´ %3dp  %3db  %3du ´",
-            n, g_letter [n].l_line, g_letter [n].l_label,
-            g_letter [n].l_xrad , g_letter [n].l_yrad , g_letter [n].l_rot  , g_letter [n].l_beg  , g_letter [n].l_arc  ,
-            g_letter [n].l_cat  , g_letter [n].l_code ,
-            g_letter [n].l_xend , g_letter [n].l_yend , g_letter [n].l_deg  , g_letter [n].l_xylen,
-            g_letter [n].l_lef  , g_letter [n].l_rig  , g_letter [n].l_top  , g_letter [n].l_bot  ,
-            g_letter [n].l_points,
-            g_letter [n].l_base , g_letter [n].l_used );
+            n, s_letter [n].l_line, s_letter [n].l_label,
+            s_letter [n].l_xrad , s_letter [n].l_yrad , s_letter [n].l_rot  , s_letter [n].l_beg  , s_letter [n].l_arc  ,
+            s_letter [n].l_cat  , s_letter [n].l_code ,
+            s_letter [n].l_xend , s_letter [n].l_yend , s_letter [n].l_deg  , s_letter [n].l_xylen,
+            s_letter [n].l_lef  , s_letter [n].l_rig  , s_letter [n].l_top  , s_letter [n].l_bot  ,
+            s_letter [n].l_points,
+            s_letter [n].l_base , s_letter [n].l_used );
    }
    return g_print;
 }
@@ -224,19 +261,19 @@ LETTER_by_name          (char a_ltr [LEN_TERSE], char a_scope, char *r_type, cha
    /*---(walk letters)-------------------*/
    for (i = 0; i < MAX_LETTERS; ++i) {
       /*---(check end)-------------------*/
-      if (a_scope != LTRS_ALL && strcmp (g_letter [i].l_label, "END") == 0)    break;
-      if (strcmp (g_letter [i].l_label, "EOF") == 0)                           break;
+      if (a_scope != LTRS_ALL && strcmp (s_letter [i].l_label, "END") == 0)    break;
+      if (strcmp (s_letter [i].l_label, "EOF") == 0)                           break;
       /*---(check match)-----------------*/
-      if (strcmp (a_ltr, g_letter [i].l_label) != 0)                           continue;
+      if (strcmp (a_ltr, s_letter [i].l_label) != 0)                           continue;
       /*---(found)-----------------------*/
-      if (r_type    != NULL)  *r_type    = g_letter [i].l_type;
-      if (r_lcat    != NULL)  *r_lcat    = g_letter [i].l_cat;
-      if (r_label   != NULL)  strlcpy (r_label, g_letter [i].l_label, LEN_TERSE);
-      if (r_xrad    != NULL)  *r_xrad    = g_letter [i].l_xrad;
-      if (r_yrad    != NULL)  *r_yrad    = g_letter [i].l_yrad;
-      if (r_rot     != NULL)  *r_rot     = g_letter [i].l_rot;
-      if (r_beg     != NULL)  *r_beg     = g_letter [i].l_beg;
-      if (r_arc     != NULL)  *r_arc     = g_letter [i].l_arc;
+      if (r_type    != NULL)  *r_type    = s_letter [i].l_type;
+      if (r_lcat    != NULL)  *r_lcat    = s_letter [i].l_cat;
+      if (r_label   != NULL)  strlcpy (r_label, s_letter [i].l_label, LEN_TERSE);
+      if (r_xrad    != NULL)  *r_xrad    = s_letter [i].l_xrad;
+      if (r_yrad    != NULL)  *r_yrad    = s_letter [i].l_yrad;
+      if (r_rot     != NULL)  *r_rot     = s_letter [i].l_rot;
+      if (r_beg     != NULL)  *r_beg     = s_letter [i].l_beg;
+      if (r_arc     != NULL)  *r_arc     = s_letter [i].l_arc;
       return i;
    }
    /*---(complete)-----------------------*/
@@ -260,14 +297,14 @@ LETTER_by_index         (short n, char *r_type, char *r_lcat, char r_label [LEN_
    /*---(defense)------------------------*/
    --rce;  if (n < 0 || n >= MAX_LETTERS)  return rce;
    /*---(save data)-------------------*/
-   if (r_type    != NULL)  *r_type    = g_letter [n].l_type;
-   if (r_lcat    != NULL)  *r_lcat    = g_letter [n].l_cat;
-   if (r_label   != NULL)  strlcpy (r_label, g_letter [n].l_label, LEN_TERSE);
-   if (r_xrad    != NULL)  *r_xrad    = g_letter [n].l_xrad;
-   if (r_yrad    != NULL)  *r_yrad    = g_letter [n].l_yrad;
-   if (r_rot     != NULL)  *r_rot     = g_letter [n].l_rot;
-   if (r_beg     != NULL)  *r_beg     = g_letter [n].l_beg;
-   if (r_arc     != NULL)  *r_arc     = g_letter [n].l_arc;
+   if (r_type    != NULL)  *r_type    = s_letter [n].l_type;
+   if (r_lcat    != NULL)  *r_lcat    = s_letter [n].l_cat;
+   if (r_label   != NULL)  strlcpy (r_label, s_letter [n].l_label, LEN_TERSE);
+   if (r_xrad    != NULL)  *r_xrad    = s_letter [n].l_xrad;
+   if (r_yrad    != NULL)  *r_yrad    = s_letter [n].l_yrad;
+   if (r_rot     != NULL)  *r_rot     = s_letter [n].l_rot;
+   if (r_beg     != NULL)  *r_beg     = s_letter [n].l_beg;
+   if (r_arc     != NULL)  *r_arc     = s_letter [n].l_arc;
    /*---(complete)-----------------------*/
    return 0;
 }
@@ -290,16 +327,99 @@ LETTER_sizing           (short n, float *r_xend, float *r_yend, float *r_deg, fl
    /*---(defense)------------------------*/
    --rce;  if (n < 0 || n >= MAX_LETTERS)  return rce;
    /*---(save data)-------------------*/
-   if (r_xend    != NULL)  *r_xend    = g_letter [n].l_xend;
-   if (r_yend    != NULL)  *r_yend    = g_letter [n].l_yend;
-   if (r_deg     != NULL)  *r_deg     = g_letter [n].l_deg;
-   if (r_xylen   != NULL)  *r_xylen   = g_letter [n].l_xylen;
-   if (r_lef     != NULL)  *r_lef     = g_letter [n].l_lef;
-   if (r_rig     != NULL)  *r_rig     = g_letter [n].l_rig;
-   if (r_top     != NULL)  *r_top     = g_letter [n].l_top;
-   if (r_bot     != NULL)  *r_bot     = g_letter [n].l_bot;
-   if (r_points  != NULL)  *r_points  = g_letter [n].l_points;
+   if (r_xend    != NULL)  *r_xend    = s_letter [n].l_xend;
+   if (r_yend    != NULL)  *r_yend    = s_letter [n].l_yend;
+   if (r_deg     != NULL)  *r_deg     = s_letter [n].l_deg;
+   if (r_xylen   != NULL)  *r_xylen   = s_letter [n].l_xylen;
+   if (r_lef     != NULL)  *r_lef     = s_letter [n].l_lef;
+   if (r_rig     != NULL)  *r_rig     = s_letter [n].l_rig;
+   if (r_top     != NULL)  *r_top     = s_letter [n].l_top;
+   if (r_bot     != NULL)  *r_bot     = s_letter [n].l_bot;
+   if (r_points  != NULL)  *r_points  = s_letter [n].l_points;
    /*---(complete)-----------------------*/
    return 0;
 }
+
+
+
+/*====================-----------------==-----------------====================*/
+/*===----                      database handling                       ----===*/
+/*====================-----------------==-----------------====================*/
+static void o___DATABASE__________________o (void) {;}
+
+char
+LETTER_write            (FILE *a_file)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
+   short       i           =    0;
+   /*---(header)-------------------------*/
+   DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
+   /*---(defense)------------------------*/
+   DEBUG_OUTP  yLOG_point   ("a_file"    , a_file);
+   --rce;  if (a_file == NULL) {
+      DEBUG_OUTP  yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_OUTP  yLOG_value   ("s_nletter" , s_nletter);
+   --rce;  if (s_nletter <= 0) {
+      DEBUG_OUTP  yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(write all)----------------------*/
+   for (i = 0; i < s_nletter; ++i) {
+      rc = fwrite (&(s_letter [i]), sizeof (tLETTER), 1, a_file);
+      if (rc != 1)   break;
+   }
+   /*---(check)--------------------------*/
+   DEBUG_OUTP  yLOG_value   ("i"         , i);
+   --rce;  if (s_nletter != i) {
+      DEBUG_OUTP  yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(complete)-----------------------*/
+   DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+LETTER_read             (FILE *a_file, short a_count)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
+   short       i           =    0;
+   /*---(header)-------------------------*/
+   DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
+   /*---(defense)------------------------*/
+   DEBUG_OUTP  yLOG_point   ("a_file"    , a_file);
+   --rce;  if (a_file == NULL) {
+      DEBUG_OUTP  yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_OUTP  yLOG_value   ("s_nletter" , s_nletter);
+   --rce;  if (s_nletter > 0) {
+      DEBUG_OUTP  yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(write all)----------------------*/
+   for (i = 0; i < a_count; ++i) {
+      rc = fread  (&(s_letter [i]), sizeof (tLETTER), 1, a_file);
+      if (rc != 1)   break;
+      ++s_nletter;
+   }
+   /*---(check)--------------------------*/
+   DEBUG_OUTP  yLOG_value   ("a_count"   , a_count);
+   --rce;  if (s_nletter != a_count) {
+      DEBUG_OUTP  yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(complete)-----------------------*/
+   DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+
+
 

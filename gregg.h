@@ -37,8 +37,8 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "5.--= generalization for broader use"
 #define     P_VERMINOR  "5.6 = build out for fast, focused database"
-#define     P_VERNUM    "5.6e"
-#define     P_VERTXT    "sources and dictionary importing user tested"
+#define     P_VERNUM    "5.6f"
+#define     P_VERTXT    "letters updated and unit tested database write/read"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -930,44 +930,6 @@ extern char   s_fields  [MAX_FIELD][LEN_TITLE];
 extern char   s_nfield;
 
 
-#define    MAX_LETTERS   1000
-typedef struct cLETTER tLETTER;
-struct cLETTER
-{
-   /*---(header)------------*/
-   short     l_line;                             /* source file line  */
-   char      l_label       [LEN_TERSE];          /* name              */
-   /*---(creation)----------*/
-   char      l_type;                             /* draw function     */
-   float     l_xrad;                             /* ellipse x-radius  */
-   float     l_yrad;                             /* ellipse y-radius  */
-   float     l_rot;                              /* ellipse rotation  */
-   float     l_beg;                              /* arc begin         */
-   float     l_arc;                              /* arc length        */
-   /*---(grouping)----------*/
-   uchar     l_cat;                              /* letter group      */
-   char      l_code;                             /* single char id    */
-   /*---(trend)-------------*/
-   float     l_xend;                             /* ending x          */
-   float     l_yend;                             /* ending y          */
-   float     l_deg;                              /* degrees of slope  */
-   float     l_xylen;                            /* full length       */
-   /*---(bounds)------------*/
-   float     l_lef;                              /* leftmost          */
-   float     l_rig;                              /* rightmost         */
-   float     l_top;                              /* topmost           */
-   float     l_bot;                              /* bottommost        */
-   /*---(count)-------------*/
-   short     l_points;                           /* number of points  */
-   /*---(count)-------------*/
-   short     l_base;                             /* in how many bases */
-   short     l_used;                             /* in how many words */
-   /*---(done)--------------*/
-};
-extern tLETTER     g_letter [MAX_LETTERS];
-extern short       g_nletter;
-
-
 
 
 
@@ -1482,8 +1444,10 @@ char*       FIX_tree_showable       (char a_tree [LEN_TERSE], char a_max);
 
 
 /*---(header)---------------*/
-char        DB__head_write          (FILE *a_file, char a_label [LEN_TERSE], int a_var);
-char        DB__head_read           (FILE *a_file, char a_label [LEN_TERSE], int *a_var);
+char        DB__head_write_one      (FILE *a_file, char a_label [LEN_TERSE], int a_var);
+char        DB__head_write          (FILE *a_file, char a_name [LEN_LABEL], char a_vernum [LEN_LABEL], int a_nletter, int a_nprefix, int a_nsuffix, int a_nsource, int a_nbase, int a_nword, char a_heart [LEN_DESC]);
+char        DB__head_read_one       (FILE *a_file, char a_label [LEN_TERSE], int *r_var);
+char        DB__head_read           (FILE *a_file, char r_name [LEN_LABEL], char r_vernum [LEN_LABEL], int *r_nletter, int *r_nprefix, int *r_nsuffix, int *r_nsource, int *r_nbase, int *r_nword, char r_heart [LEN_DESC]);
 /*---(sources)--------------*/
 char        DB_source_add           (char a_file [LEN_HUND]);
 short       DB_source_inc           (void);
@@ -1538,11 +1502,15 @@ char        LETTER_wrap             (void);
 char        LETTER_handler          (int n, char a_verb [LEN_LABEL], char a_exist, void *a_handler);
 char        LETTER_load             (char a_fname [LEN_HUND]);
 /*---(debug)----------------*/
+short       LETTER_count            (void);
 char*       LETTER_detail           (uchar n);
 /*---(find)-----------------*/
 short       LETTER_by_name          (char a_ltr [LEN_TERSE], char a_scope, char *r_type, char *r_lcat, char r_label [LEN_TERSE], float *r_xrad, float *r_yrad, float *r_rot, float *r_beg, float *r_arc);
 char        LETTER_by_index         (short n, char *r_type, char *r_lcat, char r_label [LEN_TERSE], float *r_xrad, float *r_yrad, float *r_rot, float *r_beg, float *r_arc);
 char        LETTER_sizing           (short n, float *r_xend, float *r_yend, float *r_deg, float *r_xylen, float *r_lef, float *r_rig, float *r_top, float *r_bot, short *r_points);
+/*---(database)-------------*/
+char        LETTER_write            (FILE *a_file);
+char        LETTER_read             (FILE *a_file, short a_count);
 /*---(done)-----------------*/
 
 

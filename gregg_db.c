@@ -16,20 +16,112 @@ static tFILES  s_files       [LEN_DESC];
 static void  o___HEADER__________o () { return; }
 
 char
-DB__head_write          (FILE *a_file, char a_label [LEN_TERSE], int a_var)
+DB__head_write_one       (FILE *a_file, char a_label [LEN_TERSE], int a_var)
 {
-   DEBUG_FILE   yLOG_value   (a_label      , a_var);
-   fwrite (&a_var, sizeof (int), 1, a_file);
+   char        rc          =    0;
+   rc = fwrite (&a_var, sizeof (int), 1, a_file);
+   DEBUG_OUTP   yLOG_complex (a_label     , "%4d %d", rc, a_var);
+   return rc;
+}
+
+char
+DB__head_write          (FILE *a_file, char a_name [LEN_LABEL], char a_vernum [LEN_LABEL], int a_nletter, int a_nprefix, int a_nsuffix, int a_nsource, int a_nbase, int a_nword, char a_heart [LEN_DESC])
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
+   int         i           =    0;
+   char        t           [LEN_HUND]  = "";
+   /*---(header)-------------------------*/
+   DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
+   /*---(defense)------------------------*/
+   DEBUG_OUTP  yLOG_point   ("a_file"    , a_file);
+   --rce;  if (a_file == NULL) {
+      DEBUG_OUTP  yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(name)------------------------*/
+   for (i = 0; i < LEN_LABEL; i++)  t [i] = ' ';
+   strlcpy (t, a_name, LEN_LABEL);
+   rc = fwrite (t, LEN_LABEL, 1, a_file);
+   DEBUG_OUTP   yLOG_complex ("name"      , "%4d %s", rc, t);
+   /*---(version)---------------------*/
+   for (i = 0; i < LEN_LABEL; i++)  t [i] = ' ';
+   strlcpy (t, a_vernum  , LEN_SHORT);
+   rc = fwrite (t, LEN_SHORT, 1, a_file);
+   DEBUG_OUTP   yLOG_complex ("vernum"    , "%4d %s", rc, t);
+   /*---(stats)-----------------------*/
+   rc = DB__head_write_one (a_file, "letters" , a_nletter);
+   rc = DB__head_write_one (a_file, "prefixes", a_nprefix);
+   rc = DB__head_write_one (a_file, "suffixes", a_nsuffix);
+   rc = DB__head_write_one (a_file, "sources" , a_nsource);
+   rc = DB__head_write_one (a_file, "bases"   , a_nbase);
+   rc = DB__head_write_one (a_file, "words"   , a_nword);
+   /*---(heartbeat)-------------------*/
+   for (i = 0; i < LEN_DESC;  i++)  t [i] = '·';
+   strlcpy (t, a_heart    , LEN_DESC);
+   rc = fwrite (t, LEN_DESC , 1, a_file);
+   DEBUG_OUTP   yLOG_complex ("heart"     , "%4d %s", rc, t);
+   /*---(force flush)-----------------*/
+   fflush (a_file);
+   /*---(complete)-----------------------*/
+   DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
    return 0;
 }
 
 char
-DB__head_read           (FILE *a_file, char a_label [LEN_TERSE], int *a_var)
+DB__head_read_one       (FILE *a_file, char a_label [LEN_TERSE], int *r_var)
 {
-   int         n           =    0;
-   fread  (&n, sizeof (int), 1, a_file);
-   DEBUG_FILE   yLOG_value   (a_label      , n);
-   if (a_var != NULL)  *a_var = n;
+   char        rc          =    0;
+   int         a           =    0;
+   rc = fread  (&a, sizeof (int), 1, a_file);
+   DEBUG_INPT   yLOG_complex (a_label     , "%4d %d", rc, a);
+   if (r_var != NULL)  *r_var = a;
+   return 0;
+}
+
+char
+DB__head_read           (FILE *a_file, char r_name [LEN_LABEL], char r_vernum [LEN_LABEL], int *r_nletter, int *r_nprefix, int *r_nsuffix, int *r_nsource, int *r_nbase, int *r_nword, char r_heart [LEN_DESC])
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
+   char        t           [LEN_HUND]  = "";
+   int         a           =    0;
+   /*---(header)-------------------------*/
+   DEBUG_INPT   yLOG_enter   (__FUNCTION__);
+   /*---(defense)------------------------*/
+   DEBUG_INPT  yLOG_point   ("a_file"    , a_file);
+   --rce;  if (a_file == NULL) {
+      DEBUG_INPT  yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(name)------------------------*/
+   rc = fread  (&t, LEN_LABEL, 1, a_file);
+   DEBUG_INPT   yLOG_complex ("name"      , "%4d %s", rc, t);
+   if (r_name    != NULL)  strlcpy (r_name   , t, LEN_LABEL);
+   /*---(version)---------------------*/
+   rc = fread  (&t, LEN_LABEL, 1, a_file);
+   DEBUG_INPT   yLOG_complex ("version"   , "%4d %s", rc, t);
+   if (r_vernum  != NULL)  strlcpy (r_vernum , t, LEN_LABEL);
+   /*---(stats)-----------------------*/
+   rc = DB__head_read_one  (a_file, "letters" , &a);
+   if (r_nletter != NULL)  *r_nletter = a;
+   rc = DB__head_read_one  (a_file, "prefixes", &a);
+   if (r_nprefix != NULL)  *r_nprefix = a;
+   rc = DB__head_read_one  (a_file, "suffixes", &a);
+   if (r_nsuffix != NULL)  *r_nsuffix = a;
+   rc = DB__head_read_one  (a_file, "sources" , &a);
+   if (r_nsource != NULL)  *r_nsource = a;
+   rc = DB__head_read_one  (a_file, "bases"   , &a);
+   if (r_nbase   != NULL)  *r_nbase   = a;
+   rc = DB__head_read_one  (a_file, "words"   , &a);
+   if (r_nword   != NULL)  *r_nword   = a;
+   /*---(heartbeat)-------------------*/
+   rc = fread  (t, LEN_DESC , 1, a_file);
+   DEBUG_INPT   yLOG_complex ("heart"     , "%4d %s", rc, t);
+   /*---(complete)-----------------------*/
+   DEBUG_INPT   yLOG_exit    (__FUNCTION__);
    return 0;
 }
 
@@ -312,9 +404,9 @@ DB__open                (char a_name [LEN_PATH], char a_mode, int *b_nfile, int 
       fread  (&(my.a_ver), LEN_SHORT, 1, f);
       DEBUG_FILE   yLOG_info    ("ver"       , my.a_ver);
       /*---(stats)-----------------------*/
-      DB__head_read  (f, "files", b_nfile);
-      DB__head_read  (f, "bases", b_nbase);
-      DB__head_read  (f, "words", b_nword);
+      DB__head_read_one  (f, "files", b_nfile);
+      DB__head_read_one  (f, "bases", b_nbase);
+      DB__head_read_one  (f, "words", b_nword);
       /*---(heartbeat)-------------------*/
       fread  (b_heart    , LEN_DESC, 1, f);
       DEBUG_FILE   yLOG_info    ("heartbeat" , b_heart);
@@ -333,9 +425,9 @@ DB__open                (char a_name [LEN_PATH], char a_mode, int *b_nfile, int 
       fwrite (t, LEN_SHORT, 1, f);
       DEBUG_FILE   yLOG_info    ("ver"       , t);
       /*---(stats)-----------------------*/
-      DB__head_write (f, "files", *b_nfile);
-      DB__head_write (f, "bases", *b_nbase);
-      DB__head_write (f, "words", *b_nword);
+      DB__head_write_one (f, "files", *b_nfile);
+      DB__head_write_one (f, "bases", *b_nbase);
+      DB__head_write_one (f, "words", *b_nword);
       /*---(heartbeat)-------------------*/
       for (n = 0; n < LEN_DESC;  n++)  t [n] = '·';
       strlcpy (t, b_heart    , LEN_DESC);
