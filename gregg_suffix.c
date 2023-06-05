@@ -613,3 +613,84 @@ SUFFIX_dump             (FILE *f)
 }
 
 
+
+/*====================-----------------==-----------------====================*/
+/*===----                      database handling                       ----===*/
+/*====================-----------------==-----------------====================*/
+static void o___DATABASE__________________o (void) {;}
+
+char
+SUFFIX_write            (FILE *a_file)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
+   short       i           =    0;
+   /*---(header)-------------------------*/
+   DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
+   /*---(defense)------------------------*/
+   DEBUG_OUTP  yLOG_point   ("a_file"    , a_file);
+   --rce;  if (a_file == NULL) {
+      DEBUG_OUTP  yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_OUTP  yLOG_value   ("s_nsuffix" , s_nsuffix);
+   --rce;  if (s_nsuffix <= 0) {
+      DEBUG_OUTP  yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(write all)----------------------*/
+   for (i = 0; i < s_nsuffix; ++i) {
+      rc = fwrite (&(s_suffix [i]), sizeof (tSUFFIX), 1, a_file);
+      if (rc != 1)   break;
+   }
+   /*---(check)--------------------------*/
+   DEBUG_OUTP  yLOG_value   ("i"         , i);
+   --rce;  if (s_nsuffix != i) {
+      DEBUG_OUTP  yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(complete)-----------------------*/
+   DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+SUFFIX_read             (FILE *a_file, short a_count)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
+   short       i           =    0;
+   /*---(header)-------------------------*/
+   DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
+   /*---(defense)------------------------*/
+   DEBUG_OUTP  yLOG_point   ("a_file"    , a_file);
+   --rce;  if (a_file == NULL) {
+      DEBUG_OUTP  yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_OUTP  yLOG_value   ("s_nsuffix" , s_nsuffix);
+   --rce;  if (s_nsuffix > 0) {
+      DEBUG_OUTP  yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(write all)----------------------*/
+   for (i = 0; i < a_count; ++i) {
+      rc = fread  (&(s_suffix [i]), sizeof (tSUFFIX), 1, a_file);
+      if (rc != 1)   break;
+      ++s_nsuffix;
+   }
+   /*---(check)--------------------------*/
+   DEBUG_OUTP  yLOG_value   ("a_count"   , a_count);
+   --rce;  if (s_nsuffix != a_count) {
+      DEBUG_OUTP  yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(complete)-----------------------*/
+   DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+
+

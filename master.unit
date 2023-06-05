@@ -335,7 +335,18 @@ GLOBAL   -C-  add a standard prefix table                                      
 
    COND       verify reading the file                                            - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((02.003))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
      exec     call loader                          PREFIX_load                 my.n_prefix                                                                                           i_equal     0                                                                                                    
-     exec     ... check count                      PREFIX__count                                                                                                                     i_equal     125                                                                                                  
+
+   COND       eliminate testing file                                             - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((02.004))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+     exec     remove test file                     yURG_rm                     my.n_prefix                                                                                           i_equal     0                                                                                                    
+
+
+
+#23456789-12  123456789-123456789-123456789-12345  123456789-123456789-123456  123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-  123456789-  123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-  -  123456789-123456789- 
+#==(verb)===  ===========(description)===========  =====(function)===========  ========================(arguments)=================================================================  ==(test)==  ==========================(results)=================================================================  t  ========(var)======= 
+GLOBAL   -D-  verify prefix load                                                 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((BB.---))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+
+   COND       verify reading the file                                            - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((02.003))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+     get      ... check count                      PREFIX__count                                                                                                                     i_equal     125                                                                                                  
      get      ... check line                       PREFIX__detail              1                                                                                                     s_equal     1    6    5åtransæ      5 m 103  5åtransæ      4åt·<·æ       ·                                         
      get      ... check line                       PREFIX__detail              3                                                                                                     s_equal     3    11   2ådeæ         5 m 81   2ådeæ         4åd·<·æ       ·                                         
      get      ... check line                       PREFIX__detail              37                                                                                                    s_equal     37   54   5åmagniæ      5 m 103  5åmagniæ      4åm·<·æ       ·                                         
@@ -347,9 +358,6 @@ GLOBAL   -C-  add a standard prefix table                                      
      get      ... check line                       PREFIX__detail              114                                                                                                   s_equal     114  173  5åultraæ      5 m 96   5åultraæ      5åu2·<·æ      ·                                         
      get      ... check line                       PREFIX__detail              124                                                                                                   s_equal     124  189  8åself-conæ   5 m 106  7åselfconæ    6ås·k·<·æ     ·                                         
      get      ... check line                       PREFIX__detail              125                                                                                                   s_equal     n/a                                                                                                    
-
-   COND       eliminate testing file                                             - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((02.004))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
-     exec     remove test file                     yURG_rm                     my.n_prefix                                                                                           i_equal     0                                                                                                    
 
 
 
@@ -584,7 +592,18 @@ GLOBAL   -E-  add a standard suffix table                                      
 
    COND       verify reading the file                                            - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((02.003))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
      exec     call loader                          SUFFIX_load                 my.n_suffix                                                                                           i_equal     0                                                                                                    
-     exec     ... check count                      SUFFIX__count                                                                                                                     i_equal     141                                                                                                  
+
+   COND       eliminate testing file                                             - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((02.004))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+     exec     remove test file                     yURG_rm                     my.n_suffix                                                                                           i_equal     0                                                                                                    
+
+
+
+#23456789-12  123456789-123456789-123456789-12345  123456789-123456789-123456  123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-  123456789-  123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-123456789-  -  123456789-123456789- 
+#==(verb)===  ===========(description)===========  =====(function)===========  ========================(arguments)=================================================================  ==(test)==  ==========================(results)=================================================================  t  ========(var)======= 
+GLOBAL   -F-  verify suffix load                                                 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((BB.---))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+
+   COND       verify reading the file                                            - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((02.003))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+     get      ... check count                      SUFFIX__count                                                                                                                     i_equal     141                                                                                                  
      get      ... check line                       SUFFIX__detail              0                                                                                                     s_equal     0    2    1å·æ          ·  · ·  · · ·    0åæ           0åæ           0åæ           ·                                  
      get      ... check line                       SUFFIX__detail              1                                                                                                     s_equal     1    6    1å´æ          ·  v ·  5 · 29   4å·>·´æ       0åæ           0åæ           ·                                    
      get      ... check line                       SUFFIX__detail              7                                                                                                     s_equal     7    15   2åteæ         ·  · ·  · · ·    6å·>·t·eæ     0åæ           0åæ           ·                                  
@@ -598,9 +617,6 @@ GLOBAL   -E-  add a standard suffix table                                      
      get      ... check line                       SUFFIX__detail              115                                                                                                   s_equal     115  179  3åoleæ        a  · ·  · · ·    6å·>·u·eæ     1åoæ          7å×icallyæ    ·                                  
      get      ... check line                       SUFFIX__detail              140                                                                                                   s_equal     140  207  2åURæ         a  · ·  · · ·    8å·>·u·r·zæ   2åuRæ         1åsæ          ·                                  
      get      ... check line                       SUFFIX__detail              141                                                                                                   s_equal     n/a                                                                                                    
-
-   COND       eliminate testing file                                             - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   ((02.004))  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
-     exec     remove test file                     yURG_rm                     my.n_suffix                                                                                           i_equal     0                                                                                                    
 
 
 
