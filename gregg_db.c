@@ -2,12 +2,15 @@
 #include "gregg.h"
 
 
-typedef   struct cFILES tFILES;
-struct cFILES {
+
+typedef   struct cSOURCE tSOURCE;
+struct cSOURCE {
    char        name        [LEN_HUND];
    short       count;
 };
-static tFILES  s_files       [LEN_DESC];
+static tSOURCE  s_source   [LEN_DESC];
+static char     s_nsource  = 0;
+
 
 
 /*====================------------------------------------====================*/
@@ -25,7 +28,7 @@ DB__head_write_one       (FILE *a_file, char a_label [LEN_TERSE], int a_var)
 }
 
 char
-DB__head_write          (FILE *a_file, char a_name [LEN_LABEL], char a_vernum [LEN_LABEL], int a_nletter, int a_nprefix, int a_nsuffix, int a_nsource, int a_nbase, int a_nword, char a_heart [LEN_DESC])
+DB__head_write          (FILE *a_file, char a_name [LEN_LABEL], char a_vernum [LEN_LABEL], int a_nletter, int a_nprefix, int a_nsuffix, int a_nsource, int a_nbase, int a_ndict, char a_heart [LEN_DESC])
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
@@ -48,7 +51,7 @@ DB__head_write          (FILE *a_file, char a_name [LEN_LABEL], char a_vernum [L
    /*---(version)---------------------*/
    for (i = 0; i < LEN_LABEL; i++)  t [i] = ' ';
    strlcpy (t, a_vernum  , LEN_SHORT);
-   rc = fwrite (t, LEN_SHORT, 1, a_file);
+   rc = fwrite (t, LEN_LABEL, 1, a_file);
    DEBUG_OUTP   yLOG_complex ("vernum"    , "%4d %s", rc, t);
    /*---(stats)-----------------------*/
    rc = DB__head_write_one (a_file, "letters" , a_nletter);
@@ -56,7 +59,7 @@ DB__head_write          (FILE *a_file, char a_name [LEN_LABEL], char a_vernum [L
    rc = DB__head_write_one (a_file, "suffixes", a_nsuffix);
    rc = DB__head_write_one (a_file, "sources" , a_nsource);
    rc = DB__head_write_one (a_file, "bases"   , a_nbase);
-   rc = DB__head_write_one (a_file, "words"   , a_nword);
+   rc = DB__head_write_one (a_file, "words"   , a_ndict);
    /*---(heartbeat)-------------------*/
    for (i = 0; i < LEN_DESC;  i++)  t [i] = '·';
    strlcpy (t, a_heart    , LEN_DESC);
@@ -81,7 +84,7 @@ DB__head_read_one       (FILE *a_file, char a_label [LEN_TERSE], int *r_var)
 }
 
 char
-DB__head_read           (FILE *a_file, char r_name [LEN_LABEL], char r_vernum [LEN_LABEL], int *r_nletter, int *r_nprefix, int *r_nsuffix, int *r_nsource, int *r_nbase, int *r_nword, char r_heart [LEN_DESC])
+DB__head_read           (FILE *a_file, char r_name [LEN_LABEL], char r_vernum [LEN_LABEL], int *r_nletter, int *r_nprefix, int *r_nsuffix, int *r_nsource, int *r_nbase, int *r_ndict, char r_heart [LEN_DESC])
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
@@ -115,11 +118,12 @@ DB__head_read           (FILE *a_file, char r_name [LEN_LABEL], char r_vernum [L
    if (r_nsource != NULL)  *r_nsource = a;
    rc = DB__head_read_one  (a_file, "bases"   , &a);
    if (r_nbase   != NULL)  *r_nbase   = a;
-   rc = DB__head_read_one  (a_file, "words"   , &a);
-   if (r_nword   != NULL)  *r_nword   = a;
+   rc = DB__head_read_one  (a_file, "dicts"   , &a);
+   if (r_ndict   != NULL)  *r_ndict   = a;
    /*---(heartbeat)-------------------*/
    rc = fread  (t, LEN_DESC , 1, a_file);
    DEBUG_INPT   yLOG_complex ("heart"     , "%4d %s", rc, t);
+   if (r_heart   != NULL)  strlcpy (r_heart  , t, LEN_DESC);
    /*---(complete)-----------------------*/
    DEBUG_INPT   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -133,7 +137,7 @@ DB__head_read           (FILE *a_file, char r_name [LEN_LABEL], char r_vernum [L
 static void      o___SOURCE__________________o (void) {;}
 
 char
-DB_source_add           (char a_file [LEN_HUND])
+SOURCE_add              (char a_file [LEN_HUND])
 {
    /*---(locals)-------------------------*/
    char        rce         =  -10;
@@ -146,16 +150,16 @@ DB_source_add           (char a_file [LEN_HUND])
       return rce;
    }
    /*---(copy)---------------------------*/
-   strlcpy (s_files [my.r_nfile].name, a_file, LEN_HUND);
-   s_files [my.r_nfile].count = 0;
-   ++my.r_nfile;
+   strlcpy (s_source [s_nsource].name, a_file, LEN_HUND);
+   s_source [s_nsource].count = 0;
+   ++s_nsource;
    /*---(complete)-----------------------*/
    DEBUG_CONF   yLOG_exit    (__FUNCTION__);
    return 0;
 }
 
 char
-DB_source_purge         (void)
+SOURCE__purge           (void)
 {
    /*---(locals)-------------------------*/
    int         i           =    0;
@@ -163,59 +167,89 @@ DB_source_purge         (void)
    DEBUG_CONF   yLOG_enter   (__FUNCTION__);
    /*---(remove)-------------------------*/
    for (i = 0; i < LEN_DESC; ++i) {
-      strlcpy (s_files [i].name, "", LEN_HUND);
-      s_files [i].count = 0;
+      strlcpy (s_source [i].name, "", LEN_HUND);
+      s_source [i].count = 0;
    }
-   my.r_nfile = 0;
+   s_nsource = 0;
    /*---(complete)-----------------------*/
    DEBUG_CONF   yLOG_exit    (__FUNCTION__);
    return 0;
 }
 
 char
-DB__source_write        (FILE *a_file)
+SOURCE_write            (FILE *a_file)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
-   int         i           =    0;
+   char        rc          =    0;
+   short       i           =    0;
    /*---(header)-------------------------*/
    DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
-   /*---(remove)-------------------------*/
-   DEBUG_OUTP   yLOG_value   ("r_nfile"   , my.r_nfile);
-   for (i = 0; i < my.r_nfile; ++i) {
-      DEBUG_OUTP   yLOG_info    ("write"     , s_files [i].name);
-      fwrite (s_files [i].name, LEN_HUND, 1, a_file);
+   /*---(defense)------------------------*/
+   DEBUG_OUTP  yLOG_point   ("a_file"    , a_file);
+   --rce;  if (a_file == NULL) {
+      DEBUG_OUTP  yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_OUTP  yLOG_value   ("r_nfile"   , s_nsource);
+   --rce;  if (s_nsource <= 0) {
+      DEBUG_OUTP  yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(write all)----------------------*/
+   for (i = 0; i < s_nsource; ++i) {
+      rc = fwrite (&(s_source [i]), sizeof (tSOURCE), 1, a_file);
+      if (rc != 1)   break;
+   }
+   /*---(check)--------------------------*/
+   DEBUG_OUTP  yLOG_value   ("i"         , i);
+   --rce;  if (s_nsource != i) {
+      DEBUG_OUTP  yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
    }
    /*---(complete)-----------------------*/
    DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
    return 0;
 }
 
-short DB_source_inc      (void)  { return ++(s_files [my.r_nfile - 1].count); }
-
 char
-DB__source_read         (int n, FILE *a_file)
+SOURCE_read             (FILE *a_file, short a_count)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
    char        rc          =    0;
-   int         i           =    0;
-   char        t           [LEN_DESC]  = "";
+   short       i           =    0;
    /*---(header)-------------------------*/
-   DEBUG_INPT   yLOG_enter   (__FUNCTION__);
-   /*---(walk sources)-------------------*/
-   DEBUG_INPT   yLOG_value   ("n"         , n);
-   for (i = 0; i < n; ++i) {
-      /*---(read)---------------------------*/
-      fread  (t, LEN_DESC, 1, a_file);
-      DEBUG_OUTP   yLOG_complex ("x_raw"     , "%2d#, %s", i, t);
-      DB_source_add (t);
-      /*---(done)---------------------------*/
+   DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
+   /*---(defense)------------------------*/
+   DEBUG_OUTP  yLOG_point   ("a_file"    , a_file);
+   --rce;  if (a_file == NULL) {
+      DEBUG_OUTP  yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_OUTP  yLOG_value   ("r_nfile"   , s_nsource);
+   --rce;  if (s_nsource > 0) {
+      DEBUG_OUTP  yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(write all)----------------------*/
+   for (i = 0; i < a_count; ++i) {
+      rc = fread  (&(s_source [i]), sizeof (tSOURCE), 1, a_file);
+      if (rc != 1)   break;
+      ++s_nsource;
+   }
+   /*---(check)--------------------------*/
+   DEBUG_OUTP  yLOG_value   ("a_count"   , a_count);
+   --rce;  if (s_nsource != a_count) {
+      DEBUG_OUTP  yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
    }
    /*---(complete)-----------------------*/
-   DEBUG_INPT   yLOG_exit    (__FUNCTION__);
+   DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
    return 0;
 }
+
+short SOURCE_inc         (void)  { ++(s_source [s_nsource - 1].count); return 0; }
 
 
 
@@ -504,7 +538,7 @@ DB_write                (void)
       return rce;
    }
    /*---(sources)------------------------*/
-   rc = DB__source_write (f);
+   rc = SOURCE_write (f);
    DEBUG_OUTP   yLOG_value   ("sources"   , rc);
    --rce;  if (rc < 0) {
       yURG_err ('f', "database could not write sources");
@@ -557,7 +591,7 @@ DB_read                 (void)
       return rce;
    }
    /*---(sources)------------------------*/
-   rc = DB__source_read  (my.a_nfile, f);
+   rc = SOURCE_read  (my.a_nfile, f);
    DEBUG_OUTP   yLOG_value   ("sources"   , rc);
    --rce;  if (rc < 0) {
       yURG_err ('f', "database could not read sources");
@@ -650,18 +684,18 @@ DB_stats                (void)
 /*====================------------------------------------====================*/
 static void  o___DEBUGGING_______o () { return; }
 
-char DB__source_count   (void)  { return my.r_nfile; }
+char SOURCE__count   (void)  { return s_nsource; }
 
 char*
-DB__source_detail       (char n)
+SOURCE__detail          (char n)
 {
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
    /*---(defense)------------------------*/
    strcpy (g_print, "n/a");
-   if (n <  0 || n >= my.r_nfile)  return g_print;
+   if (n <  0 || n >= s_nsource)  return g_print;
    /*---(prepare)------------------------*/
-   sprintf (g_print, "%-2d  %-5d  %s", n, s_files [n].count, s_files [n].name);
+   sprintf (g_print, "%-2d  %-5d  %s", n, s_source [n].count, s_source [n].name);
    /*---(complete)-----------------------*/
    return g_print;
 }

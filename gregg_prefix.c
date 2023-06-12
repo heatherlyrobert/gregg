@@ -9,6 +9,7 @@
 typedef  struct  cPREFIX   tPREFIX;
 struct cPREFIX {
    /*---(main)-----------------*/
+   short       p_ref;                       /* ref for db write/read          */
    char        p_name      [LEN_LABEL];     /* name used in .dict files       */
    char        p_english   [LEN_LABEL];     /* text prefixed to english       */
    char        p_gregg     [LEN_LABEL];     /* gregg prefix                   */
@@ -40,6 +41,7 @@ PREFIX__purge           (void)
    int         j           =    0;
    for (i = 0; i < LEN_FULL; ++i) {
       /*---(main)-----------------*/
+      s_prefix [i].p_ref  = -1;
       strlcpy (s_prefix [i].p_name   , "", LEN_LABEL);
       strlcpy (s_prefix [i].p_english, "", LEN_LABEL);
       strlcpy (s_prefix [i].p_gregg  , "", LEN_LABEL);
@@ -111,6 +113,7 @@ PREFIX__handler         (int n, char a_verb [LEN_LABEL], char a_exist, void *a_h
       return rce;
    }
    /*---(finish)-------------------------*/
+   s_prefix [s_nprefix].p_ref  = s_nprefix;
    s_prefix [s_nprefix].p_line = n;
    strlcpy (s_prefix [s_nprefix].p_name, a_verb, LEN_LABEL);
    l = strlen (x_cats);
@@ -221,7 +224,7 @@ PREFIX__detail          (uchar n)
 static void o___DRIVER____________________o (void) {;}
 
 char
-PREFIX__english_change  (cchar a_base [LEN_TITLE], cchar a_change [LEN_LABEL], char r_update [LEN_TITLE], char r_prefix [LEN_LABEL], char *r_trunc)
+PREFIX_english_change   (cchar a_base [LEN_TITLE], cchar a_change [LEN_LABEL], char r_update [LEN_TITLE], char r_prefix [LEN_LABEL], char *r_trunc)
 {  /*---(notes)--------------------------*/
    /*
     *  all arrows must be at end of prefix
@@ -234,42 +237,125 @@ PREFIX__english_change  (cchar a_base [LEN_TITLE], cchar a_change [LEN_LABEL], c
    char        rce         =  -10;
    char        l           =    0;
    char       *p           = NULL;
-   char        x_change    [LEN_LABEL] = "";
+   char        x_update    [LEN_TITLE] = "";
+   static char x_original  [LEN_LABEL] = "";
+   static char x_change    [LEN_LABEL] = "";
+   char        x_prefix    [LEN_LABEL] = "";
+   char        x_pretty    [LEN_LABEL] = "";
+   char        x_trunc     =    0;
+   char        c           =  ' ';
+   /*---(header)-------------------------*/
+   DEBUG_INPT  yLOG_enter   (__FUNCTION__);
    /*---(default)------------------------*/
    if (r_update != NULL)  strcpy (r_update, "");
+   if (r_prefix != NULL)  strcpy (r_prefix, "");
+   if (r_trunc  != NULL)  *r_trunc = 0;
    /*---(defenses)-----------------------*/
-   --rce;  if (a_base    == NULL)   return rce;
-   --rce;  if (a_change  == NULL)   return rce;
-   --rce;  if (r_update  == NULL)   return rce;
-   --rce;  if (r_prefix  == NULL)   return rce;
-   --rce;  if (r_trunc   == NULL)   return rce;
+   DEBUG_INPT  yLOG_point   ("a_base"    , a_base);
+   --rce;  if (a_base    == NULL) {
+      DEBUG_INPT  yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_INPT  yLOG_point   ("a_change"  , a_change);
+   --rce;  if (a_change  == NULL) {
+      DEBUG_INPT  yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
    /*---(prepare)------------------------*/
-   strlcpy (x_change, a_change, LEN_LABEL);
+   DEBUG_INPT  yLOG_info    ("x_original", x_original);
+   DEBUG_INPT  yLOG_info    ("a_change"  , a_change);
+   if (strcmp (a_change, "") != 0) {
+      strlcpy (x_change  , a_change  , LEN_LABEL);
+      strlcpy (x_original, a_change  , LEN_LABEL);
+   } else {
+      strlcpy (x_change, x_original, LEN_LABEL);
+   }
    l = strlen (x_change);
-   *r_trunc = 0;
-   /*---(check for root change)----------*/
+   DEBUG_INPT  yLOG_complex ("x_change"  , "%2då%sæ", l, x_change);
+   /*---(check for root adds)------------*/
+   c = x_change [l - 1];
+   DEBUG_INPT  yLOG_char    ("c"         , c);
+   if (strchr (YSTR_UPPER, c) != NULL) {
+      c = tolower (c);
+      x_change [--l] = '\0';
+   } else {
+      c = '·';
+   }
+   DEBUG_INPT  yLOG_complex ("x_change"  , "%2då%sæ", l, x_change);
+   /*---(check for root truncs)----------*/
    p = strchr (x_change, 'Ö');
    if (p != NULL) {
       if (strncmp (p, "ÖÖ", 2) == 0) {
-         strlcpy (r_update, a_base + 2, LEN_TITLE);
+         strlcpy (x_update, a_base + 2, LEN_TITLE);
          p [ 0] = p [ 1] = '\0';
       } else {
-         strlcpy (r_update, a_base + 1, LEN_TITLE);
+         strlcpy (x_update, a_base + 1, LEN_TITLE);
          p [ 0] = '\0';
       }
    } else {
-      strlcpy (r_update, a_base + 0, LEN_TITLE);
+      strlcpy (x_update, a_base + 0, LEN_TITLE);
    }
    /*---(check for prefix change)--------*/
    p = strchr (x_change, '×');
    if (p != NULL) {
       p [ 0] = '\0';
-      strlcpy (r_prefix, x_change, LEN_LABEL);
-      *r_trunc = 1;
+      strlcpy (x_prefix, x_change, LEN_LABEL);
+      x_trunc = 1;
    } else {
-      strlcpy (r_prefix, x_change, LEN_LABEL);
+      strlcpy (x_prefix, x_change, LEN_LABEL);
    }
+   /*---(save-back)----------------------*/
+   if (r_update != NULL) {
+      if (c != '·')  sprintf (r_update, "%c%s", c, x_update);
+      else           strlcpy (r_update, x_update, LEN_TITLE);
+   }
+   if (r_prefix != NULL)  strlcpy (r_prefix, x_prefix, LEN_LABEL);
+   if (r_trunc  != NULL)  *r_trunc = x_trunc;
    /*---(complete)-----------------------*/
+   DEBUG_INPT  yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+PREFIX_english_final    (void *a_prefix, cchar a_base [LEN_TITLE], char r_update [LEN_TITLE])
+{
+   char        rce         =  -10;
+   char        rc          =    0;
+   char        x_english   [LEN_TITLE];
+   char        x_pretty    [LEN_LABEL];
+   char        x_trunc     =    0;
+   int         l           =    0;
+   /*---(header)-------------------------*/
+   DEBUG_INPT  yLOG_enter   (__FUNCTION__);
+   /*---(defense)------------------------*/
+   DEBUG_INPT  yLOG_point   ("a_prefix"  , a_prefix);
+   --rce;  if (a_prefix  == NULL) {
+      DEBUG_INPT  yLOG_exit    (__FUNCTION__);
+      return 0;
+   }
+   rc = PREFIX_english (a_prefix, x_pretty);
+   DEBUG_INPT  yLOG_value   ("pretty"    , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_INPT  yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_INPT  yLOG_info    ("x_pretty"  , x_pretty);
+   rc = PREFIX_english_change (a_base, "", x_english, NULL, &x_trunc);
+   DEBUG_INPT  yLOG_value   ("change"    , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_INPT  yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_INPT  yLOG_info    ("x_english" , x_english);
+   DEBUG_INPT  yLOG_value   ("x_trunc"   , x_trunc);
+   if (x_trunc == 1) {
+      l = strlen (x_pretty);
+      if (l > 0)  x_pretty [l - 1] = '\0';
+   }
+   /*---(save-back)----------------------*/
+   if (r_update != NULL)  sprintf (r_update, "%s%s", x_pretty, x_english);
+   /*---(complete)-----------------------*/
+   DEBUG_INPT  yLOG_exit    (__FUNCTION__);
    return 0;
 }
 
@@ -353,7 +439,7 @@ PREFIX_driver           (cchar a_prefix [LEN_LABEL], char b_english [LEN_TITLE],
    strlcpy (x_english, b_english, LEN_TITLE);
    strlcpy (x_gbase  , b_gregg  , LEN_TITLE);
    /*---(update)-------------------------*/
-   rc = PREFIX__english_change  (b_english, a_prefix, x_english, x_prefix, &x_trunc);
+   rc = PREFIX_english_change  (b_english, a_prefix, x_english, x_prefix, &x_trunc);
    DEBUG_INPT  yLOG_value   ("english"   , rc);
    --rce;  if (rc < 0) {
       DEBUG_INPT  yLOG_exitr   (__FUNCTION__, rce);
@@ -401,6 +487,22 @@ PREFIX_english          (void *a_prefix, char r_english [LEN_LABEL])
 /*===----                      database handling                       ----===*/
 /*====================-----------------==-----------------====================*/
 static void o___DATABASE__________________o (void) {;}
+
+short
+PREFIX_encode           (void *a_prefix)
+{
+   tPREFIX    *x_prefix    = NULL;
+   if (a_prefix == NULL)  return 0;
+   x_prefix = (tPREFIX *) a_prefix;
+   return  x_prefix->p_ref;
+}
+
+void*
+PREFIX_decode           (short a_prefix)
+{
+   if (a_prefix == 0)     return NULL;
+   return  &(s_prefix [a_prefix]);
+}
 
 char
 PREFIX_write            (FILE *a_file)

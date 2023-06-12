@@ -183,7 +183,7 @@ PROG__init              (int a_argc, char *a_argv[])
    strlcpy (my.words, "", LEN_RECD);
    strlcpy (my.guide, "", LEN_RECD);
    /*---(get letters/sizing ready)----*/
-   DB_source_purge ();
+   SOURCE__purge   ();
    BASE_init       ();
    PREFIX_init     ();
    SUFFIX_init     ();

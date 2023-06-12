@@ -37,8 +37,8 @@
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "5.--= generalization for broader use"
 #define     P_VERMINOR  "5.6 = build out for fast, focused database"
-#define     P_VERNUM    "5.6g"
-#define     P_VERTXT    "prefix/suffix updated and unit tested database write/read"
+#define     P_VERNUM    "5.6h"
+#define     P_VERTXT    "full database write/read to database unit tested"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
@@ -1449,11 +1449,11 @@ char        DB__head_write          (FILE *a_file, char a_name [LEN_LABEL], char
 char        DB__head_read_one       (FILE *a_file, char a_label [LEN_TERSE], int *r_var);
 char        DB__head_read           (FILE *a_file, char r_name [LEN_LABEL], char r_vernum [LEN_LABEL], int *r_nletter, int *r_nprefix, int *r_nsuffix, int *r_nsource, int *r_nbase, int *r_nword, char r_heart [LEN_DESC]);
 /*---(sources)--------------*/
-char        DB_source_add           (char a_file [LEN_HUND]);
-short       DB_source_inc           (void);
-char        DB_source_purge         (void);
-char        DB__source_write        (FILE *a_file);
-char        DB__source_read         (int n, FILE *a_file);
+char        SOURCE_add              (char a_file [LEN_HUND]);
+short       SOURCE_inc              (void);
+char        SOURCE__purge           (void);
+char        SOURCE_write            (FILE *a_file);
+char        SOURCE_read             (FILE *a_file, short a_count);
 /*---(words)----------------*/
 char        DB__word_write_one      (FILE *a_file, tWORD *a_curr);
 char        DB__word_write          (FILE *a_file);
@@ -1465,8 +1465,8 @@ char        DB__close               (FILE **b_file);
 char        DB_write                (void);
 char        DB_read                 (void);
 /*---(debugging)------------*/
-char        DB__source_count        (void);
-char*       DB__source_detail       (char n);
+char        SOURCE__count           (void);
+char*       SOURCE__detail          (char n);
 /*---(done)-----------------*/
 
 
@@ -1484,10 +1484,16 @@ short       PREFIX__count           (void);
 char*       PREFIX__detail_by_ptr   (short n, void *a_prefix);
 char*       PREFIX__detail          (uchar n);
 /*---(find)-----------------*/
-char        PREFIX__english_change  (cchar a_base [LEN_TITLE], cchar a_change [LEN_LABEL], char r_update [LEN_TITLE], char r_prefix [LEN_LABEL], char *r_trunc);
+char        PREFIX_english_change   (cchar a_base [LEN_TITLE], cchar a_change [LEN_LABEL], char r_update [LEN_TITLE], char r_prefix [LEN_LABEL], char *r_trunc);
+char        PREFIX_english_final    (void *a_prefix, cchar a_base [LEN_TITLE], char r_update [LEN_TITLE]);
 short       PREFIX__by_name         (char a_prefix [LEN_LABEL], char r_english [LEN_LABEL], char r_gregg [LEN_LABEL], void **r_point);
 char        PREFIX_driver           (cchar a_prefix [LEN_LABEL], char b_english [LEN_TITLE], char b_gregg [LEN_TITLE], void **r_point);
 char        PREFIX_english          (void *a_prefix, char r_english [LEN_LABEL]);
+/*---(database)-------------*/
+short       PREFIX_encode           (void *a_prefix);
+void*       PREFIX_decode           (short a_prefix);
+char        PREFIX_write            (FILE *a_file);
+char        PREFIX_read             (FILE *a_file, short a_count);
 /*---(done)-----------------*/
 
 
@@ -1536,8 +1542,14 @@ char        SUFFIX_english_change   (cchar a_english [LEN_TITLE], cchar a_change
 char        SUFFIX__field           (cchar a_field [LEN_TITLE], char r_request [LEN_TERSE], char r_english [LEN_TITLE]);
 char        SUFFIX__single          (void *a_base, void *a_prefix, void *a_suffix, cchar a_english [LEN_TITLE], cchar a_gregg [LEN_TITLE]);
 char        SUFFIX_driver           (void *a_base, void *a_prefix, cchar a_field [LEN_TITLE], cchar a_gregg [LEN_TITLE]);
+char        SUFFIX_english          (void *a_suffix, char r_english [LEN_LABEL]);
 /*---(report)---------------*/
 char        SUFFIX_dump             (FILE *f);
+/*---(database)-------------*/
+short       SUFFIX_encode           (void *a_suffix);
+void*       SUFFIX_decode           (short a_suffix);
+char        SUFFIX_write            (FILE *a_file);
+char        SUFFIX_read             (FILE *a_file, short a_count);
 /*---(done)-----------------*/
 
 
@@ -1580,6 +1592,13 @@ char        BASE_create             (char a_file, short a_line, cchar a_english 
 char        BASE_add_dict           (void *a_base, void *a_dict);
 /*---(reporting)------------*/
 char        BASE_dump_tree          (FILE *f);
+/*---(database)-------------*/
+char        BASE_index_new          (short a_count);
+char        BASE_index_add          (short n, void *a_base);
+void*       BASE_index_get          (short n);
+char        BASE_index_free         (void);
+char        BASE_write              (FILE *a_file);
+char        BASE_read               (FILE *a_file, short a_count);
 /*---(done)-----------------*/
 
 

@@ -46,6 +46,7 @@ BASE__purge             (void)
    /*---(purging)------------------------*/
    BASE__by_cursor (YDLST_TAIL, &x_curr);
    while (x_curr != NULL) {
+      DEBUG_CONF   yLOG_info    ("english"   , x_curr->b_english);
       BASE__unhook (x_curr);
       BASE__free   (&x_curr);
       BASE__by_cursor (YDLST_TAIL, &x_curr);
@@ -98,6 +99,7 @@ BASE__wipe              (void *a_base)
    x_base->b_head    = NULL;
    x_base->b_tail    = NULL;
    x_base->b_ndict   = 0;
+   x_base->b_ref     = 0;
    /*---(part-of-speech)-------*/
    x_base->b_part    = '·';
    x_base->b_sub     = '·';
@@ -470,6 +472,220 @@ BASE_dump_tree          (FILE *f)
     *> DEBUG_CONF   yLOG_exit    (__FUNCTION__);                                                               <* 
     *> return 0;                                                                                               <*/
 }
+
+
+
+/*====================-----------------==-----------------====================*/
+/*===----                      database handling                       ----===*/
+/*====================-----------------==-----------------====================*/
+static void o___DATABASE__________________o (void) {;}
+
+static  short    s_count = 0;
+static  tBASE  **s_index = NULL;
+
+char
+BASE_index_new          (short a_count)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   char        x_tries     =    0;
+   /*---(header)-------------------------*/
+   DEBUG_FILE   yLOG_enter   (__FUNCTION__);
+   /*---(defense)------------------------*/
+   DEBUG_FILE  yLOG_value   ("a_count"   , a_count);
+   --rce;  if (a_count <= 0) {
+      DEBUG_FILE  yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_FILE  yLOG_point   ("s_index"   , s_index);
+   --rce;  if (s_index != NULL) {
+      DEBUG_FILE  yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(create index)-------------------*/
+   while (s_index == NULL) {
+      ++x_tries;
+      s_index = (tBASE *) malloc (sizeof (*s_index) * a_count);
+      if (x_tries > 3)   break;
+   }
+   DEBUG_FILE   yLOG_sint    (x_tries);
+   DEBUG_FILE   yLOG_spoint  (s_index);
+   --rce;  if (s_index == NULL) {
+      DEBUG_FILE   yLOG_sexitr  (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(save)---------------------------*/
+   s_count = a_count;
+   /*---(complete)-----------------------*/
+   DEBUG_FILE   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+BASE_index_add          (short n, void *a_base)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   tBASE      *x_base      = NULL;
+   /*---(header)-------------------------*/
+   DEBUG_FILE   yLOG_enter   (__FUNCTION__);
+   /*---(defense)------------------------*/
+   DEBUG_FILE  yLOG_value   ("n"         , n);
+   --rce;  if (n < 0 || n >= s_count) {
+      DEBUG_FILE  yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_FILE  yLOG_point   ("s_index"   , s_index);
+   --rce;  if (s_index == NULL) {
+      DEBUG_FILE  yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(save)---------------------------*/
+   x_base = (tBASE *) a_base;
+   s_index [n] = x_base;
+   x_base->b_ref = n;
+   /*---(complete)-----------------------*/
+   DEBUG_FILE   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+void*
+BASE_index_get          (short n)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   /*---(header)-------------------------*/
+   DEBUG_FILE   yLOG_enter   (__FUNCTION__);
+   /*---(defense)------------------------*/
+   DEBUG_FILE  yLOG_value   ("n"         , n);
+   --rce;  if (n < 0 || n >= s_count) {
+      DEBUG_FILE  yLOG_exitr   (__FUNCTION__, rce);
+      return NULL;
+   }
+   DEBUG_FILE  yLOG_point   ("s_index"   , s_index);
+   --rce;  if (s_index == NULL) {
+      DEBUG_FILE  yLOG_exitr   (__FUNCTION__, rce);
+      return NULL;
+   }
+   /*---(complete)-----------------------*/
+   DEBUG_FILE   yLOG_exit    (__FUNCTION__);
+   return s_index [n];
+}
+
+char
+BASE_index_free         (void)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   /*---(header)-------------------------*/
+   DEBUG_FILE   yLOG_enter   (__FUNCTION__);
+   /*---(defense)------------------------*/
+   DEBUG_FILE  yLOG_point   ("s_index"   , s_index);
+   --rce;  if (s_index == NULL) {
+      DEBUG_FILE  yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(free and ground)----------------*/
+   free (s_index);
+   s_index = NULL;
+   s_count = 0;
+   /*---(complete)-----------------------*/
+   DEBUG_FILE   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+BASE_write              (FILE *a_file)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
+   char        x_count     =    0;
+   tBASE      *x_base      = NULL;
+   short       c           =    0;
+   /*---(header)-------------------------*/
+   DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
+   /*---(defense)------------------------*/
+   DEBUG_OUTP  yLOG_point   ("a_file"    , a_file);
+   --rce;  if (a_file == NULL) {
+      DEBUG_OUTP  yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   x_count = BASE__count ();
+   DEBUG_OUTP  yLOG_value   ("x_count"   , x_count);
+   --rce;  if (x_count <= 0) {
+      DEBUG_OUTP  yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(write all)----------------------*/
+   BASE__by_cursor (YDLST_HEAD, &x_base);
+   while (x_base != NULL) {
+      DEBUG_OUTP  yLOG_info    ("english"   , x_base->b_english);
+      rc = fwrite (x_base, sizeof (tBASE), 1, a_file);
+      if (rc != 1)   break;
+      BASE_index_add  (c, x_base);
+      BASE__by_cursor (YDLST_NEXT, &x_base);
+      ++c;
+   }
+   /*---(check)--------------------------*/
+   DEBUG_OUTP  yLOG_value   ("c"         , c);
+   --rce;  if (x_count != c) {
+      DEBUG_OUTP  yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(complete)-----------------------*/
+   DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+BASE_read               (FILE *a_file, short a_count)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
+   char        x_count     =    0;
+   short       i           =    0;
+   tBASE      *x_base      = NULL;
+   /*---(header)-------------------------*/
+   DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
+   /*---(defense)------------------------*/
+   DEBUG_OUTP  yLOG_point   ("a_file"    , a_file);
+   --rce;  if (a_file == NULL) {
+      DEBUG_OUTP  yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   x_count = BASE__count ();
+   DEBUG_OUTP  yLOG_value   ("x_count"   , x_count);
+   --rce;  if (x_count >  0) {
+      DEBUG_OUTP  yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(write all)----------------------*/
+   for (i = 0; i < a_count; ++i) {
+      BASE__force (&x_base);
+      rc = fread  (x_base, sizeof (tBASE), 1, a_file);
+      DEBUG_OUTP  yLOG_info    ("english"   , x_base->b_english);
+      if (rc != 1)   break;
+      BASE_index_add (i, x_base);
+      BASE__hook     (x_base);
+      x_base->b_head  = 0;
+      x_base->b_tail  = 0;
+      x_base->b_ndict = 0;
+   }
+   /*---(check)--------------------------*/
+   x_count = BASE__count ();
+   DEBUG_OUTP  yLOG_value   ("x_count"   , x_count);
+   --rce;  if (i != x_count) {
+      DEBUG_OUTP  yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(complete)-----------------------*/
+   DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+
 
 
 

@@ -12,6 +12,7 @@
 typedef  struct  cSUFFIX   tSUFFIX;
 struct cSUFFIX {
    /*---(main)-----------------*/
+   short       s_ref;                       /* ref for db write/read          */
    char        s_name      [LEN_LABEL];     /* name used in .dict files       */
    char        s_gregg     [LEN_LABEL];     /* gregg suffix                   */
    short       s_drawn     [LEN_LABEL];     /* fast gregg suffix (indexed)    */
@@ -49,6 +50,7 @@ SUFFIX__purge           (void)
    int         j           =    0;
    for (i = 0; i < MAX_SUFFIX; ++i) {
       /*---(main)-----------------*/
+      s_suffix [i].s_ref  = -1;
       strlcpy (s_suffix [i].s_name   , "", LEN_LABEL);
       strlcpy (s_suffix [i].s_gregg  , "", LEN_LABEL);
       for (j = 0; j < LEN_LABEL; ++j)   s_suffix [i].s_drawn [j] = 0;
@@ -134,6 +136,7 @@ SUFFIX__handler         (int n, char a_verb [LEN_LABEL], char a_exist, void *a_h
    if (s_suffix [s_nsuffix].s_change [0]           == '¬')   strcpy (s_suffix [s_nsuffix].s_change, "");
    if (strcmp (s_suffix [s_nsuffix].s_change, "·") == 0)     strcpy (s_suffix [s_nsuffix].s_change, "");
    /*---(add non-scanf)------------------*/
+   s_suffix [s_nsuffix].s_ref  = s_nsuffix;
    s_suffix [s_nsuffix].s_line = n;
    strlcpy (s_suffix [s_nsuffix].s_name, a_verb, LEN_LABEL);
    DEBUG_INPT  yLOG_complex ("final"     , "%3d#, %-10.10s, %s", s_nsuffix, s_suffix [s_nsuffix].s_name, s_suffix [s_nsuffix].s_gregg);
@@ -440,11 +443,14 @@ SUFFIX__field           (cchar a_field [LEN_TITLE], char r_request [LEN_TERSE], 
    }
    sprintf  (x_request, "%*.*s", l, l, a_field);
    strltrim (x_request, ySTR_BOTH, LEN_LABEL);
+   DEBUG_CONF   yLOG_complex ("x_request" , "%2då%sæ", l, x_request);
    /*---(get english)--------------------*/
    l = strlen (a_field);
    DEBUG_CONF   yLOG_value   ("l"         , l);
    sprintf (x_english, "%s"   , p + 2);
    strltrim (x_english, ySTR_BOTH, LEN_TITLE);
+   l = strlen (x_english);
+   DEBUG_CONF   yLOG_complex ("x_english" , "%2då%sæ", l, x_english);
    /*---(save-back)----------------------*/
    if (r_request != NULL)  strlcpy (r_request, x_request, LEN_TERSE);
    if (r_english != NULL)  strlcpy (r_english, x_english, LEN_TITLE);
@@ -459,9 +465,7 @@ SUFFIX__single          (void *a_base, void *a_prefix, void *a_suffix, cchar a_e
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
    char        rc          =    0;
-   char        x_prefix    [LEN_LABEL] = "";
    tSUFFIX    *x_suffix    = NULL;
-   char        x_english   [LEN_TITLE] = "";
    char        x_updated   [LEN_TITLE] = "";
    char        x_gregg     [LEN_TITLE] = "";
    /*---(header)-------------------------*/
@@ -477,19 +481,25 @@ SUFFIX__single          (void *a_base, void *a_prefix, void *a_suffix, cchar a_e
       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
-   /*---(add prefix)------------------*/
-   PREFIX_english (a_prefix, x_prefix);
-   sprintf (x_english, "%s%s", x_prefix, a_english);
    /*---(make variation)--------------*/
    x_suffix = (tSUFFIX *) a_suffix;
-   rc = SUFFIX_english_change (x_english, x_suffix->s_change, x_updated);
+   rc = SUFFIX_english_change (a_english, x_suffix->s_change, x_updated);
    DEBUG_CONF   yLOG_value   ("english"   , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   DEBUG_CONF   yLOG_info    ("x_updated" , x_updated);
    /*---(update gregg)----------------*/
    sprintf (x_gregg, "%s%s", a_gregg, x_suffix->s_gregg);
    DEBUG_CONF   yLOG_info    ("x_gregg"   , x_gregg);
    /*---(create dictionary entry)-----*/
    rc = DICT_create (x_updated, x_gregg, a_prefix, a_base, x_suffix, NULL);
    DEBUG_CONF   yLOG_value   ("creator"   , rc);
+   --rce;  if (rc < 0) {
+      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
    /*---(complete)-----------------------*/
    DEBUG_CONF   yLOG_exit    (__FUNCTION__);
    return rc;
@@ -502,7 +512,10 @@ SUFFIX_driver           (void *a_base, void *a_prefix, cchar a_field [LEN_TITLE]
    char        rce         =  -10;
    char        rc          =    0;
    char        x_request   [LEN_TERSE] = "";
+   char        t           [LEN_TITLE] = "";
+   char        s           [LEN_TITLE] = "";
    char        x_english   [LEN_TITLE] = "";
+   char        x_prefix    [LEN_LABEL] = "";
    char        x_action    =  '-';
    tSUFFIX    *x_suffix    = NULL;
    tSUFFIX    *x_other     = NULL;
@@ -526,12 +539,15 @@ SUFFIX_driver           (void *a_base, void *a_prefix, cchar a_field [LEN_TITLE]
    }
    DEBUG_CONF   yLOG_info    ("a_field"   , a_field);
    /*---(parse)--------------------------*/
-   rc = SUFFIX__field  (a_field, x_request, x_english);
+   rc = SUFFIX__field  (a_field, x_request, t);
    DEBUG_CONF   yLOG_value   ("parse"     , rc);
    --rce;  if (rc < 0) {
       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
       return rce;
    }
+   /*---(handle prefix)------------------*/
+   if (a_prefix == NULL)  strlcpy (x_english, t, LEN_TITLE);
+   else                   PREFIX_english_final (a_prefix, t, x_english);
    /*---(find variation)-----------------*/
    n = SUFFIX_by_name (x_request, &x_action, NULL, x_base, NULL, &x_suffix);
    DEBUG_CONF   yLOG_value   ("suffix"    , n);
@@ -589,6 +605,23 @@ SUFFIX_driver           (void *a_base, void *a_prefix, cchar a_field [LEN_TITLE]
    return 0;
 }
 
+char
+SUFFIX_english          (void *a_suffix, char r_english [LEN_LABEL])
+{
+   /*---(locals)-------------------------*/
+   char        rce         =  -10;
+   tSUFFIX    *x_suffix    = NULL;
+   /*---(default)------------------------*/
+   if (r_english != NULL)  strcpy (r_english, "");
+   /*---(defense)------------------------*/
+   --rce;  if (a_suffix  == NULL)  return rce;
+   /*---(save-back)----------------------*/
+   x_suffix = (tSUFFIX *) a_suffix;
+   strlcpy (r_english, x_suffix->s_name, LEN_LABEL);
+   /*---(complete)-----------------------*/
+   return 0;
+}
+
 
 
 /*============================--------------------============================*/
@@ -618,6 +651,22 @@ SUFFIX_dump             (FILE *f)
 /*===----                      database handling                       ----===*/
 /*====================-----------------==-----------------====================*/
 static void o___DATABASE__________________o (void) {;}
+
+short
+SUFFIX_encode           (void *a_suffix)
+{
+   tSUFFIX    *x_suffix    = NULL;
+   if (a_suffix == NULL)  return 0;
+   x_suffix = (tSUFFIX *) a_suffix;
+   return  x_suffix->s_ref;
+}
+
+void*
+SUFFIX_decode           (short a_suffix)
+{
+   if (a_suffix == 0)     return NULL;
+   return  &(s_suffix [a_suffix]);
+}
 
 char
 SUFFIX_write            (FILE *a_file)

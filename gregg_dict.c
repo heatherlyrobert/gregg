@@ -114,7 +114,7 @@ DICT_init               (void)
       return rce;
    }
    /*---(files)--------------------------*/
-   DB_source_purge ();
+   SOURCE__purge ();
    /*---(complete)-----------------------*/
    DEBUG_CONF   yLOG_exit    (__FUNCTION__);
    return 0;
@@ -314,6 +314,7 @@ DICT__detail_full       (void *a_dict, char a_style, char a_out [LEN_FULL])
    char        v           [LEN_TITLE] = "·";
    char        w           [LEN_TITLE] = "·";
    char        x           [LEN_TITLE] = "·";
+   char        y           [LEN_TITLE] = "·";
    /*---(defense)------------------------*/
    --rce;  if (a_out  == NULL)  return rce;
    strcpy (a_out, "");
@@ -332,17 +333,21 @@ DICT__detail_full       (void *a_dict, char a_style, char a_out [LEN_FULL])
       sprintf  (t, "%.30s", x_dict->d_gregg);
       break;
    }
-   sprintf  (u, "%-3.3sp %-3.3sb %-3.3ss", (x_dict->d_prefix == NULL) ? "···" : "SET", (x_dict->d_base == NULL) ? "···" : "SET", (x_dict->d_suffix == NULL) ? "···" : "SET");
-   if (x_dict->d_prev != NULL)  strlcpy (v, x_dict->d_prev->d_english, LEN_TITLE);
-   if (x_dict->d_next != NULL)  strlcpy (w, x_dict->d_next->d_english, LEN_TITLE);
-   if (x_base         != NULL)  strlcpy (x, x_base->b_english        , LEN_TITLE);
+   /*> sprintf  (u, "%-3.3sp %-3.3sb %-3.3ss", (x_dict->d_prefix == NULL) ? "···" : "SET", (x_dict->d_base == NULL) ? "···" : "SET", (x_dict->d_suffix == NULL) ? "···" : "SET");   <*/
+   if (x_dict->d_prev   != NULL)  strlcpy (v, x_dict->d_prev->d_english, LEN_TITLE);
+   if (x_dict->d_next   != NULL)  strlcpy (w, x_dict->d_next->d_english, LEN_TITLE);
+   if (x_base           != NULL)  strlcpy (x, x_base->b_english        , LEN_TITLE);
+   PREFIX_english (x_dict->d_prefix, u);
+   if (strcmp (u, "") == 0)  strcpy (u, "·");
+   SUFFIX_english (x_dict->d_suffix, y);
+   if (strcmp (y, "") == 0)  strcpy (y, "·");
    /*---(consolidate)--------------------*/
    switch (a_style) {
    case  't' :
-      sprintf (a_out, "%-24.24s  %-34.34s ´ %-20.20s ´ %-14.14s ´ %-20.20s ´ %-20.20s ´", s, t, x, u, v, w);
+      sprintf (a_out, "%-24.24s  %-34.34s ´ %-20.20s ´ %-8.8s %-5.5s ´ %-20.20s ´ %-20.20s ´", s, t, x, u, y, v, w);
       break;
    case  '-' :
-      sprintf (a_out, "%-20.20s  %-30.30s ´ %-20.20s ´ %-14.14s ´ %-20.20s ´ %-20.20s ´", s, t, x, u,  v, w);
+      sprintf (a_out, "%-20.20s  %-30.30s ´ %-20.20s ´ %-8.8s %-5.5s ´ %-20.20s ´ %-20.20s ´", s, t, x, u, y, v, w);
       break;
    }
    /*---(complete)-----------------------*/
@@ -441,7 +446,7 @@ DICT_create             (cchar a_english [LEN_TITLE], cchar a_gregg [LEN_TITLE],
       return rce;
    }
    /*---(add to source)------------------*/
-   DB_source_inc ();
+   SOURCE_inc ();
    /*---(save-back)----------------------*/
    if (r_dict != NULL)  *r_dict = x_new;
    /*---(complete)-----------------------*/
@@ -786,8 +791,8 @@ DICT_import             (cchar a_name [LEN_PATH])
    }
    yURG_msg ('-', "data source openned successfully");
    /*---(add file)-------------------------*/
-   x_file = my.r_nfile;
-   DB_source_add (a_name);
+   x_file = SOURCE__count ();
+   SOURCE_add (a_name);
    /*---(process)--------------------------*/
    while (1) {
       /*---(next)----------------*/
@@ -1061,5 +1066,159 @@ DICT_page_ends          (int a_page, char r_beg [LEN_TITLE], char r_end [LEN_TIT
    if (r_end != NULL)  strlcpy (r_end, x_end->d_english, LEN_TITLE);
    return my.w_ppage;
 }
+
+
+
+/*====================-----------------==-----------------====================*/
+/*===----                      database handling                       ----===*/
+/*====================-----------------==-----------------====================*/
+static void o___DATABASE__________________o (void) {;}
+
+char
+DICT__encode            (void *a_dict)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
+   tDICT      *x_dict      = NULL;
+   tBASE      *x_base      = NULL;
+   /*---(header)-------------------------*/
+   DEBUG_OUTP   yLOG_senter  (__FUNCTION__);
+   /*---(defense)------------------------*/
+   DEBUG_OUTP  yLOG_spoint  (a_dict);
+   --rce;  if (a_dict == NULL) {
+      DEBUG_OUTP  yLOG_sexitr  (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(encode)-------------------------*/
+   x_dict = (tDICT *) a_dict;
+   x_base = (tBASE *) x_dict->d_base;
+   x_dict->d_prefix = PREFIX_encode  (x_dict->d_prefix);
+   x_dict->d_suffix = SUFFIX_encode  (x_dict->d_suffix);
+   x_dict->d_base   = x_base->b_ref;
+   /*---(complete)-----------------------*/
+   DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+DICT__decode            (void *a_dict)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
+   tDICT      *x_dict      = NULL;
+   /*---(header)-------------------------*/
+   DEBUG_OUTP   yLOG_senter  (__FUNCTION__);
+   /*---(defense)------------------------*/
+   DEBUG_OUTP  yLOG_spoint  (a_dict);
+   --rce;  if (a_dict == NULL) {
+      DEBUG_OUTP  yLOG_sexitr  (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(encode)-------------------------*/
+   x_dict = (tDICT *) a_dict;
+   x_dict->d_prefix = PREFIX_decode  (x_dict->d_prefix);
+   x_dict->d_suffix = SUFFIX_decode  (x_dict->d_suffix);
+   x_dict->d_base   = BASE_index_get (x_dict->d_base);
+   /*---(complete)-----------------------*/
+   DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+DICT_write              (FILE *a_file)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
+   char        x_count     =    0;
+   tDICT      *x_dict      = NULL;
+   short       c           =    0;
+   /*---(header)-------------------------*/
+   DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
+   /*---(defense)------------------------*/
+   DEBUG_OUTP  yLOG_point   ("a_file"    , a_file);
+   --rce;  if (a_file == NULL) {
+      DEBUG_OUTP  yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   x_count = DICT__count ();
+   DEBUG_OUTP  yLOG_value   ("x_count"   , x_count);
+   --rce;  if (x_count <= 0) {
+      DEBUG_OUTP  yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(write all)----------------------*/
+   DICT__by_cursor (YDLST_HEAD, &x_dict);
+   while (x_dict != NULL) {
+      DEBUG_OUTP  yLOG_info    ("english"   , x_dict->d_english);
+      DICT__encode (x_dict);
+      rc = fwrite (x_dict, sizeof (tDICT), 1, a_file);
+      if (rc != 1)   break;
+      DICT__decode (x_dict);
+      DICT__by_cursor (YDLST_NEXT, &x_dict);
+      ++c;
+   }
+   /*---(check)--------------------------*/
+   DEBUG_OUTP  yLOG_value   ("c"         , c);
+   --rce;  if (x_count != c) {
+      DEBUG_OUTP  yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(complete)-----------------------*/
+   DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+char
+DICT_read               (FILE *a_file, short a_count)
+{
+   /*---(locals)-----------+-----+-----+-*/
+   char        rce         =  -10;
+   char        rc          =    0;
+   char        x_count     =    0;
+   short       i           =    0;
+   tDICT      *x_dict      = NULL;
+   /*---(header)-------------------------*/
+   DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
+   /*---(defense)------------------------*/
+   DEBUG_OUTP  yLOG_point   ("a_file"    , a_file);
+   --rce;  if (a_file == NULL) {
+      DEBUG_OUTP  yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   x_count = DICT__count ();
+   DEBUG_OUTP  yLOG_value   ("x_count"   , x_count);
+   --rce;  if (x_count >  0) {
+      DEBUG_OUTP  yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(write all)----------------------*/
+   for (i = 0; i < a_count; ++i) {
+      DICT__force (&x_dict);
+      rc = fread  (x_dict, sizeof (tDICT), 1, a_file);
+      DEBUG_OUTP  yLOG_info    ("english"   , x_dict->d_english);
+      if (rc != 1)   break;
+      DICT__decode (x_dict);
+      DICT__hook   (x_dict);
+      BASE_add_dict (x_dict->d_base, x_dict);
+   }
+   /*---(check)--------------------------*/
+   x_count = DICT__count ();
+   DEBUG_OUTP  yLOG_value   ("x_count"   , x_count);
+   --rce;  if (i != x_count) {
+      DEBUG_OUTP  yLOG_exitr   (__FUNCTION__, rce);
+      return rce;
+   }
+   /*---(complete)-----------------------*/
+   DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
+   return 0;
+}
+
+
+
+
+
 
 

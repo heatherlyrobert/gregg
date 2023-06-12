@@ -282,53 +282,53 @@ WORDS__populate         (tWORD *a_new, char a_english [LEN_TITLE], char a_gregg 
    return 0;
 }
 
-char
-WORDS_new_full          (char a_english [LEN_TITLE], char a_gregg [LEN_TITLE], char a_part, char a_base, tWORD **r_new)
-{
-   /*---(locals)-----------+-----------+-*/
-   char        rce         =  -10;
-   char        rc          =    0;
-   char        x_full      [LEN_DESC]  = "";
-   /*---(begin)--------------------------*/
-   DEBUG_CONF   yLOG_enter   (__FUNCTION__);
-   /*---(verify)-------------------------*/
-   rc = WORDS__check  (a_english, a_gregg, a_part, x_full);
-   DEBUG_CONF   yLOG_value   ("check"     , rc);
-   --rce; if (rc < 0) {
-      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   if (rc == 1) {
-      DEBUG_CONF   yLOG_exit    (__FUNCTION__);
-      return 1;
-   }
-   /*---(malloc)-------------------------*/
-   rc = WORDS_new     ('-', r_new);
-   DEBUG_CONF   yLOG_value   ("malloc"    , rc);
-   --rce; if (rc < 0) {
-      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   /*---(populate)-----------------------*/
-   rc = WORDS__populate  (*r_new, a_english, a_gregg, a_part, x_full);
-   DEBUG_CONF   yLOG_value   ("populate"  , rc);
-   --rce; if (rc < 0) {
-      DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   /*---(stats)--------------------------*/
-   if (a_base == 'B' && strchr (a_gregg, '<') == NULL) {
-      (*r_new)->w_bref = my.r_nbase;
-      ++(my.r_nbase);
-   }
-   ++(my.r_nword);
-   /*---(complete)-----------------------*/
-   DEBUG_CONF   yLOG_exit    (__FUNCTION__);
-   return 0;
-}
+/*> char                                                                                                                      <* 
+ *> WORDS_new_full          (char a_english [LEN_TITLE], char a_gregg [LEN_TITLE], char a_part, char a_base, tWORD **r_new)   <* 
+ *> {                                                                                                                         <* 
+ *>    /+---(locals)-----------+-----------+-+/                                                                               <* 
+ *>    char        rce         =  -10;                                                                                        <* 
+ *>    char        rc          =    0;                                                                                        <* 
+ *>    char        x_full      [LEN_DESC]  = "";                                                                              <* 
+ *>    /+---(begin)--------------------------+/                                                                               <* 
+ *>    DEBUG_CONF   yLOG_enter   (__FUNCTION__);                                                                              <* 
+ *>    /+---(verify)-------------------------+/                                                                               <* 
+ *>    rc = WORDS__check  (a_english, a_gregg, a_part, x_full);                                                               <* 
+ *>    DEBUG_CONF   yLOG_value   ("check"     , rc);                                                                          <* 
+ *>    --rce; if (rc < 0) {                                                                                                   <* 
+ *>       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);                                                                      <* 
+ *>       return rce;                                                                                                         <* 
+ *>    }                                                                                                                      <* 
+ *>    if (rc == 1) {                                                                                                         <* 
+ *>       DEBUG_CONF   yLOG_exit    (__FUNCTION__);                                                                           <* 
+ *>       return 1;                                                                                                           <* 
+ *>    }                                                                                                                      <* 
+ *>    /+---(malloc)-------------------------+/                                                                               <* 
+ *>    rc = WORDS_new     ('-', r_new);                                                                                       <* 
+ *>    DEBUG_CONF   yLOG_value   ("malloc"    , rc);                                                                          <* 
+ *>    --rce; if (rc < 0) {                                                                                                   <* 
+ *>       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);                                                                      <* 
+ *>       return rce;                                                                                                         <* 
+ *>    }                                                                                                                      <* 
+ *>    /+---(populate)-----------------------+/                                                                               <* 
+ *>    rc = WORDS__populate  (*r_new, a_english, a_gregg, a_part, x_full);                                                    <* 
+ *>    DEBUG_CONF   yLOG_value   ("populate"  , rc);                                                                          <* 
+ *>    --rce; if (rc < 0) {                                                                                                   <* 
+ *>       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);                                                                      <* 
+ *>       return rce;                                                                                                         <* 
+ *>    }                                                                                                                      <* 
+ *>    /+---(stats)--------------------------+/                                                                               <* 
+ *>    if (a_base == 'B' && strchr (a_gregg, '<') == NULL) {                                                                  <* 
+ *>       (*r_new)->w_bref = my.r_nbase;                                                                                      <* 
+ *>       ++(my.r_nbase);                                                                                                     <* 
+ *>    }                                                                                                                      <* 
+ *>    ++(my.r_nword);                                                                                                        <* 
+ *>    /+---(complete)-----------------------+/                                                                               <* 
+ *>    DEBUG_CONF   yLOG_exit    (__FUNCTION__);                                                                              <* 
+ *>    return 0;                                                                                                              <* 
+ *> }                                                                                                                         <*/
 
-char WORDS_new_base          (char a_english [LEN_TITLE], char a_gregg [LEN_TITLE], char a_part, tWORD **r_new)    { return WORDS_new_full (a_english, a_gregg, a_part, 'B', r_new); }
-char WORDS_new_vary          (char a_english [LEN_TITLE], char a_gregg [LEN_TITLE], char a_part, tWORD **r_new)    { return WORDS_new_full (a_english, a_gregg, a_part, '-', r_new); }
+/*> char WORDS_new_base          (char a_english [LEN_TITLE], char a_gregg [LEN_TITLE], char a_part, tWORD **r_new)    { return WORDS_new_full (a_english, a_gregg, a_part, 'B', r_new); }   <*/
+/*> char WORDS_new_vary          (char a_english [LEN_TITLE], char a_gregg [LEN_TITLE], char a_part, tWORD **r_new)    { return WORDS_new_full (a_english, a_gregg, a_part, '-', r_new); }   <*/
 
 
 char         /*-> remove a cell completely -----------[ ------ [fe.943.224.81]*/ /*-[11.0000.133.7]-*/ /*-[--.---.---.--]-*/
@@ -522,8 +522,8 @@ WORDS_unhook            (tWORD *a_old)
 /*====================------------------------------------====================*/
 static void  o___SEARCH__________o () { return; }
 
-int  WORDS_eng_count         (void)                            { return ySORT_count     (B_ENGLISH); }
-char WORDS_eng_by_name       (uchar *a_text, tWORD **r_word)   { return ySORT_by_name   (B_ENGLISH, a_text, r_word); }
+/*> int  WORDS_eng_count         (void)                            { return ySORT_count     (B_ENGLISH); }   <*/
+/*> char WORDS_eng_by_name       (uchar *a_text, tWORD **r_word)   { return ySORT_by_name   (B_ENGLISH, a_text, r_word); }   <*/
 char WORDS_eng_by_index      (int n, tWORD **r_word)           { return ySORT_by_index  (B_ENGLISH, n, r_word); }
 char WORDS_eng_by_cursor     (char a_dir, tWORD **r_word)      { return ySORT_by_cursor (B_ENGLISH, a_dir, r_word); }
 
@@ -1030,165 +1030,165 @@ words_outstring (            /* locate outline in the translation dictionary  */
  *> {                                                                                 <* 
  *> }                                                                                 <*/
 
-char
-WORDS_outline        (int a_index, char a_base)
-{
-   /*---(locals)--------------------------------*/
-   int    letter = 0;        /* current letter                                */
-   int    offset = 0;        /* pointes to correct version of vowel           */
-   int    left   = 0;        /* leftmost position                             */
-   int    right  = 0;        /* rightmost position                            */
-   int    temp   = 0;        /* calc variable                                 */
-   int    ltr    = 0;        /* current letter index                          */
-   int i;
-   /*---(set up letters)------------------------*/
-   int    count  = words_translate(a_index);
-   printf("CREATING OUTLINE...\n");
-   /*---(test for width too large)--------------*/
-   printf("   test width...\n");
-   posx = posy = 0;
-   for (i = 0; i < count; ++i) {
-      ltr   = letters[i];
-      posy += g_loc[ltr].y_end;
-      if (posy < 50 && posy > -50) {
-         temp = posx + g_loc[ltr].x_lef;
-         /*> if (temp < left ) left  = temp;                                          <*/
-         temp = posx + g_loc[ltr].x_rig;
-         if (temp > right) right = temp;
-      }
-      posx += g_loc[ltr].x_end;
-      printf("      %02d (%03d) %-5.5s :: ", i, ltr, g_loc[ltr].label);
-      printf("tx = %4.0f, px  = %4d, py  = %4d, le  = %4d, ri = %4d\n",
-            g_loc[ltr].x_end, posx, posy, left, right);
-   }
-   if (outx - left + right > 280) { /* 260 small, 360 pad */
-      outx  = BASX;     /* reset to left margin      */
-      outy += LINE;     /* go to nextg line           */
-   }
-   /*---(continue the base line)----------------*/
-   printf("   drawing...\n");
-   printf("      starting at %4dx, %4dy\n", outx - left, outy);
-   if (a_base == 'y') {
-      glPushMatrix(); {
-         glTranslatef (outx - left,  outy,  0.0);
-         glColor4f    (0.0f, 0.0f, 0.0f, 0.7f);
-         glLineWidth  ( 3.0);
-         glBegin (GL_LINES); {
-            glVertex3f   (left            , 0, 50);
-            glVertex3f   (right + OUT_XGAP, 0, 50);
-         } glEnd ();
-         glPointSize  (10.0);
-         glBegin (GL_POINTS); {
-            glVertex3f   (left            , 0, 50);
-            glVertex3f   (right + OUT_XGAP, 0, 50);
-         } glEnd ();
-      } glPopMatrix();
-   }
-   /*---(LOOP)----------------------------------*/
-   posx = posy = 0;
-   /*---(set outline starting point)------------*/
-   glPushMatrix();
-   glTranslatef(outx - left,  outy,  0.0);
-   glLineWidth(1.5);
-   for (i = 0; i < count; ++i) {
-      /*---(establish values)-------------------*/
-      letter = letters[i];
-      offset = 0;
-      /*---(watch initial left)-----------------*/
-      /*> if (i == 0 && g_loc[letter].x_lef < 0) {                                       <* 
-       *>    glTranslatef(-g_loc[letter].x_lef,  0,  0.0);                               <* 
-       *>    posx  =  -g_loc[letter].x_lef;                                              <* 
-       *> }                                                                           <*/
-      /*---(draw letter)------------------------*/
-      /*> glColor4f(0.0f, 0.0f, 0.5f, 0.7f);                                          <*/
-      glColor4f (0.0f, 0.0f, 0.0f, 0.7f);
-      if (g_loc[letter].type == 'c') {
-         /*> offset = words_vowel(i, count) - 1;                                      <*/
-         offset = 0;
-         glCallList (dl_solid + letter + offset);
-      } else {
-         /*> words_consonant(i, count);                                               <*/
-         glCallList (dl_solid + letter);
-      }
-      /*---(update g_loc)-------------------------*/
-      printf("      letter = %3d, offset = %2d\n", letter, offset);
-      glTranslatef(g_loc[letter].x_end,  g_loc[letter].y_end,  0.0);
-      posx += g_loc[letter].x_end;
-      posy += g_loc[letter].y_end;
-   }
-   printf("      ending   at %4dx, %4dy, %4dox\n", outx + posx, outy + posy, outx);
-   outx += -left + right + OUT_XGAP;
-   glPopMatrix();
-   printf("   DONE\n");
-   /*---(complete)------------------------------*/
-   return 0;
-}
+/*> char                                                                                           <* 
+ *> WORDS_outline        (int a_index, char a_base)                                                <* 
+ *> {                                                                                              <* 
+ *>    /+---(locals)--------------------------------+/                                             <* 
+ *>    int    letter = 0;        /+ current letter                                +/               <* 
+ *>    int    offset = 0;        /+ pointes to correct version of vowel           +/               <* 
+ *>    int    left   = 0;        /+ leftmost position                             +/               <* 
+ *>    int    right  = 0;        /+ rightmost position                            +/               <* 
+ *>    int    temp   = 0;        /+ calc variable                                 +/               <* 
+ *>    int    ltr    = 0;        /+ current letter index                          +/               <* 
+ *>    int i;                                                                                      <* 
+ *>    /+---(set up letters)------------------------+/                                             <* 
+ *>    int    count  = words_translate(a_index);                                                   <* 
+ *>    printf("CREATING OUTLINE...\n");                                                            <* 
+ *>    /+---(test for width too large)--------------+/                                             <* 
+ *>    printf("   test width...\n");                                                               <* 
+ *>    posx = posy = 0;                                                                            <* 
+ *>    for (i = 0; i < count; ++i) {                                                               <* 
+ *>       ltr   = letters[i];                                                                      <* 
+ *>       posy += g_loc[ltr].y_end;                                                                <* 
+ *>       if (posy < 50 && posy > -50) {                                                           <* 
+ *>          temp = posx + g_loc[ltr].x_lef;                                                       <* 
+ *>          /+> if (temp < left ) left  = temp;                                          <+/      <* 
+ *>          temp = posx + g_loc[ltr].x_rig;                                                       <* 
+ *>          if (temp > right) right = temp;                                                       <* 
+ *>       }                                                                                        <* 
+ *>       posx += g_loc[ltr].x_end;                                                                <* 
+ *>       printf("      %02d (%03d) %-5.5s :: ", i, ltr, g_loc[ltr].label);                        <* 
+ *>       printf("tx = %4.0f, px  = %4d, py  = %4d, le  = %4d, ri = %4d\n",                        <* 
+ *>             g_loc[ltr].x_end, posx, posy, left, right);                                        <* 
+ *>    }                                                                                           <* 
+ *>    if (outx - left + right > 280) { /+ 260 small, 360 pad +/                                   <* 
+ *>       outx  = BASX;     /+ reset to left margin      +/                                        <* 
+ *>       outy += LINE;     /+ go to nextg line           +/                                       <* 
+ *>    }                                                                                           <* 
+ *>    /+---(continue the base line)----------------+/                                             <* 
+ *>    printf("   drawing...\n");                                                                  <* 
+ *>    printf("      starting at %4dx, %4dy\n", outx - left, outy);                                <* 
+ *>    if (a_base == 'y') {                                                                        <* 
+ *>       glPushMatrix(); {                                                                        <* 
+ *>          glTranslatef (outx - left,  outy,  0.0);                                              <* 
+ *>          glColor4f    (0.0f, 0.0f, 0.0f, 0.7f);                                                <* 
+ *>          glLineWidth  ( 3.0);                                                                  <* 
+ *>          glBegin (GL_LINES); {                                                                 <* 
+ *>             glVertex3f   (left            , 0, 50);                                            <* 
+ *>             glVertex3f   (right + OUT_XGAP, 0, 50);                                            <* 
+ *>          } glEnd ();                                                                           <* 
+ *>          glPointSize  (10.0);                                                                  <* 
+ *>          glBegin (GL_POINTS); {                                                                <* 
+ *>             glVertex3f   (left            , 0, 50);                                            <* 
+ *>             glVertex3f   (right + OUT_XGAP, 0, 50);                                            <* 
+ *>          } glEnd ();                                                                           <* 
+ *>       } glPopMatrix();                                                                         <* 
+ *>    }                                                                                           <* 
+ *>    /+---(LOOP)----------------------------------+/                                             <* 
+ *>    posx = posy = 0;                                                                            <* 
+ *>    /+---(set outline starting point)------------+/                                             <* 
+ *>    glPushMatrix();                                                                             <* 
+ *>    glTranslatef(outx - left,  outy,  0.0);                                                     <* 
+ *>    glLineWidth(1.5);                                                                           <* 
+ *>    for (i = 0; i < count; ++i) {                                                               <* 
+ *>       /+---(establish values)-------------------+/                                             <* 
+ *>       letter = letters[i];                                                                     <* 
+ *>       offset = 0;                                                                              <* 
+ *>       /+---(watch initial left)-----------------+/                                             <* 
+ *>       /+> if (i == 0 && g_loc[letter].x_lef < 0) {                                       <*    <* 
+ *>        *>    glTranslatef(-g_loc[letter].x_lef,  0,  0.0);                               <*    <* 
+ *>        *>    posx  =  -g_loc[letter].x_lef;                                              <*    <* 
+ *>        *> }                                                                           <+/      <* 
+ *>       /+---(draw letter)------------------------+/                                             <* 
+ *>       /+> glColor4f(0.0f, 0.0f, 0.5f, 0.7f);                                          <+/      <* 
+ *>       glColor4f (0.0f, 0.0f, 0.0f, 0.7f);                                                      <* 
+ *>       if (g_loc[letter].type == 'c') {                                                         <* 
+ *>          /+> offset = words_vowel(i, count) - 1;                                      <+/      <* 
+ *>          offset = 0;                                                                           <* 
+ *>          glCallList (dl_solid + letter + offset);                                              <* 
+ *>       } else {                                                                                 <* 
+ *>          /+> words_consonant(i, count);                                               <+/      <* 
+ *>          glCallList (dl_solid + letter);                                                       <* 
+ *>       }                                                                                        <* 
+ *>       /+---(update g_loc)-------------------------+/                                           <* 
+ *>       printf("      letter = %3d, offset = %2d\n", letter, offset);                            <* 
+ *>       glTranslatef(g_loc[letter].x_end,  g_loc[letter].y_end,  0.0);                           <* 
+ *>       posx += g_loc[letter].x_end;                                                             <* 
+ *>       posy += g_loc[letter].y_end;                                                             <* 
+ *>    }                                                                                           <* 
+ *>    printf("      ending   at %4dx, %4dy, %4dox\n", outx + posx, outy + posy, outx);            <* 
+ *>    outx += -left + right + OUT_XGAP;                                                           <* 
+ *>    glPopMatrix();                                                                              <* 
+ *>    printf("   DONE\n");                                                                        <* 
+ *>    /+---(complete)------------------------------+/                                             <* 
+ *>    return 0;                                                                                   <* 
+ *> }                                                                                              <*/
 
-int           /*----: translate english word into gregg letters --------------*/
-words_translate    (int a_word)
-{
-   /*---(locals)-------------------------*/
-   char   *p = NULL;             // pointer to substring
-   char   *q = ".";              // delimiters
-   char   x_ltr[5] = "";             // letter
-   int    count =    0;          // letter count
-   int    offset =   0;
-   char   a_outstring[MAX_LEN];
-   int       i         = 0;            /* loop iterator : general             */
-   /*---(init)---------------------------*/
-   strlcpy (a_outstring, s_words[a_word].w_gregg, MAX_LEN);
-   /*---(clear letters)------------------*/
-   for (i = 0; i < 30; ++i) {
-      letters[i] = 0;
-   }
-   /*---(get the first letter, always ">")------*/
-   /*> DEBUG_CONFTING  printf("OUTSTRING = %s\n", a_outstring);                       <*/
-   p = strtok(a_outstring, q);
-   if (p == NULL || strncmp(p, "", MAX_LEN) == 0) {
-      return -1;
-   }
-   /*---(run through the letters)---------------*/
-   while (1) {
-      p = strtok(NULL, q);
-      if (p == NULL) {
-         if (letters[count - 1] == 1) {
-            letters[count] = 2;
-            ++count;
-         }
-         break;
-      }
-      /*---(new stroke)------------------*/
-      if (strncmp(p, ">", 5) == 0) {
-         if (count == 0 || letters[count - 1] == 1) {
-            letters[count] = 2;
-            ++count;
-         }
-      }
-      /*---(handle letter)---------------*/
-      strlcpy (x_ltr, p, 5);
-      for (i = 0; i < 5; ++i)  x_ltr[i] = tolower(x_ltr[i]);
-      /*> DEBUG_CONFTING  printf("   letter = <<%s>>\n", x_ltr);                      <*/
-      for (i = 0; i < MAX_LETTERS; ++i) {
-         if (strncmp(x_ltr, g_loc[i].label, 5) != 0) continue;
-         letters[count]  = i;
-         break;
-      }
-      if (letters[count] == 0) continue;
-      /*> DEBUG_CONFTING  printf("      ind = <<%d>>\n", letters[count]);             <*/
-      ++count;
-   }
-   for (i = 0; i < count; ++i) {
-      offset = 0;
-      if (g_loc[letters[i]].type == 'c') { /*> offset = words_vowel(i, count) - 1;                                      <*/
-         /*> offset = words_vowel(i, count);                                          <*/
-         letters[i] += offset;
-      }
-      /*> DEBUG_CONFTING  printf("%d, ", letters[i]);                                 <*/
-   }
-   /*> DEBUG_CONFTING  printf("\n");                                                  <*/
-   /*---(complete)-----------------------*/
-   return count;
-}
+/*> int           /+----: translate english word into gregg letters --------------+/                                              <* 
+ *> words_translate    (int a_word)                                                                                               <* 
+ *> {                                                                                                                             <* 
+ *>    /+---(locals)-------------------------+/                                                                                   <* 
+ *>    char   *p = NULL;             // pointer to substring                                                                      <* 
+ *>    char   *q = ".";              // delimiters                                                                                <* 
+ *>    char   x_ltr[5] = "";             // letter                                                                                <* 
+ *>    int    count =    0;          // letter count                                                                              <* 
+ *>    int    offset =   0;                                                                                                       <* 
+ *>    char   a_outstring[MAX_LEN];                                                                                               <* 
+ *>    int       i         = 0;            /+ loop iterator : general             +/                                              <* 
+ *>    /+---(init)---------------------------+/                                                                                   <* 
+ *>    strlcpy (a_outstring, s_words[a_word].w_gregg, MAX_LEN);                                                                   <* 
+ *>    /+---(clear letters)------------------+/                                                                                   <* 
+ *>    for (i = 0; i < 30; ++i) {                                                                                                 <* 
+ *>       letters[i] = 0;                                                                                                         <* 
+ *>    }                                                                                                                          <* 
+ *>    /+---(get the first letter, always ">")------+/                                                                            <* 
+ *>    /+> DEBUG_CONFTING  printf("OUTSTRING = %s\n", a_outstring);                       <+/                                     <* 
+ *>    p = strtok(a_outstring, q);                                                                                                <* 
+ *>    if (p == NULL || strncmp(p, "", MAX_LEN) == 0) {                                                                           <* 
+ *>       return -1;                                                                                                              <* 
+ *>    }                                                                                                                          <* 
+ *>    /+---(run through the letters)---------------+/                                                                            <* 
+ *>    while (1) {                                                                                                                <* 
+ *>       p = strtok(NULL, q);                                                                                                    <* 
+ *>       if (p == NULL) {                                                                                                        <* 
+ *>          if (letters[count - 1] == 1) {                                                                                       <* 
+ *>             letters[count] = 2;                                                                                               <* 
+ *>             ++count;                                                                                                          <* 
+ *>          }                                                                                                                    <* 
+ *>          break;                                                                                                               <* 
+ *>       }                                                                                                                       <* 
+ *>       /+---(new stroke)------------------+/                                                                                   <* 
+ *>       if (strncmp(p, ">", 5) == 0) {                                                                                          <* 
+ *>          if (count == 0 || letters[count - 1] == 1) {                                                                         <* 
+ *>             letters[count] = 2;                                                                                               <* 
+ *>             ++count;                                                                                                          <* 
+ *>          }                                                                                                                    <* 
+ *>       }                                                                                                                       <* 
+ *>       /+---(handle letter)---------------+/                                                                                   <* 
+ *>       strlcpy (x_ltr, p, 5);                                                                                                  <* 
+ *>       for (i = 0; i < 5; ++i)  x_ltr[i] = tolower(x_ltr[i]);                                                                  <* 
+ *>       /+> DEBUG_CONFTING  printf("   letter = <<%s>>\n", x_ltr);                      <+/                                     <* 
+ *>       for (i = 0; i < MAX_LETTERS; ++i) {                                                                                     <* 
+ *>          if (strncmp(x_ltr, g_loc[i].label, 5) != 0) continue;                                                                <* 
+ *>          letters[count]  = i;                                                                                                 <* 
+ *>          break;                                                                                                               <* 
+ *>       }                                                                                                                       <* 
+ *>       if (letters[count] == 0) continue;                                                                                      <* 
+ *>       /+> DEBUG_CONFTING  printf("      ind = <<%d>>\n", letters[count]);             <+/                                     <* 
+ *>       ++count;                                                                                                                <* 
+ *>    }                                                                                                                          <* 
+ *>    for (i = 0; i < count; ++i) {                                                                                              <* 
+ *>       offset = 0;                                                                                                             <* 
+ *>       if (g_loc[letters[i]].type == 'c') { /+> offset = words_vowel(i, count) - 1;                                      <+/   <* 
+ *>          /+> offset = words_vowel(i, count);                                          <+/                                     <* 
+ *>          letters[i] += offset;                                                                                                <* 
+ *>       }                                                                                                                       <* 
+ *>       /+> DEBUG_CONFTING  printf("%d, ", letters[i]);                                 <+/                                     <* 
+ *>    }                                                                                                                          <* 
+ *>    /+> DEBUG_CONFTING  printf("\n");                                                  <+/                                     <* 
+ *>    /+---(complete)-----------------------+/                                                                                   <* 
+ *>    return count;                                                                                                              <* 
+ *> }                                                                                                                             <*/
 
 /*> int                                                                                         <* 
  *> words_consonant (            /+ adjust for combination consontants            +/            <* 
@@ -1302,78 +1302,77 @@ words_translate    (int a_word)
  *> }                                                                                                             <*/
 
 
-
 /*============================--------------------============================*/
 /*===----                         unit testing                         ----===*/
 /*============================--------------------============================*/
 static void o___UNIT_TEST_________________o (void) {;}
 
-char*        /*-> unit test accessor -----------------[ light  [us.D90.241.L0]*/ /*-[03.0000.00#.#]-*/ /*-[--.---.---.--]-*/
-WORDS__unit          (char *a_question, int a_num)
-{
-   /*---(locals)-----------+-----+-----+-*/
-   int         i           = 0;
-   char        t           [100] = "";
-   char        s           [100] = "";
-   char        u           [100] = "";
-   char        x_show      [100] = "";
-   int         c           = 0;
-   tWORD     *x_curr      = NULL;
-   int         x_fore      = 0;
-   int         x_back      = 0;
-   /*---(initialize)---------------------*/
-   strlcpy (unit_answer, "WORDS unit       : unknownn request", 100);
-   /*---(core data)----------------------*/
-   if        (strncmp (a_question, "parsing"   , 20)  == 0) {
-      /*> sprintf  (s, "%2d[%.20s]", strlen (s_english), s_english);                  <*/
-      /*> sprintf  (t, "%2d[%.20s]", strlen (s_gregg)  , s_gregg);                    <*/
-      /*> snprintf (unit_answer, LEN_FULL, "WORDS parsing    : %-24.24s  %-24.24s  %c  %c  %3d  %c    %c  %c  %c  %c  %c", s, t, s_ver, s_book, s_page, s_type, s_diff, s_simp, s_3rd, s_4th, s_top);   <*/
-   }
-   else if (strcmp(a_question, "e_count"       ) == 0) {
-      /*> x_curr = e_hword; while (x_curr != NULL) { ++x_fore; x_curr = x_curr->e_next; }   <* 
-       *> x_curr = e_tword; while (x_curr != NULL) { ++x_back; x_curr = x_curr->e_prev; }   <*/
-      /*> snprintf (unit_answer, LEN_FULL, "WORDS e_count    : %4dn, %4df, %4db", e_nword, x_fore, x_back);   <*/
-   }
-   else if (strcmp(a_question, "g_count"       ) == 0) {
-      /*> x_curr = g_hword; while (x_curr != NULL) { ++x_fore; x_curr = x_curr->g_next; }   <* 
-       *> x_curr = g_tword; while (x_curr != NULL) { ++x_back; x_curr = x_curr->g_prev; }   <*/
-      /*> snprintf (unit_answer, LEN_FULL, "WORDS g_count    : %4dn, %4df, %4db", g_nword, x_fore, x_back);   <*/
-   }
-   else if   (strncmp (a_question, "e_entry"   , 20)  == 0) {
-      /*> x_curr = e_hword;                                                                                                                             <* 
-       *> while (x_curr != NULL) {                                                                                                                      <* 
-       *>    if (c == a_num)   break;                                                                                                                   <* 
-       *>    x_curr = x_curr->e_next;                                                                                                                   <* 
-       *>    ++c;                                                                                                                                       <* 
-       *> }                                                                                                                                             <* 
-       *> if (x_curr == NULL)  snprintf (unit_answer, LEN_FULL, "WORDS eng   (%2d) :  -[]                       -[]                      []", a_num);   <* 
-       *> else {                                                                                                                                        <* 
-       *>    sprintf  (s, "%2d[%.20s]", x_curr->e_len, x_curr->w_english);                                                                                <* 
-       *>    sprintf  (t, "%2d[%.20s]", x_curr->g_len, x_curr->w_gregg);                                                                                  <* 
-       *>    WORDS_drawn_show (x_curr->w_drawn, x_show);                                                                                                  <* 
-       *>    sprintf  (u, "[%.20s]"   , x_show);                                                                                                        <* 
-       *>    snprintf (unit_answer, LEN_FULL, "WORDS eng   (%2d) : %-24.24s  %-24.24s  %s", a_num, s, t, u);                                             <* 
-       *> }                                                                                                                                             <*/
-   }
-   else if   (strncmp (a_question, "g_entry"   , 20)  == 0) {
-      /*> x_curr = g_hword;                                                                                                                             <* 
-       *> while (x_curr != NULL) {                                                                                                                      <* 
-       *>    if (c == a_num)   break;                                                                                                                   <* 
-       *>    x_curr = x_curr->g_next;                                                                                                                   <* 
-       *>    ++c;                                                                                                                                       <* 
-       *> }                                                                                                                                             <* 
-       *> if (x_curr == NULL)  snprintf (unit_answer, LEN_FULL, "WORDS gregg (%2d) :  -[]                       -[]                      []", a_num);   <* 
-       *> else {                                                                                                                                        <* 
-       *>    sprintf  (s, "%2d[%.20s]", x_curr->e_len, x_curr->w_english);                                                                                <* 
-       *>    sprintf  (t, "%2d[%.20s]", x_curr->g_len, x_curr->w_gregg);                                                                                  <* 
-       *>    WORDS_drawn_show (x_curr->w_drawn, x_show);                                                                                                  <* 
-       *>    sprintf  (u, "[%.20s]"   , x_show);                                                                                                        <* 
-       *>    snprintf (unit_answer, LEN_FULL, "WORDS gregg (%2d) : %-24.24s  %-24.24s  %s", a_num, s, t, u);                                             <* 
-       *> }                                                                                                                                             <*/
-   }
-   /*---(complete)-----------------------*/
-   return unit_answer;
-}
+/*> char*        /+-> unit test accessor -----------------[ light  [us.D90.241.L0]+/ /+-[03.0000.00#.#]-+/ /+-[--.---.---.--]-+/                                                                                  <* 
+ *> WORDS__unit          (char *a_question, int a_num)                                                                                                                                                            <* 
+ *> {                                                                                                                                                                                                             <* 
+ *>    /+---(locals)-----------+-----+-----+-+/                                                                                                                                                                   <* 
+ *>    int         i           = 0;                                                                                                                                                                               <* 
+ *>    char        t           [100] = "";                                                                                                                                                                        <* 
+ *>    char        s           [100] = "";                                                                                                                                                                        <* 
+ *>    char        u           [100] = "";                                                                                                                                                                        <* 
+ *>    char        x_show      [100] = "";                                                                                                                                                                        <* 
+ *>    int         c           = 0;                                                                                                                                                                               <* 
+ *>    tWORD     *x_curr      = NULL;                                                                                                                                                                             <* 
+ *>    int         x_fore      = 0;                                                                                                                                                                               <* 
+ *>    int         x_back      = 0;                                                                                                                                                                               <* 
+ *>    /+---(initialize)---------------------+/                                                                                                                                                                   <* 
+ *>    strlcpy (unit_answer, "WORDS unit       : unknownn request", 100);                                                                                                                                         <* 
+ *>    /+---(core data)----------------------+/                                                                                                                                                                   <* 
+ *>    if        (strncmp (a_question, "parsing"   , 20)  == 0) {                                                                                                                                                 <* 
+ *>       /+> sprintf  (s, "%2d[%.20s]", strlen (s_english), s_english);                  <+/                                                                                                                     <* 
+ *>       /+> sprintf  (t, "%2d[%.20s]", strlen (s_gregg)  , s_gregg);                    <+/                                                                                                                     <* 
+ *>       /+> snprintf (unit_answer, LEN_FULL, "WORDS parsing    : %-24.24s  %-24.24s  %c  %c  %3d  %c    %c  %c  %c  %c  %c", s, t, s_ver, s_book, s_page, s_type, s_diff, s_simp, s_3rd, s_4th, s_top);   <+/   <* 
+ *>    }                                                                                                                                                                                                          <* 
+ *>    else if (strcmp(a_question, "e_count"       ) == 0) {                                                                                                                                                      <* 
+ *>       /+> x_curr = e_hword; while (x_curr != NULL) { ++x_fore; x_curr = x_curr->e_next; }   <*                                                                                                                <* 
+ *>        *> x_curr = e_tword; while (x_curr != NULL) { ++x_back; x_curr = x_curr->e_prev; }   <+/                                                                                                               <* 
+ *>       /+> snprintf (unit_answer, LEN_FULL, "WORDS e_count    : %4dn, %4df, %4db", e_nword, x_fore, x_back);   <+/                                                                                             <* 
+ *>    }                                                                                                                                                                                                          <* 
+ *>    else if (strcmp(a_question, "g_count"       ) == 0) {                                                                                                                                                      <* 
+ *>       /+> x_curr = g_hword; while (x_curr != NULL) { ++x_fore; x_curr = x_curr->g_next; }   <*                                                                                                                <* 
+ *>        *> x_curr = g_tword; while (x_curr != NULL) { ++x_back; x_curr = x_curr->g_prev; }   <+/                                                                                                               <* 
+ *>       /+> snprintf (unit_answer, LEN_FULL, "WORDS g_count    : %4dn, %4df, %4db", g_nword, x_fore, x_back);   <+/                                                                                             <* 
+ *>    }                                                                                                                                                                                                          <* 
+ *>    else if   (strncmp (a_question, "e_entry"   , 20)  == 0) {                                                                                                                                                 <* 
+ *>       /+> x_curr = e_hword;                                                                                                                             <*                                                    <* 
+ *>        *> while (x_curr != NULL) {                                                                                                                      <*                                                    <* 
+ *>        *>    if (c == a_num)   break;                                                                                                                   <*                                                    <* 
+ *>        *>    x_curr = x_curr->e_next;                                                                                                                   <*                                                    <* 
+ *>        *>    ++c;                                                                                                                                       <*                                                    <* 
+ *>        *> }                                                                                                                                             <*                                                    <* 
+ *>        *> if (x_curr == NULL)  snprintf (unit_answer, LEN_FULL, "WORDS eng   (%2d) :  -[]                       -[]                      []", a_num);   <*                                                    <* 
+ *>        *> else {                                                                                                                                        <*                                                    <* 
+ *>        *>    sprintf  (s, "%2d[%.20s]", x_curr->e_len, x_curr->w_english);                                                                                <*                                                  <* 
+ *>        *>    sprintf  (t, "%2d[%.20s]", x_curr->g_len, x_curr->w_gregg);                                                                                  <*                                                  <* 
+ *>        *>    WORDS_drawn_show (x_curr->w_drawn, x_show);                                                                                                  <*                                                  <* 
+ *>        *>    sprintf  (u, "[%.20s]"   , x_show);                                                                                                        <*                                                    <* 
+ *>        *>    snprintf (unit_answer, LEN_FULL, "WORDS eng   (%2d) : %-24.24s  %-24.24s  %s", a_num, s, t, u);                                             <*                                                   <* 
+ *>        *> }                                                                                                                                             <+/                                                   <* 
+ *>    }                                                                                                                                                                                                          <* 
+ *>    else if   (strncmp (a_question, "g_entry"   , 20)  == 0) {                                                                                                                                                 <* 
+ *>       /+> x_curr = g_hword;                                                                                                                             <*                                                    <* 
+ *>        *> while (x_curr != NULL) {                                                                                                                      <*                                                    <* 
+ *>        *>    if (c == a_num)   break;                                                                                                                   <*                                                    <* 
+ *>        *>    x_curr = x_curr->g_next;                                                                                                                   <*                                                    <* 
+ *>        *>    ++c;                                                                                                                                       <*                                                    <* 
+ *>        *> }                                                                                                                                             <*                                                    <* 
+ *>        *> if (x_curr == NULL)  snprintf (unit_answer, LEN_FULL, "WORDS gregg (%2d) :  -[]                       -[]                      []", a_num);   <*                                                    <* 
+ *>        *> else {                                                                                                                                        <*                                                    <* 
+ *>        *>    sprintf  (s, "%2d[%.20s]", x_curr->e_len, x_curr->w_english);                                                                                <*                                                  <* 
+ *>        *>    sprintf  (t, "%2d[%.20s]", x_curr->g_len, x_curr->w_gregg);                                                                                  <*                                                  <* 
+ *>        *>    WORDS_drawn_show (x_curr->w_drawn, x_show);                                                                                                  <*                                                  <* 
+ *>        *>    sprintf  (u, "[%.20s]"   , x_show);                                                                                                        <*                                                    <* 
+ *>        *>    snprintf (unit_answer, LEN_FULL, "WORDS gregg (%2d) : %-24.24s  %-24.24s  %s", a_num, s, t, u);                                             <*                                                   <* 
+ *>        *> }                                                                                                                                             <+/                                                   <* 
+ *>    }                                                                                                                                                                                                          <* 
+ *>    /+---(complete)-----------------------+/                                                                                                                                                                   <* 
+ *>    return unit_answer;                                                                                                                                                                                        <* 
+ *> }                                                                                                                                                                                                             <*/
 
 
 

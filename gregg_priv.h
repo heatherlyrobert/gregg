@@ -24,6 +24,7 @@ struct cBASE {
    tDICT      *b_head;                      /* first dictionary variation     */
    tDICT      *b_tail;                      /* last dictionary variation      */
    char        b_ndict;                     /* count of dictinoary entries    */
+   short       b_ref;                       /* for db read/write              */
    /*---(part-of-speech)-------*/
    char        b_part;                      /* primary part of speech         */
    char        b_sub;                       /* sub-part                       */

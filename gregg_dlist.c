@@ -1,6 +1,6 @@
 /*============================---(source-start)---============================*/
-
 #include "gregg.h"
+#include "gregg_priv.h"
 
 
 
@@ -762,98 +762,98 @@ DLIST__back_edging      (void)
 char
 DLIST_dict              (void)
 {
-   /*---(locals)-----------+-----+-----+-*/
-   char        rce         =  -10;
-   char        rc          =    0;
-   tWORD      *x_word      = NULL;
-   int         i           =    0;
-   int         c           =    0;
-   int         x_save      =    0;
-   float       x           =    0;
-   float       y           =    0;
-   char        x_beg       [LEN_TITLE] = "";
-   char        t           [LEN_TITLE] = "";
-   int         x_max       =    0;
-   static int  x_times     =    0;
-   int         x_extra     =    0;
-   float       x_left      =    0;
-   int         n           =    0;
-   /*---(header)-------------------------*/
-   DEBUG_GRAF   yLOG_enter   (__FUNCTION__);
-   /*---(defense)------------------------*/
-   DEBUG_GRAF   yLOG_value   ("words"     , WORDS_eng_count ());
-   /*---(page)---------------------------*/
-   /*> my.p_hinting = STYLE_HINTS;                                                    <*/
-   DEBUG_GRAF   yLOG_value   ("cpage"     , my.w_cpage);
-   DICT_page_ends (0, x_beg, NULL);
-   DEBUG_GRAF   yLOG_info    ("x_beg"     , x_beg);
-   --rce;  if (strcmp (x_beg, "") == 0) {
-      DEBUG_GRAF   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   DEBUG_GRAF   yLOG_complex ("bounds"    , "%4d lef, %4d rig, %4d xlen,  %4d bot, %4d top, %4d ylen", my.t_lef, my.t_rig, my.t_xlen, my.t_bot, my.t_top, my.t_ylen);
-   x_left = my.p_left + 0.5 * my.p_spacing;
-   rc = DICT_page_ends (my.w_cpage, x_beg, NULL);
-   DEBUG_GRAF   yLOG_value   ("beg"       , rc);
-   --rce;  if (rc < 0) {
-      DEBUG_GRAF   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   DEBUG_GRAF   yLOG_info    ("x_beg"     , x_beg);
-   glPushMatrix    (); {
-      x = x_left;
-      y =  -75;
-      WORDS_eng_by_name  (x_beg, &x_word);
-      while (x_word != NULL) {
-         DEBUG_GRAF   yLOG_complex ("x_word"    , "%4d %-15.15s %-5.5s %-15.15s %s", i, x_word->w_english, x_word->w_vary, x_word->w_gregg, x_word->w_shown);
-         if (my.baseonly == '-' || x_word->w_vary [0] == '<') {
-            if (my.nopre == '-' || strchr (x_word->w_gregg, '<') == NULL)  {
-               DEBUG_GRAF   yLOG_complex ("show at"   , "%4d, %6.2fx, %6.2fy", c, x, y);
-               glPushMatrix    (); {
-                  glTranslatef (x, y + 15, -50);
-                  glColor4f    (0.5, 0.5, 0.5, 0.3);
-                  /*> strlcpy  (t, x_word->w_shown, LEN_TITLE);                               <*/
-                  strlcpy  (t, x_word->w_english, LEN_TITLE);
-                  strldchg (t, '·', ' ', LEN_TITLE);
-                  yFONT_print (win.font_pretty,  8, YF_MIDCEN, t);
-                  if (x_word->w_vary [0] == '<') {
-                     glTranslatef (0,   - 30,   0);
-                     sprintf  (t, "%d", x_word->w_nvary);
-                     yFONT_print (win.font_pretty,  8, YF_MIDCEN, t);
-                  }
-               } glPopMatrix   ();
-               PAGE_gregg_word (SHAPE_DRAW, x_word->w_shown, &x, &y);
-               ++c;
-            }
-         }
-         ++i;
-         WORDS_eng_by_cursor (YDLST_NEXT, &x_word);
-         if (x_save != c && c %  12 == 0) {
-            PAGE_next_line (&x, &y);
-            if (++n == 5)  y -= 40;
-            x = x_left;
-         } else if (x_save != c && c %   6 == 0) {
-            x += 30;
-         }
-         if (c >= my.w_ppage)  break;
-         x_save = c;
-      }
-   } glPopMatrix   ();
-   /*---(totals)-------------------------*/
-   yCOLOR_opengl (YCOLOR_NEG, YCOLOR_DRK, 0.40);
-   glPushMatrix    (); {
-      glTranslatef ( 20, -10,   0);
-      sprintf  (t, "%d words", i);
-      yFONT_print (win.font_pretty,  8, YF_MIDLEF, t);
-   } glPopMatrix   ();
-   glPushMatrix    (); {
-      glTranslatef (my.t_xlen - 20, -10,   0);
-      sprintf  (t, "bases %d", c);
-      yFONT_print (win.font_pretty,  8, YF_MIDRIG, t);
-   } glPopMatrix   ();
-   /*---(complete)-----------------------*/
-   DEBUG_GRAF   yLOG_exit    (__FUNCTION__);
-   return 0;
+   /*> /+---(locals)-----------+-----+-----+-+/                                                                                                                             <* 
+    *> char        rce         =  -10;                                                                                                                                      <* 
+    *> char        rc          =    0;                                                                                                                                      <* 
+    *> tDICT      *x_word      = NULL;                                                                                                                                      <* 
+    *> int         i           =    0;                                                                                                                                      <* 
+    *> int         c           =    0;                                                                                                                                      <* 
+    *> int         x_save      =    0;                                                                                                                                      <* 
+    *> float       x           =    0;                                                                                                                                      <* 
+    *> float       y           =    0;                                                                                                                                      <* 
+    *> char        x_beg       [LEN_TITLE] = "";                                                                                                                            <* 
+    *> char        t           [LEN_TITLE] = "";                                                                                                                            <* 
+    *> int         x_max       =    0;                                                                                                                                      <* 
+    *> static int  x_times     =    0;                                                                                                                                      <* 
+    *> int         x_extra     =    0;                                                                                                                                      <* 
+    *> float       x_left      =    0;                                                                                                                                      <* 
+    *> int         n           =    0;                                                                                                                                      <* 
+    *> /+---(header)-------------------------+/                                                                                                                             <* 
+    *> DEBUG_GRAF   yLOG_enter   (__FUNCTION__);                                                                                                                            <* 
+    *> /+---(defense)------------------------+/                                                                                                                             <* 
+    *> /+> DEBUG_GRAF   yLOG_value   ("words"     , WORDS_eng_count ());                  <+/                                                                               <* 
+    *> /+---(page)---------------------------+/                                                                                                                             <* 
+    *> /+> my.p_hinting = STYLE_HINTS;                                                    <+/                                                                               <* 
+    *> DEBUG_GRAF   yLOG_value   ("cpage"     , my.w_cpage);                                                                                                                <* 
+    *> DICT_page_ends (0, x_beg, NULL);                                                                                                                                     <* 
+    *> DEBUG_GRAF   yLOG_info    ("x_beg"     , x_beg);                                                                                                                     <* 
+    *> --rce;  if (strcmp (x_beg, "") == 0) {                                                                                                                               <* 
+    *>    DEBUG_GRAF   yLOG_exitr   (__FUNCTION__, rce);                                                                                                                    <* 
+    *>    return rce;                                                                                                                                                       <* 
+    *> }                                                                                                                                                                    <* 
+    *> DEBUG_GRAF   yLOG_complex ("bounds"    , "%4d lef, %4d rig, %4d xlen,  %4d bot, %4d top, %4d ylen", my.t_lef, my.t_rig, my.t_xlen, my.t_bot, my.t_top, my.t_ylen);   <* 
+    *> x_left = my.p_left + 0.5 * my.p_spacing;                                                                                                                             <* 
+    *> rc = DICT_page_ends (my.w_cpage, x_beg, NULL);                                                                                                                       <* 
+    *> DEBUG_GRAF   yLOG_value   ("beg"       , rc);                                                                                                                        <* 
+    *> --rce;  if (rc < 0) {                                                                                                                                                <* 
+    *>    DEBUG_GRAF   yLOG_exitr   (__FUNCTION__, rce);                                                                                                                    <* 
+    *>    return rce;                                                                                                                                                       <* 
+    *> }                                                                                                                                                                    <* 
+    *> DEBUG_GRAF   yLOG_info    ("x_beg"     , x_beg);                                                                                                                     <* 
+    *> glPushMatrix    (); {                                                                                                                                                <* 
+    *>    x = x_left;                                                                                                                                                       <* 
+    *>    y =  -75;                                                                                                                                                         <* 
+    *>    DICT__by_english  (x_beg, &x_word);                                                                                                                               <* 
+    *>    while (x_word != NULL) {                                                                                                                                          <* 
+    *>       DEBUG_GRAF   yLOG_complex ("x_word"    , "%4d %-15.15s %-5.5s %-15.15s %s", i, x_word->w_english, x_word->w_vary, x_word->w_gregg, x_word->w_shown);           <* 
+    *>       if (my.baseonly == '-' || x_word->w_vary [0] == '<') {                                                                                                         <* 
+    *>          if (my.nopre == '-' || strchr (x_word->w_gregg, '<') == NULL)  {                                                                                            <* 
+    *>             DEBUG_GRAF   yLOG_complex ("show at"   , "%4d, %6.2fx, %6.2fy", c, x, y);                                                                                <* 
+    *>             glPushMatrix    (); {                                                                                                                                    <* 
+    *>                glTranslatef (x, y + 15, -50);                                                                                                                        <* 
+    *>                glColor4f    (0.5, 0.5, 0.5, 0.3);                                                                                                                    <* 
+    *>                /+> strlcpy  (t, x_word->w_shown, LEN_TITLE);                               <+/                                                                       <* 
+    *>                strlcpy  (t, x_word->w_english, LEN_TITLE);                                                                                                           <* 
+    *>                strldchg (t, '·', ' ', LEN_TITLE);                                                                                                                    <* 
+    *>                yFONT_print (win.font_pretty,  8, YF_MIDCEN, t);                                                                                                      <* 
+    *>                if (x_word->w_vary [0] == '<') {                                                                                                                      <* 
+    *>                   glTranslatef (0,   - 30,   0);                                                                                                                     <* 
+    *>                   sprintf  (t, "%d", x_word->w_nvary);                                                                                                               <* 
+    *>                   yFONT_print (win.font_pretty,  8, YF_MIDCEN, t);                                                                                                   <* 
+    *>                }                                                                                                                                                     <* 
+    *>             } glPopMatrix   ();                                                                                                                                      <* 
+    *>             PAGE_gregg_word (SHAPE_DRAW, x_word->w_shown, &x, &y);                                                                                                   <* 
+    *>             ++c;                                                                                                                                                     <* 
+    *>          }                                                                                                                                                           <* 
+    *>       }                                                                                                                                                              <* 
+    *>       ++i;                                                                                                                                                           <* 
+    *>       WORDS_eng_by_cursor (YDLST_NEXT, &x_word);                                                                                                                     <* 
+    *>       if (x_save != c && c %  12 == 0) {                                                                                                                             <* 
+    *>          PAGE_next_line (&x, &y);                                                                                                                                    <* 
+    *>          if (++n == 5)  y -= 40;                                                                                                                                     <* 
+    *>          x = x_left;                                                                                                                                                 <* 
+    *>       } else if (x_save != c && c %   6 == 0) {                                                                                                                      <* 
+    *>          x += 30;                                                                                                                                                    <* 
+    *>       }                                                                                                                                                              <* 
+    *>       if (c >= my.w_ppage)  break;                                                                                                                                   <* 
+    *>       x_save = c;                                                                                                                                                    <* 
+    *>    }                                                                                                                                                                 <* 
+    *> } glPopMatrix   ();                                                                                                                                                  <* 
+    *> /+---(totals)-------------------------+/                                                                                                                             <* 
+    *> yCOLOR_opengl (YCOLOR_NEG, YCOLOR_DRK, 0.40);                                                                                                                        <* 
+    *> glPushMatrix    (); {                                                                                                                                                <* 
+    *>    glTranslatef ( 20, -10,   0);                                                                                                                                     <* 
+    *>    sprintf  (t, "%d words", i);                                                                                                                                      <* 
+    *>    yFONT_print (win.font_pretty,  8, YF_MIDLEF, t);                                                                                                                  <* 
+    *> } glPopMatrix   ();                                                                                                                                                  <* 
+    *> glPushMatrix    (); {                                                                                                                                                <* 
+    *>    glTranslatef (my.t_xlen - 20, -10,   0);                                                                                                                          <* 
+    *>    sprintf  (t, "bases %d", c);                                                                                                                                      <* 
+    *>    yFONT_print (win.font_pretty,  8, YF_MIDRIG, t);                                                                                                                  <* 
+    *> } glPopMatrix   ();                                                                                                                                                  <* 
+    *> /+---(complete)-----------------------+/                                                                                                                             <* 
+    *> DEBUG_GRAF   yLOG_exit    (__FUNCTION__);                                                                                                                            <* 
+    *> return 0;                                                                                                                                                            <*/
 }
 
 char
