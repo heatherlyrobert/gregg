@@ -1,5 +1,6 @@
 /*============================---(source-start)---============================*/
 #include    "gregg.h"
+#include    "gregg_priv.h"
 
 
 
@@ -665,7 +666,6 @@ PAGE_gregg              (char a_act, char a_gregg [LEN_RECD], float *b_xpos, flo
    char       *r           = NULL;
    int         l           =    0;
    short       n           =    0;
-   tWORD      *x_word      = NULL;
    uchar       x_shown     [LEN_HUND] = "";
    short       x_drawn     [LEN_LABEL];
    /*---(header)-------------------------*/
@@ -696,9 +696,7 @@ PAGE_gregg              (char a_act, char a_gregg [LEN_RECD], float *b_xpos, flo
          DEBUG_OUTP   yLOG_note    ("found empty grid");
          PAGE_next_grid (b_xpos, b_ypos);
       } else {
-         n = WORDS_by_gregg (p, &x_word);
-         if (n >= 0)  strlcpy (x_shown, x_word->w_shown, LEN_HUND);
-         else         FIX_gregg  (p, x_shown, x_drawn, NULL, NULL);
+         FIX_gregg  (p, x_shown, x_drawn, NULL, NULL);
          rc =  PAGE_gregg_word (a_act, x_shown, b_xpos, b_ypos);
          DEBUG_OUTP   yLOG_value   ("word"      , rc);
       }
@@ -1087,7 +1085,7 @@ PAGE_demo_dict          (void)
    /*---(locals)-----------+-----+-----+-*/
    char        rce         =  -10;
    char        rc          =    0;
-   tWORD      *x_word      = NULL;
+   tDICT      *x_dict      = NULL;
    int         i           =    0;
    /*---(header)-------------------------*/
    DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
@@ -1102,11 +1100,11 @@ PAGE_demo_dict          (void)
    glPushMatrix    (); {
       s_xpos = my.p_left + (my.p_spacing * 0.5);
       s_ypos = s_ybase;
-      WORDS_eng_by_index (i, &x_word);
-      while (x_word != NULL) {
-         printf ("%3d, %s, %s\n", i, x_word->w_english, x_word->w_gregg);
-         PAGE_gregg (SHAPE_DRAW, x_word->w_gregg, &s_xpos, &s_ypos);
-         WORDS_eng_by_index (++i, &x_word);
+      WORDS_eng_by_index (i, &x_dict);
+      while (x_dict != NULL) {
+         printf ("%3d, %s, %s\n", i, x_dict->d_english, x_dict->d_gregg);
+         PAGE_gregg (SHAPE_DRAW, x_dict->d_gregg, &s_xpos, &s_ypos);
+         WORDS_eng_by_index (++i, &x_dict);
          if (i % 10 == 0)  PAGE_gregg (SHAPE_DRAW, "¦", &s_xpos, &s_ypos);
          if (i > 50)  break;
       }

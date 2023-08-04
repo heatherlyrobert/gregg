@@ -588,39 +588,6 @@ FIX_gregg               (char a_gregg [LEN_TITLE], char r_shown [LEN_HUND], shor
 
 
 
-/*====================------------------------------------====================*/
-/*===----                        searching                             ----===*/
-/*====================------------------------------------====================*/
-static void  o___HOOKING_________o () { return; }
-
-char
-FIX_hook                (tWORD *a_new)
-{
-   /*---(locals)-----------+-----+-----+-*/
-   char        rce         =  -10;
-   char        rc          =    0;
-   /*---(header)-------------------------*/
-   DEBUG_CONF   yLOG_enter   (__FUNCTION__);
-   /*---(tree)---------------------------*/
-   /*> rc = ySORT_hook (B_TREE   , a_new, a_new->w_tree   , &(a_new->ysort_t));       <* 
-    *> DEBUG_CONF   yLOG_value   ("hook tree" , rc);                                  <* 
-    *> --rce;  if (rc < 0) {                                                          <* 
-    *>    DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);                              <* 
-    *>    return rce;                                                                 <* 
-    *> }                                                                              <* 
-    *> rc = ySORT_prepare (B_TREE);                                                   <* 
-    *> DEBUG_CONF   yLOG_value   ("prep tree" , rc);                                  <* 
-    *> --rce;  if (rc < 0) {                                                          <* 
-    *>    DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);                              <* 
-    *>    return rce;                                                                 <* 
-    *> }                                                                              <*/
-   /*---(complete)-----------------------*/
-   DEBUG_CONF   yLOG_exit    (__FUNCTION__);
-   return 0;
-}
-
-
-
 /*============================--------------------============================*/
 /*===----                       reporting/audit                        ----===*/
 /*============================--------------------============================*/

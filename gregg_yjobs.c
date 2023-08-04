@@ -31,15 +31,15 @@ gregg_yjobs             (cchar a_req, cchar *a_data)
    switch (a_req) {
    case YJOBS_READ     :
       DEBUG_PROG    yLOG_note    ("read database");
-      if (!yJOBS_ifgather ())  rc = DB_read     ();
+      if (!yJOBS_ifgather ())  rc = DB_read     (NAME_DB);
       break;
    case YJOBS_STATS    :
       DEBUG_PROG    yLOG_note    ("called for stats");
-      rc = DB_stats ();
+      rc = DB_stats (NAME_DB);
       break;
    case YJOBS_WRITE    :
       DEBUG_PROG    yLOG_note    ("write database");
-      rc = DB_write    ();
+      rc = DB_write    (NAME_DB);
       break;
    case YJOBS_PULL     :
       DEBUG_PROG    yLOG_note    ("called for pull");
@@ -58,6 +58,9 @@ gregg_yjobs             (cchar a_req, cchar *a_data)
       /*> rc = metis_inventory ();                                                    <*/
       /*> rc = metis_rptg_matrix ();                                                  <*/
       break;
+   /*> case YJOBS_ONLY     :                                                          <* 
+    *>    DEBUG_PROG    yLOG_note    ("called for only");                             <* 
+    *>    break;                                                                      <*/
    case YJOBS_PURGE    :
       DEBUG_PROG    yLOG_note    ("called for purge");
       rc = WORDS_purge ();

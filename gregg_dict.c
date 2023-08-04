@@ -267,7 +267,7 @@ char   DICT__by_index      (int n, void **r_dict)            { return ySORT_by_i
 char   DICT__by_cursor     (char a_dir, void **r_dict)       { return ySORT_by_cursor (B_DICT, a_dir, r_dict); }
 
 /*> char                                                                                     <* 
- *> DICT__walk_by_bases     (FILE *a_file, char *f_callback (FILE *a_file, tWORD *a_curr))   <* 
+ *> DICT__walk_by_bases     (FILE *a_file, char *f_callback (FILE *a_file, void *a_curr))    <* 
  *> {                                                                                        <* 
  *>    /+---(locals)-----------+-----+-----+-+/                                              <* 
  *>    int         a           =    0;                                                       <* 
@@ -830,126 +830,6 @@ DICT_import             (cchar a_name [LEN_PATH])
 static void  o___REPORTING_______o () { return; }
 
 char
-DICT_list          (void)
-{
-   /*> /+---(locals)-----------+-----+-----+-+/                                                       <* 
-    *> int         i           =    0;                                                                <* 
-    *> int         a           =    0;                                                                <* 
-    *> int         c           =    0;                                                                <* 
-    *> char        t           [LEN_FULL]  = "";                                                      <* 
-    *> char        n           [LEN_SHORT] = "";                                                      <* 
-    *> char        e           [LEN_TITLE] = "";                                                      <* 
-    *> char        g           [LEN_TITLE] = "";                                                      <* 
-    *> char        x_col       =    0;                                                                <* 
-    *> tWORD      *x_curr      = NULL;                                                                <* 
-    *> tWORD      *x_sub       = NULL;                                                                <* 
-    *> /+---(search)-------------------------+/                                                       <* 
-    *> WORDS_eng_by_index  (a, &x_curr);                                                              <* 
-    *> while (x_curr != NULL) {                                                                       <* 
-    *>    if (strcmp (x_curr->w_vary, "<") == 0) {                                                    <* 
-    *>       WORDS_detail (x_curr, t);                                                                <* 
-    *>       strlpadn (++c, n, '.', '<', 5);                                                          <* 
-    *>       printf ("%5.5s··%s\n", n, t);                                                            <* 
-    *>       x_sub = x_curr->w_next;                                                                  <* 
-    *>       x_col = 0;                                                                               <* 
-    *>       while (x_sub != NULL) {                                                                  <* 
-    *>          WORDS_detail (x_sub, t);                                                              <* 
-    *>          printf ("    %c  %s\n", ++x_col + 'a', t);                                            <* 
-    *>          x_sub  = x_sub->w_next;                                                               <* 
-    *>       }                                                                                        <* 
-    *>    }                                                                                           <* 
-    *>    ++a;                                                                                        <* 
-    *>    WORDS_eng_by_index (a, &x_curr);                                                            <* 
-    *> }                                                                                              <* 
-    *> printf ("## found %d primaries and %d total words (%4.2fx)\n", c, a, (float) a / (float) c);   <* 
-    *> /+---(complete)-----------------------+/                                                       <* 
-    *> return 0;                                                                                      <*/
-}
-
-char
-DICT_list_all      (void)
-{
-   /*> /+---(locals)-----------+-----+-----+-+/                                       <* 
-    *> int         i           =    0;                                                <* 
-    *> int         a           =    0;                                                <* 
-    *> int         c           =    0;                                                <* 
-    *> char        t           [LEN_FULL]  = "";                                      <* 
-    *> char        n           [LEN_SHORT] = "";                                      <* 
-    *> char        e           [LEN_TITLE] = "";                                      <* 
-    *> char        g           [LEN_TITLE] = "";                                      <* 
-    *> tWORD       *x_curr      = NULL;                                               <* 
-    *> /+---(search)-------------------------+/                                       <* 
-    *> WORDS_eng_by_index  (a, &x_curr);                                              <* 
-    *> while (x_curr != NULL) {                                                       <* 
-    *>    WORDS_detail (x_curr, t);                                                   <* 
-    *>    strlpadn (++a, n, '.', '<', 5);                                             <* 
-    *>    printf ("%5.5s··%s\n", n, t);                                               <* 
-    *>    WORDS_eng_by_index (a, &x_curr);                                            <* 
-    *> }                                                                              <* 
-    *> /+---(complete)-----------------------+/                                       <* 
-    *> return 0;                                                                      <*/
-}
-
-char
-DICT_dump_words_OLD     (FILE *f)
-{
-   /*> /+---(locals)-----------+-----+-----+-+/                                                                                                                                        <* 
-    *> int         i           =    0;                                                                                                                                                 <* 
-    *> int         a           =    0;                                                                                                                                                 <* 
-    *> int         c           =    0;                                                                                                                                                 <* 
-    *> char        t           [LEN_FULL]  = "";                                                                                                                                       <* 
-    *> char        n           [LEN_SHORT] = "";                                                                                                                                       <* 
-    *> char        e           [LEN_TITLE] = "";                                                                                                                                       <* 
-    *> char        g           [LEN_TITLE] = "";                                                                                                                                       <* 
-    *> char        x_col       =    0;                                                                                                                                                 <* 
-    *> tWORD      *x_curr      = NULL;                                                                                                                                                 <* 
-    *> tWORD      *x_sub       = NULL;                                                                                                                                                 <* 
-    *> /+---(header)---------------------------+/                                                                                                                                      <* 
-    *> DEBUG_CONF   yLOG_enter   (__FUNCTION__);                                                                                                                                       <* 
-    *> fprintf (f, "##   %s %s\n", P_NAMESAKE, P_HERITAGE);                                                                                                                            <* 
-    *> fprintf (f, "##   version %s, %s\n", P_VERNUM, P_VERTXT);                                                                                                                       <* 
-    *> fprintf (f, "##   inventory of dictionary words\n");                                                                                                                            <* 
-    *> fprintf (f, "\n");                                                                                                                                                              <* 
-    *> fprintf (f, "#@ style     V = printable columnar values\n");                                                                                                                    <* 
-    *> fprintf (f, "#@ x-parse  14åÏ---···Ï-----------------------··Ï---·Ï---·Ï·Ï··Ï·Ï·Ï--··Ï·Ï---··Ï-----------------------··Ï----------------------------------·æ\n");               <* 
-    *> fprintf (f, "#@ titles     åref····english···················line·var··p·s··s·c·pg···g·freq··gregg·····················shown·······························æ\n");               <* 
-    *> fprintf (f, "\n");                                                                                                                                                              <* 
-    *> WORDS_eng_by_index  (a, &x_curr);                                                                                                                                               <* 
-    *> while (x_curr != NULL) {                                                                                                                                                        <* 
-    *>    if (strcmp (x_curr->w_vary, "<") == 0) {                                                                                                                                     <* 
-    *>       DEBUG_CONF   yLOG_info    ("base"      , x_curr->w_english);                                                                                                              <* 
-    *>       WORDS_detail (x_curr, t);                                                                                                                                                 <* 
-    *>       DEBUG_CONF   yLOG_info    ("t"         , t);                                                                                                                              <* 
-    *>       strlpadn (++c, n, '.', '<', 5);                                                                                                                                           <* 
-    *>       if (i %  5 == 0)  fprintf (f, "\n");                                                                                                                                      <* 
-    *>       if (i % 25 == 0)  fprintf (f, "##-····---english--------------··line·var··p·s··s·c·pg···g·freq··---gregg----------------··---shown---------------------------\n\n");      <* 
-    *>       i++;                                                                                                                                                                      <* 
-    *>       fprintf (f, "%5.5s··%s\n", n, t);                                                                                                                                         <* 
-    *>       x_sub = x_curr->w_next;                                                                                                                                                   <* 
-    *>       x_col = 0;                                                                                                                                                                <* 
-    *>       while (x_sub != NULL) {                                                                                                                                                   <* 
-    *>          DEBUG_CONF   yLOG_info    ("vary"      , x_sub->w_english);                                                                                                            <* 
-    *>          WORDS_detail (x_sub, t);                                                                                                                                               <* 
-    *>          DEBUG_CONF   yLOG_info    ("t"         , t);                                                                                                                           <* 
-    *>          if (i %  5 == 0)  fprintf (f, "\n");                                                                                                                                   <* 
-    *>          if (i % 25 == 0)  fprintf (f, "##-····---english--------------··line·var··p·s··s·c·pg···g·freq··---gregg----------------··---shown---------------------------\n\n");   <* 
-    *>          i++;                                                                                                                                                                   <* 
-    *>          fprintf (f, "    %c  %s\n", ++x_col + 'a', t);                                                                                                                         <* 
-    *>          x_sub  = x_sub->w_next;                                                                                                                                                <* 
-    *>       }                                                                                                                                                                         <* 
-    *>    }                                                                                                                                                                            <* 
-    *>    ++a;                                                                                                                                                                         <* 
-    *>    WORDS_eng_by_index (a, &x_curr);                                                                                                                                             <* 
-    *> }                                                                                                                                                                               <* 
-    *> fprintf (f, "\n");                                                                                                                                                              <* 
-    *> fprintf (f, "##-····---english--------------··line·var··p·s··s·c·pg···g·freq··---gregg----------------··---shown---------------------------\n\n");                              <* 
-    *> fprintf (f, "## found %d primaries and %d total words (%4.2fx)\n", c, a, (float) a / (float) c);                                                                                <* 
-    *> /+---(complete)-------------------------+/                                                                                                                                      <* 
-    *> DEBUG_CONF   yLOG_exit    (__FUNCTION__);                                                                                                                                       <* 
-    *> return 0;                                                                                                                                                                       <*/
-}
-
-char
 DICT_dump_words         (FILE *f)
 {
    /*---(locals)-----------+-----+-----+-*/
@@ -1003,6 +883,7 @@ DICT_paginate           (void)
    DEBUG_GRAF   yLOG_value   ("ppage"     , my.w_ppage);
    /*---(clear paging)-------------------*/
    for (i = 0; i < MAX_PAGES; ++i)  s_pages [i] = s_lasts [i] = NULL;
+   my.w_npage;
    /*---(paginate)-----------------------*/
    DICT__by_cursor (YDLST_HEAD, &x_word);
    i = 0;

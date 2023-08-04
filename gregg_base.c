@@ -425,6 +425,24 @@ BASE__entry             (int n)
 }
 
 
+char
+BASE_show               (void *a_base, char r_shown [LEN_TITLE])
+{
+   /*---(locals)-------------------------*/
+   char        rce         =  -10;
+   tBASE      *x_base      = NULL;
+   /*---(default)------------------------*/
+   if (r_shown != NULL)  strcpy (r_shown, "");
+   /*---(defense)------------------------*/
+   --rce;  if (a_base == NULL)  return rce;
+   /*---(save-back)----------------------*/
+   x_base = (tBASE *) a_base;
+   strlcpy (r_shown, x_base->b_shown, LEN_TITLE);
+   /*---(complete)-----------------------*/
+   return 0;
+}
+
+
 
 /*====================------------------------------------====================*/
 /*===----                       reporting                              ----===*/
@@ -434,43 +452,7 @@ static void  o___REPORTING_______o () { return; }
 char
 BASE_dump_tree          (FILE *f)
 {
-   /*> /+---(locals)-----------+-----+-----+-+/                                                                <* 
-    *> int         x_pos       =    0;                                                                         <* 
-    *> int         x_gregg     =    0;                                                                         <* 
-    *> int         i           =    0;                                                                         <* 
-    *> int         a           =    0;                                                                         <* 
-    *> int         c           =    0;                                                                         <* 
-    *> char        r           [LEN_SHORT] = "";                                                               <* 
-    *> char        s           [LEN_SHORT] = "";                                                               <* 
-    *> char        t           [LEN_SHORT] = "";                                                               <* 
-    *> char        u           [LEN_SHORT] = "";                                                               <* 
-    *> char        v           [LEN_SHORT] = "";                                                               <* 
-    *> char        x_col       =    0;                                                                         <* 
-    *> tWORD      *x_curr      = NULL;                                                                         <* 
-    *> /+---(header)-------------------------+/                                                                <* 
-    *> DEBUG_CONF   yLOG_enter   (__FUNCTION__);                                                               <* 
-    *> WORDS_eng_by_index  (a, &x_curr);                                                                       <* 
-    *> while (x_curr != NULL) {                                                                                <* 
-    *>    if (strcmp (x_curr->w_vary, "<") != 0) {                                                             <* 
-    *>       WORDS_eng_by_index (++a, &x_curr);                                                                <* 
-    *>       continue;                                                                                         <* 
-    *>    }                                                                                                    <* 
-    *>    if (x_curr->w_tree [0] > 0)  sprintf (r, "%02d" , x_curr->w_tree [0]);                               <* 
-    *>    else                         strcpy  (r, "  ");                                                      <* 
-    *>    if (x_curr->w_tree [1] > 0)  sprintf (s, "·%02d", x_curr->w_tree [1]);                               <* 
-    *>    else                         strcpy  (s, "   ");                                                     <* 
-    *>    if (x_curr->w_tree [2] > 0)  sprintf (t, "·%02d", x_curr->w_tree [2]);                               <* 
-    *>    else                         strcpy  (t, "   ");                                                     <* 
-    *>    if (x_curr->w_tree [3] > 0)  sprintf (u, "·%02d", x_curr->w_tree [3]);                               <* 
-    *>    else                         strcpy  (u, "   ");                                                     <* 
-    *>    if (x_curr->w_tree [4] > 0)  sprintf (v, "·%02d", x_curr->w_tree [4]);                               <* 
-    *>    else                         strcpy  (v, "   ");                                                     <* 
-    *>    fprintf (f, "%2s%2s%2s%2s%2s  %-20.20s  %s\n", r, s, t, u, v, x_curr->w_gregg, x_curr->w_english);   <* 
-    *>    WORDS_eng_by_index (++a, &x_curr);                                                                   <* 
-    *> }                                                                                                       <* 
-    *> /+---(complete)-----------------------+/                                                                <* 
-    *> DEBUG_CONF   yLOG_exit    (__FUNCTION__);                                                               <* 
-    *> return 0;                                                                                               <*/
+   return 0;
 }
 
 

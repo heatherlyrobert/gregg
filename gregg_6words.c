@@ -271,7 +271,7 @@ WORDS__populate         (tWORD *a_new, char a_english [LEN_TITLE], char a_gregg 
    /*---(drawn)-------------------------*/
    rc = FIX_gregg (a_new->w_gregg, a_new->w_shown, a_new->w_drawn, a_new->w_tree, NULL);
    /*---(hook to tree)------------------*/
-   rc = FIX_hook   (a_new);
+   /*> rc = FIX_hook   (a_new);                                                       <*/
    DEBUG_CONF   yLOG_value   ("fix"       , rc);
    --rce;  if (rc < 0) {
       DEBUG_CONF   yLOG_exitr   (__FUNCTION__, rce);

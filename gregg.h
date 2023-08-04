@@ -11,9 +11,9 @@
 #define     P_PURPOSE   "hyper-efficient, effective pen-based english input"
 /*········· ··········· ´·····························´········································*/
 #define     P_NAMESAKE  "athene-makhanitis (skilled inventor)"
-#define     P_PRONOUNCE "uh·thee·nay"
+#define     P_PRONOUNCE "uh·thee·nay mahk·ahn·ih·tihs"
 #define     P_HERITAGE  "athene is the virgin goddess of protection, civilization, and craft"
-#define     P_BRIEFLY   ""
+#define     P_BRIEFLY   "goddess of invention"
 #define     P_IMAGERY   "stately woman armed with sheild, spear, crested helm, and aigis cloak"
 #define     P_REASON    "goddess of wisdom, strength, invention, and learning"
 /*········· ··········· ´·····························´········································*/
@@ -30,21 +30,27 @@
 #define     P_COMPILER  "gcc 5.3.0"
 #define     P_CODESIZE  "moderate    (appoximately 5,000 slocl)"
 /*········· ··········· ´·····························´········································*/
-#define     P_DEPENDS   "none"
+#define     P_DEPSTDC   "stdio,stdlib,string,math,time,error,signal,ctype"
+#define     P_DEPPOSIX  "unistd,termios,sys/time"
+#define     P_DEPCORE   "yURG,yLOG,ySTR"
+#define     P_DEPVIKEY  "yMODE,yKEYS,yFILE,yVIEW,yMAP,yCMD,yMACRO,ySRC,yMARK"
+#define     P_DEPGRAPH  "X11/X,X11/Xlib,GL/gl,GL/glx"
+#define     P_DEPOTHER  "yPARSE,ySORT,yJOBS,yEXEC"
+#define     P_DEPSOLO   "yVIHUB_solo,yDLST_solo"
 /*········· ··········· ´·····························´········································*/
 #define     P_AUTHOR    "heatherlyrobert"
 #define     P_CREATED   "2008-07"
 /*········· ··········· ´·····························´········································*/
 #define     P_VERMAJOR  "5.--= generalization for broader use"
 #define     P_VERMINOR  "5.6 = build out for fast, focused database"
-#define     P_VERNUM    "5.6h"
-#define     P_VERTXT    "full database write/read to database unit tested"
+#define     P_VERNUM    "5.6i"
+#define     P_VERTXT    "dictionary view back after the massive re-write for new structures"
 /*········· ··········· ´·····························´········································*/
 #define     P_PRIORITY  "direct, simple, brief, vigorous, and lucid (h.w. fowler)"
 #define     P_PRINCIPAL "[grow a set] and build your wings on the way down (r. bradbury)"
 #define     P_REMINDER  "there are many better options, but i *own* every byte of this one"
 /*········· ··········· ´·····························´········································*/
-#define     P_HEADERS   P_FOCUS, P_NICHE, P_SUBJECT, P_PURPOSE, P_NAMESAKE, P_PRONOUNCE, P_HERITAGE, P_BRIEFLY, P_IMAGERY, P_REASON, P_ONELINE, P_HOMEDIR, P_BASENAME, P_FULLPATH, P_SUFFIX, P_CONTENT, P_SYSTEM, P_LANGUAGE, P_COMPILER, P_CODESIZE, P_DEPENDS, P_AUTHOR, P_CREATED, P_VERMAJOR, P_VERMINOR, P_VERNUM, P_VERTXT
+#define     P_HEADERS   P_FOCUS, P_NICHE, P_SUBJECT, P_PURPOSE, P_NAMESAKE, P_PRONOUNCE, P_HERITAGE, P_BRIEFLY, P_IMAGERY, P_REASON, P_ONELINE, P_HOMEDIR, P_BASENAME, P_FULLPATH, P_SUFFIX, P_CONTENT, P_SYSTEM, P_LANGUAGE, P_COMPILER, P_CODESIZE, P_DEPSTDC, P_AUTHOR, P_CREATED, P_VERMAJOR, P_VERMINOR, P_VERNUM, P_VERTXT
 /*········· ··········· ´·····························´········································*/
 /*--------- 12345678901 ´123456789-123456789-123456789-123456789-123456789-123456789-123456789-*/
 
@@ -278,6 +284,7 @@
 #define     B_UNIQUE       'q'
 
 
+#define     NAME_DB      "/var/lib/gregg/gregg.db"
 #define     NAME_DICT    "/var/lib/gregg/gregg_manual.dict"
 
 
@@ -1324,8 +1331,6 @@ char        DICT__base              (char a_file, short a_line, cchar a_recd [LE
 char        DICT__read              (FILE *a_file, short *r_line, char r_prefixes [LEN_HUND], char r_recd [LEN_RECD]);
 char        DICT_import             (cchar a_name [LEN_PATH]);
 /*---(reporting)------------*/
-char        DICT_list               (void);
-char        DICT_list_all           (void);
 char        DICT_dump_words         (FILE *f);
 char        DICT_paginate           (void);
 char        DICT_page_ends          (int a_page, char r_beg [LEN_TITLE], char r_end [LEN_TITLE]);
@@ -1436,8 +1441,6 @@ char        FIX__ou                 (char *i, char *j, char a_pcat, char a_ccat,
 char        FIX__other              (char *i, char *j, char a_pcat, char a_ccat, char a_name [LEN_TERSE], char a_ncat, char b_shown [LEN_HUND], short b_drawn [LEN_LABEL], char b_tree [LEN_TERSE]);
 char        FIX_gregg               (char a_gregg [LEN_TITLE], char r_shown [LEN_HUND], short r_drawn [LEN_LABEL], char r_tree [LEN_TERSE], char r_sort [LEN_LABEL]);
 /*---(hooking)--------------*/
-char        FIX_hook                (tWORD *a_new);
-char        FIX_unhook              (tWORD *a_old);
 char*       FIX_tree_showable       (char a_tree [LEN_TERSE], char a_max);
 
 
@@ -1445,9 +1448,9 @@ char*       FIX_tree_showable       (char a_tree [LEN_TERSE], char a_max);
 
 /*---(header)---------------*/
 char        DB__head_write_one      (FILE *a_file, char a_label [LEN_TERSE], int a_var);
-char        DB__head_write          (FILE *a_file, char a_name [LEN_LABEL], char a_vernum [LEN_LABEL], int a_nletter, int a_nprefix, int a_nsuffix, int a_nsource, int a_nbase, int a_nword, char a_heart [LEN_DESC]);
+char        DB__head_write          (FILE *a_file, char a_name [LEN_LABEL], char a_ver [LEN_LABEL], int a_nlet, int a_npre, int a_nsuf, int a_nsrc, int a_nbas, int a_ndic, char a_heart [LEN_DESC]);
 char        DB__head_read_one       (FILE *a_file, char a_label [LEN_TERSE], int *r_var);
-char        DB__head_read           (FILE *a_file, char r_name [LEN_LABEL], char r_vernum [LEN_LABEL], int *r_nletter, int *r_nprefix, int *r_nsuffix, int *r_nsource, int *r_nbase, int *r_nword, char r_heart [LEN_DESC]);
+char        DB__head_read           (FILE *a_file, char r_name [LEN_LABEL], char r_ver [LEN_LABEL], int *r_nlet, int *r_npre, int *r_nsuf, int *r_nsrc, int *r_nbas, int *r_ndic, char r_heart [LEN_DESC]);
 /*---(sources)--------------*/
 char        SOURCE_add              (char a_file [LEN_HUND]);
 short       SOURCE_inc              (void);
@@ -1459,15 +1462,16 @@ char        DB__word_write_one      (FILE *a_file, tWORD *a_curr);
 char        DB__word_write          (FILE *a_file);
 char        DB__word_read           (int n, FILE *a_file);
 /*---(file)-----------------*/
-char        DB__open                (char a_name [LEN_PATH], char a_mode, int *b_nfile, int *b_nbase, int *b_nword, char b_heartbeat [LEN_DESC], FILE **b_file);
 char        DB__close               (FILE **b_file);
 /*---(driver)---------------*/
-char        DB_write                (void);
-char        DB_read                 (void);
+char        DB_write                (char a_name [LEN_HUND]);
+char        DB_read                 (char a_name [LEN_HUND]);
+char        DB_stats                (char a_name [LEN_HUND]);
 /*---(debugging)------------*/
 char        SOURCE__count           (void);
 char*       SOURCE__detail          (char n);
 /*---(done)-----------------*/
+
 
 
 /*===[[ gregg_prefix.c ]]=====================================================*/
@@ -1489,6 +1493,7 @@ char        PREFIX_english_final    (void *a_prefix, cchar a_base [LEN_TITLE], c
 short       PREFIX__by_name         (char a_prefix [LEN_LABEL], char r_english [LEN_LABEL], char r_gregg [LEN_LABEL], void **r_point);
 char        PREFIX_driver           (cchar a_prefix [LEN_LABEL], char b_english [LEN_TITLE], char b_gregg [LEN_TITLE], void **r_point);
 char        PREFIX_english          (void *a_prefix, char r_english [LEN_LABEL]);
+char        PREFIX_shown            (void *a_prefix, char r_shown [LEN_LABEL]);
 /*---(database)-------------*/
 short       PREFIX_encode           (void *a_prefix);
 void*       PREFIX_decode           (short a_prefix);
@@ -1524,6 +1529,7 @@ char        LETTER_read             (FILE *a_file, short a_count);
 /*===[[ gregg_suffix.c ]]=====================================================*/
 /*········· ´······················ ´·········································*/
 /*---(program)--------------*/
+char        SUFFIX__wipe            (void *c_curr);
 char        SUFFIX__purge           (void);
 char        SUFFIX_init             (void);
 char        SUFFIX_wrap             (void);
@@ -1543,6 +1549,7 @@ char        SUFFIX__field           (cchar a_field [LEN_TITLE], char r_request [
 char        SUFFIX__single          (void *a_base, void *a_prefix, void *a_suffix, cchar a_english [LEN_TITLE], cchar a_gregg [LEN_TITLE]);
 char        SUFFIX_driver           (void *a_base, void *a_prefix, cchar a_field [LEN_TITLE], cchar a_gregg [LEN_TITLE]);
 char        SUFFIX_english          (void *a_suffix, char r_english [LEN_LABEL]);
+char        SUFFIX_shown            (void *a_suffix, char r_shown [LEN_LABEL]);
 /*---(report)---------------*/
 char        SUFFIX_dump             (FILE *f);
 /*---(database)-------------*/
@@ -1585,6 +1592,7 @@ char        BASE__by_cursor         (char a_dir, void **r_base);
 char        BASE__detail            (void *a_base, char a_out [LEN_FULL]);
 char*       BASE__pointer           (short n, void *a_base);
 char*       BASE__entry             (int n);
+char        BASE_show               (void *a_base, char r_shown [LEN_TITLE]);
 /*---(driver)---------------*/
 char        BASE__prepare           (short a_line, cchar a_english [LEN_TITLE], cchar a_gregg [LEN_TITLE]);
 char        BASE__populate          (void *a_new, char a_file, short a_line, char a_english [LEN_TITLE], char a_gregg [LEN_TITLE]);

@@ -364,7 +364,7 @@ PREFIX__by_name         (char a_prefix [LEN_LABEL], char r_english [LEN_LABEL], 
 {
    /*---(locals)-------------------------*/
    char        rce         =  -10;
-   char        i           =    0;
+   int         i           =    0;
    /*---(default)------------------------*/
    if (r_english != NULL)  strcpy (r_english, "");
    if (r_gregg   != NULL)  strcpy (r_gregg  , "");
@@ -477,6 +477,23 @@ PREFIX_english          (void *a_prefix, char r_english [LEN_LABEL])
    /*---(save-back)----------------------*/
    x_prefix = (tPREFIX *) a_prefix;
    strlcpy (r_english, x_prefix->p_english, LEN_LABEL);
+   /*---(complete)-----------------------*/
+   return 0;
+}
+
+char
+PREFIX_shown            (void *a_prefix, char r_shown [LEN_LABEL])
+{
+   /*---(locals)-------------------------*/
+   char        rce         =  -10;
+   tPREFIX    *x_prefix    = NULL;
+   /*---(default)------------------------*/
+   if (r_shown != NULL)  strcpy (r_shown, "");
+   /*---(defense)------------------------*/
+   --rce;  if (a_prefix  == NULL)  return rce;
+   /*---(save-back)----------------------*/
+   x_prefix = (tPREFIX *) a_prefix;
+   strlcpy (r_shown, x_prefix->p_gregg, LEN_LABEL);
    /*---(complete)-----------------------*/
    return 0;
 }

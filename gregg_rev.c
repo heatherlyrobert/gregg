@@ -703,47 +703,47 @@ static void o___BY_ENGLISH________________o (void) {;}
 char
 REVERSE_english_word    (uchar *a_word, char a_type, char a_skip)
 {
-   /*---(locals)-----------+-----+-----+-*/
-   char        rce         =  -10;
-   char        rc          =    0;
-   tWORD     *x_word      = NULL;
-   /*---(header)-------------------------*/
-   DEBUG_OUTP   yLOG_enter   (__FUNCTION__);
-   /*---(defense)------------------------*/
-   DEBUG_OUTP   yLOG_point   ("a_word"    , a_word);
-   --rce;  if (a_word == NULL) {
-      DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   DEBUG_OUTP   yLOG_info    ("a_word"    , a_word);
-   /*---(look it up)---------------------*/
-   /*> rc = BTREE_by_english (&x_word, a_word);                                       <*/
-   DEBUG_OUTP   yLOG_value   ("btree"     , rc);
-   DEBUG_OUTP   yLOG_point   ("x_word"    , x_word);
-   --rce;  if (rc < 0 || x_word == NULL) {
-      DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   strlcpy (my.word , a_word         , LEN_HUND);
-   strlcpy (my.gregg, x_word->w_gregg, LEN_HUND);
-   /*---(translate)----------------------*/
-   rc = WORDS_drawn_show     (x_word->w_drawn, my.shown);
-   DEBUG_OUTP   yLOG_value   ("tranlate"  , rc);
-   --rce;  if (rc < 0) {
-      DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   DEBUG_OUTP   yLOG_info    ("my.shown"  , my.shown);
-   /*---(display)------------------------*/
-   rc = REVERSE_gregg_word (my.shown, a_type, a_skip);
-   DEBUG_OUTP   yLOG_value   ("outline"   , rc);
-   --rce;  if (rc < 0) {
-      DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);
-      return rce;
-   }
-   /*---(complete)-----------------------*/
-   DEBUG_OUTP   yLOG_exit    (__FUNCTION__);
-   return 0;
+   /*> /+---(locals)-----------+-----+-----+-+/                                                 <* 
+    *> char        rce         =  -10;                                                          <* 
+    *> char        rc          =    0;                                                          <* 
+    *> tWORD     *x_word      = NULL;                                                           <* 
+    *> /+---(header)-------------------------+/                                                 <* 
+    *> DEBUG_OUTP   yLOG_enter   (__FUNCTION__);                                                <* 
+    *> /+---(defense)------------------------+/                                                 <* 
+    *> DEBUG_OUTP   yLOG_point   ("a_word"    , a_word);                                        <* 
+    *> --rce;  if (a_word == NULL) {                                                            <* 
+    *>    DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);                                        <* 
+    *>    return rce;                                                                           <* 
+    *> }                                                                                        <* 
+    *> DEBUG_OUTP   yLOG_info    ("a_word"    , a_word);                                        <* 
+    *> /+---(look it up)---------------------+/                                                 <* 
+    *> /+> rc = BTREE_by_english (&x_word, a_word);                                       <+/   <* 
+    *> DEBUG_OUTP   yLOG_value   ("btree"     , rc);                                            <* 
+    *> DEBUG_OUTP   yLOG_point   ("x_word"    , x_word);                                        <* 
+    *> --rce;  if (rc < 0 || x_word == NULL) {                                                  <* 
+    *>    DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);                                        <* 
+    *>    return rce;                                                                           <* 
+    *> }                                                                                        <* 
+    *> strlcpy (my.word , a_word         , LEN_HUND);                                           <* 
+    *> strlcpy (my.gregg, x_word->w_gregg, LEN_HUND);                                           <* 
+    *> /+---(translate)----------------------+/                                                 <* 
+    *> rc = WORDS_drawn_show     (x_word->w_drawn, my.shown);                                   <* 
+    *> DEBUG_OUTP   yLOG_value   ("tranlate"  , rc);                                            <* 
+    *> --rce;  if (rc < 0) {                                                                    <* 
+    *>    DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);                                        <* 
+    *>    return rce;                                                                           <* 
+    *> }                                                                                        <* 
+    *> DEBUG_OUTP   yLOG_info    ("my.shown"  , my.shown);                                      <* 
+    *> /+---(display)------------------------+/                                                 <* 
+    *> rc = REVERSE_gregg_word (my.shown, a_type, a_skip);                                      <* 
+    *> DEBUG_OUTP   yLOG_value   ("outline"   , rc);                                            <* 
+    *> --rce;  if (rc < 0) {                                                                    <* 
+    *>    DEBUG_OUTP   yLOG_exitr   (__FUNCTION__, rce);                                        <* 
+    *>    return rce;                                                                           <* 
+    *> }                                                                                        <* 
+    *> /+---(complete)-----------------------+/                                                 <* 
+    *> DEBUG_OUTP   yLOG_exit    (__FUNCTION__);                                                <* 
+    *> return 0;                                                                                <*/
 }
 
 char

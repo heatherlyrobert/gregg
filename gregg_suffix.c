@@ -42,47 +42,58 @@ static short    s_nsuffix = 0;
 /*============================--------------------============================*/
 static void o___PROGRAM___________________o (void) {;}
 
-char
-SUFFIX__purge           (void)
+char         /*-> clear a single suffix entry -----------------[ leaf······ ]-*/ /*-åfcg´·1á···1á···á·´6·7´2··´·1·1·á·æ¬å1á1···´···á·······´···´····æ¬å·····´1···1··´····´····æ-*/
+SUFFIX__wipe            (void *c_curr)
 {
    /*---(locals)-----------+-----------+-*/
+   tSUFFIX    *x_curr      = NULL;
    int         i           =    0;
-   int         j           =    0;
-   for (i = 0; i < MAX_SUFFIX; ++i) {
-      /*---(main)-----------------*/
-      s_suffix [i].s_ref  = -1;
-      strlcpy (s_suffix [i].s_name   , "", LEN_LABEL);
-      strlcpy (s_suffix [i].s_gregg  , "", LEN_LABEL);
-      for (j = 0; j < LEN_LABEL; ++j)   s_suffix [i].s_drawn [j] = 0;
-      /*---(update)---------------*/
-      s_suffix [i].s_type = '·';
-      strlcpy (s_suffix [i].s_base   , "", LEN_TITLE);
-      strlcpy (s_suffix [i].s_change , "", LEN_LABEL);
-      /*---(cats)-----------------*/
-      s_suffix [i].s_part = '·';
-      s_suffix [i].s_sub  = '·';
-      /*---(source)---------------*/
-      s_suffix [i].s_line = 0;
-      s_suffix [i].s_src  = '·';
-      s_suffix [i].s_cat  = '·';
-      s_suffix [i].s_page = 0;
-      /*---(count)----------------*/
-      s_suffix [i].s_used = 0;
-      /*---(done------------------*/
-   }
-   s_nsuffix = 0;
-   /*---(complete)-----------------------*/
+   /*---(prepare)--------------*/
+   x_curr = (tSUFFIX *) c_curr;
+   /*---(main)-----------------*/
+   x_curr->s_ref        = -1;
+   x_curr->s_name   [0] = '\0';
+   x_curr->s_gregg  [0] = '\0';
+   for (i = 0; i < LEN_LABEL; ++i)   x_curr->s_drawn [i] = 0;
+   /*---(update)---------------*/
+   x_curr->s_type       = '·';
+   x_curr->s_base   [0] = '\0';
+   x_curr->s_change [0] = '\0';
+   /*---(cats)-----------------*/
+   x_curr->s_part       = '·';
+   x_curr->s_sub        = '·';
+   /*---(source)---------------*/
+   x_curr->s_line       = 0;
+   x_curr->s_src        = '·';
+   x_curr->s_cat        = '·';
+   x_curr->s_page       = 0;
+   /*---(count)----------------*/
+   x_curr->s_used       = 0;
+   /*---(done------------------*/
    return 0;
 }
 
-char
+char         /*-> wipe all suffix data ------------------------[ node+····· ]-*/ /*-åfcg´·vá····á···á·´1·A´12·´·1·1·á·æ¬å2á2···´1·1á1······´···´····æ¬å·····´11·····´····´234·æ-*/
+SUFFIX__purge           (void)
+{
+   int         i           =    0;
+   for (i = 0; i < MAX_SUFFIX; ++i)  SUFFIX__wipe (&s_suffix [i]);
+   s_nsuffix = 0;
+   return 0;
+}
+
+char         /*-> suffix initialization -----------------------[ ´········· ]-*/ /*-åûcg´·vá····á···á·´1·A´··1´···1·á·æ¬å1á·1··´2·2á1··1···´···´····æ¬å·····´1···1··´····´····æ-*/
 SUFFIX_init             (void)
 {
    strlcpy (my.n_suffix, "/var/lib/gregg/suffix.txt", LEN_HUND);
    return SUFFIX__purge ();
 }
 
-char SUFFIX_wrap     (void)  { return SUFFIX__purge (); }
+char         /*-> suffix wrap-up ------------------------------[ node······ ]-*/ /*-åfcg´·vá····á···á·´1·A´···´···1·á·æ¬å·á····´1·1á1······´···´····æ¬å·····´·······´····´····æ-*/
+SUFFIX_wrap             (void)
+{
+   return SUFFIX__purge ();
+}
 
 
 
@@ -91,13 +102,15 @@ char SUFFIX_wrap     (void)  { return SUFFIX__purge (); }
 /*============================--------------------============================*/
 static void o___LOAD______________________o (void) {;}
 
-char
-SUFFIX__handler         (int n, char a_verb [LEN_LABEL], char a_exist, void *a_handler)
+char         /*-> parse and create suffix ---------------------[ leafy····· ]-*/ /*-åfcg´·4á4··á···´E26´83·´1·H13á·æ¬å1á1···´VGFá··C3···´···´····æ¬å>linr´3···3··´····´113·æ-*/
+SUFFIX__handler         (int a_line, char a_verb [LEN_LABEL], char a_exist, void *a_handler)
 {
    /*---(locals)-----------+-----------+-*/
    char        rce         =  -10;
    int         rc          =    0;
    int         c           =    0;
+   int         n           =    0;
+   tSUFFIX    *u           = NULL;
    char        x_nada      [LEN_LABEL] = "";
    char        x_cats      [LEN_LABEL] = "";
    int         l           =    0;
@@ -119,48 +132,51 @@ SUFFIX__handler         (int n, char a_verb [LEN_LABEL], char a_exist, void *a_h
       yURG_err ('f', "not enough fields for suffix");
       return rce;
    }
+   /*---(prepare)------------------------*/
+   n = s_nsuffix;
+   u = &(s_suffix [n]);
    /*---(pull all)-----------------------*/
-   rc = yPARSE_scanf (a_verb, "LLL3L", s_suffix [s_nsuffix].s_gregg, x_cats, x_nada, s_suffix [s_nsuffix].s_base, s_suffix [s_nsuffix].s_change);
+   rc = yPARSE_scanf (a_verb, "LLL3L", u->s_gregg, x_cats, x_nada, u->s_base, u->s_change);
    DEBUG_INPT  yLOG_value   ("handler"   , rc);
    --rce;  if (rc < 0) {
       DEBUG_INPT  yLOG_exit    (__FUNCTION__);
       yURG_err ('f', "yparse could not process record");
       return rce;
    }
-   DEBUG_INPT  yLOG_complex ("inputs"    , "%-20.20s, %-20.20s, %-20.20s, %-20.20s, %s", s_suffix [s_nsuffix].s_gregg, x_cats, x_nada, s_suffix [s_nsuffix].s_base, s_suffix [s_nsuffix].s_change);
+   DEBUG_INPT  yLOG_complex ("inputs"    , "%-20.20s, %-20.20s, %-20.20s, %-20.20s, %s", u->s_gregg, x_cats, x_nada, u->s_base, u->s_change);
    /*---(fluff and filler)---------------*/
-   if (s_suffix [s_nsuffix].s_gregg  [0]           == '¬')   strcpy (s_suffix [s_nsuffix].s_gregg , "");
-   if (strcmp (s_suffix [s_nsuffix].s_base  , "·") == 0)     strcpy (s_suffix [s_nsuffix].s_base  , "");
-   if (s_suffix [s_nsuffix].s_base   [0]           == '¬')   strcpy (s_suffix [s_nsuffix].s_base  , "");
-   if (x_cats [0]                                  == '¬')   strcpy (x_cats                       , "");
-   if (s_suffix [s_nsuffix].s_change [0]           == '¬')   strcpy (s_suffix [s_nsuffix].s_change, "");
-   if (strcmp (s_suffix [s_nsuffix].s_change, "·") == 0)     strcpy (s_suffix [s_nsuffix].s_change, "");
+   if (u->s_gregg  [0]           == '¬')   strcpy (u->s_gregg  , "");
+   if (strcmp (u->s_base  , "·") == 0)     strcpy (u->s_base   , "");
+   if (u->s_base   [0]           == '¬')   strcpy (u->s_base   , "");
+   if (x_cats [0]                == '¬')   strcpy (x_cats      , "");
+   if (u->s_change [0]           == '¬')   strcpy (u->s_change , "");
+   if (strcmp (u->s_change, "·") == 0)     strcpy (u->s_change , "");
    /*---(add non-scanf)------------------*/
-   s_suffix [s_nsuffix].s_ref  = s_nsuffix;
-   s_suffix [s_nsuffix].s_line = n;
-   strlcpy (s_suffix [s_nsuffix].s_name, a_verb, LEN_LABEL);
-   DEBUG_INPT  yLOG_complex ("final"     , "%3d#, %-10.10s, %s", s_nsuffix, s_suffix [s_nsuffix].s_name, s_suffix [s_nsuffix].s_gregg);
+   u->s_ref  = n;
+   u->s_line = a_line;
+   strlcpy (u->s_name, a_verb, LEN_LABEL);
+   DEBUG_INPT  yLOG_complex ("final"     , "%3d#, %-10.10s, %s", n, u->s_name, u->s_gregg);
    /*---(categories)---------------------*/
    l = strlen (x_cats);
-   if (l >=  1)   s_suffix [s_nsuffix].s_part = x_cats [0];
-   if (l >=  3)   s_suffix [s_nsuffix].s_sub  = x_cats [2];
-   if (l >=  6)   s_suffix [s_nsuffix].s_src  = x_cats [5];
-   if (l >=  8)   s_suffix [s_nsuffix].s_cat  = x_cats [7];
-   if (l >= 10)   s_suffix [s_nsuffix].s_page = atoi (x_cats + 9);
-   DEBUG_INPT  yLOG_complex ("cats"      , "%2d len, %3d %3d  %3d %3d %3d", l, s_suffix [s_nsuffix].s_part, s_suffix [s_nsuffix].s_sub, s_suffix [s_nsuffix].s_src, s_suffix [s_nsuffix].s_cat, s_suffix [s_nsuffix].s_page);
+   if (l >=  1)   u->s_part = x_cats [0];
+   if (l >=  3)   u->s_sub  = x_cats [2];
+   if (l >=  6)   u->s_src  = x_cats [5];
+   if (l >=  8)   u->s_cat  = x_cats [7];
+   if (l >= 10)   u->s_page = atoi (x_cats + 9);
+   DEBUG_INPT  yLOG_complex ("cats"      , "%2d len, %3d %3d  %3d %3d %3d", l, u->s_part, u->s_sub, u->s_src, u->s_cat, u->s_page);
    /*---(type)---------------------------*/
-   if      (strchr ("*+-", s_suffix [s_nsuffix].s_name [0]) != NULL)   s_suffix [s_nsuffix].s_type = '+';
-   else if (s_suffix [s_nsuffix].s_base [0] != '\0')                   s_suffix [s_nsuffix].s_type = 'a';
-   else                                                                s_suffix [s_nsuffix].s_type = '·';
+   if      (strchr ("*+-", u->s_name [0]) != NULL)   u->s_type = '+';
+   else if (u->s_base [0] != '\0')                   u->s_type = 'a';
+   else                                              u->s_type = '·';
    /*---(increment)----------------------*/
-   ++s_nsuffix;
-   DEBUG_INPT  yLOG_value   ("s_nsuffix" , s_nsuffix);
+   n = ++s_nsuffix;
+   DEBUG_INPT  yLOG_value   ("s_nsuffix" , n);
    /*---(complete)-----------------------*/
    DEBUG_INPT  yLOG_exit    (__FUNCTION__);
    return rc;
 }
 
-char
+char         /*->  --------------------------------------------[ node······ ]-*/ /*-ågcg´·1á1··á···´753´21·´1·212á·æ¬å·á····´JG3á1·11···´···´····æ¬å>li··´·······´····´222·æ-*/
 SUFFIX_load             (char a_fname [LEN_HUND])
 {
    /*---(locals)-----------+-----+-----+-*/
@@ -605,7 +621,7 @@ SUFFIX_driver           (void *a_base, void *a_prefix, cchar a_field [LEN_TITLE]
    return 0;
 }
 
-char
+char         /*-> return english from structure ---------------[ leaf······ ]-*/ /*-ågcg´·2á11·á···´3·6´2··´··211á·æ¬å1á·1··´2·2á··11···´···´····æ¬å·····´1···1··´····´····æ-*/
 SUFFIX_english          (void *a_suffix, char r_english [LEN_LABEL])
 {
    /*---(locals)-------------------------*/
@@ -622,6 +638,23 @@ SUFFIX_english          (void *a_suffix, char r_english [LEN_LABEL])
    return 0;
 }
 
+char
+SUFFIX_shown            (void *a_suffix, char r_shown [LEN_LABEL])
+{
+   /*---(locals)-------------------------*/
+   char        rce         =  -10;
+   tSUFFIX    *x_suffix    = NULL;
+   /*---(default)------------------------*/
+   if (r_shown != NULL)  strcpy (r_shown, "");
+   /*---(defense)------------------------*/
+   --rce;  if (a_suffix  == NULL)  return rce;
+   /*---(save-back)----------------------*/
+   x_suffix = (tSUFFIX *) a_suffix;
+   strlcpy (r_shown, x_suffix->s_gregg, LEN_LABEL);
+   /*---(complete)-----------------------*/
+   return 0;
+}
+
 
 
 /*============================--------------------============================*/
@@ -629,7 +662,7 @@ SUFFIX_english          (void *a_suffix, char r_english [LEN_LABEL])
 /*============================--------------------============================*/
 static void o___REPORT____________________o (void) {;}
 
-char
+char         /*-> dump all suffix data to file ----------------[ ´········· ]-*/ /*-ågcg´·1á····á···á1´3·7´23·´1111·á·æ¬å1á·1··´3·3á1·2····´·w·´····æ¬å·····´·······´····´····æ-*/
 SUFFIX_dump             (FILE *f)
 {
    /*---(locals)-----------+-----+-----+-*/
@@ -668,7 +701,7 @@ SUFFIX_decode           (short a_suffix)
    return  &(s_suffix [a_suffix]);
 }
 
-char
+char         /*-> write all suffixes to database --------------[ ´········· ]-*/ /*-ågcg´·1á1···á···á1´735´35·´11413á·æ¬å1á·1··´981á··1····´·W·´····æ¬å>lo··´·······´····´222·æ-*/
 SUFFIX_write            (FILE *a_file)
 {
    /*---(locals)-----------+-----+-----+-*/
@@ -704,7 +737,7 @@ SUFFIX_write            (FILE *a_file)
    return 0;
 }
 
-char
+char         /*-> read all suffixes from database -------------[ ´········· ]-*/ /*-ågcg´·2á2···á···á1´736´35·´11413á·æ¬å1á·1··´981á··1····´R··´····æ¬å>lo··´·······´····´222·æ-*/
 SUFFIX_read             (FILE *a_file, short a_count)
 {
    /*---(locals)-----------+-----+-----+-*/

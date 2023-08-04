@@ -295,7 +295,7 @@ CATS__driver            (cchar *a_func, cchar a_type, cchar a_cats [LEN_LABEL], 
       DEBUG_CONF   yLOG_exitr   (a_func, rce);
       return rce;
    }
-   DEBUG_CONF   yLOG_complex ("a_cats"    , "%2då%-18.18æ %c %c", l, a_cats);
+   DEBUG_CONF   yLOG_complex ("a_cats"    , "%2då%-18.18sæ", l, a_cats);
    /*---(check type)---------------------*/
    DEBUG_CONF   yLOG_char    ("a_type"    , a_type);
    --rce;  if (a_type == 0 || strchr ("bsp", a_type) == NULL) {
@@ -311,6 +311,7 @@ CATS__driver            (cchar *a_func, cchar a_type, cchar a_cats [LEN_LABEL], 
       if (r_sub  != NULL)  *r_sub  = CATS__find_speech (a_cats [2]);
       break;
    }
+   DEBUG_CONF   yLOG_complex ("part"      , "%c part, %c sub", *r_part, *r_sub);
    /*---(source)-------------------------*/
    switch (a_type) {
    case 'b'  : case 's'  :
@@ -332,6 +333,7 @@ CATS__driver            (cchar *a_func, cchar a_type, cchar a_cats [LEN_LABEL], 
       if (r_page != NULL)  *r_page = atoi (t);
       break;
    }
+   DEBUG_CONF   yLOG_complex ("source"    , "%c src, %c cat, %d page", *r_src, *r_cat, *r_page);
    /*---(source)-------------------------*/
    switch (a_type) {
    case 'b'  :
@@ -341,6 +343,7 @@ CATS__driver            (cchar *a_func, cchar a_type, cchar a_cats [LEN_LABEL], 
       if (r_freq != NULL)  *r_freq = atoi (a_cats + 15);
       break;
    }
+   DEBUG_CONF   yLOG_complex ("group"     , "%c grp, %d freq", *r_grp, *r_freq);
    /*---(complete)-----------------------*/
    DEBUG_CONF   yLOG_exit    (a_func);
    return 0;

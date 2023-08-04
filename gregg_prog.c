@@ -188,7 +188,6 @@ PROG__init              (int a_argc, char *a_argv[])
    PREFIX_init     ();
    SUFFIX_init     ();
    LETTER_init     ();
-   WORDS_init      ();
    DICT_init       ();
    my.w_ppage   = 120;
    my.w_npage   = 0;
@@ -267,6 +266,7 @@ PROG__args              (int a_argc, char *a_argv[])
       DEBUG_ARGS  yLOG_info    ("two arg", b);
       l = strlen(a);
       /*---(yKEYS arguments)------------*/
+      DEBUG_ARGS  yLOG_note    ("check for yKEYS argument handling");
       rc = yKEYS_arg_handle (&i, a, b);
       DEBUG_ARGS  yLOG_value   ("ykeys"     , rc);
       if (rc == 1) {
@@ -280,6 +280,7 @@ PROG__args              (int a_argc, char *a_argv[])
          return rce;
       }
       /*---(yJOBS arguments)-------------*/
+      DEBUG_ARGS  yLOG_note    ("check for yJOBS argument handling");
       ++x_args;
       DEBUG_ARGS  yLOG_info     ("argument"  , a);
       rc = yJOBS_argument (&i, a, b, &(my.run_as), &(my.run_mode), my.run_file);
@@ -320,12 +321,19 @@ PROG__args              (int a_argc, char *a_argv[])
       else if (strcmp (a, "--baseonly"          ) == 0)   my.baseonly = 'y';
       else if (strcmp (a, "--nopre"             ) == 0)   my.nopre    = 'y';
       else if (strcmp (a, "--wordfile"          ) == 0)   TWOARG  { strncpy (my.wordfile, b, LEN_PATH); }
+      else {
+         DEBUG_PROG  yLOG_note  ("local PROG__args handler not found");
+         DEBUG_PROG  yLOG_exitr (__FUNCTION__, rce);
+         return rce;
+      }
       /*---(catch two-arg errors)--------*/
       if (rc < 0)  {
          DEBUG_PROG  yLOG_note  ("two arg test failed");
          DEBUG_PROG  yLOG_exitr (__FUNCTION__, rce);
          return rce;
       }
+      DEBUG_ARGS  yLOG_note    ("local PROG__args handler found");
+      DEBUG_ARGS  yLOG_info    ("handled"   , a);
       /*---(done)------------------------*/
    }
    DEBUG_ARGS  yLOG_value  ("entries"   , x_total);
@@ -344,10 +352,12 @@ PROG__begin             (void)
 {
    char        rc          =    0;
    DEBUG_PROG   yLOG_enter   (__FUNCTION__);
-   WORDS_table_ae ();
    DEBUG_ARGS   yLOG_info    ("yPARSE"   ,"initializing");
    rc = yPARSE_init  ('-', NULL, '-');
    rc = yPARSE_delimiters  ("§");
+   rc = LETTER_load ("/var/lib/gregg/letter.txt");
+   rc = PREFIX_load ("/var/lib/gregg/prefix.txt");
+   rc = SUFFIX_load ("/var/lib/gregg/suffix.txt");
    DEBUG_PROG   yLOG_exit    (__FUNCTION__);
    return 0;
 }
